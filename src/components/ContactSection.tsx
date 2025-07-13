@@ -154,7 +154,7 @@ export function ContactSection() {
         </div>
 
         {/* CTA Banner */}
-        <div className="mt-20 text-center bg-gradient-primary rounded-2xl p-12 animate-fade-in">
+        <div className="mt-20 text-center bg-gradient-primary rounded-2xl p-6 sm:p-8 md:p-12 mx-4 sm:mx-0 animate-fade-in">
           <h3 className="text-3xl font-bold text-primary-foreground mb-4">
             Pronto para Transformar o Seu Negócio?
           </h3>
