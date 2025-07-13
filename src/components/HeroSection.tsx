@@ -1,12 +1,28 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Play } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
 import heroImage from "@/assets/hero-ai.jpg";
 
 export function HeroSection() {
+  const [scrollY, setScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Fixed Background */}
-      <div className="absolute inset-0 z-0">
+      {/* Simple Parallax Background */}
+      <div 
+        className="absolute inset-0 z-0"
+        style={{
+          transform: `translateY(${scrollY * 0.5}px)`
+        }}
+      >
         <img 
           src={heroImage} 
           alt="AI and Technology Background" 
