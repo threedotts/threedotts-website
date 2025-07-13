@@ -25,13 +25,13 @@ const services = [
   },
   {
     icon: Bot,
-    title: "Smart Customer Service Solutions",
+    title: "AI Customer Service Solutions",
     description: "Handle customer questions 24/7 with intelligent chatbots and professional call center services that never sleep.",
     features: ["24/7 Live Chat Support", "Professional Call Centers", "Instant Customer Responses"]
   },
   {
     icon: Zap,
-    title: "Save Time with Smart Automation",
+    title: "Save Time with AI Automation",
     description: "Stop doing repetitive tasks manually. We automate your daily work so you can focus on growing your business.",
     features: ["Automatic Report Generation", "Email & SMS Automation", "Inventory Management"]
   },
