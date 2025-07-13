@@ -12,31 +12,31 @@ import {
 const values = [
   {
     icon: Target,
-    title: "Mission-Driven",
-    description: "Delivering technology solutions that drive real business outcomes and measurable success."
+    title: "Orientado por Missão",
+    description: "Entregamos soluções tecnológicas que geram resultados empresariais reais e sucesso mensurável."
   },
   {
     icon: Users,
-    title: "Client-Focused", 
-    description: "Building long-term partnerships through exceptional service and continuous support."
+    title: "Focado no Cliente", 
+    description: "Construindo parcerias de longo prazo através de serviço excepcional e suporte contínuo."
   },
   {
     icon: Zap,
-    title: "Innovation First",
-    description: "Staying ahead with cutting-edge technologies and forward-thinking strategies."
+    title: "Inovação em Primeiro",
+    description: "Mantendo-nos à frente com tecnologias de ponta e estratégias visionárias."
   },
   {
     icon: Award,
-    title: "Excellence",
-    description: "Maintaining the highest standards in every project we deliver and service we provide."
+    title: "Excelência",
+    description: "Mantendo os mais altos padrões em cada projecto que entregamos e serviço que prestamos."
   }
 ];
 
 const achievements = [
-  "Free Consultation",
-  "24/7 Support", 
-  "No Hidden Fees",
-  "Proven Results"
+  "Consulta Gratuita",
+  "Suporte 24/7", 
+  "Sem Taxas Ocultas",
+  "Resultados Comprovados"
 ];
 
 export function AboutSection() {
@@ -47,17 +47,17 @@ export function AboutSection() {
           {/* Content */}
           <div className="animate-fade-in">
             <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
-              Leading the Future of 
+              Liderando o Futuro da 
               <span className="block bg-gradient-primary bg-clip-text text-transparent mt-2 mb-2 pb-1">
-                Technology Innovation
+                Inovação Tecnológica
               </span>
             </h2>
             
             <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-              In just over five years, we've established ourselves as the technology partner 
-              that truly understands your business needs. Our dedicated team of skilled 
-              engineers and strategic consultants focuses exclusively on delivering tailored 
-              solutions that drive measurable results for companies ready to embrace digital transformation.
+              Em pouco mais de cinco anos, estabelecemo-nos como o parceiro tecnológico 
+              que verdadeiramente compreende as necessidades do seu negócio. A nossa equipa dedicada de engenheiros 
+              especializados e consultores estratégicos foca-se exclusivamente em entregar soluções personalizadas 
+              que geram resultados mensuráveis para empresas prontas para abraçar a transformação digital.
             </p>
 
             <div className="flex flex-wrap gap-2 mb-8">
@@ -74,7 +74,7 @@ export function AboutSection() {
             </div>
 
             <Button variant="hero" size="lg" className="group">
-              Learn Our Story
+              Conheça a Nossa História
               <ArrowRight className="group-hover:translate-x-1 transition-transform" />
             </Button>
           </div>

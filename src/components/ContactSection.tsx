@@ -14,27 +14,27 @@ import {
 const contactInfo = [
   {
     icon: Mail,
-    title: "Email Us",
+    title: "Envie-nos um Email",
     content: "suporte@threedotts.com",
-    description: "Send us an email anytime"
+    description: "Envie-nos um email a qualquer hora"
   },
   {
     icon: Phone,
-    title: "Call Us",
+    title: "Ligue-nos",
     content: "+258 87 611 0005",
-    description: "Mon-Fri from 8am to 6pm"
+    description: "Seg-Sex das 8h às 18h"
   },
   {
     icon: MapPin,
-    title: "Visit Us",
+    title: "Visite-nos",
     content: "Quinta Avenida Minguene, Costa do Sol",
-    description: "Our headquarters location"
+    description: "A localização da nossa sede"
   },
   {
     icon: Clock,
-    title: "Support Hours",
-    content: "24/7 Available",
-    description: "Round-the-clock assistance"
+    title: "Horário de Suporte",
+    content: "Disponível 24/7",
+    description: "Assistência 24 horas por dia"
   }
 ];
 
@@ -44,10 +44,10 @@ export function ContactSection() {
       <div className="container mx-auto px-4">
         <div className="text-center mb-16 animate-fade-in">
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
-            Ready to <span className="bg-gradient-primary bg-clip-text text-transparent">Get Started?</span>
+            Pronto para <span className="bg-gradient-primary bg-clip-text text-transparent">Começar?</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Let's discuss how we can help transform your business with the right technology solutions.
+            Vamos discutir como podemos ajudar a transformar o seu negócio com as soluções tecnológicas certas.
           </p>
         </div>
 
@@ -56,11 +56,11 @@ export function ContactSection() {
           <div className="space-y-6">
             <div className="animate-fade-in">
               <h3 className="text-2xl font-semibold text-foreground mb-6">
-                Get in Touch
+                Entre em Contacto
               </h3>
               <p className="text-muted-foreground mb-8 leading-relaxed">
-                Have questions about our services or want to discuss your project? 
-                We'd love to hear from you. Reach out through any of the channels below.
+                Tem perguntas sobre os nossos serviços ou quer discutir o seu projecto? 
+                Adoraríamos ouvir de si. Entre em contacto através de qualquer um dos canais abaixo.
               </p>
             </div>
             
@@ -98,22 +98,22 @@ export function ContactSection() {
           <Card className="border-primary/10 shadow-elegant bg-gradient-card animate-fade-in">
             <CardHeader>
               <CardTitle className="text-2xl font-semibold text-foreground">
-                Send us a Message
+                Envie-nos uma Mensagem
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium text-foreground mb-2 block">
-                    First Name
+                    Primeiro Nome
                   </label>
-                  <Input placeholder="John" className="border-primary/20 focus:border-primary" />
+                  <Input placeholder="João" className="border-primary/20 focus:border-primary" />
                 </div>
                 <div>
                   <label className="text-sm font-medium text-foreground mb-2 block">
-                    Last Name
+                    Último Nome
                   </label>
-                  <Input placeholder="Doe" className="border-primary/20 focus:border-primary" />
+                  <Input placeholder="Silva" className="border-primary/20 focus:border-primary" />
                 </div>
               </div>
               
@@ -123,31 +123,31 @@ export function ContactSection() {
                 </label>
                 <Input 
                   type="email" 
-                  placeholder="john@company.com" 
+                  placeholder="joao@empresa.com" 
                   className="border-primary/20 focus:border-primary" 
                 />
               </div>
               
               <div>
                 <label className="text-sm font-medium text-foreground mb-2 block">
-                  Company
+                  Empresa
                 </label>
-                <Input placeholder="Your Company" className="border-primary/20 focus:border-primary" />
+                <Input placeholder="A Sua Empresa" className="border-primary/20 focus:border-primary" />
               </div>
               
               <div>
                 <label className="text-sm font-medium text-foreground mb-2 block">
-                  Message
+                  Mensagem
                 </label>
                 <Textarea 
-                  placeholder="Tell us about your project requirements..."
+                  placeholder="Conte-nos sobre os requisitos do seu projecto..."
                   className="min-h-[120px] border-primary/20 focus:border-primary"
                 />
               </div>
               
               <Button variant="hero" size="lg" className="w-full group">
                 <Send className="w-4 h-4 mr-2 group-hover:translate-x-1 transition-transform" />
-                Send Message
+                Enviar Mensagem
               </Button>
             </CardContent>
           </Card>
@@ -156,13 +156,13 @@ export function ContactSection() {
         {/* CTA Banner */}
         <div className="mt-20 text-center bg-gradient-primary rounded-2xl p-12 animate-fade-in">
           <h3 className="text-3xl font-bold text-primary-foreground mb-4">
-            Ready to Transform Your Business?
+            Pronto para Transformar o Seu Negócio?
           </h3>
           <p className="text-lg text-primary-foreground/90 mb-8 max-w-2xl mx-auto">
-            Take the first step towards digital transformation. Let's discuss your project and create solutions that drive real results for your business.
+            Dê o primeiro passo rumo à transformação digital. Vamos discutir o seu projecto e criar soluções que geram resultados reais para o seu negócio.
           </p>
           <Button variant="secondary" size="lg" className="group">
-            Schedule Free Consultation
+            Agende Consulta Gratuita
             <ArrowRight className="group-hover:translate-x-1 transition-transform" />
           </Button>
         </div>

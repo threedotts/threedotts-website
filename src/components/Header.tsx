@@ -3,10 +3,10 @@ import { Menu, X } from "lucide-react";
 import { useState } from "react";
 
 const navLinks = [
-  { name: "Home", href: "#home" },
-  { name: "Services", href: "#services" },
-  { name: "About", href: "#about" },
-  { name: "Contact", href: "#contact" }
+  { name: "Início", href: "#home" },
+  { name: "Serviços", href: "#services" },
+  { name: "Sobre", href: "#about" },
+  { name: "Contacto", href: "#contact" }
 ];
 
 export function Header() {
@@ -41,10 +41,10 @@ export function Header() {
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center space-x-4">
             <Button variant="ghost" className="text-foreground">
-              Login
+              Entrar
             </Button>
             <Button variant="default">
-              Get Started
+              Começar
             </Button>
           </div>
 
@@ -73,10 +73,10 @@ export function Header() {
               ))}
               <div className="flex flex-col space-y-2 pt-4 border-t border-primary/10">
                 <Button variant="ghost" className="text-foreground justify-start">
-                  Login
+                  Entrar
                 </Button>
                 <Button variant="default" className="justify-start">
-                  Get Started
+                  Começar
                 </Button>
               </div>
             </nav>

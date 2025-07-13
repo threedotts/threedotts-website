@@ -48,23 +48,23 @@ export function HeroSection() {
       <div className="container mx-auto px-4 z-20 text-center max-w-4xl relative">
         <div className="animate-fade-in">
           <h1 className="text-3xl md:text-5xl font-bold text-foreground mb-6 leading-normal">
-            Transform Your Business
+            Transforme o Seu Negócio
             <span className="block bg-gradient-primary bg-clip-text text-transparent py-2">
-              With Smart Technology
+              Com Tecnologia Inteligente
             </span>
           </h1>
           
-          <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">We specialize in mobile apps, web applications, AI agents, and AI automation solutions that streamline your operations and accelerate digital transformation.</p>
+          <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">Especializamo-nos em aplicações móveis, aplicações web, agentes de IA e soluções de automação que simplificam as suas operações e aceleram a transformação digital.</p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
             <Button variant="hero" size="lg" className="group">
-              Start Your Project
+              Comece o Seu Projecto
               <ArrowRight className="group-hover:translate-x-1 transition-transform" />
             </Button>
             
             <Button variant="premium" size="lg" className="group">
               <Play className="group-hover:scale-110 transition-transform" />
-              View Our Work
+              Ver o Nosso Trabalho
             </Button>
           </div>
 
@@ -74,19 +74,19 @@ export function HeroSection() {
             animationDelay: '0.2s'
           }}>
               <div className="text-3xl md:text-4xl font-bold text-primary mb-2">5+</div>
-              <div className="text-muted-foreground">Years Experience</div>
+              <div className="text-muted-foreground">Anos de Experiência</div>
             </div>
             <div className="animate-scale-in" style={{
             animationDelay: '0.4s'
           }}>
               <div className="text-3xl md:text-4xl font-bold text-primary mb-2">24/7</div>
-              <div className="text-muted-foreground">Development Support</div>
+              <div className="text-muted-foreground">Suporte de Desenvolvimento</div>
             </div>
             <div className="animate-scale-in" style={{
             animationDelay: '0.6s'
           }}>
               <div className="text-3xl md:text-4xl font-bold text-primary mb-2">100%</div>
-              <div className="text-muted-foreground">Client Satisfaction</div>
+              <div className="text-muted-foreground">Satisfação do Cliente</div>
             </div>
           </div>
         </div>

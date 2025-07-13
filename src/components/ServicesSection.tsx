@@ -13,39 +13,39 @@ import {
 const services = [
   {
     icon: Smartphone,
-    title: "Mobile Apps for Your Business",
-    description: "Reach your customers anywhere with custom mobile apps that work perfectly on all phones and tablets.",
-    features: ["Android Apps", "iPhone Apps", "Easy to Use Interface"]
+    title: "Aplicações Móveis para o Seu Negócio",
+    description: "Chegue aos seus clientes em qualquer lugar com aplicações móveis personalizadas que funcionam perfeitamente em todos os telemóveis e tablets.",
+    features: ["Aplicações Android", "Aplicações iPhone", "Interface Fácil de Usar"]
   },
   {
     icon: Globe,
-    title: "Professional Websites & Online Systems",
-    description: "Beautiful websites and online platforms that help you sell more, serve customers better, and grow your business.",
-    features: ["Online Stores", "Customer Portals", "Booking Systems"]
+    title: "Websites Profissionais e Sistemas Online",
+    description: "Websites bonitos e plataformas online que o ajudam a vender mais, servir melhor os clientes e fazer crescer o seu negócio.",
+    features: ["Lojas Online", "Portais de Clientes", "Sistemas de Reservas"]
   },
   {
     icon: Bot,
-    title: "AI Customer Service Solutions",
-    description: "Handle customer questions 24/7 with intelligent chatbots and professional call center services that never sleep.",
-    features: ["24/7 Live Chat Support", "Professional Call Centers", "Instant Customer Responses"]
+    title: "Soluções de Atendimento ao Cliente com IA",
+    description: "Atenda perguntas dos clientes 24/7 com chatbots inteligentes e serviços profissionais de call center que nunca dormem.",
+    features: ["Suporte de Chat 24/7", "Call Centers Profissionais", "Respostas Instantâneas ao Cliente"]
   },
   {
     icon: Zap,
-    title: "Save Time with AI Automation",
-    description: "Stop doing repetitive tasks manually. We automate your daily work so you can focus on growing your business.",
-    features: ["Automatic Report Generation", "Email & SMS Automation", "Inventory Management"]
+    title: "Poupe Tempo com Automação IA",
+    description: "Pare de fazer tarefas repetitivas manualmente. Automatizamos o seu trabalho diário para se focar no crescimento do negócio.",
+    features: ["Geração Automática de Relatórios", "Automação de Email e SMS", "Gestão de Inventário"]
   },
   {
     icon: Code2,
-    title: "Tailored Business Solutions",
-    description: "Every business is unique. We create custom software that fits exactly how you work and what you need.",
-    features: ["Built Just for You", "Easy Team Training", "Grows with Your Business"]
+    title: "Soluções Empresariais Personalizadas",
+    description: "Cada negócio é único. Criamos software personalizado que se adequa exactamente à forma como trabalha e ao que precisa.",
+    features: ["Construído Só para Si", "Formação Fácil da Equipa", "Cresce com o Seu Negócio"]
   },
   {
     icon: Brain,
-    title: "Data Intelligence & Business Insights",
-    description: "Turn your business data into clear insights that help you make better decisions and predict future trends.",
-    features: ["Sales Forecasting", "Customer Behavior Analysis", "Performance Reports"]
+    title: "Inteligência de Dados e Insights Empresariais",
+    description: "Transforme os dados do seu negócio em insights claros que o ajudam a tomar melhores decisões e prever tendências futuras.",
+    features: ["Previsão de Vendas", "Análise de Comportamento do Cliente", "Relatórios de Desempenho"]
   }
 ];
 
@@ -55,10 +55,10 @@ export function ServicesSection() {
       <div className="container mx-auto px-4">
         <div className="text-center mb-16 animate-fade-in">
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
-            Our <span className="bg-gradient-primary bg-clip-text text-transparent">Services</span>
+            Os Nossos <span className="bg-gradient-primary bg-clip-text text-transparent">Serviços</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            We solve real business problems with smart solutions that save you time, increase sales, and help you serve customers better.
+            Resolvemos problemas empresariais reais com soluções inteligentes que lhe poupam tempo, aumentam vendas e ajudam a servir melhor os clientes.
           </p>
         </div>
 
@@ -90,7 +90,7 @@ export function ServicesSection() {
                   ))}
                 </ul>
                 <Button variant="ghost" className="group/btn px-4 py-2 h-auto text-primary bg-muted/50 hover:bg-muted/70 hover:text-primary/80 rounded-md">
-                  Learn More
+                  Saber Mais
                   <ArrowRight className="w-4 h-4 ml-1 group-hover/btn:translate-x-1 transition-transform" />
                 </Button>
               </CardContent>
@@ -100,7 +100,7 @@ export function ServicesSection() {
 
         <div className="text-center">
           <Button variant="hero" size="lg" className="group">
-            Discuss Your Project
+            Discuta o Seu Projecto
             <ArrowRight className="group-hover:translate-x-1 transition-transform" />
           </Button>
         </div>

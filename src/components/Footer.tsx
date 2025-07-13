@@ -11,35 +11,35 @@ import {
 
 const footerSections = [
   {
-    title: "Services",
+    title: "Serviços",
     links: [
-      "Mobile Apps",
-      "Professional Websites", 
-      "Customer Service Solutions",
-      "Business Automation",
-      "Custom Software",
-      "Data Intelligence"
+      "Aplicações Móveis",
+      "Websites Profissionais", 
+      "Soluções de Atendimento ao Cliente",
+      "Automação Empresarial",
+      "Software Personalizado",
+      "Inteligência de Dados"
     ]
   },
   {
-    title: "Company",
+    title: "Empresa",
     links: [
-      "About Us",
-      "Our Team",
-      "Portfolio",
-      "Success Stories",
-      "Contact Us",
-      "Free Consultation"
+      "Sobre Nós",
+      "A Nossa Equipa",
+      "Portfólio",
+      "Histórias de Sucesso",
+      "Contacte-nos",
+      "Consulta Gratuita"
     ]
   },
   {
-    title: "Support",
+    title: "Suporte",
     links: [
-      "Help Center",
-      "Documentation",
-      "Technical Support",
-      "Training",
-      "Maintenance",
+      "Centro de Ajuda",
+      "Documentação",
+      "Suporte Técnico",
+      "Formação",
+      "Manutenção",
       "FAQ"
     ]
   }
@@ -67,8 +67,8 @@ export function Footer() {
             </div>
             
             <p className="text-background/80 mb-6 leading-relaxed">
-              Transforming businesses through technology solutions that solve real problems, 
-              save time, and drive growth with 5+ years of dedicated service.
+              Transformando negócios através de soluções tecnológicas que resolvem problemas reais, 
+              poupam tempo e promovem crescimento com mais de 5 anos de serviço dedicado.
             </p>
 
             <div className="space-y-3 mb-6">
@@ -130,20 +130,20 @@ export function Footer() {
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div>
               <h3 className="text-lg font-semibold mb-2 text-background">
-                Stay Updated
+                Mantenha-se Actualizado
               </h3>
               <p className="text-background/80">
-                Get the latest technology insights and updates delivered to your inbox.
+                Receba as últimas novidades e actualizações tecnológicas na sua caixa de entrada.
               </p>
             </div>
             <div className="flex space-x-2 w-full md:w-auto">
               <input
                 type="email"
-                placeholder="Enter your email"
+                placeholder="Insira o seu email"
                 className="flex-1 md:w-64 px-4 py-2 rounded-md bg-background/10 border border-background/20 text-background placeholder-background/60 focus:outline-none focus:border-primary"
               />
               <Button variant="default">
-                Subscribe
+                Subscrever
               </Button>
             </div>
           </div>
@@ -152,7 +152,7 @@ export function Footer() {
         {/* Copyright */}
         <div className="border-t border-background/20 pt-8 mt-8 text-center">
           <p className="text-background/60">
-            © 2024 Threedotts. All rights reserved. | Privacy Policy | Terms of Service
+            © 2024 Threedotts. Todos os direitos reservados. | Política de Privacidade | Termos de Serviço
           </p>
         </div>
       </div>
