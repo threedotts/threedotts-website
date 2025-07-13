@@ -50,7 +50,7 @@ const servicesData = {
       "Suporte e manutenção contínua"
     ],
     timeline: "4-8 semanas",
-    price: "Desde €2.500"
+    price: "Desde 125.000 MT"
   },
   web: {
     id: "web",
@@ -84,7 +84,7 @@ const servicesData = {
       "Lançamento e formação"
     ],
     timeline: "3-6 semanas",
-    price: "Desde €1.500"
+    price: "Desde 75.000 MT"
   },
   ai: {
     id: "ai",
@@ -118,7 +118,7 @@ const servicesData = {
       "Monitorização e otimização contínua"
     ],
     timeline: "2-4 semanas",
-    price: "Desde €800/mês"
+    price: "Desde 40.000 MT/mês"
   },
   automation: {
     id: "automation",
@@ -152,7 +152,7 @@ const servicesData = {
       "Implementação e formação"
     ],
     timeline: "2-5 semanas",
-    price: "Desde €1.200"
+    price: "Desde 60.000 MT"
   },
   custom: {
     id: "custom",
@@ -186,7 +186,7 @@ const servicesData = {
       "Implementação e go-live"
     ],
     timeline: "8-16 semanas",
-    price: "Desde €5.000"
+    price: "Desde 250.000 MT"
   },
   analytics: {
     id: "analytics",
@@ -220,7 +220,7 @@ const servicesData = {
       "Formação e acompanhamento"
     ],
     timeline: "3-7 semanas",
-    price: "Desde €2.000"
+    price: "Desde 100.000 MT"
   }
 };
 
