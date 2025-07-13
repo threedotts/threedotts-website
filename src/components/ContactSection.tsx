@@ -71,7 +71,7 @@ export function ContactSection() {
                   className="border-primary/10 hover:border-primary/20 hover:shadow-elegant transition-all duration-300 bg-gradient-card animate-scale-in"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
-                  <CardContent className="p-6">
+                  <CardContent className="p-6 pl-4">
                     <div className="flex items-start space-x-4">
                       <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center flex-shrink-0">
                         <info.icon className="w-5 h-5 text-primary-foreground" />
