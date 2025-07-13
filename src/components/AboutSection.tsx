@@ -54,10 +54,10 @@ export function AboutSection() {
             </h2>
             
             <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-              With over a decade of experience in the technology sector, we've evolved from a 
-              small startup to a trusted partner for businesses worldwide. Our team of expert 
-              engineers, consultants, and strategists work tirelessly to deliver solutions 
-              that transform how organizations operate in the digital landscape.
+              In just over five years, we've established ourselves as the technology partner 
+              that truly understands your business needs. Our dedicated team of skilled 
+              engineers and strategic consultants focuses exclusively on delivering tailored 
+              solutions that drive measurable results for companies ready to embrace digital transformation.
             </p>
 
             <div className="flex flex-wrap gap-2 mb-8">
