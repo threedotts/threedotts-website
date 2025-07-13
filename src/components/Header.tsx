@@ -17,11 +17,12 @@ export function Header() {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-              <div className="w-4 h-4 bg-primary-foreground rounded-sm" />
-            </div>
-            <span className="text-xl font-bold text-foreground">TechFlow</span>
+          <div className="flex items-center">
+            <img 
+              src="/lovable-uploads/94b7368f-8dbd-4300-a5a2-ac91606ff813.png" 
+              alt="threedotts logo" 
+              className="h-8 w-auto"
+            />
           </div>
 
           {/* Desktop Navigation */}
