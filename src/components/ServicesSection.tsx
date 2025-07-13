@@ -33,7 +33,7 @@ const services = [
     icon: Zap,
     title: "Poupe Tempo com Automação IA",
     description: "Pare de fazer tarefas repetitivas manualmente. Automatizamos o seu trabalho diário para se focar no crescimento do negócio.",
-    features: ["Geração Automática de Relatórios", "Automação de Email e SMS", "Gestão de Inventário"]
+    features: ["Geração Automática de Relatórios", "Processamento Inteligente de Documentos", "Gestão de Inventário"]
   },
   {
     icon: Code2,
