@@ -15,19 +15,19 @@ const contactInfo = [
   {
     icon: Mail,
     title: "Email Us",
-    content: "hello@itcompany.com",
+    content: "support@threedotts.com",
     description: "Send us an email anytime"
   },
   {
     icon: Phone,
     title: "Call Us",
-    content: "+1 (555) 123-4567",
+    content: "+258 87 611 0005",
     description: "Mon-Fri from 8am to 6pm"
   },
   {
     icon: MapPin,
     title: "Visit Us",
-    content: "123 Tech Street, Silicon Valley, CA 94025",
+    content: "Quinta Avenida Minguene, Costa do Sol",
     description: "Our headquarters location"
   },
   {
