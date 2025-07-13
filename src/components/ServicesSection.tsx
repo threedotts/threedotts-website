@@ -15,7 +15,7 @@ const services = [
     icon: Smartphone,
     title: "Mobile Apps for Your Business",
     description: "Reach your customers anywhere with custom mobile apps that work perfectly on all phones and tablets.",
-    features: ["iPhone Apps", "Works Offline", "Easy to Use Interface"]
+    features: ["Android Apps", "Works Offline", "Easy to Use Interface"]
   },
   {
     icon: Globe,
