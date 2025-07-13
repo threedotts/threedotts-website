@@ -48,7 +48,7 @@ export function AboutSection() {
           <div className="animate-fade-in">
             <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
               Leading the Future of 
-              <span className="block bg-gradient-primary bg-clip-text text-transparent">
+              <span className="block bg-gradient-primary bg-clip-text text-transparent mt-2">
                 Technology Innovation
               </span>
             </h2>
