@@ -13,39 +13,39 @@ import {
 const services = [
   {
     icon: Smartphone,
-    title: "Mobile App Development",
-    description: "Native iOS and Android apps, plus cross-platform solutions that deliver exceptional user experiences and performance.",
-    features: ["iOS & Android Native", "React Native", "Flutter Development"]
+    title: "Mobile Apps for Your Business",
+    description: "Reach your customers anywhere with custom mobile apps that work perfectly on all phones and tablets.",
+    features: ["iPhone & Android Apps", "Works Offline", "Easy to Use Interface"]
   },
   {
     icon: Globe,
-    title: "Web Applications",
-    description: "Modern, responsive web applications built with cutting-edge frameworks to scale with your business needs.",
-    features: ["React & Next.js", "Progressive Web Apps", "E-commerce Solutions"]
+    title: "Professional Websites & Online Systems",
+    description: "Beautiful websites and online platforms that help you sell more, serve customers better, and grow your business.",
+    features: ["Online Stores", "Customer Portals", "Booking Systems"]
   },
   {
     icon: Bot,
-    title: "AI Agents",
-    description: "Intelligent AI-powered agents that automate customer service, data processing, and complex business workflows.",
-    features: ["Chatbots & Virtual Assistants", "NLP Processing", "Custom AI Models"]
+    title: "Smart Customer Service Solutions",
+    description: "Handle customer questions 24/7 with intelligent chatbots and professional call center services that never sleep.",
+    features: ["24/7 Live Chat Support", "Professional Call Centers", "Instant Customer Responses"]
   },
   {
     icon: Zap,
-    title: "Process Automation",
-    description: "Streamline operations with intelligent automation solutions that reduce manual work and increase efficiency.",
-    features: ["Workflow Automation", "API Integration", "RPA Solutions"]
+    title: "Save Time with Smart Automation",
+    description: "Stop doing repetitive tasks manually. We automate your daily work so you can focus on growing your business.",
+    features: ["Automatic Report Generation", "Email & SMS Automation", "Inventory Management"]
   },
   {
     icon: Code2,
-    title: "Custom Software",
-    description: "Tailored software solutions designed specifically for your business requirements and industry needs.",
-    features: ["Enterprise Software", "System Integration", "Legacy Modernization"]
+    title: "Tailored Business Solutions",
+    description: "Every business is unique. We create custom software that fits exactly how you work and what you need.",
+    features: ["Built Just for You", "Easy Team Training", "Grows with Your Business"]
   },
   {
     icon: Brain,
-    title: "AI & Machine Learning",
-    description: "Advanced AI solutions including predictive analytics, computer vision, and intelligent data processing.",
-    features: ["Machine Learning Models", "Data Analytics", "Computer Vision"]
+    title: "Data Intelligence & Business Insights",
+    description: "Turn your business data into clear insights that help you make better decisions and predict future trends.",
+    features: ["Sales Forecasting", "Customer Behavior Analysis", "Performance Reports"]
   }
 ];
 
@@ -58,7 +58,7 @@ export function ServicesSection() {
             Our <span className="bg-gradient-primary bg-clip-text text-transparent">Services</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            From mobile apps to AI agents, we deliver innovative technology solutions that drive business growth and digital transformation.
+            We solve real business problems with smart solutions that save you time, increase sales, and help you serve customers better.
           </p>
         </div>
 
