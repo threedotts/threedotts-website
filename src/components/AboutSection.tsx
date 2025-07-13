@@ -33,10 +33,10 @@ const values = [
 ];
 
 const achievements = [
-  "ISO 27001 Certified",
-  "Microsoft Gold Partner", 
-  "AWS Advanced Partner",
-  "Industry Awards Winner"
+  "Custom Solutions",
+  "Dedicated Support", 
+  "Fast Delivery",
+  "Expert Team"
 ];
 
 export function AboutSection() {
