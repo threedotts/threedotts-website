@@ -73,8 +73,8 @@ export function HeroSection() {
             <div className="animate-scale-in" style={{
             animationDelay: '0.2s'
           }}>
-              <div className="text-3xl md:text-4xl font-bold text-primary mb-2">50+</div>
-              <div className="text-muted-foreground">Projectos Entregues</div>
+              <div className="text-3xl md:text-4xl font-bold text-primary mb-2">100+</div>
+              <div className="text-muted-foreground">Soluções de IA</div>
             </div>
             <div className="animate-scale-in" style={{
             animationDelay: '0.4s'
