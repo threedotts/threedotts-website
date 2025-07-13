@@ -3,6 +3,17 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+
+// Declare custom element for TypeScript
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      'elevenlabs-convai': {
+        'agent-id': string;
+      };
+    }
+  }
+}
 import Index from "./pages/Index";
 import ServiceDetails from "./pages/ServiceDetails";
 import NotFound from "./pages/NotFound";
@@ -22,6 +33,7 @@ const App = () => (
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
+      <elevenlabs-convai agent-id="agent_01k02ete3tfjgrq97y8a7v541y"></elevenlabs-convai>
     </TooltipProvider>
   </QueryClientProvider>
 );
