@@ -36,26 +36,25 @@ export function HeroSection() {
       <div className="container mx-auto px-4 z-20 text-center max-w-4xl relative">
         <div className="animate-fade-in">
           <h1 className="text-5xl md:text-7xl font-bold text-foreground mb-6 leading-tight">
-            Transform Your Business
+            Build Better
             <span className="block bg-gradient-primary bg-clip-text text-transparent">
-              With Smart Technology
+              Digital Solutions
             </span>
           </h1>
           
-          <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
-            Threedotts specializes in mobile apps, web applications, AI agents, and automation solutions 
-            that streamline your operations and accelerate digital transformation.
+          <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
+            Mobile apps, web platforms, AI agents, and automation that actually work.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
             <Button variant="hero" size="lg" className="group">
-              Start Your Project
+              Let's Talk
               <ArrowRight className="group-hover:translate-x-1 transition-transform" />
             </Button>
             
             <Button variant="premium" size="lg" className="group">
               <Play className="group-hover:scale-110 transition-transform" />
-              View Our Work
+              Our Work
             </Button>
           </div>
 
