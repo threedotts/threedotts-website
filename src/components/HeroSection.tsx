@@ -13,7 +13,7 @@ export function HeroSection() {
     });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-  return <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+  return <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16 sm:pt-20">
 
       {/* Gradient Overlay */}
       <div className="absolute inset-0 z-10 bg-gradient-to-br from-background/70 via-background/60 to-background/70" />
@@ -47,7 +47,7 @@ export function HeroSection() {
       {/* Main Content */}
       <div className="container mx-auto px-4 z-20 text-center max-w-4xl relative">
         <div className="animate-fade-in">
-          <h1 className="text-3xl md:text-5xl font-bold text-foreground mb-6 leading-normal">
+          <h1 className="text-2xl sm:text-3xl md:text-5xl font-bold text-foreground mb-6 leading-tight sm:leading-normal">
             Transforme o Seu Negócio
             <span className="block bg-gradient-primary bg-clip-text text-transparent py-2">
               Com Tecnologia Inteligente
