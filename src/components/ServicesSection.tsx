@@ -89,7 +89,7 @@ export function ServicesSection() {
                     </li>
                   ))}
                 </ul>
-                <Button variant="ghost" className="group/btn p-2 h-auto text-primary hover:text-primary/80 hover:bg-transparent">
+                <Button variant="ghost" className="group/btn px-4 py-2 h-auto text-primary bg-muted/50 hover:bg-muted/70 hover:text-primary/80 rounded-md">
                   Learn More
                   <ArrowRight className="w-4 h-4 ml-1 group-hover/btn:translate-x-1 transition-transform" />
                 </Button>
