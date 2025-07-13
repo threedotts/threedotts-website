@@ -27,13 +27,18 @@ export function HeroSection() {
         <img 
           src={heroImage} 
           alt="Technology Background" 
-          className="w-full h-[120%] object-cover opacity-20"
+          className="w-full h-[120%] object-cover opacity-60"
           style={{ minHeight: '120vh' }}
+          onError={(e) => {
+            console.error('Hero image failed to load:', e);
+            e.currentTarget.style.display = 'none';
+          }}
+          onLoad={() => console.log('Hero image loaded successfully')}
         />
       </div>
 
       {/* Gradient Overlay */}
-      <div className="absolute inset-0 z-10 bg-gradient-to-br from-background/95 via-background/85 to-background/95" />
+      <div className="absolute inset-0 z-10 bg-gradient-to-br from-background/70 via-background/60 to-background/70" />
       
       {/* Secondary Parallax Layer */}
       <div 
