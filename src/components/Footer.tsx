@@ -63,7 +63,7 @@ export function Footer() {
               <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
                 <div className="w-4 h-4 bg-primary-foreground rounded-sm" />
               </div>
-              <span className="text-xl font-bold">ThreeDotts</span>
+              <span className="text-xl font-bold">Threedotts</span>
             </div>
             
             <p className="text-background/80 mb-6 leading-relaxed">
@@ -152,7 +152,7 @@ export function Footer() {
         {/* Copyright */}
         <div className="border-t border-background/20 pt-8 mt-8 text-center">
           <p className="text-background/60">
-            © 2024 ThreeDotts. All rights reserved. | Privacy Policy | Terms of Service
+            © 2024 Threedotts. All rights reserved. | Privacy Policy | Terms of Service
           </p>
         </div>
       </div>
