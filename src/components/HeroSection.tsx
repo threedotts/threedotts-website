@@ -20,10 +20,17 @@ export function HeroSection() {
       {/* Gradient Overlay */}
       <div className="absolute inset-0 z-10 bg-gradient-to-br from-background/70 via-background/60 to-background/70" />
 
-      {/* Floating Elements */}
-      <div className="absolute top-20 left-10 w-20 h-20 bg-primary/15 rounded-full animate-float backdrop-blur-sm" />
-      <div className="absolute top-40 right-20 w-32 h-32 bg-accent/15 rounded-full animate-float backdrop-blur-sm" style={{ animationDelay: '2s' }} />
-      <div className="absolute bottom-32 left-1/4 w-16 h-16 bg-primary/15 rounded-full animate-float backdrop-blur-sm" style={{ animationDelay: '4s' }} />
+      {/* Floating Elements with Blur */}
+      <div className="absolute top-20 left-10 w-20 h-20 bg-primary/20 rounded-full animate-float backdrop-blur-md border border-primary/30" />
+      <div className="absolute top-40 right-20 w-32 h-32 bg-accent/15 rounded-full animate-float backdrop-blur-lg border border-accent/20" style={{ animationDelay: '2s' }} />
+      <div className="absolute bottom-32 left-1/4 w-16 h-16 bg-primary/25 rounded-full animate-float backdrop-blur-sm border border-primary/40" style={{ animationDelay: '4s' }} />
+      
+      {/* Additional Floating Shapes */}
+      <div className="absolute top-1/3 left-1/3 w-12 h-12 bg-secondary/20 rounded-lg animate-float backdrop-blur-md rotate-45 border border-secondary/30" style={{ animationDelay: '1s' }} />
+      <div className="absolute bottom-1/4 right-1/3 w-24 h-24 bg-muted/15 rounded-full animate-float backdrop-blur-lg border border-muted/25" style={{ animationDelay: '3s' }} />
+      <div className="absolute top-1/2 right-10 w-14 h-14 bg-primary/15 rounded-full animate-float backdrop-blur-md border border-primary/25" style={{ animationDelay: '5s' }} />
+      <div className="absolute bottom-20 left-1/2 w-18 h-18 bg-accent/20 rounded-lg animate-float backdrop-blur-sm rotate-12 border border-accent/30" style={{ animationDelay: '6s' }} />
+      <div className="absolute top-60 left-1/5 w-10 h-10 bg-secondary/25 rounded-full animate-float backdrop-blur-md border border-secondary/35" style={{ animationDelay: '1.5s' }} />
 
       {/* Main Content */}
       <div className="container mx-auto px-4 z-20 text-center max-w-4xl relative">
