@@ -1,4 +1,5 @@
 import { useParams, Link } from "react-router-dom";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -227,15 +228,19 @@ const ServiceDetails = () => {
   const { serviceId } = useParams();
   const service = serviceId ? servicesData[serviceId as keyof typeof servicesData] : null;
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   if (!service) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-foreground mb-4">Serviço não encontrado</h1>
-          <Link to="/">
+          <Link to="/#services">
             <Button variant="outline">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Voltar à página inicial
+              Voltar aos serviços
             </Button>
           </Link>
         </div>
