@@ -13,12 +13,12 @@ const footerSections = [
   {
     title: "Services",
     links: [
-      "Cloud Solutions",
-      "Cybersecurity", 
-      "Custom Development",
-      "Data Analytics",
-      "Mobile Solutions",
-      "IT Consulting"
+      "Mobile Apps",
+      "Professional Websites", 
+      "Customer Service Solutions",
+      "Business Automation",
+      "Custom Software",
+      "Data Intelligence"
     ]
   },
   {
@@ -26,10 +26,10 @@ const footerSections = [
     links: [
       "About Us",
       "Our Team",
-      "Careers",
-      "News & Updates",
-      "Case Studies",
-      "Partners"
+      "Portfolio",
+      "Success Stories",
+      "Contact Us",
+      "Free Consultation"
     ]
   },
   {
@@ -37,10 +37,10 @@ const footerSections = [
     links: [
       "Help Center",
       "Documentation",
-      "Contact Support",
-      "System Status",
-      "Security",
-      "Privacy Policy"
+      "Technical Support",
+      "Training",
+      "Maintenance",
+      "FAQ"
     ]
   }
 ];
@@ -63,26 +63,26 @@ export function Footer() {
               <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
                 <div className="w-4 h-4 bg-primary-foreground rounded-sm" />
               </div>
-              <span className="text-xl font-bold">TechFlow</span>
+              <span className="text-xl font-bold">ThreeDotts</span>
             </div>
             
             <p className="text-background/80 mb-6 leading-relaxed">
-              Empowering businesses with innovative technology solutions that drive growth, 
-              efficiency, and digital transformation in an ever-evolving landscape.
+              Transforming businesses through technology solutions that solve real problems, 
+              save time, and drive growth with 5+ years of dedicated service.
             </p>
 
             <div className="space-y-3 mb-6">
               <div className="flex items-center space-x-3 text-background/80">
                 <Mail className="w-4 h-4" />
-                <span>hello@techflow.com</span>
+                <span>suporte@threedotts.com</span>
               </div>
               <div className="flex items-center space-x-3 text-background/80">
                 <Phone className="w-4 h-4" />
-                <span>+1 (555) 123-4567</span>
+                <span>+258 87 611 0005</span>
               </div>
               <div className="flex items-center space-x-3 text-background/80">
                 <MapPin className="w-4 h-4" />
-                <span>123 Tech Street, Silicon Valley, CA</span>
+                <span>Quinta Avenida Minguene, Costa do Sol</span>
               </div>
             </div>
 
@@ -152,7 +152,7 @@ export function Footer() {
         {/* Copyright */}
         <div className="border-t border-background/20 pt-8 mt-8 text-center">
           <p className="text-background/60">
-            © 2024 TechFlow. All rights reserved. | Privacy Policy | Terms of Service
+            © 2024 ThreeDotts. All rights reserved. | Privacy Policy | Terms of Service
           </p>
         </div>
       </div>
