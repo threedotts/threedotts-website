@@ -9,40 +9,40 @@ All colors MUST be HSL.
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 210 40% 8%;
+    --foreground: 160 100% 8%;
 
     --card: 0 0% 100%;
-    --card-foreground: 210 40% 8%;
+    --card-foreground: 160 100% 8%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 210 40% 8%;
+    --popover-foreground: 160 100% 8%;
 
-    --primary: 210 100% 50%;
+    --primary: 175 75% 45%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 210 100% 60%;
+    --primary-glow: 175 75% 55%;
 
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 210 40% 8%;
+    --secondary: 175 30% 96%;
+    --secondary-foreground: 160 100% 8%;
 
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 20% 50%;
+    --muted: 175 30% 96%;
+    --muted-foreground: 170 20% 50%;
 
-    --accent: 195 100% 50%;
+    --accent: 165 80% 50%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 214 31% 91%;
-    --input: 214 31% 91%;
-    --ring: 210 100% 50%;
+    --border: 175 30% 91%;
+    --input: 175 30% 91%;
+    --ring: 175 75% 45%;
 
-    /* IT Company specific design tokens */
-    --gradient-primary: linear-gradient(135deg, hsl(210 100% 50%), hsl(195 100% 50%));
-    --gradient-hero: linear-gradient(135deg, hsl(210 100% 95%), hsl(195 100% 95%));
-    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(210 40% 98%));
-    --shadow-elegant: 0 10px 30px -10px hsl(210 100% 50% / 0.2);
-    --shadow-glow: 0 0 40px hsl(210 100% 60% / 0.3);
+    /* threedotts specific design tokens */
+    --gradient-primary: linear-gradient(135deg, hsl(175 75% 45%), hsl(165 80% 50%));
+    --gradient-hero: linear-gradient(135deg, hsl(175 30% 95%), hsl(165 30% 95%));
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(175 30% 98%));
+    --shadow-elegant: 0 10px 30px -10px hsl(175 75% 45% / 0.2);
+    --shadow-glow: 0 0 40px hsl(175 75% 55% / 0.3);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
     --radius: 0.5rem;
@@ -65,41 +65,41 @@ All colors MUST be HSL.
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 160 50% 3%;
+    --foreground: 175 30% 95%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 160 50% 3%;
+    --card-foreground: 175 30% 95%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 160 50% 3%;
+    --popover-foreground: 175 30% 95%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 175 75% 55%;
+    --primary-foreground: 160 50% 8%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 160 30% 15%;
+    --secondary-foreground: 175 30% 95%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 160 30% 15%;
+    --muted-foreground: 170 20% 65%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 165 80% 55%;
+    --accent-foreground: 160 50% 8%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 175 30% 95%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --border: 160 30% 15%;
+    --input: 160 30% 15%;
+    --ring: 175 75% 55%;
+    --sidebar-background: 160 40% 8%;
+    --sidebar-foreground: 175 30% 90%;
+    --sidebar-primary: 175 75% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 160 30% 12%;
+    --sidebar-accent-foreground: 175 30% 90%;
+    --sidebar-border: 160 30% 12%;
+    --sidebar-ring: 175 75% 55%;
   }
 }
 
