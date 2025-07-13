@@ -1,51 +1,51 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
-  Cloud, 
-  Shield, 
-  Code, 
-  Database, 
   Smartphone, 
-  Settings,
+  Globe, 
+  Bot, 
+  Zap, 
+  Code2, 
+  Brain,
   ArrowRight 
 } from "lucide-react";
 
 const services = [
   {
-    icon: Cloud,
-    title: "Cloud Solutions",
-    description: "Scalable cloud infrastructure and migration services to modernize your business operations with enhanced security and flexibility.",
-    features: ["AWS & Azure Migration", "Cloud Architecture", "DevOps Integration"]
-  },
-  {
-    icon: Shield,
-    title: "Cybersecurity",
-    description: "Comprehensive security solutions to protect your digital assets from evolving threats and ensure compliance with industry standards.",
-    features: ["Threat Assessment", "Security Audits", "Incident Response"]
-  },
-  {
-    icon: Code,
-    title: "Custom Development",
-    description: "Tailored software solutions built with cutting-edge technologies to meet your unique business requirements and goals.",
-    features: ["Web Applications", "API Development", "System Integration"]
-  },
-  {
-    icon: Database,
-    title: "Data Analytics",
-    description: "Transform your data into actionable insights with advanced analytics, reporting, and business intelligence solutions.",
-    features: ["Data Warehousing", "BI Dashboards", "Predictive Analytics"]
-  },
-  {
     icon: Smartphone,
-    title: "Mobile Solutions",
-    description: "Native and cross-platform mobile applications that deliver exceptional user experiences across all devices.",
-    features: ["iOS & Android Apps", "React Native", "Mobile Strategy"]
+    title: "Mobile App Development",
+    description: "Native iOS and Android apps, plus cross-platform solutions that deliver exceptional user experiences and performance.",
+    features: ["iOS & Android Native", "React Native", "Flutter Development"]
   },
   {
-    icon: Settings,
-    title: "IT Consulting",
-    description: "Strategic technology consulting to optimize your IT infrastructure and align technology with business objectives.",
-    features: ["Technology Roadmap", "Digital Transformation", "IT Strategy"]
+    icon: Globe,
+    title: "Web Applications",
+    description: "Modern, responsive web applications built with cutting-edge frameworks to scale with your business needs.",
+    features: ["React & Next.js", "Progressive Web Apps", "E-commerce Solutions"]
+  },
+  {
+    icon: Bot,
+    title: "AI Agents",
+    description: "Intelligent AI-powered agents that automate customer service, data processing, and complex business workflows.",
+    features: ["Chatbots & Virtual Assistants", "NLP Processing", "Custom AI Models"]
+  },
+  {
+    icon: Zap,
+    title: "Process Automation",
+    description: "Streamline operations with intelligent automation solutions that reduce manual work and increase efficiency.",
+    features: ["Workflow Automation", "API Integration", "RPA Solutions"]
+  },
+  {
+    icon: Code2,
+    title: "Custom Software",
+    description: "Tailored software solutions designed specifically for your business requirements and industry needs.",
+    features: ["Enterprise Software", "System Integration", "Legacy Modernization"]
+  },
+  {
+    icon: Brain,
+    title: "AI & Machine Learning",
+    description: "Advanced AI solutions including predictive analytics, computer vision, and intelligent data processing.",
+    features: ["Machine Learning Models", "Data Analytics", "Computer Vision"]
   }
 ];
 
@@ -58,7 +58,7 @@ export function ServicesSection() {
             Our <span className="bg-gradient-primary bg-clip-text text-transparent">Services</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Comprehensive IT solutions designed to accelerate your business growth and digital transformation journey.
+            From mobile apps to AI agents, we deliver innovative technology solutions that drive business growth and digital transformation.
           </p>
         </div>
 
@@ -100,7 +100,7 @@ export function ServicesSection() {
 
         <div className="text-center">
           <Button variant="hero" size="lg" className="group">
-            View All Services
+            Discuss Your Project
             <ArrowRight className="group-hover:translate-x-1 transition-transform" />
           </Button>
         </div>
