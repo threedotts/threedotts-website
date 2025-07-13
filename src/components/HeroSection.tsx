@@ -35,7 +35,7 @@ export function HeroSection() {
       {/* Main Content */}
       <div className="container mx-auto px-4 z-20 text-center max-w-4xl relative">
         <div className="animate-fade-in">
-          <h1 className="text-5xl md:text-7xl font-bold text-foreground mb-6 leading-tight">
+          <h1 className="text-3xl md:text-5xl font-bold text-foreground mb-6 leading-tight">
             Transform Your Business
             <span className="block bg-gradient-primary bg-clip-text text-transparent">
               With Smart Technology
@@ -60,18 +60,18 @@ export function HeroSection() {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-8 max-w-2xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-2xl mx-auto">
             <div className="animate-scale-in" style={{ animationDelay: '0.2s' }}>
-              <div className="text-3xl md:text-4xl font-bold text-primary mb-2">100+</div>
-              <div className="text-muted-foreground">Apps Delivered</div>
+              <div className="text-3xl md:text-4xl font-bold text-primary mb-2">5+</div>
+              <div className="text-muted-foreground">Years Experience</div>
             </div>
             <div className="animate-scale-in" style={{ animationDelay: '0.4s' }}>
               <div className="text-3xl md:text-4xl font-bold text-primary mb-2">24/7</div>
               <div className="text-muted-foreground">Development Support</div>
             </div>
-            <div className="animate-scale-in col-span-2 md:col-span-1" style={{ animationDelay: '0.6s' }}>
-              <div className="text-3xl md:text-4xl font-bold text-primary mb-2">AI-First</div>
-              <div className="text-muted-foreground">Approach</div>
+            <div className="animate-scale-in" style={{ animationDelay: '0.6s' }}>
+              <div className="text-3xl md:text-4xl font-bold text-primary mb-2">100%</div>
+              <div className="text-muted-foreground">Client Satisfaction</div>
             </div>
           </div>
         </div>
