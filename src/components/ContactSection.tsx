@@ -15,7 +15,7 @@ const contactInfo = [
   {
     icon: Mail,
     title: "Email Us",
-    content: "support@threedotts.com",
+    content: "suporte@threedotts.com",
     description: "Send us an email anytime"
   },
   {
