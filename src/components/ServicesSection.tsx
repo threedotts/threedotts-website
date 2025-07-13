@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Link } from "react-router-dom";
 import { 
   Smartphone, 
   Globe, 
@@ -12,36 +13,42 @@ import {
 
 const services = [
   {
+    id: "mobile",
     icon: Smartphone,
     title: "Aplicações Móveis para o Seu Negócio",
     description: "Chegue aos seus clientes em qualquer lugar com aplicações móveis personalizadas que funcionam perfeitamente em todos os telemóveis e tablets.",
     features: ["Aplicações Android", "Aplicações iPhone", "Interface Fácil de Usar"]
   },
   {
+    id: "web",
     icon: Globe,
     title: "Websites Profissionais e Sistemas Online",
     description: "Websites bonitos e plataformas online que o ajudam a vender mais, servir melhor os clientes e fazer crescer o seu negócio.",
     features: ["Lojas Online", "Portais de Clientes", "Sistemas de Reservas"]
   },
   {
+    id: "ai",
     icon: Bot,
     title: "Soluções de Atendimento ao Cliente com IA",
     description: "Atenda perguntas dos clientes 24/7 com chatbots inteligentes e serviços profissionais de call center que nunca dormem.",
     features: ["Suporte de Chat 24/7", "Call Centers Profissionais", "Respostas Instantâneas ao Cliente"]
   },
   {
+    id: "automation",
     icon: Zap,
     title: "Poupe Tempo com Automação IA",
     description: "Pare de fazer tarefas repetitivas manualmente. Automatizamos o seu trabalho diário para se focar no crescimento do negócio.",
     features: ["Geração Automática de Relatórios", "Processamento Inteligente de Documentos", "Gestão de Inventário"]
   },
   {
+    id: "custom",
     icon: Code2,
     title: "Soluções Empresariais Personalizadas",
     description: "Cada negócio é único. Criamos software personalizado que se adequa exactamente à forma como trabalha e ao que precisa.",
     features: ["Construído Só para Si", "Formação Fácil da Equipa", "Cresce com o Seu Negócio"]
   },
   {
+    id: "analytics",
     icon: Brain,
     title: "Inteligência de Dados e Insights Empresariais",
     description: "Transforme os dados do seu negócio em insights claros que o ajudam a tomar melhores decisões e prever tendências futuras.",
@@ -89,10 +96,12 @@ export function ServicesSection() {
                     </li>
                   ))}
                 </ul>
-                <Button variant="ghost" className="group/btn px-4 py-2 h-auto text-primary bg-muted/50 hover:bg-muted/70 hover:text-primary/80 rounded-md">
-                  Saber Mais
-                  <ArrowRight className="w-4 h-4 ml-1 group-hover/btn:translate-x-1 transition-transform" />
-                </Button>
+                <Link to={`/service/${service.id}`}>
+                  <Button variant="ghost" className="group/btn px-4 py-2 h-auto text-primary bg-muted/50 hover:bg-muted/70 hover:text-primary/80 rounded-md">
+                    Saber Mais
+                    <ArrowRight className="w-4 h-4 ml-1 group-hover/btn:translate-x-1 transition-transform" />
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
           ))}
