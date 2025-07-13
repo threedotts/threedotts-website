@@ -159,7 +159,7 @@ export function ContactSection() {
             Ready to Transform Your Business?
           </h3>
           <p className="text-lg text-primary-foreground/90 mb-8 max-w-2xl mx-auto">
-            Join hundreds of satisfied clients who have revolutionized their operations with our technology solutions.
+            Take the first step towards digital transformation. Let's discuss your project and create solutions that drive real results for your business.
           </p>
           <Button variant="secondary" size="lg" className="group">
             Schedule Free Consultation
