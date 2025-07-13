@@ -33,10 +33,10 @@ const values = [
 ];
 
 const achievements = [
-  "Custom Solutions",
-  "Dedicated Support", 
-  "Fast Delivery",
-  "Expert Team"
+  "Free Consultation",
+  "24/7 Support", 
+  "No Hidden Fees",
+  "Proven Results"
 ];
 
 export function AboutSection() {
