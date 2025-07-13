@@ -253,7 +253,18 @@ const ServiceDetails = () => {
       {/* Header */}
       <header className="bg-gradient-hero border-b border-primary/10 py-8">
         <div className="container mx-auto px-4">
-          <Link to="/#services">
+          <Link 
+            to="/#services"
+            onClick={() => {
+              // Small delay to ensure navigation happens first
+              setTimeout(() => {
+                const servicesSection = document.getElementById('services');
+                if (servicesSection) {
+                  servicesSection.scrollIntoView({ behavior: 'smooth' });
+                }
+              }, 100);
+            }}
+          >
             <Button variant="ghost" className="mb-6">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Voltar aos serviços
