@@ -133,13 +133,13 @@ export function Footer() {
                 Receba as últimas novidades e actualizações tecnológicas na sua caixa de entrada.
               </p>
             </div>
-            <div className="flex space-x-2 w-full md:w-auto">
+            <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
               <input
                 type="email"
                 placeholder="Insira o seu email"
-                className="flex-1 md:w-64 px-4 py-2 rounded-md bg-background/10 border border-background/20 text-background placeholder-background/60 focus:outline-none focus:border-primary"
+                className="flex-1 sm:w-64 px-4 py-2 rounded-md bg-background/10 border border-background/20 text-background placeholder-background/60 focus:outline-none focus:border-primary min-w-0"
               />
-              <Button variant="default">
+              <Button variant="default" className="w-full sm:w-auto">
                 Subscrever
               </Button>
             </div>
