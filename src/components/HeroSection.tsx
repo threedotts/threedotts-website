@@ -16,24 +16,6 @@ export function HeroSection() {
   }, []);
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Simple Parallax Background */}
-      <div 
-        className="absolute inset-0 z-0"
-        style={{
-          transform: `translateY(${scrollY * 0.5}px)`
-        }}
-      >
-        <img 
-          src={heroImage} 
-          alt="AI and Technology Background" 
-          className="w-full h-full object-cover opacity-70"
-          onError={(e) => {
-            console.error('Hero image failed to load:', e);
-            e.currentTarget.style.display = 'none';
-          }}
-          onLoad={() => console.log('Hero AI image loaded successfully')}
-        />
-      </div>
 
       {/* Gradient Overlay */}
       <div className="absolute inset-0 z-10 bg-gradient-to-br from-background/70 via-background/60 to-background/70" />
