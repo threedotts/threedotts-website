@@ -34,8 +34,8 @@ export function HeroSection() {
 
       {/* Main Content */}
       <div className="container mx-auto px-4 z-20 text-center max-w-4xl relative">
-        <div className="animate-fade-in">
-          <h1 className="text-3xl md:text-5xl font-bold text-foreground mb-6 leading-normal">
+        <div className="animate-fade-in py-8">
+          <h1 className="text-3xl md:text-5xl font-bold text-foreground mb-8 leading-relaxed py-4">
             Transform Your Business
             <span className="block bg-gradient-primary bg-clip-text text-transparent">
               With Smart Technology
