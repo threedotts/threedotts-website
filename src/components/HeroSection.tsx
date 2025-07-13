@@ -1,39 +1,59 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Play } from "lucide-react";
-import { useState, useEffect } from "react";
-import heroImage from "@/assets/hero-tech.jpg";
+import { useState, useEffect, useCallback } from "react";
+import heroImage from "@/assets/hero-ai.jpg";
 
 export function HeroSection() {
   const [scrollY, setScrollY] = useState(0);
 
-  useEffect(() => {
-    const handleScroll = () => {
+  const handleScroll = useCallback(() => {
+    // Use requestAnimationFrame for smoother performance
+    requestAnimationFrame(() => {
       setScrollY(window.scrollY);
+    });
+  }, []);
+
+  useEffect(() => {
+    // Throttle scroll events for better performance
+    let ticking = false;
+    
+    const onScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          handleScroll();
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [handleScroll]);
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Parallax Background Image */}
       <div 
         className="absolute inset-0 z-0 will-change-transform"
         style={{
-          transform: `translateY(${scrollY * 0.5}px)`,
-          scale: `${1 + scrollY * 0.0002}`
+          transform: `translate3d(0, ${scrollY * 0.5}px, 0) scale(${1 + scrollY * 0.0001})`,
+          backfaceVisibility: 'hidden',
+          perspective: '1000px'
         }}
       >
         <img 
           src={heroImage} 
-          alt="Technology Background" 
-          className="w-full h-[120%] object-cover opacity-60"
-          style={{ minHeight: '120vh' }}
+          alt="AI and Technology Background" 
+          className="w-full h-[120%] object-cover opacity-70"
+          style={{ 
+            minHeight: '120vh',
+            filter: 'blur(0.5px)' // Slight blur for depth
+          }}
           onError={(e) => {
             console.error('Hero image failed to load:', e);
             e.currentTarget.style.display = 'none';
           }}
-          onLoad={() => console.log('Hero image loaded successfully')}
+          onLoad={() => console.log('Hero AI image loaded successfully')}
         />
       </div>
 
@@ -42,31 +62,35 @@ export function HeroSection() {
       
       {/* Secondary Parallax Layer */}
       <div 
-        className="absolute inset-0 z-20 bg-gradient-hero opacity-60"
+        className="absolute inset-0 z-20 bg-gradient-hero opacity-50"
         style={{
-          transform: `translateY(${scrollY * 0.3}px)`
+          transform: `translate3d(0, ${scrollY * 0.3}px, 0)`,
+          backfaceVisibility: 'hidden'
         }}
       />
 
-      {/* Floating Elements with Parallax */}
+      {/* Floating Elements with Smooth Parallax */}
       <div 
-        className="absolute top-20 left-10 w-20 h-20 bg-primary/10 rounded-full animate-float"
+        className="absolute top-20 left-10 w-20 h-20 bg-primary/15 rounded-full animate-float backdrop-blur-sm"
         style={{
-          transform: `translateY(${scrollY * 0.2}px)`
+          transform: `translate3d(0, ${scrollY * 0.2}px, 0)`,
+          backfaceVisibility: 'hidden'
         }}
       />
       <div 
-        className="absolute top-40 right-20 w-32 h-32 bg-accent/10 rounded-full animate-float"
+        className="absolute top-40 right-20 w-32 h-32 bg-accent/15 rounded-full animate-float backdrop-blur-sm"
         style={{ 
           animationDelay: '2s',
-          transform: `translateY(${scrollY * 0.15}px)`
+          transform: `translate3d(0, ${scrollY * 0.15}px, 0)`,
+          backfaceVisibility: 'hidden'
         }}
       />
       <div 
-        className="absolute bottom-32 left-1/4 w-16 h-16 bg-primary/10 rounded-full animate-float"
+        className="absolute bottom-32 left-1/4 w-16 h-16 bg-primary/15 rounded-full animate-float backdrop-blur-sm"
         style={{ 
           animationDelay: '4s',
-          transform: `translateY(${scrollY * 0.25}px)`
+          transform: `translate3d(0, ${scrollY * 0.25}px, 0)`,
+          backfaceVisibility: 'hidden'
         }}
       />
 
