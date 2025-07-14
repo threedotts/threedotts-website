@@ -5,7 +5,9 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Users, Phone, TrendingUp, Clock, Building } from "lucide-react";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/AppSidebar";
+import { Plus, Users, Phone, TrendingUp, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface Profile {
@@ -84,14 +86,6 @@ const Dashboard = () => {
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-      navigate("/");
-    } catch (error) {
-      console.error("Error signing out:", error);
-    }
-  };
 
   if (loading) {
     return (
@@ -146,24 +140,20 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-hero">
-      {/* Header */}
-      <header className="bg-background/95 backdrop-blur-md border-b border-border">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <img 
-                src="/lovable-uploads/94b7368f-8dbd-4300-a5a2-ac91606ff813.png" 
-                alt="threedotts logo" 
-                className="h-8 w-auto"
-              />
-              <div className="h-8 w-px bg-border"></div>
-              <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
-            </div>
-            
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <Building className="h-4 w-4 text-muted-foreground" />
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full bg-gradient-hero">
+        <AppSidebar user={user} profile={profile} />
+
+        <div className="flex-1 flex flex-col">
+          {/* Header */}
+          <header className="bg-background/95 backdrop-blur-md border-b border-border">
+            <div className="flex items-center justify-between h-16 px-6">
+              <div className="flex items-center space-x-4">
+                <SidebarTrigger />
+                <h1 className="text-xl font-semibold text-foreground">Dashboard</h1>
+              </div>
+              
+              <div className="flex items-center space-x-4">
                 <Select value={selectedOrg} onValueChange={setSelectedOrg}>
                   <SelectTrigger className="w-[250px]">
                     <SelectValue placeholder="Selecionar organização" />
@@ -175,139 +165,129 @@ const Dashboard = () => {
                   </SelectContent>
                 </Select>
                 
-                <Button variant="outline" size="sm" className="ml-2">
+                <Button variant="outline" size="sm">
                   <Plus className="h-4 w-4 mr-1" />
                   Nova Organização
                 </Button>
               </div>
-              
-              <div className="h-8 w-px bg-border"></div>
-              
-              <div className="text-sm text-muted-foreground">
-                Olá, {user.email}
-              </div>
-              
-              <Button variant="ghost" onClick={handleLogout}>
-                Sair
-              </Button>
             </div>
-          </div>
-        </div>
-      </header>
+          </header>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
-        {/* Welcome Section */}
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-foreground mb-2">
-            Bem-vindo ao seu Dashboard
-          </h2>
-          <p className="text-muted-foreground">
-            Gerencie suas operações de call center e automação - {profile.organization_name}
-          </p>
-        </div>
+          {/* Main Content */}
+          <main className="flex-1 p-6 overflow-auto">
+            {/* Welcome Section */}
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold text-foreground mb-2">
+                Overview
+              </h2>
+              <p className="text-muted-foreground">
+                Visão geral das operações de call center e automação
+              </p>
+            </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {stats.map((stat, index) => {
-            const IconComponent = stat.icon;
-            return (
-              <Card key={index} className="bg-gradient-card border-border shadow-elegant">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">
-                        {stat.title}
-                      </p>
-                      <p className="text-2xl font-bold text-foreground">
-                        {stat.value}
-                      </p>
-                      <p className={`text-sm ${stat.color}`}>
-                        {stat.change} desde o último mês
-                      </p>
+            {/* Stats Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              {stats.map((stat, index) => {
+                const IconComponent = stat.icon;
+                return (
+                  <Card key={index} className="bg-gradient-card border-border shadow-elegant">
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-muted-foreground">
+                            {stat.title}
+                          </p>
+                          <p className="text-2xl font-bold text-foreground">
+                            {stat.value}
+                          </p>
+                          <p className={`text-sm ${stat.color}`}>
+                            {stat.change} desde o último mês
+                          </p>
+                        </div>
+                        <IconComponent className={`h-8 w-8 ${stat.color}`} />
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+
+            {/* Main Dashboard Content */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Call Center Activity */}
+              <Card className="bg-gradient-card border-border shadow-elegant">
+                <CardHeader>
+                  <CardTitle className="text-foreground">Atividade do Call Center</CardTitle>
+                  <CardDescription>
+                    Visão geral das chamadas em tempo real
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-3 h-3 bg-primary rounded-full animate-pulse"></div>
+                        <span className="text-foreground font-medium">Chamadas Ativas</span>
+                      </div>
+                      <span className="text-2xl font-bold text-primary">8</span>
                     </div>
-                    <IconComponent className={`h-8 w-8 ${stat.color}`} />
+                    <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-3 h-3 bg-accent rounded-full"></div>
+                        <span className="text-foreground font-medium">Fila de Espera</span>
+                      </div>
+                      <span className="text-2xl font-bold text-accent">12</span>
+                    </div>
+                    <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-3 h-3 bg-primary-glow rounded-full"></div>
+                        <span className="text-foreground font-medium">Chamadas Hoje</span>
+                      </div>
+                      <span className="text-2xl font-bold text-primary-glow">247</span>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
-            );
-          })}
-        </div>
 
-        {/* Main Dashboard Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Call Center Activity */}
-          <Card className="bg-gradient-card border-border shadow-elegant">
-            <CardHeader>
-              <CardTitle className="text-foreground">Atividade do Call Center</CardTitle>
-              <CardDescription>
-                Visão geral das chamadas em tempo real
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-3 h-3 bg-primary rounded-full animate-pulse"></div>
-                    <span className="text-foreground font-medium">Chamadas Ativas</span>
+              {/* Automation Status */}
+              <Card className="bg-gradient-card border-border shadow-elegant">
+                <CardHeader>
+                  <CardTitle className="text-foreground">Status da Automação</CardTitle>
+                  <CardDescription>
+                    Sistemas de automação em funcionamento
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-3 h-3 bg-primary rounded-full"></div>
+                        <span className="text-foreground font-medium">Chatbot AI</span>
+                      </div>
+                      <span className="text-sm text-primary font-medium">Online</span>
+                    </div>
+                    <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-3 h-3 bg-primary rounded-full"></div>
+                        <span className="text-foreground font-medium">Auto-Resposta</span>
+                      </div>
+                      <span className="text-sm text-primary font-medium">Online</span>
+                    </div>
+                    <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-3 h-3 bg-primary rounded-full"></div>
+                        <span className="text-foreground font-medium">Roteamento</span>
+                      </div>
+                      <span className="text-sm text-primary font-medium">Online</span>
+                    </div>
                   </div>
-                  <span className="text-2xl font-bold text-primary">8</span>
-                </div>
-                <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-3 h-3 bg-accent rounded-full"></div>
-                    <span className="text-foreground font-medium">Fila de Espera</span>
-                  </div>
-                  <span className="text-2xl font-bold text-accent">12</span>
-                </div>
-                <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-3 h-3 bg-primary-glow rounded-full"></div>
-                    <span className="text-foreground font-medium">Chamadas Hoje</span>
-                  </div>
-                  <span className="text-2xl font-bold text-primary-glow">247</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Automation Status */}
-          <Card className="bg-gradient-card border-border shadow-elegant">
-            <CardHeader>
-              <CardTitle className="text-foreground">Status da Automação</CardTitle>
-              <CardDescription>
-                Sistemas de automação em funcionamento
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-3 h-3 bg-primary rounded-full"></div>
-                    <span className="text-foreground font-medium">Chatbot AI</span>
-                  </div>
-                  <span className="text-sm text-primary font-medium">Online</span>
-                </div>
-                <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-3 h-3 bg-primary rounded-full"></div>
-                    <span className="text-foreground font-medium">Auto-Resposta</span>
-                  </div>
-                  <span className="text-sm text-primary font-medium">Online</span>
-                </div>
-                <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-3 h-3 bg-primary rounded-full"></div>
-                    <span className="text-foreground font-medium">Roteamento</span>
-                  </div>
-                  <span className="text-sm text-primary font-medium">Online</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
+            </div>
+          </main>
         </div>
-      </main>
-    </div>
+      </div>
+    </SidebarProvider>
   );
 };
 
