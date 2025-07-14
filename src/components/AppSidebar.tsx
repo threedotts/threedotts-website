@@ -172,11 +172,11 @@ export function AppSidebar({ user, profile }: AppSidebarProps) {
         {state !== "collapsed" && profile && (
           <div className="p-4 border-b border-border/50">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm">
+              <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm p-1">
                 <img 
-                  src="https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=400&h=400&fit=crop&crop=center" 
+                  src="https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=400&h=400&fit=crop&crop=center" 
                   alt="Company Logo" 
-                  className="w-6 h-6 object-contain rounded"
+                  className="w-full h-full object-cover rounded-full"
                 />
               </div>
               <div className="flex-1 min-w-0">
@@ -191,11 +191,11 @@ export function AppSidebar({ user, profile }: AppSidebarProps) {
         {/* Collapsed Header */}
         {state === "collapsed" && (
           <div className="p-4 border-b border-border/50 flex justify-center">
-            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm">
+            <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm p-1">
               <img 
-                src="https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=400&h=400&fit=crop&crop=center" 
+                src="https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=400&h=400&fit=crop&crop=center" 
                 alt="Company Logo" 
-                className="w-6 h-6 object-contain rounded"
+                className="w-full h-full object-cover rounded-full"
               />
             </div>
           </div>
