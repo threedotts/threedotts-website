@@ -172,11 +172,11 @@ export function AppSidebar({ user, profile }: AppSidebarProps) {
         {/* Organization Header */}
         <div className="p-4 border-b border-border/50">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm p-1">
+            <div className="w-16 h-8 bg-black rounded flex items-center justify-center shadow-sm p-1">
               <img 
-                src="https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=400&h=400&fit=crop&crop=center" 
-                alt="Company Logo" 
-                className="w-full h-full object-cover rounded-full"
+                src="/lovable-uploads/c671177c-9134-4ef2-8785-87d9d2a5368f.png" 
+                alt="Threedotts Logo" 
+                className="w-full h-full object-contain"
               />
             </div>
             <div className="flex-1 min-w-0 flex items-center">
