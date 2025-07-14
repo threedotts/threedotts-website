@@ -174,7 +174,7 @@ export function AppSidebar({ user, profile }: AppSidebarProps) {
           <div className="flex items-center space-x-3">
             <div className="flex-1 min-w-0 flex items-center">
               <h2 className="text-base font-semibold text-foreground truncate">
-                {profile?.organization_name || 'Organization'}
+                Threedotts
               </h2>
             </div>
           </div>
