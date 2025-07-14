@@ -165,22 +165,6 @@ export function AppSidebar({ user, profile }: AppSidebarProps) {
             </SidebarGroupContent>
           </SidebarGroup>
 
-          {/* User Info & Logout */}
-          {state !== "collapsed" && user && (
-            <div className="p-4 space-y-2">
-              <div className="text-xs text-sidebar-foreground/70 truncate">
-                {user.email}
-              </div>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={handleLogout}
-                className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent"
-              >
-                Sair
-              </Button>
-            </div>
-          )}
         </div>
       </SidebarContent>
     </Sidebar>
