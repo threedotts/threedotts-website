@@ -89,19 +89,19 @@ const servicesData = {
   ai: {
     id: "ai",
     icon: Bot,
-    title: "Soluções de Atendimento ao Cliente com IA",
-    subtitle: "Atendimento 24/7 inteligente",
-    description: "Chatbots inteligentes e soluções de call center que atendem os seus clientes 24 horas por dia, 7 dias por semana, com respostas rápidas e precisas.",
-    fullDescription: "Revolucione o atendimento ao cliente com inteligência artificial. Os nossos chatbots aprendem com cada interação e oferecem respostas cada vez mais precisas, melhorando continuamente a experiência do cliente.",
+    title: "Call Center e Atendimento ao Cliente com IA",
+    subtitle: "Agentes de IA que fazem e atendem chamadas",
+    description: "Call center revolucionário com agentes de inteligência artificial que fazem e atendem chamadas telefônicas e conversas no website, com capacidade de redirecionamento para agentes reais.",
+    fullDescription: "O nosso call center funciona com agentes de inteligência artificial que gerem chamadas telefônicas e conversas no website 24/7. Os agentes de IA podem redirecionar conversas para agentes reais quando necessário, que podem monitorar e conversar com clientes através do nosso dashboard profissional.",
     features: [
-      "Chatbots inteligentes multicanal",
-      "Processamento de linguagem natural",
-      "Integração com WhatsApp, Facebook, site",
-      "Call center virtual automatizado",
-      "Respostas instantâneas 24/7",
-      "Escalamento para humanos quando necessário",
+      "Agentes de IA para chamadas telefônicas",
+      "Atendimento web com chat inteligente",
+      "Redirecionamento para agentes reais",
+      "Dashboard de monitorização para agentes",
+      "Call center híbrido (IA + humanos)",
+      "Integração telefónica e web",
       "Base de conhecimento dinâmica",
-      "Análise de sentimentos dos clientes"
+      "Análise de conversas em tempo real"
     ],
     benefits: [
       "Redução de 80% no tempo de resposta",

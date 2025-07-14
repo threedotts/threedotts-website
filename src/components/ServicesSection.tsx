@@ -29,9 +29,9 @@ const services = [
   {
     id: "ai",
     icon: Bot,
-    title: "Soluções de Atendimento ao Cliente com IA",
-    description: "Atenda perguntas dos clientes 24/7 com chatbots inteligentes e serviços profissionais de call center que nunca dormem.",
-    features: ["Suporte de Chat 24/7", "Call Centers Profissionais", "Respostas Instantâneas ao Cliente"]
+    title: "Call Center e Atendimento ao Cliente com IA",
+    description: "Call center inteligente com agentes de IA que fazem e atendem chamadas telefônicas e conversas no website 24/7, com redirecionamento para agentes reais quando necessário.",
+    features: ["Agentes de IA para Chamadas", "Call Center Telefônico e Web", "Dashboard para Agentes Reais"]
   },
   {
     id: "automation",
