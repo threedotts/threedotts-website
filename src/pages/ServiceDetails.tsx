@@ -50,7 +50,8 @@ const servicesData = {
       "Suporte e manutenção contínua"
     ],
     timeline: "4-8 semanas",
-    price: "Desde 125.000 MT"
+    price: "Consulta",
+    packages: null
   },
   web: {
     id: "web",
@@ -84,7 +85,24 @@ const servicesData = {
       "Lançamento e formação"
     ],
     timeline: "3-6 semanas",
-    price: "Desde 75.000 MT"
+    price: "3 Pacotes disponíveis",
+    packages: [
+      {
+        name: "Básico",
+        price: "Desde 75.000 MT",
+        features: ["Website responsivo", "5 páginas", "Formulário de contacto", "Otimização SEO básica"]
+      },
+      {
+        name: "Profissional", 
+        price: "Desde 150.000 MT",
+        features: ["Website avançado", "10 páginas", "Loja online", "CMS", "Analytics", "Suporte 6 meses"]
+      },
+      {
+        name: "Enterprise",
+        price: "Consulta",
+        features: ["Solução personalizada", "Funcionalidades avançadas", "Integrações complexas", "Suporte dedicado"]
+      }
+    ]
   },
   ai: {
     id: "ai",
@@ -118,7 +136,24 @@ const servicesData = {
       "Monitorização e otimização contínua"
     ],
     timeline: "2-4 semanas",
-    price: "Desde 40.000 MT/mês"
+    price: "3 Pacotes disponíveis",
+    packages: [
+      {
+        name: "Básico",
+        price: "Desde 40.000 MT/mês",
+        features: ["Chat em 1 plataforma", "500 conversas/mês", "Horário comercial", "Suporte por email"]
+      },
+      {
+        name: "Profissional",
+        price: "Desde 80.000 MT/mês", 
+        features: ["Chat multiplataforma", "2000 conversas/mês", "24/7", "Dashboard avançado", "Agentes humanos"]
+      },
+      {
+        name: "Enterprise",
+        price: "Consulta",
+        features: ["Solução personalizada", "Conversas ilimitadas", "Integrações avançadas", "Suporte dedicado"]
+      }
+    ]
   },
   automation: {
     id: "automation",
@@ -152,7 +187,14 @@ const servicesData = {
       "Implementação e formação"
     ],
     timeline: "2-5 semanas",
-    price: "Desde 60.000 MT"
+    price: "Desde 60.000 MT",
+    packages: [
+      {
+        name: "Pacote Automação",
+        price: "Desde 60.000 MT",
+        features: ["Até 5 automações", "Relatórios automáticos", "Integração com 3 sistemas", "Suporte 3 meses", "Formação incluída"]
+      }
+    ]
   },
   custom: {
     id: "custom",
@@ -186,7 +228,8 @@ const servicesData = {
       "Implementação e go-live"
     ],
     timeline: "8-16 semanas",
-    price: "Desde 250.000 MT"
+    price: "Consulta",
+    packages: null
   },
   analytics: {
     id: "analytics",
@@ -220,7 +263,24 @@ const servicesData = {
       "Formação e acompanhamento"
     ],
     timeline: "3-7 semanas",
-    price: "Desde 100.000 MT"
+    price: "3 Pacotes disponíveis",
+    packages: [
+      {
+        name: "Básico",
+        price: "Desde 100.000 MT",
+        features: ["Dashboard básico", "5 KPIs principais", "Relatórios mensais", "Dados históricos 1 ano"]
+      },
+      {
+        name: "Profissional",
+        price: "Desde 200.000 MT",
+        features: ["Dashboard avançado", "KPIs ilimitados", "Previsões com IA", "Relatórios automáticos", "Dados históricos completos"]
+      },
+      {
+        name: "Enterprise", 
+        price: "Consulta",
+        features: ["Solução personalizada", "Análises preditivas avançadas", "Integrações complexas", "Consultoria dedicada"]
+      }
+    ]
   }
 };
 
@@ -357,6 +417,35 @@ const ServiceDetails = () => {
 
           {/* Sidebar */}
           <div className="space-y-6">
+            {/* Packages */}
+            {service.packages && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Pacotes disponíveis</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {service.packages.map((pkg, index) => (
+                      <div key={index} className="border rounded-lg p-4 space-y-3">
+                        <div className="flex justify-between items-start">
+                          <h4 className="font-semibold text-foreground">{pkg.name}</h4>
+                          <Badge variant="secondary">{pkg.price}</Badge>
+                        </div>
+                        <div className="space-y-2">
+                          {pkg.features.map((feature, idx) => (
+                            <div key={idx} className="flex items-start gap-2">
+                              <Check className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                              <span className="text-xs text-muted-foreground">{feature}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Benefits */}
             <Card>
               <CardHeader>
