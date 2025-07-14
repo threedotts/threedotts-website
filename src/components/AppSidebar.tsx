@@ -190,12 +190,12 @@ export function AppSidebar({ user, profile }: AppSidebarProps) {
 
         {/* Collapsed Header */}
         {state === "collapsed" && (
-          <div className="p-6 border-b border-border/50 flex justify-center">
-            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm p-1.5">
+          <div className="p-4 border-b border-border/50 flex justify-center">
+            <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-md overflow-hidden">
               <img 
                 src="https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=400&h=400&fit=crop&crop=center" 
                 alt="Company Logo" 
-                className="w-full h-full object-cover rounded-full"
+                className="w-10 h-10 object-cover rounded-full"
               />
             </div>
           </div>
