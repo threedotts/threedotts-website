@@ -179,8 +179,8 @@ export function AppSidebar({ user, profile }: AppSidebarProps) {
                   className="w-full h-full object-cover rounded-full"
                 />
               </div>
-              <div className="flex-1 min-w-0">
-                <h2 className="text-sm font-semibold text-foreground truncate">
+              <div className="flex-1 min-w-0 flex items-center">
+                <h2 className="text-base font-semibold text-foreground truncate">
                   {profile.organization_name}
                 </h2>
               </div>
