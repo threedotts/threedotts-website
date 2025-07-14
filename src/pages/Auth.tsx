@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Building2, Users, Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, Building2, Users, Mail, Lock, Eye, EyeOff, User } from "lucide-react";
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -16,6 +16,8 @@ const Auth = () => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
+    firstName: "",
+    lastName: "",
     organizationName: "",
     membersCount: 1,
   });
@@ -52,6 +54,8 @@ const Auth = () => {
         options: {
           emailRedirectTo: `${window.location.origin}/`,
           data: {
+            first_name: formData.firstName,
+            last_name: formData.lastName,
             organization_name: formData.organizationName,
             organization_members_count: formData.membersCount.toString(),
           }
@@ -277,6 +281,41 @@ const Auth = () => {
                         value={formData.membersCount}
                         onChange={handleInputChange}
                       />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="first-name">Primeiro Nome</Label>
+                      <div className="relative">
+                        <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          id="first-name"
+                          name="firstName"
+                          type="text"
+                          required
+                          className="pl-10"
+                          placeholder="Seu primeiro nome"
+                          value={formData.firstName}
+                          onChange={handleInputChange}
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="last-name">Apelido</Label>
+                      <div className="relative">
+                        <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          id="last-name"
+                          name="lastName"
+                          type="text"
+                          required
+                          className="pl-10"
+                          placeholder="Seu apelido"
+                          value={formData.lastName}
+                          onChange={handleInputChange}
+                        />
+                      </div>
                     </div>
                   </div>
 
