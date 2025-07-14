@@ -1,5 +1,22 @@
 import { useState } from "react";
-import { BarChart3, User, Building, LogOut } from "lucide-react";
+import { 
+  BarChart3, 
+  User, 
+  Building, 
+  Calendar,
+  CheckSquare,
+  Users,
+  TrendingUp,
+  FileText,
+  DollarSign,
+  MessageSquare,
+  UserCheck,
+  ShoppingCart,
+  Settings,
+  Star,
+  ChevronDown,
+  ChevronRight
+} from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   Sidebar,
@@ -15,19 +32,104 @@ import {
 
 const menuItems = [
   { 
-    title: "Overview", 
+    title: "Dashboard", 
     url: "/dashboard", 
     icon: BarChart3,
-    description: "Dados estatísticos gerais"
   },
-];
-
-const bottomMenuItems = [
   { 
-    title: "Perfil", 
-    url: "/dashboard/profile", 
-    icon: User,
-    description: "Configurações do perfil"
+    title: "Events", 
+    url: "/dashboard/events", 
+    icon: Star,
+  },
+  { 
+    title: "Schedule", 
+    url: "/dashboard/schedule", 
+    icon: Calendar,
+    hasSubmenu: true,
+    submenu: [
+      { title: "Calendar View", url: "/dashboard/schedule/calendar" },
+      { title: "List View", url: "/dashboard/schedule/list" },
+    ]
+  },
+  { 
+    title: "Tasks", 
+    url: "/dashboard/tasks", 
+    icon: CheckSquare,
+    hasSubmenu: true,
+    submenu: [
+      { title: "Active Tasks", url: "/dashboard/tasks/active" },
+      { title: "Completed", url: "/dashboard/tasks/completed" },
+    ]
+  },
+  { 
+    title: "Employees", 
+    url: "/dashboard/employees", 
+    icon: Users,
+  },
+  { 
+    title: "Analytics", 
+    url: "/dashboard/analytics", 
+    icon: TrendingUp,
+    hasSubmenu: true,
+    submenu: [
+      { title: "Reports", url: "/dashboard/analytics/reports" },
+      { title: "Performance", url: "/dashboard/analytics/performance" },
+    ]
+  },
+  { 
+    title: "Reports", 
+    url: "/dashboard/reports", 
+    icon: FileText,
+    hasSubmenu: true,
+    submenu: [
+      { title: "Monthly", url: "/dashboard/reports/monthly" },
+      { title: "Quarterly", url: "/dashboard/reports/quarterly" },
+    ]
+  },
+  { 
+    title: "Finances", 
+    url: "/dashboard/finances", 
+    icon: DollarSign,
+    hasSubmenu: true,
+    submenu: [
+      { title: "Income", url: "/dashboard/finances/income" },
+      { title: "Expenses", url: "/dashboard/finances/expenses" },
+    ]
+  },
+  { 
+    title: "Customers", 
+    url: "/dashboard/customers", 
+    icon: UserCheck,
+  },
+  { 
+    title: "Messages", 
+    url: "/dashboard/messages", 
+    icon: MessageSquare,
+  },
+  { 
+    title: "Leads", 
+    url: "/dashboard/leads", 
+    icon: UserCheck,
+  },
+  { 
+    title: "Sales", 
+    url: "/dashboard/sales", 
+    icon: ShoppingCart,
+    hasSubmenu: true,
+    submenu: [
+      { title: "Active Deals", url: "/dashboard/sales/deals" },
+      { title: "Pipeline", url: "/dashboard/sales/pipeline" },
+    ]
+  },
+  { 
+    title: "Settings", 
+    url: "/dashboard/settings", 
+    icon: Settings,
+    hasSubmenu: true,
+    submenu: [
+      { title: "General", url: "/dashboard/settings/general" },
+      { title: "Security", url: "/dashboard/settings/security" },
+    ]
   },
 ];
 
@@ -41,130 +143,148 @@ export function AppSidebar({ user, profile }: AppSidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const currentPath = location.pathname;
+  const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
-  const isActive = (path: string) => currentPath === path;
+  const isActive = (path: string) => currentPath === path || currentPath.startsWith(path + '/');
   
+  const toggleExpanded = (itemTitle: string) => {
+    setExpandedItems(prev => 
+      prev.includes(itemTitle) 
+        ? prev.filter(title => title !== itemTitle)
+        : [...prev, itemTitle]
+    );
+  };
+
   const getNavCls = (isActive: boolean) =>
     isActive 
-      ? "bg-gradient-to-r from-primary/15 to-primary/5 text-primary border-l-3 border-primary font-semibold shadow-lg shadow-primary/10" 
-      : "text-sidebar-foreground hover:bg-gradient-to-r hover:from-primary/8 hover:to-primary/2 hover:text-primary hover:shadow-md hover:shadow-primary/5 transition-all duration-300 ease-out hover:scale-[1.02]";
+      ? "bg-primary/15 text-primary font-medium" 
+      : "text-sidebar-foreground hover:bg-muted/60 hover:text-foreground transition-colors duration-200";
+
+  const getSubmenuCls = (isActive: boolean) =>
+    isActive 
+      ? "bg-primary/10 text-primary font-medium" 
+      : "text-muted-foreground hover:bg-muted/40 hover:text-foreground transition-colors duration-200";
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-border/40 bg-gradient-to-b from-background to-background/95 backdrop-blur-sm">
-      <SidebarTrigger className="m-4 hover:bg-primary/10 hover:shadow-lg transition-all duration-300 rounded-xl p-2" />
-
+    <Sidebar collapsible="icon" className="border-r border-border/50">
       <SidebarContent className="flex flex-col h-full">
-        {/* Organization Info */}
+        {/* Organization Header */}
         {state !== "collapsed" && profile && (
-          <div className="p-5 mx-4 mb-6 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent rounded-2xl border border-primary/20 shadow-lg backdrop-blur-sm">
-            <div className="flex items-center space-x-4">
-              <div className="p-3 bg-gradient-to-br from-primary/20 to-primary/10 rounded-xl shadow-md">
-                <Building className="h-6 w-6 text-primary" />
+          <div className="p-4 border-b border-border/50">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                <Building className="h-5 w-5 text-primary-foreground" />
               </div>
               <div className="flex-1 min-w-0">
-                <h2 className="text-base font-bold text-foreground truncate bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text">
+                <h2 className="text-sm font-semibold text-foreground truncate">
                   {profile.organization_name}
                 </h2>
-                <p className="text-sm text-muted-foreground font-medium">
-                  {profile.organization_members_count} membros
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Collapsed Header */}
+        {state === "collapsed" && (
+          <div className="p-4 border-b border-border/50 flex justify-center">
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+              <Building className="h-5 w-5 text-primary-foreground" />
+            </div>
+          </div>
+        )}
+
+        {/* Main Menu */}
+        <div className="flex-1 p-4">
+          <SidebarMenu className="space-y-1">
+            {menuItems.map((item) => {
+              const IconComponent = item.icon;
+              const isExpanded = expandedItems.includes(item.title);
+              const hasActiveSubmenu = item.submenu?.some(sub => isActive(sub.url));
+              
+              return (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton 
+                    asChild
+                    className={`${getNavCls(isActive(item.url) || hasActiveSubmenu)} h-10 px-3`}
+                  >
+                    <div className="w-full flex items-center justify-between">
+                      <button
+                        onClick={() => item.hasSubmenu ? toggleExpanded(item.title) : navigate(item.url)}
+                        className="flex items-center space-x-3 flex-1 text-left"
+                        title={state === "collapsed" ? item.title : undefined}
+                      >
+                        <IconComponent className="h-4 w-4 flex-shrink-0" />
+                        {state !== "collapsed" && (
+                          <span className="text-sm">{item.title}</span>
+                        )}
+                      </button>
+                      {state !== "collapsed" && item.hasSubmenu && (
+                        <button
+                          onClick={() => toggleExpanded(item.title)}
+                          className="p-1 hover:bg-muted rounded"
+                        >
+                          {isExpanded ? (
+                            <ChevronDown className="h-3 w-3" />
+                          ) : (
+                            <ChevronRight className="h-3 w-3" />
+                          )}
+                        </button>
+                      )}
+                    </div>
+                  </SidebarMenuButton>
+                  
+                  {/* Submenu */}
+                  {state !== "collapsed" && item.hasSubmenu && isExpanded && item.submenu && (
+                    <div className="ml-7 mt-1 space-y-1">
+                      {item.submenu.map((subItem) => (
+                        <SidebarMenuButton 
+                          key={subItem.title}
+                          asChild
+                          className={`${getSubmenuCls(isActive(subItem.url))} h-8 px-3 text-xs`}
+                        >
+                          <button
+                            onClick={() => navigate(subItem.url)}
+                            className="w-full text-left"
+                          >
+                            {subItem.title}
+                          </button>
+                        </SidebarMenuButton>
+                      ))}
+                    </div>
+                  )}
+                </SidebarMenuItem>
+              );
+            })}
+          </SidebarMenu>
+        </div>
+
+        {/* User Profile at Bottom */}
+        {state !== "collapsed" && user && (
+          <div className="p-4 border-t border-border/50">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
+                <User className="h-4 w-4 text-muted-foreground" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground truncate">
+                  Renata R.
+                </p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {user.email}
                 </p>
               </div>
             </div>
           </div>
         )}
 
-        {/* Main Menu */}
-        <div className="flex-1 px-4">
-          <SidebarGroup>
-            <SidebarGroupContent>
-              <SidebarMenu className="space-y-3">
-                {menuItems.map((item) => {
-                  const IconComponent = item.icon;
-                  return (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton 
-                        asChild
-                        className={`${getNavCls(isActive(item.url))} rounded-xl mx-0 px-4 py-4 min-h-[56px] group`}
-                      >
-                        <button
-                          onClick={() => navigate(item.url)}
-                          className="w-full flex items-center space-x-4 text-left"
-                          title={state === "collapsed" ? item.title : undefined}
-                        >
-                          <div className={`p-2.5 rounded-xl ${isActive(item.url) ? 'bg-primary/25 shadow-lg shadow-primary/20' : 'bg-muted/30 group-hover:bg-primary/15 group-hover:shadow-md'} transition-all duration-300`}>
-                            <IconComponent className="h-5 w-5 flex-shrink-0" />
-                          </div>
-                          {state !== "collapsed" && (
-                            <div className="flex-1">
-                              <span className="text-sm font-semibold block leading-tight">
-                                {item.title}
-                              </span>
-                              <p className="text-xs text-muted-foreground mt-1 font-medium">
-                                {item.description}
-                              </p>
-                            </div>
-                          )}
-                        </button>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                })}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </div>
-
-        {/* Bottom Menu */}
-        <div className="px-4 pb-6">
-          <div className="border-t border-gradient-to-r from-border/50 to-border/20 pt-6 mb-4">
-            <SidebarGroup>
-              <SidebarGroupContent>
-                <SidebarMenu className="space-y-3">
-                  {bottomMenuItems.map((item) => {
-                    const IconComponent = item.icon;
-                    return (
-                      <SidebarMenuItem key={item.title}>
-                        <SidebarMenuButton 
-                          asChild
-                          className={`${getNavCls(isActive(item.url))} rounded-xl mx-0 px-4 py-4 min-h-[56px] group`}
-                        >
-                          <button
-                            onClick={() => navigate(item.url)}
-                            className="w-full flex items-center space-x-4 text-left"
-                            title={state === "collapsed" ? item.title : undefined}
-                          >
-                            <div className={`p-2.5 rounded-xl ${isActive(item.url) ? 'bg-primary/25 shadow-lg shadow-primary/20' : 'bg-muted/30 group-hover:bg-primary/15 group-hover:shadow-md'} transition-all duration-300`}>
-                              <IconComponent className="h-5 w-5 flex-shrink-0" />
-                            </div>
-                            {state !== "collapsed" && (
-                              <div className="flex-1">
-                                <span className="text-sm font-semibold block leading-tight">
-                                  {item.title}
-                                </span>
-                                <p className="text-xs text-muted-foreground mt-1 font-medium">
-                                  {item.description}
-                                </p>
-                              </div>
-                            )}
-                          </button>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    );
-                  })}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </div>
-
-          {/* User Email */}
-          {state !== "collapsed" && user && (
-            <div className="p-4 bg-gradient-to-r from-muted/40 to-muted/20 rounded-xl border border-border/30 shadow-sm backdrop-blur-sm">
-              <div className="text-sm text-muted-foreground truncate font-medium">
-                {user.email}
-              </div>
+        {/* Collapsed User Profile */}
+        {state === "collapsed" && (
+          <div className="p-4 border-t border-border/50 flex justify-center">
+            <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
+              <User className="h-4 w-4 text-muted-foreground" />
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </SidebarContent>
     </Sidebar>
   );
