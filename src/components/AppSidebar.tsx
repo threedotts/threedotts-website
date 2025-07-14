@@ -18,6 +18,7 @@ import {
   ChevronRight
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Sidebar,
   SidebarContent,
@@ -251,19 +252,31 @@ export function AppSidebar({ user, profile }: AppSidebarProps) {
         {/* User Profile at Bottom */}
         {user && (
           <div className="p-4 border-t border-border/50">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
-                <User className="h-4 w-4 text-muted-foreground" />
-              </div>
-              <div className="flex-1 min-w-0">
+            <button
+              onClick={() => navigate("/profile")}
+              className="w-full flex items-center space-x-3 p-2 rounded-lg hover:bg-muted/60 transition-colors duration-200"
+            >
+              <Avatar className="w-8 h-8">
+                <AvatarImage 
+                  src={profile?.avatar_url} 
+                  alt={`${profile?.first_name || ''} ${profile?.last_name || ''}`} 
+                />
+                <AvatarFallback className="bg-primary/10 text-primary">
+                  {profile?.first_name?.[0] || profile?.last_name?.[0] || <User className="h-4 w-4" />}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0 text-left">
                 <p className="text-sm font-medium text-foreground truncate">
-                  Renata R.
+                  {profile?.first_name && profile?.last_name 
+                    ? `${profile.first_name} ${profile.last_name}`
+                    : 'Usuário'
+                  }
                 </p>
                 <p className="text-xs text-muted-foreground truncate">
                   {user.email}
                 </p>
               </div>
-            </div>
+            </button>
           </div>
         )}
       </SidebarContent>
