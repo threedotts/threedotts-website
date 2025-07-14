@@ -39,7 +39,7 @@ All colors MUST be HSL.
 
     /* threedotts specific design tokens */
     --gradient-primary: linear-gradient(135deg, hsl(175 85% 35%), hsl(165 90% 40%));
-    --gradient-hero: linear-gradient(135deg, hsl(0 0% 95%), hsl(0 0% 97%));
+    --gradient-hero: linear-gradient(135deg, hsl(0 0% 98%), hsl(0 0% 99%));
     --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(175 30% 98%));
     --shadow-elegant: 0 10px 30px -10px hsl(175 85% 35% / 0.2);
     --shadow-glow: 0 0 40px hsl(175 75% 45% / 0.3);
