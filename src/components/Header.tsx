@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const navLinks = [
   { name: "Início", href: "#home" },
@@ -40,11 +41,11 @@ export function Header() {
 
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button variant="ghost" className="text-foreground">
-              Entrar
+            <Button variant="ghost" className="text-foreground" asChild>
+              <Link to="/auth">Dashboard</Link>
             </Button>
-            <Button variant="default">
-              Começar
+            <Button variant="default" asChild>
+              <Link to="#contact">Começar</Link>
             </Button>
           </div>
 
@@ -72,11 +73,11 @@ export function Header() {
                 </a>
               ))}
               <div className="flex flex-col space-y-2 pt-4 border-t border-primary/10">
-                <Button variant="ghost" className="text-foreground justify-start">
-                  Entrar
+                <Button variant="ghost" className="text-foreground justify-start" asChild>
+                  <Link to="/auth">Dashboard</Link>
                 </Button>
-                <Button variant="default" className="justify-start">
-                  Começar
+                <Button variant="default" className="justify-start" asChild>
+                  <Link to="#contact">Começar</Link>
                 </Button>
               </div>
             </nav>
