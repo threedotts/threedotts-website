@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      onboarding: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          current_challenges: string | null
+          current_tools: string[] | null
+          how_found_platform: string | null
+          id: string
+          industry_sector: string
+          integration_channels: string[] | null
+          main_objective: string
+          monthly_call_volume: string
+          organization_website: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          current_challenges?: string | null
+          current_tools?: string[] | null
+          how_found_platform?: string | null
+          id?: string
+          industry_sector: string
+          integration_channels?: string[] | null
+          main_objective: string
+          monthly_call_volume: string
+          organization_website?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          current_challenges?: string | null
+          current_tools?: string[] | null
+          how_found_platform?: string | null
+          id?: string
+          industry_sector?: string
+          integration_channels?: string[] | null
+          main_objective?: string
+          monthly_call_volume?: string
+          organization_website?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

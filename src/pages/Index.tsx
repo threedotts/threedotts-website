@@ -18,27 +18,49 @@ const Index = () => {
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
         
-        // Redirect authenticated users to dashboard
+        // Redirect authenticated users
         if (session) {
-          navigate("/dashboard");
+          // Check if user has completed onboarding
+          const { data: onboarding } = await supabase
+            .from('onboarding')
+            .select('completed_at')
+            .eq('user_id', session.user.id)
+            .single();
+          
+          if (onboarding?.completed_at) {
+            navigate("/dashboard");
+          } else {
+            navigate("/onboarding");
+          }
         }
       }
     );
 
     // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
       
-      // Redirect authenticated users to dashboard
+      // Redirect authenticated users
       if (session) {
-        navigate("/dashboard");
+        // Check if user has completed onboarding
+        const { data: onboarding } = await supabase
+          .from('onboarding')
+          .select('completed_at')
+          .eq('user_id', session.user.id)
+          .single();
+        
+        if (onboarding?.completed_at) {
+          navigate("/dashboard");
+        } else {
+          navigate("/onboarding");
+        }
       }
     });
 

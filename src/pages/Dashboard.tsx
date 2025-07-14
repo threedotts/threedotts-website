@@ -32,21 +32,43 @@ const Dashboard = () => {
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         if (!session) {
           navigate("/auth");
+        } else {
+          // Check if user has completed onboarding
+          const { data: onboarding } = await supabase
+            .from('onboarding')
+            .select('completed_at')
+            .eq('user_id', session.user.id)
+            .maybeSingle();
+          
+          if (!onboarding?.completed_at) {
+            navigate("/onboarding");
+          }
         }
       }
     );
 
     // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       if (!session) {
         navigate("/auth");
+      } else {
+        // Check if user has completed onboarding
+        const { data: onboarding } = await supabase
+          .from('onboarding')
+          .select('completed_at')
+          .eq('user_id', session.user.id)
+          .maybeSingle();
+        
+        if (!onboarding?.completed_at) {
+          navigate("/onboarding");
+        }
       }
     });
 

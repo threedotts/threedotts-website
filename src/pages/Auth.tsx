@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Building2, Users, Mail, Lock, Eye, EyeOff, User } from "lucide-react";
+import { ArrowLeft, Building2, Mail, Lock, Eye, EyeOff, User } from "lucide-react";
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -19,7 +19,6 @@ const Auth = () => {
     firstName: "",
     lastName: "",
     organizationName: "",
-    membersCount: 1,
   });
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -39,7 +38,7 @@ const Auth = () => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: name === "membersCount" ? Math.max(1, parseInt(value) || 1) : value
+      [name]: value
     }));
   };
 
@@ -57,7 +56,7 @@ const Auth = () => {
             first_name: formData.firstName,
             last_name: formData.lastName,
             organization_name: formData.organizationName,
-            organization_members_count: formData.membersCount.toString(),
+            organization_members_count: "1",
           }
         }
       });
@@ -66,8 +65,13 @@ const Auth = () => {
 
       toast({
         title: "Conta criada com sucesso!",
-        description: "Verifique seu email para confirmar a conta.",
+        description: "Redirecionando para configuração inicial...",
       });
+      
+      // Redirect to onboarding after signup
+      setTimeout(() => {
+        navigate("/onboarding");
+      }, 1500);
     } catch (error: any) {
       toast({
         title: "Erro ao criar conta",
@@ -266,23 +270,6 @@ const Auth = () => {
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="members-count">Número de Usuários com Acesso</Label>
-                    <div className="relative">
-                      <Users className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="members-count"
-                        name="membersCount"
-                        type="number"
-                        min="1"
-                        required
-                        className="pl-10"
-                        placeholder="Ex: 5"
-                        value={formData.membersCount}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                  </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
