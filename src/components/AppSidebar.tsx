@@ -171,18 +171,13 @@ export function AppSidebar({ user, profile }: AppSidebarProps) {
       <SidebarContent className="flex flex-col h-full">
         {/* Organization Header */}
         <div className="p-4 border-b border-border/50">
-          <div className="flex items-center space-x-3">
-            <div className="w-16 h-8 bg-black rounded flex items-center justify-center shadow-sm p-1">
+          <div className="flex justify-center">
+            <div className="w-24 h-12 bg-black rounded flex items-center justify-center shadow-sm p-2">
               <img 
                 src="/lovable-uploads/c671177c-9134-4ef2-8785-87d9d2a5368f.png" 
                 alt="Threedotts Logo" 
                 className="w-full h-full object-contain"
               />
-            </div>
-            <div className="flex-1 min-w-0 flex items-center">
-              <h2 className="text-base font-semibold text-foreground truncate">
-                {profile?.organization_name || 'Organization'}
-              </h2>
             </div>
           </div>
         </div>
