@@ -65,13 +65,8 @@ const Auth = () => {
 
       toast({
         title: "Conta criada com sucesso!",
-        description: "Redirecionando para configuração inicial...",
+        description: "Verifique seu email para confirmar a conta.",
       });
-      
-      // Redirect to onboarding after signup
-      setTimeout(() => {
-        navigate("/onboarding");
-      }, 1500);
     } catch (error: any) {
       toast({
         title: "Erro ao criar conta",
