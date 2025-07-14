@@ -30,8 +30,8 @@ const services = [
     id: "ai",
     icon: Bot,
     title: "Call Center e Atendimento ao Cliente com IA",
-    description: "Call center inteligente com agentes de IA que fazem e atendem chamadas telefônicas e conversas no website 24/7, com redirecionamento para agentes reais quando necessário.",
-    features: ["Agentes de IA para Chamadas", "Call Center Telefônico e Web", "Dashboard para Agentes Reais"]
+    description: "Call center inteligente com agentes de IA que fazem e atendem chamadas telefônicas e conversas via WhatsApp, Facebook, email, SMS e outras plataformas, com redirecionamento para agentes reais.",
+    features: ["Agentes de IA para Chamadas", "WhatsApp, Facebook, Email, SMS", "Dashboard para Agentes Reais"]
   },
   {
     id: "automation",
