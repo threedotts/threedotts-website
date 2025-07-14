@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Plus, Users, Phone, TrendingUp, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -149,7 +149,6 @@ const Dashboard = () => {
           <header className="bg-background/95 backdrop-blur-md border-b border-border">
             <div className="flex items-center justify-between h-16 px-6">
               <div className="flex items-center space-x-4">
-                <SidebarTrigger />
                 <h1 className="text-xl font-semibold text-foreground">Dashboard</h1>
               </div>
               
