@@ -190,8 +190,8 @@ export function AppSidebar({ user, profile }: AppSidebarProps) {
 
         {/* Collapsed Header */}
         {state === "collapsed" && (
-          <div className="p-4 border-b border-border/50 flex justify-center">
-            <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm p-1">
+          <div className="p-6 border-b border-border/50 flex justify-center">
+            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm p-1.5">
               <img 
                 src="https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=400&h=400&fit=crop&crop=center" 
                 alt="Company Logo" 
@@ -202,8 +202,8 @@ export function AppSidebar({ user, profile }: AppSidebarProps) {
         )}
 
         {/* Main Menu */}
-        <div className="flex-1 p-4">
-          <SidebarMenu className="space-y-1">
+        <div className={`flex-1 ${state === "collapsed" ? "p-2" : "p-4"}`}>
+          <SidebarMenu className={`${state === "collapsed" ? "space-y-2" : "space-y-1"}`}>
             {menuItems.map((item) => {
               const IconComponent = item.icon;
               const isExpanded = expandedItems.includes(item.title);
@@ -213,7 +213,7 @@ export function AppSidebar({ user, profile }: AppSidebarProps) {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton 
                     asChild
-                    className={`${getNavCls(isActive(item.url) || hasActiveSubmenu)} h-10 px-3`}
+                    className={`${getNavCls(isActive(item.url) || hasActiveSubmenu)} ${state === "collapsed" ? "h-12 px-2 justify-center" : "h-10 px-3"}`}
                   >
                     <div className="w-full flex items-center justify-between">
                       <button
@@ -287,9 +287,9 @@ export function AppSidebar({ user, profile }: AppSidebarProps) {
 
         {/* Collapsed User Profile */}
         {state === "collapsed" && (
-          <div className="p-4 border-t border-border/50 flex justify-center">
-            <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
-              <User className="h-4 w-4 text-muted-foreground" />
+          <div className="p-6 border-t border-border/50 flex justify-center">
+            <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
+              <User className="h-5 w-5 text-muted-foreground" />
             </div>
           </div>
         )}
