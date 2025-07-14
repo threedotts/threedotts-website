@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Plus, Users, Phone, TrendingUp, Clock } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useToast } from "@/hooks/use-toast";
 
 interface Profile {
@@ -137,6 +138,17 @@ const Dashboard = () => {
       icon: Clock,
       color: "text-muted-foreground"
     }
+  ];
+
+  // Mock data for line chart
+  const chartData = [
+    { name: 'Jan', chamadas: 400, conversoes: 340 },
+    { name: 'Fev', chamadas: 300, conversoes: 280 },
+    { name: 'Mar', chamadas: 500, conversoes: 420 },
+    { name: 'Abr', chamadas: 680, conversoes: 590 },
+    { name: 'Mai', chamadas: 590, conversoes: 520 },
+    { name: 'Jun', chamadas: 700, conversoes: 630 },
+    { name: 'Jul', chamadas: 820, conversoes: 750 },
   ];
 
   return (
@@ -279,6 +291,60 @@ const Dashboard = () => {
                       </div>
                       <span className="text-sm text-primary font-medium">Online</span>
                     </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Performance Chart */}
+            <div className="mt-8">
+              <Card className="bg-gradient-card border-border shadow-elegant">
+                <CardHeader>
+                  <CardTitle className="text-foreground">Performance Mensal</CardTitle>
+                  <CardDescription>
+                    Evolução de chamadas e conversões ao longo do tempo
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-80 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={chartData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                        <XAxis 
+                          dataKey="name" 
+                          stroke="hsl(var(--muted-foreground))"
+                          fontSize={12}
+                        />
+                        <YAxis 
+                          stroke="hsl(var(--muted-foreground))"
+                          fontSize={12}
+                        />
+                        <Tooltip 
+                          contentStyle={{
+                            backgroundColor: 'hsl(var(--background))',
+                            border: '1px solid hsl(var(--border))',
+                            borderRadius: '8px',
+                            color: 'hsl(var(--foreground))'
+                          }}
+                        />
+                        <Line 
+                          type="monotone" 
+                          dataKey="chamadas" 
+                          stroke="hsl(var(--primary))" 
+                          strokeWidth={3}
+                          dot={{ fill: 'hsl(var(--primary))', strokeWidth: 2, r: 5 }}
+                          name="Chamadas"
+                        />
+                        <Line 
+                          type="monotone" 
+                          dataKey="conversoes" 
+                          stroke="hsl(var(--accent))" 
+                          strokeWidth={3}
+                          dot={{ fill: 'hsl(var(--accent))', strokeWidth: 2, r: 5 }}
+                          name="Conversões"
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
                   </div>
                 </CardContent>
               </Card>
