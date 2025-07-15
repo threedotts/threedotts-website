@@ -20,8 +20,31 @@ const Auth = () => {
     lastName: "",
     organizationName: "",
   });
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Password validation
+  const validatePassword = (password: string) => {
+    if (password.length < 8) {
+      return "Senha deve ter pelo menos 8 caracteres";
+    }
+    if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
+      return "Senha deve conter pelo menos uma letra maiúscula, uma minúscula e um número";
+    }
+    return "";
+  };
+
+  // Input sanitization
+  const sanitizeInput = (value: string) => {
+    return value.trim().replace(/[<>]/g, "");
+  };
+
+  // Email validation
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email) ? "" : "Email inválido";
+  };
 
   useEffect(() => {
     // Check if user is already logged in
@@ -36,14 +59,55 @@ const Auth = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    const sanitizedValue = sanitizeInput(value);
+    
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: sanitizedValue
     }));
+
+    // Clear previous errors
+    if (errors[name]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: ""
+      }));
+    }
   };
 
   const handleEmailSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate inputs
+    const newErrors: Record<string, string> = {};
+    
+    if (!formData.firstName.trim()) {
+      newErrors.firstName = "Primeiro nome é obrigatório";
+    }
+    
+    if (!formData.lastName.trim()) {
+      newErrors.lastName = "Último nome é obrigatório";
+    }
+    
+    if (!formData.organizationName.trim()) {
+      newErrors.organizationName = "Nome da organização é obrigatório";
+    }
+    
+    const emailError = validateEmail(formData.email);
+    if (emailError) {
+      newErrors.email = emailError;
+    }
+    
+    const passwordError = validatePassword(formData.password);
+    if (passwordError) {
+      newErrors.password = passwordError;
+    }
+    
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -80,6 +144,24 @@ const Auth = () => {
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate inputs
+    const newErrors: Record<string, string> = {};
+    
+    const emailError = validateEmail(formData.email);
+    if (emailError) {
+      newErrors.email = emailError;
+    }
+    
+    if (!formData.password.trim()) {
+      newErrors.password = "Senha é obrigatória";
+    }
+    
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -165,6 +247,7 @@ const Auth = () => {
                         onChange={handleInputChange}
                       />
                     </div>
+                    {errors.email && <p className="text-sm text-destructive mt-1">{errors.email}</p>}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="login-password">Senha</Label>
@@ -190,6 +273,7 @@ const Auth = () => {
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </Button>
                     </div>
+                    {errors.password && <p className="text-sm text-destructive mt-1">{errors.password}</p>}
                   </div>
                   <Button 
                     type="submit" 
@@ -263,6 +347,7 @@ const Auth = () => {
                         onChange={handleInputChange}
                       />
                     </div>
+                    {errors.organizationName && <p className="text-sm text-destructive mt-1">{errors.organizationName}</p>}
                   </div>
 
 
@@ -282,6 +367,7 @@ const Auth = () => {
                           onChange={handleInputChange}
                         />
                       </div>
+                      {errors.firstName && <p className="text-sm text-destructive mt-1">{errors.firstName}</p>}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="last-name">Apelido</Label>
@@ -298,6 +384,7 @@ const Auth = () => {
                           onChange={handleInputChange}
                         />
                       </div>
+                      {errors.lastName && <p className="text-sm text-destructive mt-1">{errors.lastName}</p>}
                     </div>
                   </div>
 
@@ -316,6 +403,7 @@ const Auth = () => {
                         onChange={handleInputChange}
                       />
                     </div>
+                    {errors.email && <p className="text-sm text-destructive mt-1">{errors.email}</p>}
                   </div>
 
                   <div className="space-y-2">
@@ -328,7 +416,7 @@ const Auth = () => {
                         type={showPassword ? "text" : "password"}
                         required
                         className="pl-10 pr-10"
-                        placeholder="Mínimo 6 caracteres"
+                        placeholder="Mínimo 8 caracteres com maiúscula, minúscula e número"
                         value={formData.password}
                         onChange={handleInputChange}
                       />
@@ -342,6 +430,7 @@ const Auth = () => {
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </Button>
                     </div>
+                    {errors.password && <p className="text-sm text-destructive mt-1">{errors.password}</p>}
                   </div>
 
                   <Button 
