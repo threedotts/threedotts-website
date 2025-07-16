@@ -115,4 +115,18 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Security and third-party integration styles */
+  .elevenlabs-chat-wrapper {
+    isolation: isolate;
+  }
+
+  .elevenlabs-chat-wrapper elevenlabs-convai {
+    display: block;
+  }
+
+  /* Ensure third-party widgets don't interfere with app security */
+  .elevenlabs-chat-wrapper iframe {
+    sandbox: allow-scripts allow-same-origin;
+  }
 }

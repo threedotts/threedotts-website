@@ -8,7 +8,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Building2, Mail, Lock, Eye, EyeOff, User } from "lucide-react";
+import { ArrowLeft, Building2, Mail, Lock, Eye, EyeOff, User, Shield } from "lucide-react";
+import { useSecurityMonitor } from "@/hooks/useSecurityMonitor";
+import { useSessionTimeout } from "@/hooks/useSessionTimeout";
+import { 
+  sanitizeInput, 
+  validateEmail, 
+  validatePassword, 
+  validateName, 
+  validateOrganization 
+} from "@/utils/securityValidation";
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -23,28 +32,12 @@ const Auth = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const navigate = useNavigate();
   const { toast } = useToast();
+  
+  // Security monitoring
+  const security = useSecurityMonitor(formData.email || 'anonymous');
+  useSessionTimeout();
 
-  // Password validation
-  const validatePassword = (password: string) => {
-    if (password.length < 8) {
-      return "Senha deve ter pelo menos 8 caracteres";
-    }
-    if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
-      return "Senha deve conter pelo menos uma letra maiúscula, uma minúscula e um número";
-    }
-    return "";
-  };
-
-  // Input sanitization
-  const sanitizeInput = (value: string) => {
-    return value.trim().replace(/[<>]/g, "");
-  };
-
-  // Email validation
-  const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email) ? "" : "Email inválido";
-  };
+  // Remove old validation functions as they're now imported from utils
 
   useEffect(() => {
     // Check if user is already logged in
@@ -78,30 +71,33 @@ const Auth = () => {
   const handleEmailSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate inputs
+    // Check security lockout
+    if (security.isLocked) {
+      toast({
+        title: "Conta temporariamente bloqueada",
+        description: `Muitas tentativas falhadas. Tente novamente em ${security.formatTimeRemaining()}`,
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Enhanced validation using security utils
     const newErrors: Record<string, string> = {};
     
-    if (!formData.firstName.trim()) {
-      newErrors.firstName = "Primeiro nome é obrigatório";
-    }
+    const firstNameError = validateName(formData.firstName, "Primeiro nome");
+    if (firstNameError) newErrors.firstName = firstNameError;
     
-    if (!formData.lastName.trim()) {
-      newErrors.lastName = "Último nome é obrigatório";
-    }
+    const lastNameError = validateName(formData.lastName, "Último nome");
+    if (lastNameError) newErrors.lastName = lastNameError;
     
-    if (!formData.organizationName.trim()) {
-      newErrors.organizationName = "Nome da organização é obrigatório";
-    }
+    const orgError = validateOrganization(formData.organizationName);
+    if (orgError) newErrors.organizationName = orgError;
     
     const emailError = validateEmail(formData.email);
-    if (emailError) {
-      newErrors.email = emailError;
-    }
+    if (emailError) newErrors.email = emailError;
     
     const passwordError = validatePassword(formData.password);
-    if (passwordError) {
-      newErrors.password = passwordError;
-    }
+    if (passwordError) newErrors.password = passwordError;
     
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -127,11 +123,13 @@ const Auth = () => {
 
       if (error) throw error;
 
+      security.recordSuccessfulAttempt();
       toast({
         title: "Conta criada com sucesso!",
         description: "Verifique seu email para confirmar a conta.",
       });
     } catch (error: any) {
+      security.recordFailedAttempt();
       toast({
         title: "Erro ao criar conta",
         description: error.message,
@@ -145,13 +143,21 @@ const Auth = () => {
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate inputs
+    // Check security lockout
+    if (security.isLocked) {
+      toast({
+        title: "Conta temporariamente bloqueada",
+        description: `Muitas tentativas falhadas. Tente novamente em ${security.formatTimeRemaining()}`,
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Enhanced validation
     const newErrors: Record<string, string> = {};
     
     const emailError = validateEmail(formData.email);
-    if (emailError) {
-      newErrors.email = emailError;
-    }
+    if (emailError) newErrors.email = emailError;
     
     if (!formData.password.trim()) {
       newErrors.password = "Senha é obrigatória";
@@ -172,8 +178,10 @@ const Auth = () => {
 
       if (error) throw error;
 
+      security.recordSuccessfulAttempt();
       navigate("/");
     } catch (error: any) {
+      security.recordFailedAttempt();
       toast({
         title: "Erro ao fazer login",
         description: error.message,
@@ -222,6 +230,25 @@ const Auth = () => {
             <CardDescription className="text-muted-foreground">
               Acesso exclusivo para clientes de <strong>Call Center</strong> e <strong>Automação</strong>
             </CardDescription>
+            
+            {/* Security Status Indicator */}
+            {security.isLocked && (
+              <div className="flex items-center justify-center gap-2 p-3 bg-destructive/10 text-destructive rounded-lg">
+                <Shield className="w-4 h-4" />
+                <span className="text-sm">
+                  Conta bloqueada por segurança. Tempo restante: {security.formatTimeRemaining()}
+                </span>
+              </div>
+            )}
+            
+            {security.failedAttempts > 0 && !security.isLocked && (
+              <div className="flex items-center justify-center gap-2 p-3 bg-destructive/10 text-destructive rounded-lg">
+                <Shield className="w-4 h-4" />
+                <span className="text-sm">
+                  {security.failedAttempts}/{security.maxAttempts} tentativas falhadas
+                </span>
+              </div>
+            )}
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="login" className="w-full">
@@ -278,9 +305,9 @@ const Auth = () => {
                   <Button 
                     type="submit" 
                     className="w-full" 
-                    disabled={isLoading}
+                    disabled={isLoading || security.isLocked}
                   >
-                    {isLoading ? "Entrando..." : "Entrar"}
+                    {isLoading ? "Entrando..." : security.isLocked ? `Bloqueado (${security.formatTimeRemaining()})` : "Entrar"}
                   </Button>
                 </form>
 
@@ -436,9 +463,9 @@ const Auth = () => {
                   <Button 
                     type="submit" 
                     className="w-full" 
-                    disabled={isLoading}
+                    disabled={isLoading || security.isLocked}
                   >
-                    {isLoading ? "Criando conta..." : "Criar Conta"}
+                    {isLoading ? "Criando conta..." : security.isLocked ? `Bloqueado (${security.formatTimeRemaining()})` : "Criar Conta"}
                   </Button>
                 </form>
 
