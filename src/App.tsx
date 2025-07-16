@@ -44,10 +44,11 @@ const ElevenLabsWidget = () => {
           redirectToExternalURL: ({ url }: { url: string }) => {
             console.log('redirectToExternalURL called with url:', url);
             
-            // Check if it's a hash fragment (like #contact)
-            if (url.startsWith('#')) {
-              // Find the element by ID (remove the # from the selector)
-              const elementId = url.substring(1);
+            // Check if it's a hash fragment (like /#contact or #contact)
+            if (url.includes('#')) {
+              // Extract the ID after the hash
+              const hashIndex = url.indexOf('#');
+              const elementId = url.substring(hashIndex + 1);
               const element = document.getElementById(elementId);
               
               console.log('Looking for element with ID:', elementId, 'Found:', element);
