@@ -18,8 +18,8 @@ declare global {
   }
 }
 
-// Configuration for third-party integrations - moved to environment for security
-const ELEVENLABS_AGENT_ID = import.meta.env.VITE_ELEVENLABS_AGENT_ID || "agent_01k02ete3tfjgrq97y8a7v541y";
+// Configuration for third-party integrations
+const ELEVENLABS_AGENT_ID = "agent_01k02ete3tfjgrq97y8a7v541y";
 const CHAT_WIDGET_ENABLED = import.meta.env.VITE_CHAT_WIDGET_ENABLED !== "false";
 import Index from "./pages/Index";
 import ServiceDetails from "./pages/ServiceDetails";
