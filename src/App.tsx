@@ -54,6 +54,52 @@ const App = () => {
     return () => subscription.unsubscribe();
   }, []);
 
+  useEffect(() => {
+    // Set up ElevenLabs widget client tools
+    if (CHAT_WIDGET_ENABLED && ELEVENLABS_AGENT_ID) {
+      const handleWidgetCall = (event: CustomEvent) => {
+        event.detail.config.clientTools = {
+          redirectToExternalURL: ({ url }: { url: string }) => {
+            console.log('redirectToExternalURL called with url:', url);
+            
+            // Build full URL - handles any base URL
+            let fullUrl = url;
+            if (!url.startsWith('http')) {
+              // Auto-detect base URL
+              const baseUrl = window.location.origin;
+              fullUrl = `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+            }
+            
+            console.log('Navigating to:', fullUrl);
+            
+            // Navigate to the URL
+            window.location.href = fullUrl;
+          },
+        };
+      };
+
+      // Wait for widget to be available and add event listener
+      const addEventListenerWhenReady = () => {
+        const widget = document.querySelector('elevenlabs-convai');
+        if (widget) {
+          widget.addEventListener('elevenlabs-convai:call', handleWidgetCall as EventListener);
+        } else {
+          // Retry after a short delay if widget is not ready
+          setTimeout(addEventListenerWhenReady, 100);
+        }
+      };
+
+      addEventListenerWhenReady();
+
+      return () => {
+        const widget = document.querySelector('elevenlabs-convai');
+        if (widget) {
+          widget.removeEventListener('elevenlabs-convai:call', handleWidgetCall as EventListener);
+        }
+      };
+    }
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
