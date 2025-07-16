@@ -226,7 +226,7 @@ const Auth = () => {
 
         <Card className="shadow-lg border-0 bg-card/95 backdrop-blur">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-bold">Dashboard Threedotts</CardTitle>
+            <CardTitle className="text-2xl font-bold">Threedotts Platform</CardTitle>
             <CardDescription className="text-muted-foreground">
               Acesso exclusivo para clientes de <strong>Call Center</strong> e <strong>Automação</strong>
             </CardDescription>
