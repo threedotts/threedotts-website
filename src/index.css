@@ -119,6 +119,10 @@ All colors MUST be HSL.
   /* Security and third-party integration styles */
   .elevenlabs-chat-wrapper {
     isolation: isolate;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
   }
 
   .elevenlabs-chat-wrapper elevenlabs-convai {
@@ -128,5 +132,9 @@ All colors MUST be HSL.
   /* Ensure third-party widgets don't interfere with app security */
   .elevenlabs-chat-wrapper iframe {
     sandbox: allow-scripts allow-same-origin;
+  }
+
+  .chat-widget-error {
+    display: none !important;
   }
 }

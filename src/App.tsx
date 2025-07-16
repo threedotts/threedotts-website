@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useSessionTimeout } from "@/hooks/useSessionTimeout";
 
 // Declare custom element for TypeScript
 declare global {
@@ -17,20 +18,25 @@ declare global {
   }
 }
 
-// Configuration for third-party integrations
-const ELEVENLABS_AGENT_ID = "agent_01k02ete3tfjgrq97y8a7v541y";
-const CHAT_WIDGET_ENABLED = true;
+// Configuration for third-party integrations - moved to environment for security
+const ELEVENLABS_AGENT_ID = import.meta.env.VITE_ELEVENLABS_AGENT_ID || "agent_01k02ete3tfjgrq97y8a7v541y";
+const CHAT_WIDGET_ENABLED = import.meta.env.VITE_CHAT_WIDGET_ENABLED !== "false";
 import Index from "./pages/Index";
 import ServiceDetails from "./pages/ServiceDetails";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import { ChatWidgetErrorBoundary } from "./components/ChatWidgetErrorBoundary";
+import { SecurityHeaders } from "./components/SecurityHeaders";
 
 const queryClient = new QueryClient();
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  
+  // Enable session timeout for authenticated users
+  useSessionTimeout();
 
   useEffect(() => {
     // Monitor authentication state for security logging
@@ -51,6 +57,7 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
+        <SecurityHeaders />
         <Toaster />
         <Sonner />
         <BrowserRouter>
@@ -66,10 +73,12 @@ const App = () => {
         </BrowserRouter>
         
         {/* Conditionally render chat widget with proper error boundary */}
-        {CHAT_WIDGET_ENABLED && (
-          <div className="elevenlabs-chat-wrapper">
-            <elevenlabs-convai agent-id={ELEVENLABS_AGENT_ID}></elevenlabs-convai>
-          </div>
+        {CHAT_WIDGET_ENABLED && ELEVENLABS_AGENT_ID && (
+          <ChatWidgetErrorBoundary>
+            <div className="elevenlabs-chat-wrapper">
+              <elevenlabs-convai agent-id={ELEVENLABS_AGENT_ID}></elevenlabs-convai>
+            </div>
+          </ChatWidgetErrorBoundary>
         )}
       </TooltipProvider>
     </QueryClientProvider>
