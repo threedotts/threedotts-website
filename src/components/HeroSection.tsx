@@ -57,9 +57,11 @@ export function HeroSection() {
           <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">Especializamo-nos em aplicações móveis, aplicações web, agentes de IA e soluções de automação que simplificam as suas operações e aceleram a transformação digital.</p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-            <Button variant="hero" size="lg" className="group">
-              Comece o Seu Projecto
-              <ArrowRight className="group-hover:translate-x-1 transition-transform" />
+            <Button variant="hero" size="lg" className="group" asChild>
+              <a href="/project-request">
+                Comece o Seu Projecto
+                <ArrowRight className="group-hover:translate-x-1 transition-transform" />
+              </a>
             </Button>
             
             <Button variant="premium" size="lg" className="group">

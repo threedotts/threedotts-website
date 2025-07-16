@@ -23,6 +23,7 @@ const ELEVENLABS_AGENT_ID = "agent_01k02ete3tfjgrq97y8a7v541y";
 const CHAT_WIDGET_ENABLED = import.meta.env.VITE_CHAT_WIDGET_ENABLED !== "false";
 import Index from "./pages/Index";
 import ServiceDetails from "./pages/ServiceDetails";
+import ProjectRequest from "./pages/ProjectRequest";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
@@ -128,6 +129,7 @@ const App = () => {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/project-request" element={<ProjectRequest />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/profile" element={<Profile />} />
