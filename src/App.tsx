@@ -46,13 +46,16 @@ const ElevenLabsWidget = () => {
             
             // Check if it's a hash fragment (like #contact)
             if (url.startsWith('#')) {
-              // Use window.location.hash for hash navigation
-              window.location.hash = url;
+              // Find the element by ID (remove the # from the selector)
+              const elementId = url.substring(1);
+              const element = document.getElementById(elementId);
               
-              // Also scroll to the element if it exists
-              const element = document.querySelector(url);
+              console.log('Looking for element with ID:', elementId, 'Found:', element);
+              
               if (element) {
-                element.scrollIntoView({ behavior: 'smooth' });
+                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              } else {
+                console.warn('Element not found:', elementId);
               }
             } else {
               // Navigate using React Router for regular paths
