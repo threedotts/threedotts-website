@@ -2,11 +2,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSessionTimeout } from "@/hooks/useSessionTimeout";
-import { useConversation } from "@11labs/react";
 
 // Declare custom element for TypeScript
 declare global {
@@ -32,41 +31,6 @@ import { ChatWidgetErrorBoundary } from "./components/ChatWidgetErrorBoundary";
 import { SecurityHeaders } from "./components/SecurityHeaders";
 
 const queryClient = new QueryClient();
-
-const ConversationalAI = () => {
-  const navigate = useNavigate();
-  
-  const conversation = useConversation({
-    clientTools: {
-      redirectToExternalURL: (parameters: { path: string }) => {
-        const currentUrl = window.location.origin;
-        const fullUrl = `${currentUrl}${parameters.path}`;
-        navigate(parameters.path);
-        return `Navigated to ${fullUrl}`;
-      }
-    }
-  });
-
-  useEffect(() => {
-    const startConversation = async () => {
-      if (ELEVENLABS_AGENT_ID) {
-        try {
-          await conversation.startSession({ agentId: ELEVENLABS_AGENT_ID });
-        } catch (error) {
-          console.error('Failed to start conversation:', error);
-        }
-      }
-    };
-
-    startConversation();
-
-    return () => {
-      conversation.endSession();
-    };
-  }, []);
-
-  return null;
-};
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -106,17 +70,16 @@ const App = () => {
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
-          
-          {/* Conditionally render chat widget with proper error boundary */}
-          {CHAT_WIDGET_ENABLED && ELEVENLABS_AGENT_ID && (
-            <ChatWidgetErrorBoundary>
-              <ConversationalAI />
-              <div className="elevenlabs-chat-wrapper">
-                <elevenlabs-convai agent-id={ELEVENLABS_AGENT_ID}></elevenlabs-convai>
-              </div>
-            </ChatWidgetErrorBoundary>
-          )}
         </BrowserRouter>
+        
+        {/* Conditionally render chat widget with proper error boundary */}
+        {CHAT_WIDGET_ENABLED && ELEVENLABS_AGENT_ID && (
+          <ChatWidgetErrorBoundary>
+            <div className="elevenlabs-chat-wrapper">
+              <elevenlabs-convai agent-id={ELEVENLABS_AGENT_ID}></elevenlabs-convai>
+            </div>
+          </ChatWidgetErrorBoundary>
+        )}
       </TooltipProvider>
     </QueryClientProvider>
   );
