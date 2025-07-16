@@ -106,17 +106,17 @@ const App = () => {
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          
+          {/* Conditionally render chat widget with proper error boundary */}
+          {CHAT_WIDGET_ENABLED && ELEVENLABS_AGENT_ID && (
+            <ChatWidgetErrorBoundary>
+              <ConversationalAI />
+              <div className="elevenlabs-chat-wrapper">
+                <elevenlabs-convai agent-id={ELEVENLABS_AGENT_ID}></elevenlabs-convai>
+              </div>
+            </ChatWidgetErrorBoundary>
+          )}
         </BrowserRouter>
-        
-        {/* Conditionally render chat widget with proper error boundary */}
-        {CHAT_WIDGET_ENABLED && ELEVENLABS_AGENT_ID && (
-          <ChatWidgetErrorBoundary>
-            <ConversationalAI />
-            <div className="elevenlabs-chat-wrapper">
-              <elevenlabs-convai agent-id={ELEVENLABS_AGENT_ID}></elevenlabs-convai>
-            </div>
-          </ChatWidgetErrorBoundary>
-        )}
       </TooltipProvider>
     </QueryClientProvider>
   );
