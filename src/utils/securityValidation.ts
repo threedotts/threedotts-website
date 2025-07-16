@@ -27,7 +27,6 @@ export const validateEmail = (email: string): string => {
 
   // Check for common malicious patterns
   const maliciousPatterns = [
-    /\.(exe|bat|cmd|scr|com|pif)$/i,
     /javascript:/i,
     /data:/i,
     /<script/i,
