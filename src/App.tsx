@@ -44,8 +44,20 @@ const ElevenLabsWidget = () => {
           redirectToExternalURL: ({ url }: { url: string }) => {
             console.log('redirectToExternalURL called with url:', url);
             
-            // Navigate using React Router without page refresh
-            navigate(url);
+            // Check if it's a hash fragment (like #contact)
+            if (url.startsWith('#')) {
+              // Use window.location.hash for hash navigation
+              window.location.hash = url;
+              
+              // Also scroll to the element if it exists
+              const element = document.querySelector(url);
+              if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+              }
+            } else {
+              // Navigate using React Router for regular paths
+              navigate(url);
+            }
           },
         };
       };
