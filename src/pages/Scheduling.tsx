@@ -1,16 +1,8 @@
 import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
 
 const Scheduling = () => {
-  const [iframeKey, setIframeKey] = useState(0);
-
-  useEffect(() => {
-    // Force iframe remount when component mounts
-    setIframeKey(prev => prev + 1);
-  }, []);
-
   return (
     <div className="min-h-screen bg-background">
       {/* Header with back button */}
@@ -32,13 +24,13 @@ const Scheduling = () => {
       {/* Google Calendar Embed - Full Width */}
       <div className="w-full h-full">
         <iframe 
-          key={iframeKey}
           src="https://calendar.google.com/calendar/appointments/schedules/AcZssZ0l1MqdSil-lmX5yQmCndkugzIdzLxO1Ut0BcpZ8Fj04LJpRHtOpltpWjB9P7ahbfoze2Q7ZDyl?gv=true" 
           style={{ border: 0, display: 'block' }} 
           width="100%" 
           height="800"
           frameBorder="0"
           title="Agendamento de Consulta Gratuita"
+          loading="lazy"
         />
       </div>
     </div>
