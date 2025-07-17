@@ -14,12 +14,13 @@ import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Send, Smartphone, Globe, Bot, Cog, BarChart3, Headphones } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import FileUpload from "@/components/FileUpload";
+import PhoneInput from "@/components/PhoneInput";
 const serviceSchema = z.object({
   // Seção 1: Informações básicas
   fullName: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
   companyName: z.string().min(2, "Nome da empresa deve ter pelo menos 2 caracteres"),
   email: z.string().email("Email deve ser válido"),
-  phone: z.string().regex(/^[\+]?[0-9\s\-\(\)]+$/, "Telefone deve conter apenas números, espaços, parênteses, hífens e pode começar com +").min(9, "Telefone deve ter pelo menos 9 dígitos"),
+  phone: z.string().regex(/^\+\d{1,4}\d{6,15}$/, "Telefone deve começar com + seguido do código do país e ter formato válido").min(10, "Telefone deve ter pelo menos 10 caracteres"),
   companyDomain: z.string().optional(),
   // Seção 2: Serviços selecionados
   selectedServices: z.array(z.string()).min(1, "Seleccione pelo menos um serviço"),
@@ -202,15 +203,10 @@ export default function ProjectRequest() {
               }) => <FormItem>
                       <FormLabel>Telefone *</FormLabel>
                       <FormControl>
-                        <Input 
-                          placeholder="+351 123 456 789" 
-                          type="tel" 
-                          {...field} 
-                          onChange={(e) => {
-                            // Remove caracteres que não sejam números, espaços, +, -, (, )
-                            const cleaned = e.target.value.replace(/[^0-9\s\+\-\(\)]/g, '');
-                            field.onChange(cleaned);
-                          }}
+                        <PhoneInput 
+                          value={field.value || ""} 
+                          onChange={field.onChange}
+                          placeholder="+351 123 456 789"
                         />
                       </FormControl>
                       <FormMessage />
