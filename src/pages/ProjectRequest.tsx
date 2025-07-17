@@ -202,7 +202,16 @@ export default function ProjectRequest() {
               }) => <FormItem>
                       <FormLabel>Telefone *</FormLabel>
                       <FormControl>
-                        <Input placeholder="+351 123 456 789" type="tel" {...field} />
+                        <Input 
+                          placeholder="+351 123 456 789" 
+                          type="tel" 
+                          {...field} 
+                          onChange={(e) => {
+                            // Remove caracteres que não sejam números, espaços, +, -, (, )
+                            const cleaned = e.target.value.replace(/[^0-9\s\+\-\(\)]/g, '');
+                            field.onChange(cleaned);
+                          }}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>} />
