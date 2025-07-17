@@ -43,6 +43,7 @@ const serviceSchema = z.object({
   
   // Call Center
   supportChannels: z.array(z.string()).optional(),
+  currentSupportMethod: z.string().optional(),
   callCenterObjective: z.string().optional(),
   
   // Automação
@@ -108,6 +109,7 @@ const supportChannelOptions = [
   "Facebook Messenger",
   "E-mail",
   "SMS",
+  "Website",
 ];
 
 const automationOptions = [
@@ -659,15 +661,35 @@ export default function ProjectRequest() {
                     </p>
                   </div>
 
-                  <FormField
-                    control={form.control}
-                    name="supportChannels"
-                    render={() => (
-                      <FormItem>
-                        <FormLabel>Quer atendimento por telefone, WhatsApp/Facebook, e-mail ou SMS?</FormLabel>
-                        <FormDescription className="text-sm text-muted-foreground">
-                          Para montar os canais corretos.
-                        </FormDescription>
+                   <FormField
+                     control={form.control}
+                     name="currentSupportMethod"
+                     render={({ field }) => (
+                       <FormItem>
+                         <FormLabel>Como atende os seus clientes hoje?</FormLabel>
+                         <FormDescription className="text-sm text-muted-foreground">
+                           Para entender a situação atual e melhorar o atendimento.
+                         </FormDescription>
+                         <FormControl>
+                           <Textarea
+                             placeholder="Descreva como faz o atendimento ao cliente atualmente..."
+                             {...field}
+                           />
+                         </FormControl>
+                         <FormMessage />
+                       </FormItem>
+                     )}
+                   />
+
+                   <FormField
+                     control={form.control}
+                     name="supportChannels"
+                     render={() => (
+                       <FormItem>
+                         <FormLabel>Quer atendimento por telefone, WhatsApp/Facebook, e-mail, SMS ou Website?</FormLabel>
+                         <FormDescription className="text-sm text-muted-foreground">
+                           Para montar os canais corretos.
+                         </FormDescription>
                         <div className="space-y-3">
                           {supportChannelOptions.map((channel) => (
                             <FormField
