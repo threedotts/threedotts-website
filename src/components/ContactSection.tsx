@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -315,9 +316,11 @@ export function ContactSection() {
           <p className="text-lg text-primary-foreground/90 mb-8 max-w-2xl mx-auto">
             Dê o primeiro passo rumo à transformação digital. Vamos discutir o seu projecto e criar soluções que geram resultados reais para o seu negócio.
           </p>
-          <Button variant="secondary" size="lg" className="group w-full sm:w-auto px-4 sm:px-6">
-            <span className="truncate">Agende Consulta Gratuita</span>
-            <ArrowRight className="group-hover:translate-x-1 transition-transform ml-2 flex-shrink-0" />
+          <Button variant="secondary" size="lg" className="group w-full sm:w-auto px-4 sm:px-6" asChild>
+            <Link to="/scheduling">
+              <span className="truncate">Agende Consulta Gratuita</span>
+              <ArrowRight className="group-hover:translate-x-1 transition-transform ml-2 flex-shrink-0" />
+            </Link>
           </Button>
         </div>
       </div>

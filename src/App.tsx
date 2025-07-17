@@ -27,6 +27,7 @@ import ProjectRequest from "./pages/ProjectRequest";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
+import Scheduling from "./pages/Scheduling";
 import NotFound from "./pages/NotFound";
 import { ChatWidgetErrorBoundary } from "./components/ChatWidgetErrorBoundary";
 import { SecurityHeaders } from "./components/SecurityHeaders";
@@ -134,6 +135,7 @@ const App = () => {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/service/:serviceId" element={<ServiceDetails />} />
+            <Route path="/scheduling" element={<Scheduling />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
