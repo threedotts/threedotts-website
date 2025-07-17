@@ -344,19 +344,28 @@ export function ContactSection() {
                 <ArrowRight className="group-hover:translate-x-1 transition-transform ml-2 flex-shrink-0" />
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-4xl w-full h-[80vh]">
+            <DialogContent className="max-w-md">
               <DialogHeader>
-                <DialogTitle>Agende sua Consulta Gratuita</DialogTitle>
+                <DialogTitle>Agendar Consulta</DialogTitle>
               </DialogHeader>
-              <div className="w-full h-full min-h-[600px]">
-                <iframe 
-                  src="https://calendar.google.com/calendar/appointments/schedules/AcZssZ0l1MqdSil-lmX5yQmCndkugzIdzLxO1Ut0BcpZ8Fj04LJpRHtOpltpWjB9P7ahbfoze2Q7ZDyl?gv=true" 
-                  style={{ border: 0 }} 
-                  width="100%" 
-                  height="100%"
-                  frameBorder="0"
-                  title="Agendamento de Consulta Gratuita"
-                />
+              <div className="text-center space-y-4">
+                <p className="text-muted-foreground">
+                  Você será redirecionado para o Google Calendar onde poderá escolher o melhor horário para sua consulta gratuita.
+                </p>
+                <Button 
+                  onClick={() => {
+                    window.open(
+                      'https://calendar.google.com/calendar/appointments/schedules/AcZssZ0l1MqdSil-lmX5yQmCndkugzIdzLxO1Ut0BcpZ8Fj04LJpRHtOpltpWjB9P7ahbfoze2Q7ZDyl?gv=true',
+                      '_blank',
+                      'noopener,noreferrer'
+                    );
+                  }}
+                  className="w-full"
+                  variant="default"
+                >
+                  Abrir Calendário
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
               </div>
             </DialogContent>
           </Dialog>
