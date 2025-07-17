@@ -333,38 +333,16 @@ export function ContactSection() {
           <p className="text-lg text-primary-foreground/90 mb-8 max-w-2xl mx-auto">
             Dê o primeiro passo rumo à transformação digital. Vamos discutir o seu projecto e criar soluções que geram resultados reais para o seu negócio.
           </p>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button 
-                variant="secondary" 
-                size="lg" 
-                className="group w-full sm:w-auto px-4 sm:px-6"
-              >
-                <span className="truncate">Agende Consulta Gratuita</span>
-                <ArrowRight className="group-hover:translate-x-1 transition-transform ml-2 flex-shrink-0" />
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>Agendar Consulta</DialogTitle>
-              </DialogHeader>
-              <div className="text-center space-y-4">
-                <p className="text-muted-foreground">
-                  Acesse nossa página de agendamento para escolher o melhor horário para sua consulta gratuita.
-                </p>
-                <Button 
-                  onClick={() => {
-                    window.open('/scheduling', '_blank');
-                  }}
-                  className="w-full"
-                  variant="default"
-                >
-                  Ir para Agendamento
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+          <Link to="/scheduling">
+            <Button 
+              variant="secondary" 
+              size="lg" 
+              className="group w-full sm:w-auto px-4 sm:px-6"
+            >
+              <span className="truncate">Agende Consulta Gratuita</span>
+              <ArrowRight className="group-hover:translate-x-1 transition-transform ml-2 flex-shrink-0" />
+            </Button>
+          </Link>
         </div>
       </div>
     </section>
