@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Send, Smartphone, Globe, Bot, Cog, BarChart3, Headphones } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -293,7 +294,7 @@ export default function ProjectRequest() {
               <CardHeader>
                 <CardTitle>Qual(is) serviço(s) você quer?</CardTitle>
                 <CardDescription>
-                  Pode selecionar múltiplos serviços se necessário.
+                  Selecione um ou mais serviços que precisa para o seu projeto.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -302,42 +303,96 @@ export default function ProjectRequest() {
                   name="selectedServices"
                   render={() => (
                     <FormItem>
-                      <div className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {services.map((service) => (
                           <FormField
                             key={service.id}
                             control={form.control}
                             name="selectedServices"
-                            render={({ field }) => (
-                              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                                <FormControl>
-                                  <Checkbox
-                                    checked={field.value?.includes(service.id)}
-                                    onCheckedChange={(checked) => {
-                                      const currentValue = field.value || [];
-                                      if (checked) {
-                                        field.onChange([...currentValue, service.id]);
-                                      } else {
-                                        field.onChange(
-                                          currentValue.filter((value: string) => value !== service.id)
-                                        );
-                                      }
-                                    }}
-                                  />
-                                </FormControl>
-                                <div className="flex items-start space-x-3">
-                                  <service.icon className="h-5 w-5 text-primary mt-1" />
-                                  <div>
-                                    <FormLabel className="text-base font-medium cursor-pointer">
-                                      {service.title}
-                                    </FormLabel>
-                                    {service.subtitle && (
-                                      <p className="text-sm text-muted-foreground">{service.subtitle}</p>
-                                    )}
-                                  </div>
-                                </div>
-                              </FormItem>
-                            )}
+                            render={({ field }) => {
+                              const isSelected = field.value?.includes(service.id);
+                              return (
+                                <FormItem className="space-y-0">
+                                  <FormControl>
+                                    <div
+                                      className={cn(
+                                        "relative p-6 rounded-lg border-2 cursor-pointer transition-all duration-200 hover:shadow-md group",
+                                        isSelected
+                                          ? "border-primary bg-primary/5 shadow-sm"
+                                          : "border-border hover:border-primary/50"
+                                      )}
+                                      onClick={() => {
+                                        const currentValue = field.value || [];
+                                        if (isSelected) {
+                                          field.onChange(
+                                            currentValue.filter((value: string) => value !== service.id)
+                                          );
+                                        } else {
+                                          field.onChange([...currentValue, service.id]);
+                                        }
+                                      }}
+                                    >
+                                      {/* Checkbox overlay */}
+                                      <div className="absolute top-3 right-3">
+                                        <div
+                                          className={cn(
+                                            "w-5 h-5 rounded border-2 flex items-center justify-center transition-colors",
+                                            isSelected
+                                              ? "bg-primary border-primary text-primary-foreground"
+                                              : "border-muted-foreground group-hover:border-primary"
+                                          )}
+                                        >
+                                          {isSelected && (
+                                            <svg
+                                              className="w-3 h-3"
+                                              fill="currentColor"
+                                              viewBox="0 0 20 20"
+                                            >
+                                              <path
+                                                fillRule="evenodd"
+                                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                clipRule="evenodd"
+                                              />
+                                            </svg>
+                                          )}
+                                        </div>
+                                      </div>
+                                      
+                                      {/* Service content */}
+                                      <div className="flex items-start space-x-4">
+                                        <div
+                                          className={cn(
+                                            "p-3 rounded-lg transition-colors",
+                                            isSelected
+                                              ? "bg-primary text-primary-foreground"
+                                              : "bg-muted group-hover:bg-primary/10"
+                                          )}
+                                        >
+                                          <service.icon className="h-6 w-6" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                          <h3
+                                            className={cn(
+                                              "font-semibold text-base mb-1 transition-colors",
+                                              isSelected
+                                                ? "text-primary"
+                                                : "text-foreground group-hover:text-primary"
+                                            )}
+                                          >
+                                            {service.title}
+                                          </h3>
+                                          {service.subtitle && (
+                                            <p className="text-sm text-muted-foreground">
+                                              {service.subtitle}
+                                            </p>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </FormControl>
+                                </FormItem>
+                              );
+                            }}
                           />
                         ))}
                       </div>
