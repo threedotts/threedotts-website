@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -316,12 +316,29 @@ export function ContactSection() {
           <p className="text-lg text-primary-foreground/90 mb-8 max-w-2xl mx-auto">
             Dê o primeiro passo rumo à transformação digital. Vamos discutir o seu projecto e criar soluções que geram resultados reais para o seu negócio.
           </p>
-          <Button variant="secondary" size="lg" className="group w-full sm:w-auto px-4 sm:px-6" asChild>
-            <Link to="/scheduling">
-              <span className="truncate">Agende Consulta Gratuita</span>
-              <ArrowRight className="group-hover:translate-x-1 transition-transform ml-2 flex-shrink-0" />
-            </Link>
-          </Button>
+          <div id="calendar-scheduling-button" className="inline-block">
+            {/* Google Calendar Appointment Scheduling begin */}
+            <link href="https://calendar.google.com/calendar/scheduling-button-script.css" rel="stylesheet" />
+            <script src="https://calendar.google.com/calendar/scheduling-button-script.js" async></script>
+            <script dangerouslySetInnerHTML={{
+              __html: `
+                (function() {
+                  var target = document.getElementById('calendar-scheduling-button');
+                  window.addEventListener('load', function() {
+                    if (window.calendar && window.calendar.schedulingButton) {
+                      calendar.schedulingButton.load({
+                        url: 'https://calendar.google.com/calendar/appointments/schedules/AcZssZ0l1MqdSil-lmX5yQmCndkugzIdzLxO1Ut0BcpZ8Fj04LJpRHtOpltpWjB9P7ahbfoze2Q7ZDyl?gv=true',
+                        color: '#039BE5',
+                        label: 'Agende Consulta Gratuita',
+                        target,
+                      });
+                    }
+                  });
+                })();
+              `
+            }} />
+            {/* end Google Calendar Appointment Scheduling */}
+          </div>
         </div>
       </div>
     </section>
