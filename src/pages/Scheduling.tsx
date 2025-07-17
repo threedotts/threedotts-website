@@ -30,7 +30,6 @@ const Scheduling = () => {
           height="800"
           frameBorder="0"
           title="Agendamento de Consulta Gratuita"
-          loading="lazy"
         />
       </div>
     </div>
