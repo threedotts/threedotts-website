@@ -15,6 +15,22 @@ import {
   ArrowRight 
 } from "lucide-react";
 
+// Declare window.calendar for TypeScript
+declare global {
+  interface Window {
+    calendar?: {
+      schedulingButton: {
+        load: (config: {
+          url: string;
+          color: string;
+          label: string;
+          target: HTMLElement;
+        }) => void;
+      };
+    };
+  }
+}
+
 const contactInfo = [
   {
     icon: Mail,
@@ -316,29 +332,40 @@ export function ContactSection() {
           <p className="text-lg text-primary-foreground/90 mb-8 max-w-2xl mx-auto">
             Dê o primeiro passo rumo à transformação digital. Vamos discutir o seu projecto e criar soluções que geram resultados reais para o seu negócio.
           </p>
-          <div id="calendar-scheduling-button" className="inline-block">
-            {/* Google Calendar Appointment Scheduling begin */}
-            <link href="https://calendar.google.com/calendar/scheduling-button-script.css" rel="stylesheet" />
-            <script src="https://calendar.google.com/calendar/scheduling-button-script.js" async></script>
-            <script dangerouslySetInnerHTML={{
-              __html: `
-                (function() {
-                  var target = document.getElementById('calendar-scheduling-button');
-                  window.addEventListener('load', function() {
+          <div 
+            id="calendar-scheduling-button" 
+            className="inline-block"
+            ref={(el) => {
+              if (el && typeof window !== 'undefined') {
+                // Load Google Calendar scheduling scripts
+                if (!document.getElementById('calendar-css')) {
+                  const link = document.createElement('link');
+                  link.id = 'calendar-css';
+                  link.href = 'https://calendar.google.com/calendar/scheduling-button-script.css';
+                  link.rel = 'stylesheet';
+                  document.head.appendChild(link);
+                }
+                
+                if (!document.getElementById('calendar-script')) {
+                  const script = document.createElement('script');
+                  script.id = 'calendar-script';
+                  script.src = 'https://calendar.google.com/calendar/scheduling-button-script.js';
+                  script.async = true;
+                  script.onload = () => {
                     if (window.calendar && window.calendar.schedulingButton) {
-                      calendar.schedulingButton.load({
+                      window.calendar.schedulingButton.load({
                         url: 'https://calendar.google.com/calendar/appointments/schedules/AcZssZ0l1MqdSil-lmX5yQmCndkugzIdzLxO1Ut0BcpZ8Fj04LJpRHtOpltpWjB9P7ahbfoze2Q7ZDyl?gv=true',
                         color: '#039BE5',
                         label: 'Agende Consulta Gratuita',
-                        target,
+                        target: el,
                       });
                     }
-                  });
-                })();
-              `
-            }} />
-            {/* end Google Calendar Appointment Scheduling */}
-          </div>
+                  };
+                  document.head.appendChild(script);
+                }
+              }
+            }}
+          ></div>
         </div>
       </div>
     </section>
