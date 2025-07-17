@@ -56,8 +56,21 @@ export default function PhoneInput({ value, onChange, placeholder, className }: 
     const country = countryCodes.find(c => cleanValue.startsWith(c.code));
     
     if (!country) {
+      // Para códigos não reconhecidos, aplicar formatação genérica
       setDetectedCountry(null);
-      return cleanValue;
+      
+      // Extrair código do país (assumindo que pode ter 1-4 dígitos após o +)
+      const codeMatch = cleanValue.match(/^\+(\d{1,4})/);
+      if (!codeMatch) return cleanValue;
+      
+      const countryCode = '+' + codeMatch[1];
+      const numberPart = cleanValue.substring(countryCode.length);
+      
+      // Formatação genérica: código + espaços a cada 3 dígitos
+      if (numberPart.length <= 3) return `${countryCode} ${numberPart}`;
+      if (numberPart.length <= 6) return `${countryCode} ${numberPart.slice(0, 3)} ${numberPart.slice(3)}`;
+      if (numberPart.length <= 9) return `${countryCode} ${numberPart.slice(0, 3)} ${numberPart.slice(3, 6)} ${numberPart.slice(6)}`;
+      return `${countryCode} ${numberPart.slice(0, 3)} ${numberPart.slice(3, 6)} ${numberPart.slice(6, 9)} ${numberPart.slice(9)}`;
     }
 
     setDetectedCountry(country);
@@ -102,7 +115,7 @@ export default function PhoneInput({ value, onChange, placeholder, className }: 
         return cleanValue;
       
       default:
-        // Formatação genérica
+        // Formatação genérica para países conhecidos mas sem formatação específica
         if (numberPart.length <= 3) return `${country.code} ${numberPart}`;
         if (numberPart.length <= 6) return `${country.code} ${numberPart.slice(0, 3)} ${numberPart.slice(3)}`;
         return `${country.code} ${numberPart.slice(0, 3)} ${numberPart.slice(3, 6)} ${numberPart.slice(6)}`;
