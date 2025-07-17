@@ -53,7 +53,12 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error('Google Calendar service account key not configured');
     }
 
-    const credentials = JSON.parse(serviceAccountKey);
+    let credentials;
+    try {
+      credentials = JSON.parse(serviceAccountKey);
+    } catch (parseError) {
+      throw new Error('Invalid Google Calendar service account JSON. Please ensure you have uploaded the complete Service Account JSON file, not just an API key.');
+    }
     const accessToken = await getAccessToken(credentials);
 
     switch (action) {
