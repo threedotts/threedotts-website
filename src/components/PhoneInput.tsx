@@ -36,17 +36,6 @@ export default function PhoneInput({ value, onChange, placeholder, className }: 
   const [displayValue, setDisplayValue] = useState("");
   const [detectedCountry, setDetectedCountry] = useState<CountryCode | null>(null);
 
-  const formatPhoneNumber = (input: string) => {
-    // Remove tudo exceto números e o sinal +
-    const cleaned = input.replace(/[^\d+]/g, '');
-    
-    // Se não começar com +, adiciona
-    if (cleaned && !cleaned.startsWith('+')) {
-      return '+' + cleaned;
-    }
-    
-    return cleaned;
-  };
 
   const getFormattedDisplay = (cleanValue: string) => {
     if (!cleanValue.startsWith('+')) return cleanValue;
@@ -122,30 +111,7 @@ export default function PhoneInput({ value, onChange, placeholder, className }: 
     const input = e.target.value;
     
     // Permitir apenas números e o sinal +
-    let cleaned = input.replace(/[^\d+]/g, '');
-    
-    // Se está vazio ou só tem espaços, forçar começar com +
-    if (cleaned === '' || !cleaned.includes('+')) {
-      onChange('+');
-      return;
-    }
-    
-    // Se tem + mas está no meio ou no final, mover para o início
-    if (cleaned.includes('+')) {
-      const numbers = cleaned.replace(/\+/g, '');
-      cleaned = '+' + numbers;
-    }
-    
-    // Garantir que sempre comece com + e tenha no máximo um +
-    if (!cleaned.startsWith('+')) {
-      cleaned = '+' + cleaned;
-    }
-    
-    // Remover + extras se houver
-    const plusCount = (cleaned.match(/\+/g) || []).length;
-    if (plusCount > 1) {
-      cleaned = '+' + cleaned.replace(/\+/g, '');
-    }
+    const cleaned = input.replace(/[^\d+]/g, '');
     
     onChange(cleaned);
   };
