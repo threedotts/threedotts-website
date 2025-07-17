@@ -228,7 +228,7 @@ const Auth = () => {
           <CardHeader className="text-center">
             <CardTitle className="text-2xl font-bold">Threedotts Platform</CardTitle>
             <CardDescription className="text-muted-foreground">
-              Acesso exclusivo para clientes de <strong>Call Center</strong> e <strong>Automação</strong>
+              Acesso exclusivo para clientes de <strong>Call Center</strong>
             </CardDescription>
             
             {/* Security Status Indicator */}
@@ -353,7 +353,7 @@ const Auth = () => {
                 <div className="bg-muted/50 p-4 rounded-lg mb-4">
                   <p className="text-sm text-muted-foreground text-center">
                     <strong>Atenção:</strong> Esta área é exclusiva para clientes dos serviços de 
-                    <strong> Call Center</strong> e <strong>Automação</strong> que precisam acessar 
+                    <strong> Call Center</strong> que precisam acessar 
                     o dashboard para gerenciar seus serviços.
                   </p>
                 </div>
