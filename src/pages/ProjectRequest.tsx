@@ -6,135 +6,133 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Send, Smartphone, Globe, Bot, Cog } from "lucide-react";
+import { ArrowLeft, Send, Smartphone, Globe, Bot, Cog, BarChart3, Headphones } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const serviceSchema = z.object({
-  // Informações básicas
+  // Seção 1: Informações básicas
   fullName: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
-  email: z.string().email("Email inválido"),
-  phone: z.string().min(9, "Telefone deve ter pelo menos 9 dígitos"),
-  company: z.string().optional(),
+  companyName: z.string().min(2, "Nome da empresa deve ter pelo menos 2 caracteres"),
+  contact: z.string().min(5, "Contacto deve ter pelo menos 5 caracteres"),
   
-  // Tipo de serviço
-  serviceType: z.enum(["mobile-app", "web-app", "ai-agent", "automation"], {
-    required_error: "Selecione um tipo de serviço",
-  }),
+  // Seção 2: Serviços selecionados
+  selectedServices: z.array(z.string()).min(1, "Selecione pelo menos um serviço"),
   
-  // Detalhes do projeto
-  projectTitle: z.string().min(5, "Título deve ter pelo menos 5 caracteres"),
-  projectDescription: z.string().min(50, "Descrição deve ter pelo menos 50 caracteres"),
+  // Seção 3: Perguntas específicas por serviço
+  // Aplicações Móveis
+  appPurpose: z.string().optional(),
+  needsUserAccount: z.enum(["sim", "nao", "nao-sei"]).optional(),
+  needsOfflineMode: z.enum(["sim", "nao", "nao-sei"]).optional(),
+  hasDesignIdentity: z.enum(["sim", "nao", "em-desenvolvimento"]).optional(),
   
-  // Orçamento
-  budget: z.enum(["5k-15k", "15k-30k", "30k-50k", "50k+", "to-discuss"], {
-    required_error: "Selecione uma faixa de orçamento",
-  }),
+  // Websites
+  websiteType: z.string().optional(),
+  websitePages: z.string().optional(),
+  needsLoginPayments: z.enum(["login", "pagamentos", "ambos", "nenhum"]).optional(),
+  hasDesignIdeasWeb: z.enum(["sim", "nao", "em-desenvolvimento"]).optional(),
   
-  // Prazo
-  timeline: z.enum(["1-month", "2-3-months", "3-6-months", "6+ months", "flexible"], {
-    required_error: "Selecione um prazo",
-  }),
+  // Call Center
+  supportChannels: z.array(z.string()).optional(),
+  teamSize: z.string().optional(),
+  needsRecording: z.enum(["sim", "nao", "nao-sei"]).optional(),
   
-  // Funcionalidades específicas por tipo de serviço
-  mobileFeatures: z.array(z.string()).optional(),
-  webFeatures: z.array(z.string()).optional(),
-  aiFeatures: z.array(z.string()).optional(),
-  automationFeatures: z.array(z.string()).optional(),
+  // Automação
+  manualTasks: z.string().optional(),
+  automationNeeds: z.array(z.string()).optional(),
   
-  // Integrações necessárias
-  integrations: z.array(z.string()).optional(),
+  // Soluções Empresariais
+  businessProblem: z.string().optional(),
+  solutionIdea: z.string().optional(),
+  userScope: z.enum(["individual", "equipe", "empresa"]).optional(),
   
-  // Informações adicionais
-  hasExistingSystem: z.boolean().default(false),
-  existingSystemDetails: z.string().optional(),
-  targetAudience: z.string().optional(),
-  specialRequirements: z.string().optional(),
+  // Inteligência de Dados
+  dataInsights: z.string().optional(),
+  currentDataSystems: z.string().optional(),
+  needsPredictions: z.enum(["sim", "nao", "nao-sei"]).optional(),
   
-  // Preferências de comunicação
-  preferredContact: z.enum(["email", "phone", "whatsapp", "video-call"], {
-    required_error: "Selecione forma de contacto preferida",
-  }),
+  // Seção 4: Integração entre serviços
+  needsIntegration: z.enum(["sim", "nao", "nao-sei"]).optional(),
+  integrationDetails: z.string().optional(),
+  
+  // Seção 5: Finalização
+  additionalInfo: z.string().optional(),
 });
 
 type ServiceFormData = z.infer<typeof serviceSchema>;
 
-const serviceOptions = [
-  { value: "mobile-app", label: "Aplicação Móvel", icon: Smartphone, description: "Apps iOS e Android" },
-  { value: "web-app", label: "Aplicação Web", icon: Globe, description: "Websites e aplicações web" },
-  { value: "ai-agent", label: "Agente de IA", icon: Bot, description: "Chatbots e assistentes inteligentes" },
-  { value: "automation", label: "Automação", icon: Cog, description: "Soluções de automação de processos" },
+const services = [
+  {
+    id: "mobile-apps",
+    title: "Aplicações Móveis para o Seu Negócio",
+    subtitle: "(Android e iPhone)",
+    icon: Smartphone,
+  },
+  {
+    id: "websites",
+    title: "Websites Profissionais e Sistemas Online",
+    subtitle: "(ex: lojas, portais, reservas)",
+    icon: Globe,
+  },
+  {
+    id: "call-center",
+    title: "Call Center e Atendimento ao Cliente com IA",
+    subtitle: "",
+    icon: Headphones,
+  },
+  {
+    id: "automation",
+    title: "Poupe Tempo com Automação IA",
+    subtitle: "",
+    icon: Bot,
+  },
+  {
+    id: "business-solutions",
+    title: "Soluções Empresariais Personalizadas",
+    subtitle: "",
+    icon: Cog,
+  },
+  {
+    id: "data-intelligence",
+    title: "Inteligência de Dados e Insights Empresariais",
+    subtitle: "",
+    icon: BarChart3,
+  },
 ];
 
-const mobileFeatureOptions = [
-  "Autenticação de utilizadores",
-  "Notificações push",
-  "Chat em tempo real",
-  "Pagamentos integrados",
-  "Geolocalização",
-  "Câmara/Galeria",
-  "Modo offline",
-  "Integração com redes sociais",
-  "Analytics",
-  "Multi-idioma",
+const supportChannelOptions = [
+  "Telefone",
+  "WhatsApp",
+  "Facebook Messenger",
+  "E-mail",
+  "SMS",
 ];
 
-const webFeatureOptions = [
-  "Sistema de gestão de conteúdo",
-  "E-commerce",
-  "Dashboard administrativo",
-  "Sistema de utilizadores",
-  "API REST",
-  "Base de dados",
-  "Sistema de pagamentos",
-  "Chat ao vivo",
-  "SEO otimizado",
-  "Responsivo",
-];
-
-const aiFeatureOptions = [
-  "Processamento de linguagem natural",
-  "Reconhecimento de voz",
-  "Análise de sentimentos",
-  "Integração com OpenAI/ChatGPT",
-  "Aprendizagem automática",
-  "Visão computacional",
-  "Recomendações personalizadas",
-  "Análise preditiva",
-];
-
-const automationFeatureOptions = [
-  "Automação de emails",
-  "Integração com CRM",
-  "Automação de redes sociais",
-  "Processamento de documentos",
-  "Integração com APIs externas",
-  "Workflows automatizados",
+const automationOptions = [
   "Relatórios automáticos",
-  "Sincronização de dados",
+  "Leitura de documentos",
+  "Gerenciamento de estoque",
+  "Outros",
 ];
 
 export default function ProjectRequest() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [selectedService, setSelectedService] = useState<string>("");
 
   const form = useForm<ServiceFormData>({
     resolver: zodResolver(serviceSchema),
     defaultValues: {
-      hasExistingSystem: false,
-      mobileFeatures: [],
-      webFeatures: [],
-      aiFeatures: [],
-      automationFeatures: [],
-      integrations: [],
+      selectedServices: [],
+      supportChannels: [],
+      automationNeeds: [],
     },
   });
+
+  const selectedServices = form.watch("selectedServices") || [];
+  const hasMultipleServices = selectedServices.length > 1;
 
   const onSubmit = async (data: ServiceFormData) => {
     try {
@@ -145,7 +143,7 @@ export default function ProjectRequest() {
         description: "Entraremos em contacto consigo em breve para discutir o seu projeto.",
       });
       
-      // Aqui você integraria com o backend/Supabase para salvar os dados
+      // Aqui integrar com Supabase para salvar os dados
       
     } catch (error) {
       toast({
@@ -156,20 +154,31 @@ export default function ProjectRequest() {
     }
   };
 
-  const getFeatureOptions = () => {
-    switch (selectedService) {
-      case "mobile-app":
-        return { options: mobileFeatureOptions, field: "mobileFeatures" };
-      case "web-app":
-        return { options: webFeatureOptions, field: "webFeatures" };
-      case "ai-agent":
-        return { options: aiFeatureOptions, field: "aiFeatures" };
-      case "automation":
-        return { options: automationFeatureOptions, field: "automationFeatures" };
-      default:
-        return { options: [], field: "" };
-    }
-  };
+  const renderRadioGroup = (
+    field: any,
+    options: { value: string; label: string }[]
+  ) => (
+    <div className="space-y-2">
+      {options.map((option) => (
+        <div key={option.value} className="flex items-center space-x-2">
+          <input
+            type="radio"
+            id={`${field.name}-${option.value}`}
+            value={option.value}
+            checked={field.value === option.value}
+            onChange={() => field.onChange(option.value)}
+            className="h-4 w-4 text-primary border-gray-300 focus:ring-primary"
+          />
+          <Label
+            htmlFor={`${field.name}-${option.value}`}
+            className="text-sm font-normal cursor-pointer"
+          >
+            {option.label}
+          </Label>
+        </div>
+      ))}
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-background py-8">
@@ -189,129 +198,128 @@ export default function ProjectRequest() {
             Solicitar Novo Projeto
           </h1>
           <p className="text-muted-foreground text-lg">
-            Preencha o formulário abaixo com os detalhes do seu projeto para recebermos uma proposta personalizada.
+            Responda às perguntas abaixo para recebermos uma proposta personalizada para o seu projeto.
           </p>
         </div>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            {/* Informações Pessoais */}
+            
+            {/* Seção 1: Informações Básicas */}
             <Card>
               <CardHeader>
-                <CardTitle>Informações de Contacto</CardTitle>
+                <CardTitle>Informações Básicas</CardTitle>
                 <CardDescription>
-                  As suas informações de contacto para podermos responder à sua solicitação.
+                  Estas informações nos ajudam a manter tudo organizado e entrar em contacto.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="fullName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Nome Completo *</FormLabel>
-                        <FormControl>
-                          <Input placeholder="O seu nome completo" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+              <CardContent className="space-y-6">
+                <FormField
+                  control={form.control}
+                  name="fullName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Qual é o seu nome?</FormLabel>
+                      <FormDescription className="text-sm text-muted-foreground">
+                        Para sabermos quem está preenchendo.
+                      </FormDescription>
+                      <FormControl>
+                        <Input placeholder="O seu nome completo" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email *</FormLabel>
-                        <FormControl>
-                          <Input type="email" placeholder="seuemail@exemplo.com" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                <FormField
+                  control={form.control}
+                  name="companyName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Qual é o nome da sua empresa ou projeto?</FormLabel>
+                      <FormDescription className="text-sm text-muted-foreground">
+                        Para manter tudo organizado.
+                      </FormDescription>
+                      <FormControl>
+                        <Input placeholder="Nome da empresa ou projeto" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="phone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Telefone *</FormLabel>
-                        <FormControl>
-                          <Input placeholder="+351 123 456 789" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="company"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Empresa (Opcional)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Nome da sua empresa" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                <FormField
+                  control={form.control}
+                  name="contact"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Qual o melhor contacto? (e-mail ou telefone)</FormLabel>
+                      <FormDescription className="text-sm text-muted-foreground">
+                        Para responder depois.
+                      </FormDescription>
+                      <FormControl>
+                        <Input placeholder="email@exemplo.com ou +351 123 456 789" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </CardContent>
             </Card>
 
-            {/* Tipo de Serviço */}
+            {/* Seção 2: Seleção de Serviços */}
             <Card>
               <CardHeader>
-                <CardTitle>Tipo de Serviço</CardTitle>
+                <CardTitle>Qual(is) serviço(s) você quer?</CardTitle>
                 <CardDescription>
-                  Selecione o tipo de serviço que melhor se adequa ao seu projeto.
+                  Pode selecionar múltiplos serviços se necessário.
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <FormField
                   control={form.control}
-                  name="serviceType"
-                  render={({ field }) => (
+                  name="selectedServices"
+                  render={() => (
                     <FormItem>
-                      <FormControl>
-                        <RadioGroup
-                          onValueChange={(value) => {
-                            field.onChange(value);
-                            setSelectedService(value);
-                          }}
-                          value={field.value}
-                          className="grid grid-cols-1 md:grid-cols-2 gap-4"
-                        >
-                          {serviceOptions.map((service) => (
-                            <div key={service.value}>
-                              <RadioGroupItem
-                                value={service.value}
-                                id={service.value}
-                                className="peer sr-only"
-                              />
-                              <Label
-                                htmlFor={service.value}
-                                className="flex items-center space-x-3 border rounded-lg p-4 cursor-pointer hover:bg-muted/50 peer-checked:ring-2 peer-checked:ring-primary peer-checked:bg-primary/5"
-                              >
-                                <service.icon className="h-6 w-6 text-primary" />
-                                <div>
-                                  <div className="font-medium">{service.label}</div>
-                                  <div className="text-sm text-muted-foreground">
-                                    {service.description}
+                      <div className="space-y-4">
+                        {services.map((service) => (
+                          <FormField
+                            key={service.id}
+                            control={form.control}
+                            name="selectedServices"
+                            render={({ field }) => (
+                              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value?.includes(service.id)}
+                                    onCheckedChange={(checked) => {
+                                      const currentValue = field.value || [];
+                                      if (checked) {
+                                        field.onChange([...currentValue, service.id]);
+                                      } else {
+                                        field.onChange(
+                                          currentValue.filter((value: string) => value !== service.id)
+                                        );
+                                      }
+                                    }}
+                                  />
+                                </FormControl>
+                                <div className="flex items-start space-x-3">
+                                  <service.icon className="h-5 w-5 text-primary mt-1" />
+                                  <div>
+                                    <FormLabel className="text-base font-medium cursor-pointer">
+                                      {service.title}
+                                    </FormLabel>
+                                    {service.subtitle && (
+                                      <p className="text-sm text-muted-foreground">{service.subtitle}</p>
+                                    )}
                                   </div>
                                 </div>
-                              </Label>
-                            </div>
-                          ))}
-                        </RadioGroup>
-                      </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        ))}
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -319,207 +327,30 @@ export default function ProjectRequest() {
               </CardContent>
             </Card>
 
-            {/* Detalhes do Projeto */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Detalhes do Projeto</CardTitle>
-                <CardDescription>
-                  Descreva o seu projeto em detalhe para podermos compreender melhor as suas necessidades.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="projectTitle"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Título do Projeto *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Ex: App de delivery de comida" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="projectDescription"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Descrição Detalhada *</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Descreva o seu projeto, objetivos, público-alvo e qualquer informação relevante..."
-                          className="min-h-[120px]"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Mínimo 50 caracteres. Quanto mais detalhe, melhor poderemos ajudar.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-            </Card>
-
-            {/* Funcionalidades Específicas */}
-            {selectedService && (
+            {/* Seção 3: Perguntas Específicas por Serviço */}
+            
+            {/* Aplicações Móveis */}
+            {selectedServices.includes("mobile-apps") && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Funcionalidades Desejadas</CardTitle>
+                  <CardTitle>Aplicações Móveis para o Seu Negócio</CardTitle>
                   <CardDescription>
-                    Selecione as funcionalidades que gostaria de incluir no seu projeto.
+                    Algumas perguntas específicas sobre a sua aplicação móvel.
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-6">
                   <FormField
                     control={form.control}
-                    name={getFeatureOptions().field as any}
-                    render={() => (
-                      <FormItem>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {getFeatureOptions().options.map((feature) => (
-                            <FormField
-                              key={feature}
-                              control={form.control}
-                              name={getFeatureOptions().field as any}
-                              render={({ field }) => (
-                                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                                  <FormControl>
-                                    <Checkbox
-                                      checked={field.value?.includes(feature)}
-                                      onCheckedChange={(checked) => {
-                                        const currentValue = field.value || [];
-                                        if (checked) {
-                                          field.onChange([...currentValue, feature]);
-                                        } else {
-                                          field.onChange(
-                                            currentValue.filter((value: string) => value !== feature)
-                                          );
-                                        }
-                                      }}
-                                    />
-                                  </FormControl>
-                                  <FormLabel className="text-sm font-normal cursor-pointer">
-                                    {feature}
-                                  </FormLabel>
-                                </FormItem>
-                              )}
-                            />
-                          ))}
-                        </div>
-                      </FormItem>
-                    )}
-                  />
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Orçamento e Prazo */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Orçamento e Prazo</CardTitle>
-                <CardDescription>
-                  Indique o seu orçamento disponível e prazo desejado para o projeto.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="budget"
+                    name="appPurpose"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Orçamento Disponível *</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione uma faixa" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="5k-15k">€5.000 - €15.000</SelectItem>
-                            <SelectItem value="15k-30k">€15.000 - €30.000</SelectItem>
-                            <SelectItem value="30k-50k">€30.000 - €50.000</SelectItem>
-                            <SelectItem value="50k+">€50.000+</SelectItem>
-                            <SelectItem value="to-discuss">A discutir</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="timeline"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Prazo Desejado *</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione um prazo" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="1-month">1 mês</SelectItem>
-                            <SelectItem value="2-3-months">2-3 meses</SelectItem>
-                            <SelectItem value="3-6-months">3-6 meses</SelectItem>
-                            <SelectItem value="6+ months">6+ meses</SelectItem>
-                            <SelectItem value="flexible">Flexível</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Informações Adicionais */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Informações Adicionais</CardTitle>
-                <CardDescription>
-                  Forneça informações adicionais que possam ser relevantes para o projeto.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="hasExistingSystem"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel>
-                          Tenho um sistema existente que precisa de integração
-                        </FormLabel>
-                      </div>
-                    </FormItem>
-                  )}
-                />
-
-                {form.watch("hasExistingSystem") && (
-                  <FormField
-                    control={form.control}
-                    name="existingSystemDetails"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Detalhes do Sistema Existente</FormLabel>
+                        <FormLabel>O que você quer que o app faça para o usuário?</FormLabel>
+                        <FormDescription className="text-sm text-muted-foreground">
+                          Ex.: pedir produtos, acompanhar compras — para entendermos o objetivo.
+                        </FormDescription>
                         <FormControl>
                           <Textarea
-                            placeholder="Descreva o sistema existente, tecnologias utilizadas, etc..."
+                            placeholder="Descreva as principais funcionalidades..."
                             {...field}
                           />
                         </FormControl>
@@ -527,61 +358,570 @@ export default function ProjectRequest() {
                       </FormItem>
                     )}
                   />
-                )}
 
+                  <FormField
+                    control={form.control}
+                    name="needsUserAccount"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Os usuários vão precisar criar conta?</FormLabel>
+                        <FormDescription className="text-sm text-muted-foreground">
+                          Para saber se o app precisa de login.
+                        </FormDescription>
+                        <FormControl>
+                          {renderRadioGroup(field, [
+                            { value: "sim", label: "Sim, vão precisar de conta" },
+                            { value: "nao", label: "Não, pode ser usado sem conta" },
+                            { value: "nao-sei", label: "Não sei ainda" }
+                          ])}
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="needsOfflineMode"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Quer que o app funcione mesmo sem internet?</FormLabel>
+                        <FormDescription className="text-sm text-muted-foreground">
+                          Para planejar uso offline.
+                        </FormDescription>
+                        <FormControl>
+                          {renderRadioGroup(field, [
+                            { value: "sim", label: "Sim, precisa funcionar offline" },
+                            { value: "nao", label: "Não, só precisa funcionar online" },
+                            { value: "nao-sei", label: "Não sei ainda" }
+                          ])}
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="hasDesignIdentity"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Você já tem logo, cores ou estilo definido?</FormLabel>
+                        <FormDescription className="text-sm text-muted-foreground">
+                          Para combinar o visual com sua marca.
+                        </FormDescription>
+                        <FormControl>
+                          {renderRadioGroup(field, [
+                            { value: "sim", label: "Sim, já tenho tudo definido" },
+                            { value: "em-desenvolvimento", label: "Tenho algumas ideias, mas não está completo" },
+                            { value: "nao", label: "Não, preciso de ajuda com o design" }
+                          ])}
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Websites */}
+            {selectedServices.includes("websites") && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Websites Profissionais e Sistemas Online</CardTitle>
+                  <CardDescription>
+                    Vamos entender melhor o seu projeto web.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <FormField
+                    control={form.control}
+                    name="websiteType"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Que tipo de site você quer?</FormLabel>
+                        <FormDescription className="text-sm text-muted-foreground">
+                          Ex.: site informativo, loja online, sistema de reservas, portal de clientes — para definir o escopo.
+                        </FormDescription>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Descreva o tipo de website..."
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="websitePages"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Quais páginas você precisa?</FormLabel>
+                        <FormDescription className="text-sm text-muted-foreground">
+                          Ex.: Início, Sobre, Contacto, Loja — para planejar o conteúdo.
+                        </FormDescription>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Liste as páginas necessárias..."
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="needsLoginPayments"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Vai ter cadastro, login ou pagamentos no site?</FormLabel>
+                        <FormDescription className="text-sm text-muted-foreground">
+                          Para saber se precisamos dessas funções.
+                        </FormDescription>
+                        <FormControl>
+                          {renderRadioGroup(field, [
+                            { value: "login", label: "Só login/cadastro" },
+                            { value: "pagamentos", label: "Só pagamentos" },
+                            { value: "ambos", label: "Login e pagamentos" },
+                            { value: "nenhum", label: "Nenhum dos dois" }
+                          ])}
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="hasDesignIdeasWeb"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Você já tem logo, cores ou ideias de design?</FormLabel>
+                        <FormDescription className="text-sm text-muted-foreground">
+                          Para manter identidade visual.
+                        </FormDescription>
+                        <FormControl>
+                          {renderRadioGroup(field, [
+                            { value: "sim", label: "Sim, já tenho tudo definido" },
+                            { value: "em-desenvolvimento", label: "Tenho algumas ideias" },
+                            { value: "nao", label: "Não, preciso de ajuda" }
+                          ])}
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Call Center */}
+            {selectedServices.includes("call-center") && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Call Center e Atendimento ao Cliente com IA</CardTitle>
+                  <CardDescription>
+                    Vamos configurar o melhor atendimento para o seu negócio.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <FormField
+                    control={form.control}
+                    name="supportChannels"
+                    render={() => (
+                      <FormItem>
+                        <FormLabel>Quer atendimento por telefone, WhatsApp/Facebook, e-mail ou SMS?</FormLabel>
+                        <FormDescription className="text-sm text-muted-foreground">
+                          Para montar os canais corretos.
+                        </FormDescription>
+                        <div className="space-y-2">
+                          {supportChannelOptions.map((channel) => (
+                            <FormField
+                              key={channel}
+                              control={form.control}
+                              name="supportChannels"
+                              render={({ field }) => (
+                                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                                  <FormControl>
+                                    <Checkbox
+                                      checked={field.value?.includes(channel)}
+                                      onCheckedChange={(checked) => {
+                                        const currentValue = field.value || [];
+                                        if (checked) {
+                                          field.onChange([...currentValue, channel]);
+                                        } else {
+                                          field.onChange(
+                                            currentValue.filter((value: string) => value !== channel)
+                                          );
+                                        }
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <FormLabel className="text-sm font-normal cursor-pointer">
+                                    {channel}
+                                  </FormLabel>
+                                </FormItem>
+                              )}
+                            />
+                          ))}
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="teamSize"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Quantas pessoas vão usar esse serviço?</FormLabel>
+                        <FormDescription className="text-sm text-muted-foreground">
+                          Para dimensionar o plano.
+                        </FormDescription>
+                        <FormControl>
+                          <Input placeholder="Ex: 5-10 pessoas, 50+ pessoas..." {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="needsRecording"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Quer gravar ou resumir as chamadas/mensagens?</FormLabel>
+                        <FormDescription className="text-sm text-muted-foreground">
+                          Para incluir histórico ou relatórios.
+                        </FormDescription>
+                        <FormControl>
+                          {renderRadioGroup(field, [
+                            { value: "sim", label: "Sim, quero gravação e relatórios" },
+                            { value: "nao", label: "Não preciso" },
+                            { value: "nao-sei", label: "Não sei ainda" }
+                          ])}
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Automação */}
+            {selectedServices.includes("automation") && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Poupe Tempo com Automação IA</CardTitle>
+                  <CardDescription>
+                    Vamos identificar onde você pode economizar tempo.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <FormField
+                    control={form.control}
+                    name="manualTasks"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Quais tarefas manuais você faz hoje e quer automatizar?</FormLabel>
+                        <FormDescription className="text-sm text-muted-foreground">
+                          Para saber onde economizar tempo.
+                        </FormDescription>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Descreva as tarefas que consome muito tempo..."
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="automationNeeds"
+                    render={() => (
+                      <FormItem>
+                        <FormLabel>Você gostaria de relatórios automáticos, leitura de documentos ou gerenciamento de estoque?</FormLabel>
+                        <FormDescription className="text-sm text-muted-foreground">
+                          Para entendermos a automação necessária.
+                        </FormDescription>
+                        <div className="space-y-2">
+                          {automationOptions.map((option) => (
+                            <FormField
+                              key={option}
+                              control={form.control}
+                              name="automationNeeds"
+                              render={({ field }) => (
+                                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                                  <FormControl>
+                                    <Checkbox
+                                      checked={field.value?.includes(option)}
+                                      onCheckedChange={(checked) => {
+                                        const currentValue = field.value || [];
+                                        if (checked) {
+                                          field.onChange([...currentValue, option]);
+                                        } else {
+                                          field.onChange(
+                                            currentValue.filter((value: string) => value !== option)
+                                          );
+                                        }
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <FormLabel className="text-sm font-normal cursor-pointer">
+                                    {option}
+                                  </FormLabel>
+                                </FormItem>
+                              )}
+                            />
+                          ))}
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Soluções Empresariais */}
+            {selectedServices.includes("business-solutions") && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Soluções Empresariais Personalizadas</CardTitle>
+                  <CardDescription>
+                    Vamos entender o problema que você quer resolver.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <FormField
+                    control={form.control}
+                    name="businessProblem"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Que problema específico você quer resolver com esse software?</FormLabel>
+                        <FormDescription className="text-sm text-muted-foreground">
+                          Para entender seu objetivo.
+                        </FormDescription>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Descreva o problema ou desafio..."
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="solutionIdea"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tem alguma ideia ou exemplo de como quer que funcione?</FormLabel>
+                        <FormDescription className="text-sm text-muted-foreground">
+                          Para visualizar sua visão.
+                        </FormDescription>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Descreva sua ideia ou cite exemplos..."
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="userScope"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Vai ser usado por várias pessoas ou só por você/sua equipe?</FormLabel>
+                        <FormDescription className="text-sm text-muted-foreground">
+                          Para planejarmos o uso.
+                        </FormDescription>
+                        <FormControl>
+                          {renderRadioGroup(field, [
+                            { value: "individual", label: "Só eu ou poucas pessoas" },
+                            { value: "equipe", label: "Minha equipe (10-50 pessoas)" },
+                            { value: "empresa", label: "Toda a empresa (50+ pessoas)" }
+                          ])}
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Inteligência de Dados */}
+            {selectedServices.includes("data-intelligence") && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Inteligência de Dados e Insights Empresariais</CardTitle>
+                  <CardDescription>
+                    Vamos entender que tipo de análise você precisa.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <FormField
+                    control={form.control}
+                    name="dataInsights"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Que tipo de informação você quer ver?</FormLabel>
+                        <FormDescription className="text-sm text-muted-foreground">
+                          Ex.: vendas, comportamento dos clientes, desempenho — para direcionar a análise.
+                        </FormDescription>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Descreva que dados e insights precisa..."
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="currentDataSystems"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Já coleta dados ou usa algum sistema hoje?</FormLabel>
+                        <FormDescription className="text-sm text-muted-foreground">
+                          Para saber de onde começamos.
+                        </FormDescription>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Descreva os sistemas e dados que já tem..."
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="needsPredictions"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Quer previsões ou relatórios automáticos?</FormLabel>
+                        <FormDescription className="text-sm text-muted-foreground">
+                          Para montar painéis úteis.
+                        </FormDescription>
+                        <FormControl>
+                          {renderRadioGroup(field, [
+                            { value: "sim", label: "Sim, quero previsões e relatórios automáticos" },
+                            { value: "nao", label: "Não, só análise dos dados atuais" },
+                            { value: "nao-sei", label: "Não sei ainda" }
+                          ])}
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Seção 4: Integração entre serviços */}
+            {hasMultipleServices && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Integração entre Serviços</CardTitle>
+                  <CardDescription>
+                    Como você selecionou múltiplos serviços, vamos ver se eles devem trabalhar juntos.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <FormField
+                    control={form.control}
+                    name="needsIntegration"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Você quer que esses serviços funcionem juntos (mesmo login, dados integrados)?</FormLabel>
+                        <FormDescription className="text-sm text-muted-foreground">
+                          Para planejar integração.
+                        </FormDescription>
+                        <FormControl>
+                          {renderRadioGroup(field, [
+                            { value: "sim", label: "Sim, quero que funcionem integrados" },
+                            { value: "nao", label: "Não, podem ser separados" },
+                            { value: "nao-sei", label: "Não sei ainda" }
+                          ])}
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="integrationDetails"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Existe alguma funcionalidade que precisa acontecer em conjunto entre eles?</FormLabel>
+                        <FormDescription className="text-sm text-muted-foreground">
+                          Como sincronização ou relatórios cruzados.
+                        </FormDescription>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Descreva como os serviços devem trabalhar juntos..."
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Seção 5: Finalização */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Finalização e Extras</CardTitle>
+                <CardDescription>
+                  Últimas informações para completarmos o seu pedido.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
                 <FormField
                   control={form.control}
-                  name="targetAudience"
+                  name="additionalInfo"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Público-Alvo</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Ex: Empresas de 50-200 funcionários"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="specialRequirements"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Requisitos Especiais</FormLabel>
+                      <FormLabel>Tem mais algo que gostaria de nos falar sobre seu projeto?</FormLabel>
+                      <FormDescription className="text-sm text-muted-foreground">
+                        Para capturarmos tudo. Se quiser, pode enviar arquivos: logo, rascunhos, exemplos, planilhas, imagens...
+                      </FormDescription>
                       <FormControl>
                         <Textarea
-                          placeholder="Regulamentações específicas, certificações necessárias, etc..."
+                          placeholder="Qualquer informação adicional, ideias, dúvidas ou comentários..."
+                          className="min-h-[120px]"
                           {...field}
                         />
                       </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="preferredContact"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Forma de Contacto Preferida *</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="email">Email</SelectItem>
-                          <SelectItem value="phone">Telefone</SelectItem>
-                          <SelectItem value="whatsapp">WhatsApp</SelectItem>
-                          <SelectItem value="video-call">Videochamada</SelectItem>
-                        </SelectContent>
-                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
