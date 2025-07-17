@@ -24,6 +24,27 @@ const countryCodes: CountryCode[] = [
   { code: "+41", flag: "🇨🇭", pattern: /^\+41(\d{9})$/, format: "+41 $1", placeholder: "+41 123 456 789" },
   { code: "+43", flag: "🇦🇹", pattern: /^\+43(\d{10})$/, format: "+43 $1", placeholder: "+43 123 456 7890" },
   { code: "+32", flag: "🇧🇪", pattern: /^\+32(\d{8,9})$/, format: "+32 $1", placeholder: "+32 123 45 67 89" },
+  { code: "+86", flag: "🇨🇳", pattern: /^\+86(\d{11})$/, format: "+86 $1", placeholder: "+86 138 0013 8000" },
+  { code: "+91", flag: "🇮🇳", pattern: /^\+91(\d{10})$/, format: "+91 $1", placeholder: "+91 98765 43210" },
+  { code: "+81", flag: "🇯🇵", pattern: /^\+81(\d{10})$/, format: "+81 $1", placeholder: "+81 90 1234 5678" },
+  { code: "+82", flag: "🇰🇷", pattern: /^\+82(\d{9,10})$/, format: "+82 $1", placeholder: "+82 10 1234 5678" },
+  { code: "+7", flag: "🇷🇺", pattern: /^\+7(\d{10})$/, format: "+7 $1", placeholder: "+7 921 123 45 67" },
+  { code: "+61", flag: "🇦🇺", pattern: /^\+61(\d{9})$/, format: "+61 $1", placeholder: "+61 412 345 678" },
+  { code: "+64", flag: "🇳🇿", pattern: /^\+64(\d{8,9})$/, format: "+64 $1", placeholder: "+64 21 123 4567" },
+  { code: "+27", flag: "🇿🇦", pattern: /^\+27(\d{9})$/, format: "+27 $1", placeholder: "+27 82 123 4567" },
+  { code: "+52", flag: "🇲🇽", pattern: /^\+52(\d{10})$/, format: "+52 $1", placeholder: "+52 55 1234 5678" },
+  { code: "+54", flag: "🇦🇷", pattern: /^\+54(\d{10})$/, format: "+54 $1", placeholder: "+54 11 1234 5678" },
+  { code: "+56", flag: "🇨🇱", pattern: /^\+56(\d{8,9})$/, format: "+56 $1", placeholder: "+56 9 8765 4321" },
+  { code: "+57", flag: "🇨🇴", pattern: /^\+57(\d{10})$/, format: "+57 $1", placeholder: "+57 321 123 4567" },
+  { code: "+51", flag: "🇵🇪", pattern: /^\+51(\d{9})$/, format: "+51 $1", placeholder: "+51 987 654 321" },
+  { code: "+58", flag: "🇻🇪", pattern: /^\+58(\d{10})$/, format: "+58 $1", placeholder: "+58 412 123 4567" },
+  { code: "+503", flag: "🇸🇻", pattern: /^\+503(\d{8})$/, format: "+503 $1", placeholder: "+503 7012 3456" },
+  { code: "+506", flag: "🇨🇷", pattern: /^\+506(\d{8})$/, format: "+506 $1", placeholder: "+506 8712 3456" },
+  { code: "+507", flag: "🇵🇦", pattern: /^\+507(\d{8})$/, format: "+507 $1", placeholder: "+507 6123 4567" },
+  { code: "+504", flag: "🇭🇳", pattern: /^\+504(\d{8})$/, format: "+504 $1", placeholder: "+504 9123 4567" },
+  { code: "+502", flag: "🇬🇹", pattern: /^\+502(\d{8})$/, format: "+502 $1", placeholder: "+502 5123 4567" },
+  { code: "+501", flag: "🇧🇿", pattern: /^\+501(\d{7})$/, format: "+501 $1", placeholder: "+501 612 3456" },
+  { code: "+505", flag: "🇳🇮", pattern: /^\+505(\d{8})$/, format: "+505 $1", placeholder: "+505 8123 4567" },
 ];
 
 interface PhoneInputProps {
@@ -56,21 +77,8 @@ export default function PhoneInput({ value, onChange, placeholder, className }: 
     const country = countryCodes.find(c => cleanValue.startsWith(c.code));
     
     if (!country) {
-      // Para códigos não reconhecidos, aplicar formatação genérica
       setDetectedCountry(null);
-      
-      // Extrair código do país (assumindo que pode ter 1-4 dígitos após o +)
-      const codeMatch = cleanValue.match(/^\+(\d{1,4})/);
-      if (!codeMatch) return cleanValue;
-      
-      const countryCode = '+' + codeMatch[1];
-      const numberPart = cleanValue.substring(countryCode.length);
-      
-      // Formatação genérica: código + espaços a cada 3 dígitos
-      if (numberPart.length <= 3) return `${countryCode} ${numberPart}`;
-      if (numberPart.length <= 6) return `${countryCode} ${numberPart.slice(0, 3)} ${numberPart.slice(3)}`;
-      if (numberPart.length <= 9) return `${countryCode} ${numberPart.slice(0, 3)} ${numberPart.slice(3, 6)} ${numberPart.slice(6)}`;
-      return `${countryCode} ${numberPart.slice(0, 3)} ${numberPart.slice(3, 6)} ${numberPart.slice(6, 9)} ${numberPart.slice(9)}`;
+      return cleanValue;
     }
 
     setDetectedCountry(country);
@@ -97,6 +105,18 @@ export default function PhoneInput({ value, onChange, placeholder, className }: 
         if (numberPart.length <= 7) return `${country.code} ${numberPart.slice(0, 1)} ${numberPart.slice(1, 3)} ${numberPart.slice(3, 5)} ${numberPart.slice(5)}`;
         return `${country.code} ${numberPart.slice(0, 1)} ${numberPart.slice(1, 3)} ${numberPart.slice(3, 5)} ${numberPart.slice(5, 7)} ${numberPart.slice(7, 9)}`;
       
+      case "+49": // Alemanha (10-11 dígitos)
+        if (numberPart.length <= 3) return `${country.code} ${numberPart}`;
+        if (numberPart.length <= 6) return `${country.code} ${numberPart.slice(0, 3)} ${numberPart.slice(3)}`;
+        if (numberPart.length <= 8) return `${country.code} ${numberPart.slice(0, 3)} ${numberPart.slice(3, 6)} ${numberPart.slice(6)}`;
+        return `${country.code} ${numberPart.slice(0, 3)} ${numberPart.slice(3, 6)} ${numberPart.slice(6, 8)} ${numberPart.slice(8, 11)}`;
+      
+      case "+44": // Reino Unido
+        if (numberPart.length <= 2) return `${country.code} ${numberPart}`;
+        if (numberPart.length <= 6) return `${country.code} ${numberPart.slice(0, 2)} ${numberPart.slice(2)}`;
+        if (numberPart.length <= 10) return `${country.code} ${numberPart.slice(0, 2)} ${numberPart.slice(2, 6)} ${numberPart.slice(6, 10)}`;
+        return `${country.code} ${numberPart.slice(0, 2)} ${numberPart.slice(2, 6)} ${numberPart.slice(6, 10)}`;
+      
       case "+1": // EUA/Canadá
         if (numberPart.length <= 3) return `${country.code} ${numberPart}`;
         if (numberPart.length <= 6) return `${country.code} ${numberPart.slice(0, 3)} ${numberPart.slice(3)}`;
@@ -114,11 +134,43 @@ export default function PhoneInput({ value, onChange, placeholder, className }: 
         }
         return cleanValue;
       
-      default:
-        // Formatação genérica para países conhecidos mas sem formatação específica
+      case "+39": // Itália (9-10 dígitos)
         if (numberPart.length <= 3) return `${country.code} ${numberPart}`;
         if (numberPart.length <= 6) return `${country.code} ${numberPart.slice(0, 3)} ${numberPart.slice(3)}`;
-        return `${country.code} ${numberPart.slice(0, 3)} ${numberPart.slice(3, 6)} ${numberPart.slice(6)}`;
+        if (numberPart.length <= 10) return `${country.code} ${numberPart.slice(0, 3)} ${numberPart.slice(3, 6)} ${numberPart.slice(6, 10)}`;
+        return `${country.code} ${numberPart.slice(0, 3)} ${numberPart.slice(3, 6)} ${numberPart.slice(6, 10)}`;
+      
+      case "+86": // China
+        if (numberPart.length <= 3) return `${country.code} ${numberPart}`;
+        if (numberPart.length <= 7) return `${country.code} ${numberPart.slice(0, 3)} ${numberPart.slice(3)}`;
+        return `${country.code} ${numberPart.slice(0, 3)} ${numberPart.slice(3, 7)} ${numberPart.slice(7, 11)}`;
+      
+      case "+91": // Índia
+        if (numberPart.length <= 5) return `${country.code} ${numberPart}`;
+        return `${country.code} ${numberPart.slice(0, 5)} ${numberPart.slice(5, 10)}`;
+      
+      case "+81": // Japão
+        if (numberPart.length <= 2) return `${country.code} ${numberPart}`;
+        if (numberPart.length <= 6) return `${country.code} ${numberPart.slice(0, 2)} ${numberPart.slice(2)}`;
+        return `${country.code} ${numberPart.slice(0, 2)} ${numberPart.slice(2, 6)} ${numberPart.slice(6, 10)}`;
+      
+      case "+82": // Coreia do Sul
+        if (numberPart.length <= 2) return `${country.code} ${numberPart}`;
+        if (numberPart.length <= 6) return `${country.code} ${numberPart.slice(0, 2)} ${numberPart.slice(2)}`;
+        return `${country.code} ${numberPart.slice(0, 2)} ${numberPart.slice(2, 6)} ${numberPart.slice(6, 10)}`;
+      
+      case "+7": // Rússia
+        if (numberPart.length <= 3) return `${country.code} ${numberPart}`;
+        if (numberPart.length <= 6) return `${country.code} ${numberPart.slice(0, 3)} ${numberPart.slice(3)}`;
+        if (numberPart.length <= 8) return `${country.code} ${numberPart.slice(0, 3)} ${numberPart.slice(3, 6)} ${numberPart.slice(6)}`;
+        return `${country.code} ${numberPart.slice(0, 3)} ${numberPart.slice(3, 6)} ${numberPart.slice(6, 8)} ${numberPart.slice(8, 10)}`;
+      
+      default:
+        // Para outros países com formatação mais simples
+        if (numberPart.length <= 3) return `${country.code} ${numberPart}`;
+        if (numberPart.length <= 6) return `${country.code} ${numberPart.slice(0, 3)} ${numberPart.slice(3)}`;
+        if (numberPart.length <= 9) return `${country.code} ${numberPart.slice(0, 3)} ${numberPart.slice(3, 6)} ${numberPart.slice(6)}`;
+        return `${country.code} ${numberPart.slice(0, 3)} ${numberPart.slice(3, 6)} ${numberPart.slice(6, 9)}`;
     }
   };
 
@@ -160,7 +212,47 @@ export default function PhoneInput({ value, onChange, placeholder, className }: 
       // Quando adicionando caracteres, aplicar formatação normal
       const cleaned = formatPhoneNumber(input);
       
-      // Limitar o tamanho máximo
+      // Verificar se há um país detectado e validar o comprimento
+      if (cleaned.startsWith('+')) {
+        const country = countryCodes.find(c => cleaned.startsWith(c.code));
+        
+        if (country) {
+          const numberPart = cleaned.substring(country.code.length);
+          
+          // Extrair o número máximo de dígitos permitidos do pattern
+          const patternMatch = country.pattern.toString().match(/\\d\{(\d+),?(\d+)?\}/);
+          let maxDigits;
+          
+          if (patternMatch) {
+            if (patternMatch[2]) {
+              // Range como {10,11}
+              maxDigits = parseInt(patternMatch[2]);
+            } else {
+              // Número fixo como {9}
+              maxDigits = parseInt(patternMatch[1]);
+            }
+          } else {
+            // Fallback para alguns casos especiais
+            switch (country.code) {
+              case "+55": maxDigits = 11; break; // Brasil
+              case "+49": maxDigits = 11; break; // Alemanha
+              case "+39": maxDigits = 10; break; // Itália
+              case "+82": maxDigits = 10; break; // Coreia do Sul
+              case "+32": maxDigits = 9; break;  // Bélgica
+              case "+56": maxDigits = 9; break;  // Chile
+              case "+64": maxDigits = 9; break;  // Nova Zelândia
+              default: maxDigits = 10;
+            }
+          }
+          
+          // Bloquear se exceder o limite de dígitos
+          if (numberPart.length > maxDigits) {
+            return;
+          }
+        }
+      }
+      
+      // Limitar o tamanho máximo geral
       if (cleaned.length > 20) return;
       
       onChange(cleaned);
