@@ -151,69 +151,181 @@ async function createJWT(header: any, payload: any, privateKey: string): Promise
 }
 
 async function getAvailability(data: AvailabilityRequest, accessToken: string): Promise<Response> {
-  const calendarId = 'primary'; // Use primary calendar or specify calendar ID
+  const calendarId = 'primary';
   const { date, timeZone } = data;
 
-  // Get events for the specified date
-  const startTime = new Date(`${date}T00:00:00.000Z`);
-  const endTime = new Date(`${date}T23:59:59.999Z`);
-
-  const response = await fetch(
-    `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?` +
-    new URLSearchParams({
-      timeMin: startTime.toISOString(),
-      timeMax: endTime.toISOString(),
-      singleEvents: 'true',
-      orderBy: 'startTime',
-    }),
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    }
-  );
-
-  const events = await response.json();
-
-  // Generate available time slots (9 AM to 5 PM, 1-hour slots)
-  const businessHours = {
-    start: 9, // 9 AM
-    end: 17,  // 5 PM
-    duration: 60, // 60 minutes
-  };
-
-  const availableSlots = [];
-  const bookedSlots = events.items?.map((event: any) => ({
-    start: new Date(event.start.dateTime || event.start.date),
-    end: new Date(event.end.dateTime || event.end.date),
-  })) || [];
-
-  for (let hour = businessHours.start; hour < businessHours.end; hour++) {
-    const slotStart = new Date(`${date}T${hour.toString().padStart(2, '0')}:00:00`);
-    const slotEnd = new Date(slotStart.getTime() + businessHours.duration * 60000);
-
-    // Check if slot conflicts with existing events
-    const isBooked = bookedSlots.some((booked: any) => 
-      (slotStart >= booked.start && slotStart < booked.end) ||
-      (slotEnd > booked.start && slotEnd <= booked.end) ||
-      (slotStart <= booked.start && slotEnd >= booked.end)
+  try {
+    // Get appointment schedules
+    const schedulesResponse = await fetch(
+      `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/acl`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
     );
 
-    if (!isBooked) {
-      availableSlots.push({
-        time: `${hour.toString().padStart(2, '0')}:00`,
-        display: `${hour > 12 ? hour - 12 : hour}:00 ${hour >= 12 ? 'PM' : 'AM'}`,
-      });
-    }
-  }
+    // Get existing events for the date to check conflicts
+    const startTime = new Date(`${date}T00:00:00.000Z`);
+    const endTime = new Date(`${date}T23:59:59.999Z`);
 
-  return new Response(
-    JSON.stringify({ availableSlots }),
-    {
-      status: 200,
-      headers: { 'Content-Type': 'application/json', ...corsHeaders },
+    const eventsResponse = await fetch(
+      `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?` +
+      new URLSearchParams({
+        timeMin: startTime.toISOString(),
+        timeMax: endTime.toISOString(),
+        singleEvents: 'true',
+        orderBy: 'startTime',
+      }),
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    const events = await eventsResponse.json();
+    
+    // Try to get appointment schedules using the newer API
+    let appointmentSchedules = [];
+    try {
+      const appointmentResponse = await fetch(
+        `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/settings/appointmentSchedules`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+      
+      if (appointmentResponse.ok) {
+        const appointmentData = await appointmentResponse.json();
+        appointmentSchedules = appointmentData.items || [];
+      }
+    } catch (error) {
+      console.log('Appointment schedules not available, using default hours');
     }
-  );
+
+    // If no appointment schedules found, use working hours from calendar settings
+    let availableTimeSlots = [];
+    
+    if (appointmentSchedules.length > 0) {
+      // Use appointment schedules to determine availability
+      const schedule = appointmentSchedules[0]; // Use first schedule
+      
+      if (schedule.workingHours) {
+        const dayOfWeek = new Date(date).getDay(); // 0 = Sunday, 1 = Monday, etc.
+        const dayName = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][dayOfWeek];
+        
+        const daySchedule = schedule.workingHours[dayName];
+        if (daySchedule && daySchedule.enabled) {
+          const startHour = parseInt(daySchedule.startTime.split(':')[0]);
+          const endHour = parseInt(daySchedule.endTime.split(':')[0]);
+          
+          for (let hour = startHour; hour < endHour; hour++) {
+            availableTimeSlots.push({
+              time: `${hour.toString().padStart(2, '0')}:00`,
+              display: `${hour > 12 ? hour - 12 : hour}:00 ${hour >= 12 ? 'PM' : 'AM'}`,
+            });
+          }
+        }
+      }
+    } else {
+      // Fallback to default business hours (9 AM to 5 PM)
+      const businessHours = {
+        start: 9,
+        end: 17,
+        duration: 60,
+      };
+
+      for (let hour = businessHours.start; hour < businessHours.end; hour++) {
+        availableTimeSlots.push({
+          time: `${hour.toString().padStart(2, '0')}:00`,
+          display: `${hour > 12 ? hour - 12 : hour}:00 ${hour >= 12 ? 'PM' : 'AM'}`,
+        });
+      }
+    }
+
+    // Filter out slots that conflict with existing events
+    const bookedSlots = events.items?.map((event: any) => ({
+      start: new Date(event.start.dateTime || event.start.date),
+      end: new Date(event.end.dateTime || event.end.date),
+    })) || [];
+
+    const availableSlots = availableTimeSlots.filter(slot => {
+      const slotStart = new Date(`${date}T${slot.time}:00`);
+      const slotEnd = new Date(slotStart.getTime() + 60 * 60000); // 1 hour duration
+
+      // Check if slot conflicts with existing events
+      const isBooked = bookedSlots.some((booked: any) => 
+        (slotStart >= booked.start && slotStart < booked.end) ||
+        (slotEnd > booked.start && slotEnd <= booked.end) ||
+        (slotStart <= booked.start && slotEnd >= booked.end)
+      );
+
+      return !isBooked;
+    });
+
+    return new Response(
+      JSON.stringify({ availableSlots }),
+      {
+        status: 200,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      }
+    );
+
+  } catch (error) {
+    console.error('Error fetching availability:', error);
+    
+    // Fallback to basic availability check
+    const events = await fetch(
+      `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?` +
+      new URLSearchParams({
+        timeMin: new Date(`${date}T00:00:00.000Z`).toISOString(),
+        timeMax: new Date(`${date}T23:59:59.999Z`).toISOString(),
+        singleEvents: 'true',
+        orderBy: 'startTime',
+      }),
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    ).then(res => res.json());
+
+    const businessHours = { start: 9, end: 17, duration: 60 };
+    const availableSlots = [];
+    const bookedSlots = events.items?.map((event: any) => ({
+      start: new Date(event.start.dateTime || event.start.date),
+      end: new Date(event.end.dateTime || event.end.date),
+    })) || [];
+
+    for (let hour = businessHours.start; hour < businessHours.end; hour++) {
+      const slotStart = new Date(`${date}T${hour.toString().padStart(2, '0')}:00:00`);
+      const slotEnd = new Date(slotStart.getTime() + businessHours.duration * 60000);
+
+      const isBooked = bookedSlots.some((booked: any) => 
+        (slotStart >= booked.start && slotStart < booked.end) ||
+        (slotEnd > booked.start && slotEnd <= booked.end) ||
+        (slotStart <= booked.start && slotEnd >= booked.end)
+      );
+
+      if (!isBooked) {
+        availableSlots.push({
+          time: `${hour.toString().padStart(2, '0')}:00`,
+          display: `${hour > 12 ? hour - 12 : hour}:00 ${hour >= 12 ? 'PM' : 'AM'}`,
+        });
+      }
+    }
+
+    return new Response(
+      JSON.stringify({ availableSlots }),
+      {
+        status: 200,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      }
+    );
+  }
 }
 
 async function bookAppointment(
