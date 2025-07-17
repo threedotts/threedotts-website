@@ -751,7 +751,7 @@ export default function ProjectRequest() {
               }) => <FormItem>
                       <FormLabel>Tem mais algo que gostaria de nos falar sobre o seu projecto?</FormLabel>
                       <FormDescription className="text-sm text-muted-foreground">
-                        Qualquer informação adicional, ideias, dúvidas ou comentários sobre o projeto.
+                        Espaço livre para detalhar aspectos específicos ou requisitos especiais do seu projeto.
                       </FormDescription>
                       <FormControl>
                         <Textarea placeholder="Qualquer informação adicional, ideias, dúvidas ou comentários..." className="min-h-[120px]" {...field} />
