@@ -36,6 +36,17 @@ export default function PhoneInput({ value, onChange, placeholder, className }: 
   const [displayValue, setDisplayValue] = useState("");
   const [detectedCountry, setDetectedCountry] = useState<CountryCode | null>(null);
 
+  const formatPhoneNumber = (input: string) => {
+    // Remove tudo exceto números e o sinal +
+    const cleaned = input.replace(/[^\d+]/g, '');
+    
+    // Se não começar com +, adiciona
+    if (cleaned && !cleaned.startsWith('+')) {
+      return '+' + cleaned;
+    }
+    
+    return cleaned;
+  };
 
   const getFormattedDisplay = (cleanValue: string) => {
     if (!cleanValue.startsWith('+')) return cleanValue;
@@ -109,11 +120,37 @@ export default function PhoneInput({ value, onChange, placeholder, className }: 
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target.value;
+    const prevLength = displayValue.length;
     
-    // Permitir apenas números e o sinal +
-    const cleaned = input.replace(/[^\d+]/g, '');
+    // Se o usuário está deletando (input é menor que display anterior)
+    const isDeleting = input.length < prevLength;
     
-    onChange(cleaned);
+    if (isDeleting) {
+      // Extrair apenas os dígitos e o +
+      let cleaned = input.replace(/[^\d+]/g, '');
+      
+      // Se deletou tudo ou só restou +, limpar completamente
+      if (cleaned === '' || cleaned === '+') {
+        onChange('');
+        return;
+      }
+      
+      // Garantir que comece com +
+      if (!cleaned.startsWith('+')) {
+        cleaned = '+' + cleaned;
+      }
+      
+      // Ao deletar, não aplicar formatação imediatamente para permitir edição livre
+      onChange(cleaned);
+    } else {
+      // Quando adicionando caracteres, aplicar formatação normal
+      const cleaned = formatPhoneNumber(input);
+      
+      // Limitar o tamanho máximo
+      if (cleaned.length > 20) return;
+      
+      onChange(cleaned);
+    }
   };
 
   return (
