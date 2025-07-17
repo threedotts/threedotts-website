@@ -43,8 +43,9 @@ const serviceSchema = z.object({
   
   // Call Center
   supportChannels: z.array(z.string()).optional(),
-  teamSize: z.string().optional(),
-  needsRecording: z.enum(["sim", "nao", "nao-sei"]).optional(),
+  callCenterObjective: z.string().optional(),
+  callCenterPurpose: z.string().optional(),
+  expectedVolume: z.string().optional(),
   
   // Automação
   manualTasks: z.string().optional(),
@@ -653,6 +654,23 @@ export default function ProjectRequest() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
+                  {/* Nota sobre a plataforma ThreeDotts */}
+                  <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
+                    <div className="flex items-start space-x-3">
+                      <div className="p-2 bg-blue-500 text-white rounded-full">
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-blue-900">Plataforma ThreeDotts</h4>
+                        <p className="text-sm text-blue-700 mt-1">
+                          Terá acesso à nossa plataforma completa de gestão de call center, onde pode configurar e monitorizar todas as funcionalidades: métricas, relatórios, gravações, distribuição de chamadas, e muito mais.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
                   <FormField
                     control={form.control}
                     name="supportChannels"
@@ -662,34 +680,55 @@ export default function ProjectRequest() {
                         <FormDescription className="text-sm text-muted-foreground">
                           Para montar os canais corretos.
                         </FormDescription>
-                        <div className="space-y-2">
+                        <div className="space-y-3">
                           {supportChannelOptions.map((channel) => (
                             <FormField
                               key={channel}
                               control={form.control}
                               name="supportChannels"
-                              render={({ field }) => (
-                                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                                  <FormControl>
-                                    <Checkbox
-                                      checked={field.value?.includes(channel)}
-                                      onCheckedChange={(checked) => {
-                                        const currentValue = field.value || [];
-                                        if (checked) {
-                                          field.onChange([...currentValue, channel]);
-                                        } else {
-                                          field.onChange(
-                                            currentValue.filter((value: string) => value !== channel)
-                                          );
-                                        }
-                                      }}
-                                    />
-                                  </FormControl>
-                                  <FormLabel className="text-sm font-normal cursor-pointer">
-                                    {channel}
-                                  </FormLabel>
-                                </FormItem>
-                              )}
+                              render={({ field }) => {
+                                const isChecked = field.value?.includes(channel);
+                                return (
+                                  <div
+                                    className={cn(
+                                      "flex items-center space-x-3 p-3 rounded-lg border cursor-pointer transition-all duration-200",
+                                      isChecked
+                                        ? "border-primary bg-primary/5 shadow-sm"
+                                        : "border-border hover:border-primary/50 hover:bg-muted/30"
+                                    )}
+                                    onClick={() => {
+                                      const currentValue = field.value || [];
+                                      if (isChecked) {
+                                        field.onChange(currentValue.filter((value: string) => value !== channel));
+                                      } else {
+                                        field.onChange([...currentValue, channel]);
+                                      }
+                                    }}
+                                  >
+                                    <div
+                                      className={cn(
+                                        "w-4 h-4 rounded border-2 flex items-center justify-center transition-colors",
+                                        isChecked
+                                          ? "border-primary bg-primary text-primary-foreground"
+                                          : "border-muted-foreground"
+                                      )}
+                                    >
+                                      {isChecked && (
+                                        <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
+                                          <path
+                                            fillRule="evenodd"
+                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                            clipRule="evenodd"
+                                          />
+                                        </svg>
+                                      )}
+                                    </div>
+                                    <Label className="text-sm font-normal cursor-pointer flex-1">
+                                      {channel}
+                                    </Label>
+                                  </div>
+                                );
+                              }}
                             />
                           ))}
                         </div>
@@ -700,15 +739,18 @@ export default function ProjectRequest() {
 
                   <FormField
                     control={form.control}
-                    name="teamSize"
+                    name="callCenterObjective"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Quantas pessoas vão usar esse serviço?</FormLabel>
+                        <FormLabel>Qual é o principal objectivo do seu call center?</FormLabel>
                         <FormDescription className="text-sm text-muted-foreground">
-                          Para dimensionar o plano.
+                          Ex.: vendas, suporte técnico, apoio ao cliente, agendamento, etc.
                         </FormDescription>
                         <FormControl>
-                          <Input placeholder="Ex: 5-10 pessoas, 50+ pessoas..." {...field} />
+                          <Textarea
+                            placeholder="Descreva o objectivo principal do call center..."
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -717,19 +759,35 @@ export default function ProjectRequest() {
 
                   <FormField
                     control={form.control}
-                    name="needsRecording"
+                    name="callCenterPurpose"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Quer gravar ou resumir as chamadas/mensagens?</FormLabel>
+                        <FormLabel>Que tipo de atendimento pretende oferecer?</FormLabel>
                         <FormDescription className="text-sm text-muted-foreground">
-                          Para incluir histórico ou relatórios.
+                          Para configurarmos o sistema de acordo com as suas necessidades.
                         </FormDescription>
                         <FormControl>
-                          {renderRadioGroup(field, [
-                            { value: "sim", label: "Sim, quero gravação e relatórios" },
-                            { value: "nao", label: "Não preciso" },
-                            { value: "nao-sei", label: "Não sei ainda" }
-                          ])}
+                          <Textarea
+                            placeholder="Descreva o tipo de atendimento (ex: resolução de problemas, informações sobre produtos, marcação de consultas, etc.)..."
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="expectedVolume"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Que volume de contactos espera por dia/mês?</FormLabel>
+                        <FormDescription className="text-sm text-muted-foreground">
+                          Para dimensionar adequadamente o sistema.
+                        </FormDescription>
+                        <FormControl>
+                          <Input placeholder="Ex: 50 chamadas/dia, 200 mensagens/semana..." {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
