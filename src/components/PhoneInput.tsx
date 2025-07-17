@@ -146,7 +146,7 @@ export default function PhoneInput({ value, onChange, placeholder, className, er
         onChange={handleChange}
         placeholder={placeholder || "+351123456789"}
         className={cn(
-          currentError ? "border-destructive focus:border-destructive" : "",
+          currentError ? "border-destructive focus:border-destructive focus-visible:ring-destructive" : "",
           className
         )}
       />
