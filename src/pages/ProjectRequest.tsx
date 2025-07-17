@@ -721,7 +721,7 @@ export default function ProjectRequest() {
                         <FormMessage />
                       </FormItem>} />
 
-                  <FormField control={form.control} name="integrationDetails" render={({
+                  {form.watch("needsIntegration") === "sim" && <FormField control={form.control} name="integrationDetails" render={({
                 field
               }) => <FormItem>
                         <FormLabel>Existe alguma funcionalidade que precisa acontecer em conjunto entre eles?</FormLabel>
@@ -732,7 +732,7 @@ export default function ProjectRequest() {
                           <Textarea placeholder="Descreva como os serviços devem trabalhar juntos..." {...field} />
                         </FormControl>
                         <FormMessage />
-                      </FormItem>} />
+                      </FormItem>} />}
                 </CardContent>
               </Card>}
 
