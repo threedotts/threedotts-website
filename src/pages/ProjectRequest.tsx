@@ -610,7 +610,7 @@ export default function ProjectRequest() {
                   <FormField control={form.control} name="userScope" render={({
                 field
               }) => <FormItem>
-                        <FormLabel>Vai ser usado por várias pessoas ou só pela sua equipa?</FormLabel>
+                        <FormLabel>Quantas pessoas vão usar este software?</FormLabel>
                         <FormControl>
                           {renderRadioGroup(field, [{
                     value: "individual",
