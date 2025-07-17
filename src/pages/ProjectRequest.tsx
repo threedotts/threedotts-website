@@ -614,7 +614,7 @@ export default function ProjectRequest() {
                         <FormControl>
                           {renderRadioGroup(field, [{
                     value: "individual",
-                    label: "Só eu ou poucas pessoas"
+                    label: "Somente eu"
                   }, {
                     value: "equipe",
                     label: "Minha equipe (10-50 pessoas)"
