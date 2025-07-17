@@ -60,7 +60,8 @@ const serviceSchema = z.object({
   needsIntegration: z.enum(["sim", "nao", "nao-sei"]).optional(),
   integrationDetails: z.string().optional(),
   // Seção 5: Finalização
-  additionalInfo: z.string().optional()
+  additionalInfo: z.string().optional(),
+  additionalFiles: z.array(z.string()).optional()
 });
 type ServiceFormData = z.infer<typeof serviceSchema>;
 const services = [{
@@ -750,10 +751,25 @@ export default function ProjectRequest() {
               }) => <FormItem>
                       <FormLabel>Tem mais algo que gostaria de nos falar sobre o seu projecto?</FormLabel>
                       <FormDescription className="text-sm text-muted-foreground">
-                        Para capturarmos tudo. Se quiser, pode enviar arquivos: logo, rascunhos, exemplos, planilhas, imagens...
+                        Qualquer informação adicional, ideias, dúvidas ou comentários sobre o projeto.
                       </FormDescription>
                       <FormControl>
                         <Textarea placeholder="Qualquer informação adicional, ideias, dúvidas ou comentários..." className="min-h-[120px]" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>} />
+
+                <FormField control={form.control} name="additionalFiles" render={({
+                field
+              }) => <FormItem>
+                      <FormControl>
+                        <FileUpload 
+                          label="Documentos, Imagens e Arquivos Extras" 
+                          description="Envie qualquer arquivo relevante: logos, rascunhos, exemplos, planilhas, imagens, documentos (máx. 10MB por ficheiro)" 
+                          onFileUpload={(urls) => field.onChange(urls)} 
+                          maxFiles={10} 
+                          acceptedFileTypes="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip,.rar,.ai,.psd,.sketch,.fig" 
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>} />
