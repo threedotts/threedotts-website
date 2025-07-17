@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Send, Smartphone, Globe, Bot, Cog, BarChart3, Headphones } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import FileUpload from "@/components/FileUpload";
 
 const serviceSchema = z.object({
   // Seção 1: Informações básicas
@@ -31,14 +32,14 @@ const serviceSchema = z.object({
   needsUserAccount: z.enum(["sim", "nao", "nao-sei"]).optional(),
   needsOfflineMode: z.enum(["sim", "nao", "nao-sei"]).optional(),
   hasDesignIdentity: z.enum(["sim", "nao", "em-desenvolvimento"]).optional(),
-  designFiles: z.string().optional(), // Para ficheiros de design móvel
+  designFiles: z.array(z.string()).optional(), // URLs dos ficheiros de design móvel
   
   // Websites
   websiteType: z.string().optional(),
   websitePages: z.string().optional(),
   needsLoginPayments: z.enum(["login", "pagamentos", "ambos", "nenhum"]).optional(),
   hasDesignIdeasWeb: z.enum(["sim", "nao", "em-desenvolvimento"]).optional(),
-  webDesignFiles: z.string().optional(), // Para ficheiros de design web
+  webDesignFiles: z.array(z.string()).optional(), // URLs dos ficheiros de design web
   
   // Call Center
   supportChannels: z.array(z.string()).optional(),
@@ -127,6 +128,8 @@ export default function ProjectRequest() {
       selectedServices: [],
       supportChannels: [],
       automationNeeds: [],
+      designFiles: [],
+      webDesignFiles: [],
     },
   });
 
@@ -506,11 +509,13 @@ export default function ProjectRequest() {
                       name="designFiles"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Ficheiros de design (opcional)</FormLabel>
                           <FormControl>
-                            <Textarea
-                              placeholder="Pode descrever os ficheiros que tem ou indicar onde os podemos aceder..."
-                              {...field}
+                            <FileUpload
+                              label="Ficheiros de design da aplicação móvel"
+                              description="Carregue logos, mockups, guias de estilo, etc. (máx. 10MB por ficheiro)"
+                              onFileUpload={(urls) => field.onChange(urls)}
+                              maxFiles={5}
+                              acceptedFileTypes="image/*,.pdf,.ai,.psd,.sketch,.fig,.zip,.rar"
                             />
                           </FormControl>
                           <FormMessage />
@@ -622,11 +627,13 @@ export default function ProjectRequest() {
                       name="webDesignFiles"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Ficheiros de design web (opcional)</FormLabel>
                           <FormControl>
-                            <Textarea
-                              placeholder="Pode descrever os ficheiros que tem ou indicar onde os podemos aceder..."
-                              {...field}
+                            <FileUpload
+                              label="Ficheiros de design do website"
+                              description="Carregue logos, mockups, guias de estilo, etc. (máx. 10MB por ficheiro)"
+                              onFileUpload={(urls) => field.onChange(urls)}
+                              maxFiles={5}
+                              acceptedFileTypes="image/*,.pdf,.ai,.psd,.sketch,.fig,.zip,.rar"
                             />
                           </FormControl>
                           <FormMessage />
