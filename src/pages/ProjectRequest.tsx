@@ -63,6 +63,169 @@ const serviceSchema = z.object({
   // Seção 5: Finalização
   additionalInfo: z.string().optional(),
   additionalFiles: z.array(z.string()).optional()
+}).superRefine((data, ctx) => {
+  // Validação condicional para Aplicações Móveis
+  if (data.selectedServices.includes("mobile-apps")) {
+    if (!data.appPurpose || data.appPurpose.trim() === "") {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["appPurpose"],
+        message: "Este campo é obrigatório quando Aplicações Móveis está selecionado"
+      });
+    }
+    if (!data.needsUserAccount) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["needsUserAccount"],
+        message: "Este campo é obrigatório quando Aplicações Móveis está selecionado"
+      });
+    }
+    if (!data.needsOfflineMode) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["needsOfflineMode"],
+        message: "Este campo é obrigatório quando Aplicações Móveis está selecionado"
+      });
+    }
+    if (!data.hasDesignIdentity) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["hasDesignIdentity"],
+        message: "Este campo é obrigatório quando Aplicações Móveis está selecionado"
+      });
+    }
+  }
+
+  // Validação condicional para Websites
+  if (data.selectedServices.includes("websites")) {
+    if (!data.websiteType || data.websiteType.trim() === "") {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["websiteType"],
+        message: "Este campo é obrigatório quando Websites está selecionado"
+      });
+    }
+    if (!data.needsLoginPayments) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["needsLoginPayments"],
+        message: "Este campo é obrigatório quando Websites está selecionado"
+      });
+    }
+    if (!data.hasDesignIdeasWeb) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["hasDesignIdeasWeb"],
+        message: "Este campo é obrigatório quando Websites está selecionado"
+      });
+    }
+  }
+
+  // Validação condicional para Call Center
+  if (data.selectedServices.includes("call-center")) {
+    if (!data.supportChannels || data.supportChannels.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["supportChannels"],
+        message: "Seleccione pelo menos um canal quando Call Center está selecionado"
+      });
+    }
+    if (!data.currentSupportMethod || data.currentSupportMethod.trim() === "") {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["currentSupportMethod"],
+        message: "Este campo é obrigatório quando Call Center está selecionado"
+      });
+    }
+    if (!data.callCenterObjective || data.callCenterObjective.trim() === "") {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["callCenterObjective"],
+        message: "Este campo é obrigatório quando Call Center está selecionado"
+      });
+    }
+    // Campo condicional para "Outros" canais
+    if (data.supportChannels?.includes("Outros") && (!data.otherSupportChannels || data.otherSupportChannels.trim() === "")) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["otherSupportChannels"],
+        message: "Especifique os outros canais"
+      });
+    }
+  }
+
+  // Validação condicional para Automação
+  if (data.selectedServices.includes("automation")) {
+    if (!data.manualTasks || data.manualTasks.trim() === "") {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["manualTasks"],
+        message: "Este campo é obrigatório quando Automação está selecionado"
+      });
+    }
+    if (!data.automationNeeds || data.automationNeeds.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["automationNeeds"],
+        message: "Seleccione pelo menos uma necessidade quando Automação está selecionado"
+      });
+    }
+  }
+
+  // Validação condicional para Soluções Empresariais
+  if (data.selectedServices.includes("business-solutions")) {
+    if (!data.businessProblem || data.businessProblem.trim() === "") {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["businessProblem"],
+        message: "Este campo é obrigatório quando Soluções Empresariais está selecionado"
+      });
+    }
+    if (!data.userScope) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["userScope"],
+        message: "Este campo é obrigatório quando Soluções Empresariais está selecionado"
+      });
+    }
+  }
+
+  // Validação condicional para Inteligência de Dados
+  if (data.selectedServices.includes("data-intelligence")) {
+    if (!data.dataInsights || data.dataInsights.trim() === "") {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["dataInsights"],
+        message: "Este campo é obrigatório quando Inteligência de Dados está selecionado"
+      });
+    }
+    if (!data.needsPredictions) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["needsPredictions"],
+        message: "Este campo é obrigatório quando Inteligência de Dados está selecionado"
+      });
+    }
+  }
+
+  // Validação condicional para integração (apenas se múltiplos serviços)
+  if (data.selectedServices.length > 1) {
+    if (!data.needsIntegration) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["needsIntegration"],
+        message: "Este campo é obrigatório quando múltiplos serviços são selecionados"
+      });
+    }
+    // Campo condicional para detalhes de integração
+    if (data.needsIntegration === "sim" && (!data.integrationDetails || data.integrationDetails.trim() === "")) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["integrationDetails"],
+        message: "Forneça detalhes sobre a integração"
+      });
+    }
+  }
 });
 type ServiceFormData = z.infer<typeof serviceSchema>;
 const services = [{
