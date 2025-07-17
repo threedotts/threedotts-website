@@ -396,11 +396,11 @@ ${notes ? `Observações: ${notes}` : ''}
     `.trim(),
     start: {
       dateTime: startDateTime,
-      timeZone: 'America/Sao_Paulo',
+      timeZone: 'Africa/Maputo',
     },
     end: {
       dateTime: endDateTime,
-      timeZone: 'America/Sao_Paulo',
+      timeZone: 'Africa/Maputo',
     }
   };
 
