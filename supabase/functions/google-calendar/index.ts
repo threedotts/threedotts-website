@@ -401,8 +401,10 @@ ${notes ? `Observações: ${notes}` : ''}
     },
     conferenceData: {
       createRequest: {
-        requestId: crypto.randomUUID(),
-        conferenceSolutionKey: { type: 'hangoutsMeet' }
+        requestId: `meet-${Date.now()}`,
+        conferenceSolutionKey: { 
+          type: 'hangoutsMeet' 
+        }
       }
     }
   };
