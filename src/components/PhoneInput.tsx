@@ -16,8 +16,8 @@ const countryCodes: CountryCode[] = [
   { code: "+33", flag: "🇫🇷", pattern: /^\+33(\d{9})$/, format: "+33 $1 $2 $3 $4", placeholder: "+33 1 23 45 67 89" },
   { code: "+49", flag: "🇩🇪", pattern: /^\+49(\d{10,11})$/, format: "+49 $1 $2", placeholder: "+49 123 456789" },
   { code: "+44", flag: "🇬🇧", pattern: /^\+44(\d{10})$/, format: "+44 $1 $2 $3", placeholder: "+44 123 456 7890" },
-  { code: "+1", flag: "🇺🇸", pattern: /^\+1(\d{10})$/, format: "+1 ($1) $2-$3", placeholder: "+1 (123) 456-7890" },
-  { code: "+55", flag: "🇧🇷", pattern: /^\+55(\d{2})(\d{8,9})$/, format: "+55 ($1) $2", placeholder: "+55 (11) 12345-6789" },
+  { code: "+1", flag: "🇺🇸", pattern: /^\+1(\d{10})$/, format: "+1 $1 $2-$3", placeholder: "+1 123 456-7890" },
+  { code: "+55", flag: "🇧🇷", pattern: /^\+55(\d{2})(\d{8,9})$/, format: "+55 $1 $2", placeholder: "+55 11 12345-6789" },
   { code: "+39", flag: "🇮🇹", pattern: /^\+39(\d{9,10})$/, format: "+39 $1", placeholder: "+39 123 456 7890" },
   { code: "+31", flag: "🇳🇱", pattern: /^\+31(\d{9})$/, format: "+31 $1", placeholder: "+31 123 456 789" },
   { code: "+41", flag: "🇨🇭", pattern: /^\+41(\d{9})$/, format: "+41 $1", placeholder: "+41 123 456 789" },
@@ -84,19 +84,19 @@ export default function PhoneInput({ value, onChange, placeholder, className }: 
         return `${country.code} ${numberPart.slice(0, 1)} ${numberPart.slice(1, 3)} ${numberPart.slice(3, 5)} ${numberPart.slice(5, 7)} ${numberPart.slice(7, 9)}`;
       
       case "+1": // EUA/Canadá
-        if (numberPart.length <= 3) return `${country.code} (${numberPart}`;
-        if (numberPart.length <= 6) return `${country.code} (${numberPart.slice(0, 3)}) ${numberPart.slice(3)}`;
-        return `${country.code} (${numberPart.slice(0, 3)}) ${numberPart.slice(3, 6)}-${numberPart.slice(6, 10)}`;
+        if (numberPart.length <= 3) return `${country.code} ${numberPart}`;
+        if (numberPart.length <= 6) return `${country.code} ${numberPart.slice(0, 3)} ${numberPart.slice(3)}`;
+        return `${country.code} ${numberPart.slice(0, 3)} ${numberPart.slice(3, 6)}-${numberPart.slice(6, 10)}`;
       
       case "+55": // Brasil
-        if (numberPart.length <= 2) return `${country.code} (${numberPart}`;
-        if (numberPart.length <= 7) return `${country.code} (${numberPart.slice(0, 2)}) ${numberPart.slice(2)}`;
+        if (numberPart.length <= 2) return `${country.code} ${numberPart}`;
+        if (numberPart.length <= 7) return `${country.code} ${numberPart.slice(0, 2)} ${numberPart.slice(2)}`;
         if (numberPart.length <= 11) {
           const areaCode = numberPart.slice(0, 2);
           const number = numberPart.slice(2);
-          if (number.length <= 4) return `${country.code} (${areaCode}) ${number}`;
-          if (number.length === 8) return `${country.code} (${areaCode}) ${number.slice(0, 4)}-${number.slice(4)}`;
-          return `${country.code} (${areaCode}) ${number.slice(0, 5)}-${number.slice(5)}`;
+          if (number.length <= 4) return `${country.code} ${areaCode} ${number}`;
+          if (number.length === 8) return `${country.code} ${areaCode} ${number.slice(0, 4)}-${number.slice(4)}`;
+          return `${country.code} ${areaCode} ${number.slice(0, 5)}-${number.slice(5)}`;
         }
         return cleanValue;
       
