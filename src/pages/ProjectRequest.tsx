@@ -43,6 +43,7 @@ const serviceSchema = z.object({
   
   // Call Center
   supportChannels: z.array(z.string()).optional(),
+  otherSupportChannels: z.string().optional(),
   currentSupportMethod: z.string().optional(),
   callCenterObjective: z.string().optional(),
   
@@ -106,10 +107,11 @@ const services = [
 const supportChannelOptions = [
   "Telefone",
   "WhatsApp",
-  "Facebook Messenger",
+  "Facebook",
   "E-mail",
   "SMS",
   "Website",
+  "Outros",
 ];
 
 const automationOptions = [
@@ -663,32 +665,12 @@ export default function ProjectRequest() {
 
                    <FormField
                      control={form.control}
-                     name="currentSupportMethod"
-                     render={({ field }) => (
-                       <FormItem>
-                         <FormLabel>Como atende os seus clientes hoje?</FormLabel>
-                         <FormDescription className="text-sm text-muted-foreground">
-                           Para entender a situação atual e melhorar o atendimento.
-                         </FormDescription>
-                         <FormControl>
-                           <Textarea
-                             placeholder="Descreva como faz o atendimento ao cliente atualmente..."
-                             {...field}
-                           />
-                         </FormControl>
-                         <FormMessage />
-                       </FormItem>
-                     )}
-                   />
-
-                   <FormField
-                     control={form.control}
                      name="supportChannels"
                      render={() => (
                        <FormItem>
-                         <FormLabel>Quer atendimento por telefone, WhatsApp/Facebook, e-mail, SMS ou Website?</FormLabel>
+                         <FormLabel>Quer atendimento por telefone, WhatsApp, Facebook, e-mail, SMS ou Website?</FormLabel>
                          <FormDescription className="text-sm text-muted-foreground">
-                           Para montar os canais corretos.
+                           Para montar os canais corretos. O nosso sistema de call center pode ser integrado em qualquer plataforma que desejar - seja WhatsApp Business, sistemas CRM, websites, ou qualquer outra ferramenta que utilize.
                          </FormDescription>
                         <div className="space-y-3">
                           {supportChannelOptions.map((channel) => (
@@ -747,25 +729,68 @@ export default function ProjectRequest() {
                     )}
                   />
 
-                  <FormField
-                    control={form.control}
-                    name="callCenterObjective"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Qual é o principal objectivo do seu call center?</FormLabel>
-                        <FormDescription className="text-sm text-muted-foreground">
-                          Ex.: vendas, suporte técnico, apoio ao cliente, agendamento, etc.
-                        </FormDescription>
-                        <FormControl>
-                          <Textarea
-                            placeholder="Descreva o objectivo principal do call center..."
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                   {/* Mostrar campo de texto para "Outros" canais */}
+                   {form.watch("supportChannels")?.includes("Outros") && (
+                     <FormField
+                       control={form.control}
+                       name="otherSupportChannels"
+                       render={({ field }) => (
+                         <FormItem>
+                           <FormLabel>Especifique outros canais de atendimento</FormLabel>
+                           <FormDescription className="text-sm text-muted-foreground">
+                             Quais outros canais deseja usar para o atendimento?
+                           </FormDescription>
+                           <FormControl>
+                             <Textarea
+                               placeholder="Ex.: Telegram, Discord, sistema próprio, etc..."
+                               {...field}
+                             />
+                           </FormControl>
+                           <FormMessage />
+                         </FormItem>
+                       )}
+                     />
+                   )}
+
+                   <FormField
+                     control={form.control}
+                     name="callCenterObjective"
+                     render={({ field }) => (
+                       <FormItem>
+                         <FormLabel>Qual é o principal objectivo do seu call center?</FormLabel>
+                         <FormDescription className="text-sm text-muted-foreground">
+                           Ex.: vendas, suporte técnico, apoio ao cliente, agendamento, etc.
+                         </FormDescription>
+                         <FormControl>
+                           <Textarea
+                             placeholder="Descreva o objectivo principal do call center..."
+                             {...field}
+                           />
+                         </FormControl>
+                         <FormMessage />
+                       </FormItem>
+                     )}
+                   />
+
+                   <FormField
+                     control={form.control}
+                     name="currentSupportMethod"
+                     render={({ field }) => (
+                       <FormItem>
+                         <FormLabel>Como atende os seus clientes hoje?</FormLabel>
+                         <FormDescription className="text-sm text-muted-foreground">
+                           Para entender a situação atual e melhorar o atendimento.
+                         </FormDescription>
+                         <FormControl>
+                           <Textarea
+                             placeholder="Ex.: Atendemos por telefone das 9h às 18h com 2 pessoas, também respondemos WhatsApp manualmente, e-mails chegam mas às vezes demoram para responder..."
+                             {...field}
+                           />
+                         </FormControl>
+                         <FormMessage />
+                       </FormItem>
+                     )}
+                   />
 
                 </CardContent>
               </Card>
