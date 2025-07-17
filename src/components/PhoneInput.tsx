@@ -146,20 +146,10 @@ export default function PhoneInput({ value, onChange, placeholder, className, er
         onChange={handleChange}
         placeholder={placeholder || "+351123456789"}
         className={cn(
-          value ? "pr-10" : "pr-3",
           currentError ? "border-destructive focus:border-destructive" : "",
           className
         )}
       />
-      {value && (
-        <button
-          type="button"
-          onClick={handleClear}
-          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors z-10"
-        >
-          <X className="h-4 w-4" />
-        </button>
-      )}
       {currentError && (
         <p className="text-sm text-destructive mt-1">{currentError}</p>
       )}
