@@ -375,10 +375,13 @@ async function bookAppointment(
   const { name, email, phone, date, time, notes } = data;
   const calendarId = 'limatembe44@gmail.com';
 
-  // Create start and end times
+  // Create start and end times with correct timezone
   const [hours, minutes] = time.split(':').map(Number);
-  const startDateTime = new Date(`${date}T${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`);
-  const endDateTime = new Date(startDateTime.getTime() + 60 * 60000); // 1 hour duration
+  
+  // Create the datetime string in São Paulo timezone format
+  const startDateTime = `${date}T${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`;
+  const endHours = hours + 1;
+  const endDateTime = `${date}T${endHours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`;
 
   // Create Google Calendar event
   const event = {
@@ -392,11 +395,11 @@ ${phone ? `Telefone: ${phone}` : ''}
 ${notes ? `Observações: ${notes}` : ''}
     `.trim(),
     start: {
-      dateTime: startDateTime.toISOString(),
+      dateTime: startDateTime,
       timeZone: 'America/Sao_Paulo',
     },
     end: {
-      dateTime: endDateTime.toISOString(),
+      dateTime: endDateTime,
       timeZone: 'America/Sao_Paulo',
     }
   };
