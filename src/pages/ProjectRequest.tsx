@@ -44,8 +44,6 @@ const serviceSchema = z.object({
   // Call Center
   supportChannels: z.array(z.string()).optional(),
   callCenterObjective: z.string().optional(),
-  callCenterPurpose: z.string().optional(),
-  expectedVolume: z.string().optional(),
   
   // Automação
   manualTasks: z.string().optional(),
@@ -654,21 +652,11 @@ export default function ProjectRequest() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  {/* Nota sobre a plataforma ThreeDotts */}
-                  <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
-                    <div className="flex items-start space-x-3">
-                      <div className="p-2 bg-blue-500 text-white rounded-full">
-                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                        </svg>
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-blue-900">Plataforma ThreeDotts</h4>
-                        <p className="text-sm text-blue-700 mt-1">
-                          Terá acesso à nossa plataforma completa de gestão de call center, onde pode configurar e monitorizar todas as funcionalidades: métricas, relatórios, gravações, distribuição de chamadas, e muito mais.
-                        </p>
-                      </div>
-                    </div>
+                  {/* Nota sobre a plataforma Threedotts */}
+                  <div className="p-4 bg-muted/20 border border-border rounded-lg">
+                    <p className="text-sm text-muted-foreground">
+                      <strong>Nota:</strong> Terá acesso à plataforma Threedotts para gerir o seu call center, onde pode configurar todas as funcionalidades necessárias.
+                    </p>
                   </div>
 
                   <FormField
@@ -757,42 +745,6 @@ export default function ProjectRequest() {
                     )}
                   />
 
-                  <FormField
-                    control={form.control}
-                    name="callCenterPurpose"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Que tipo de atendimento pretende oferecer?</FormLabel>
-                        <FormDescription className="text-sm text-muted-foreground">
-                          Para configurarmos o sistema de acordo com as suas necessidades.
-                        </FormDescription>
-                        <FormControl>
-                          <Textarea
-                            placeholder="Descreva o tipo de atendimento (ex: resolução de problemas, informações sobre produtos, marcação de consultas, etc.)..."
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="expectedVolume"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Que volume de contactos espera por dia/mês?</FormLabel>
-                        <FormDescription className="text-sm text-muted-foreground">
-                          Para dimensionar adequadamente o sistema.
-                        </FormDescription>
-                        <FormControl>
-                          <Input placeholder="Ex: 50 chamadas/dia, 200 mensagens/semana..." {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
                 </CardContent>
               </Card>
             )}
