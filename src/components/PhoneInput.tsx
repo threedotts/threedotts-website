@@ -126,25 +126,25 @@ export default function PhoneInput({ value, onChange, placeholder, className }: 
     const isDeleting = input.length < prevLength;
     
     if (isDeleting) {
-      // Extrair apenas os dígitos e o +
+      // Permitir deletar tudo, incluindo o código do país
       let cleaned = input.replace(/[^\d+]/g, '');
       
-      // Se deletou tudo ou só restou +, limpar completamente
-      if (cleaned === '' || cleaned === '+') {
+      // Se deletou tudo, permitir campo vazio
+      if (cleaned === '') {
         onChange('');
         return;
       }
       
-      // Garantir que comece com +
-      if (!cleaned.startsWith('+')) {
-        cleaned = '+' + cleaned;
-      }
-      
-      // Ao deletar, não aplicar formatação imediatamente para permitir edição livre
+      // Se só restou números sem +, permitir isso também para o usuário poder digitar novo código
       onChange(cleaned);
     } else {
-      // Quando adicionando caracteres, aplicar formatação normal
-      const cleaned = formatPhoneNumber(input);
+      // Quando adicionando caracteres
+      let cleaned = input.replace(/[^\d+]/g, '');
+      
+      // Se começou a digitar números sem +, adicionar o +
+      if (cleaned && !cleaned.startsWith('+') && /^\d/.test(cleaned)) {
+        cleaned = '+' + cleaned;
+      }
       
       // Limitar o tamanho máximo
       if (cleaned.length > 20) return;
