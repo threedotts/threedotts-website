@@ -52,9 +52,29 @@ interface PhoneInputProps {
   onChange: (value: string) => void;
   placeholder?: string;
   className?: string;
+  error?: string;
+  onError?: (error: string | null) => void;
 }
 
-export default function PhoneInput({ value, onChange, placeholder, className }: PhoneInputProps) {
+export default function PhoneInput({ value, onChange, placeholder, className, error, onError }: PhoneInputProps) {
+  const [internalError, setInternalError] = useState<string | null>(null);
+
+  const validatePhone = (phone: string) => {
+    if (!phone) {
+      return null;
+    }
+    
+    if (!phone.startsWith('+')) {
+      return "O número deve começar com o código do país (+)";
+    }
+    
+    return null;
+  };
+
+  const updateError = (errorMsg: string | null) => {
+    setInternalError(errorMsg);
+    onError?.(errorMsg);
+  };
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target.value;
     
@@ -105,11 +125,18 @@ export default function PhoneInput({ value, onChange, placeholder, className }: 
     if (cleaned.length > 20) return;
     
     onChange(cleaned);
+    
+    // Validar e atualizar erro
+    const validationError = validatePhone(cleaned);
+    updateError(validationError);
   };
 
   const handleClear = () => {
     onChange('');
+    updateError(null);
   };
+
+  const currentError = error || internalError;
 
   return (
     <div className="relative">
@@ -120,6 +147,7 @@ export default function PhoneInput({ value, onChange, placeholder, className }: 
         placeholder={placeholder || "+351123456789"}
         className={cn(
           value ? "pr-10" : "pr-3",
+          currentError ? "border-destructive focus:border-destructive" : "",
           className
         )}
       />
@@ -131,6 +159,9 @@ export default function PhoneInput({ value, onChange, placeholder, className }: 
         >
           <X className="h-4 w-4" />
         </button>
+      )}
+      {currentError && (
+        <p className="text-sm text-destructive mt-1">{currentError}</p>
       )}
     </div>
   );
