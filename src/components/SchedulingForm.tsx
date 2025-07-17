@@ -213,8 +213,7 @@ const SchedulingForm = () => {
                 disabled={(date) => 
                   date < tomorrow || 
                   date > twoMonthsFromNow ||
-                  date.getDay() === 0 || // Sunday
-                  date.getDay() === 6    // Saturday
+                  date.getDay() === 0 // Only Sunday is disabled
                 }
                 className="rounded-md border"
                 locale={ptBR}
