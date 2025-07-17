@@ -364,7 +364,7 @@ export default function ProjectRequest() {
                                         >
                                           <service.icon className="h-6 w-6" />
                                         </div>
-                                        <div className="flex-1 min-w-0">
+                                        <div className="flex-1 min-w-0 pr-8">
                                           <h3
                                             className={cn(
                                               "font-semibold text-base mb-1 transition-colors",
