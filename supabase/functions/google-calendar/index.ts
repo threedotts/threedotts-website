@@ -186,12 +186,17 @@ async function getAvailability(data: AvailabilityRequest, accessToken: string): 
 
     const events = await eventsResponse.json();
     
-    // Try to get appointment schedules using the Google Calendar API
-    let appointmentSchedules = [];
-    console.log('Fetching appointment schedules for calendar:', calendarId);
+    // Get calendar details and working hours
+    console.log('Fetching calendar details for:', calendarId);
+    
+    let workingHours = {
+      start: 9, // 9 AM
+      end: 17,  // 5 PM
+      interval: 60 // 1 hour slots
+    };
     
     try {
-      // First, try to get calendar working hours/settings
+      // Get calendar settings/details
       const calendarResponse = await fetch(
         `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}`,
         {
@@ -204,71 +209,34 @@ async function getAvailability(data: AvailabilityRequest, accessToken: string): 
       if (calendarResponse.ok) {
         const calendarData = await calendarResponse.json();
         console.log('Calendar data:', JSON.stringify(calendarData, null, 2));
-      }
-
-      // Try to get appointment schedules from the newer API
-      const appointmentResponse = await fetch(
-        `https://calendar.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/appointmentSchedules`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
+        
+        // Extract timezone for proper time handling
+        if (calendarData.timeZone) {
+          console.log('Calendar timezone:', calendarData.timeZone);
         }
-      );
-      
-      console.log('Appointment schedules response status:', appointmentResponse.status);
-      
-      if (appointmentResponse.ok) {
-        const appointmentData = await appointmentResponse.json();
-        appointmentSchedules = appointmentData.items || [];
-        console.log('Found appointment schedules:', JSON.stringify(appointmentSchedules, null, 2));
-      } else {
-        const errorText = await appointmentResponse.text();
-        console.log('Appointment schedules error:', errorText);
       }
     } catch (error) {
-      console.log('Error fetching appointment schedules:', error);
+      console.log('Error fetching calendar details:', error);
     }
 
-    // If no appointment schedules found, use working hours from calendar settings
+    // Use default working hours since Appointment Schedules API is not available
     let availableTimeSlots = [];
     
-    if (appointmentSchedules.length > 0) {
-      // Use appointment schedules to determine availability
-      const schedule = appointmentSchedules[0]; // Use first schedule
-      
-      if (schedule.workingHours) {
-        const dayOfWeek = new Date(date).getDay(); // 0 = Sunday, 1 = Monday, etc.
-        const dayName = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][dayOfWeek];
-        
-        const daySchedule = schedule.workingHours[dayName];
-        if (daySchedule && daySchedule.enabled) {
-          const startHour = parseInt(daySchedule.startTime.split(':')[0]);
-          const endHour = parseInt(daySchedule.endTime.split(':')[0]);
-          
-          for (let hour = startHour; hour < endHour; hour++) {
-            availableTimeSlots.push({
-              time: `${hour.toString().padStart(2, '0')}:00`,
-              display: `${hour > 12 ? hour - 12 : hour}:00 ${hour >= 12 ? 'PM' : 'AM'}`,
-            });
-          }
-        }
-      }
-    } else {
-      // Fallback to default business hours (9 AM to 5 PM)
-      const businessHours = {
-        start: 9,
-        end: 17,
-        duration: 60,
-      };
+    // Generate time slots based on working hours
+    const businessHours = {
+      start: workingHours.start,
+      end: workingHours.end,
+      duration: 60, // 1 hour slots
+    };
 
-      for (let hour = businessHours.start; hour < businessHours.end; hour++) {
-        availableTimeSlots.push({
-          time: `${hour.toString().padStart(2, '0')}:00`,
-          display: `${hour > 12 ? hour - 12 : hour}:00 ${hour >= 12 ? 'PM' : 'AM'}`,
-        });
-      }
+    for (let hour = businessHours.start; hour < businessHours.end; hour++) {
+      availableTimeSlots.push({
+        time: `${hour.toString().padStart(2, '0')}:00`,
+        display: `${hour > 12 ? hour - 12 : hour === 12 ? 12 : hour}:00 ${hour >= 12 ? 'PM' : 'AM'}`,
+      });
     }
+
+    console.log(`Generated ${availableTimeSlots.length} time slots for ${date}`);
 
     // Filter out slots that conflict with existing events
     const bookedSlots = events.items?.map((event: any) => ({
