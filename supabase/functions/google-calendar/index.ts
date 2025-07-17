@@ -92,7 +92,7 @@ async function getAccessToken(credentials: any): Promise<string> {
   const now = Math.floor(Date.now() / 1000);
   const jwtPayload = {
     iss: credentials.client_email,
-    scope: 'https://www.googleapis.com/auth/calendar',
+    scope: 'https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events',
     aud: 'https://oauth2.googleapis.com/token',
     exp: now + 3600,
     iat: now,
@@ -381,7 +381,7 @@ async function bookAppointment(
   const endDateTime = new Date(startDateTime.getTime() + 60 * 60000); // 1 hour duration
 
   // Create Google Calendar event
-  const event: GoogleCalendarEvent = {
+  const event: any = {
     summary: `Consulta com ${name}`,
     description: `
 Consulta gratuita agendada via website.
@@ -399,19 +399,24 @@ ${notes ? `Observações: ${notes}` : ''}
       dateTime: endDateTime.toISOString(),
       timeZone: 'America/Sao_Paulo',
     },
-    // Removed attendees to avoid permission issues with service accounts
+    conferenceData: {
+      createRequest: {
+        requestId: crypto.randomUUID(),
+        conferenceSolutionKey: { type: 'hangoutsMeet' }
+      }
+    }
   };
 
   // Create event in Google Calendar
   const calendarResponse = await fetch(
-    `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events`,
+    `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?conferenceDataVersion=1`,
     {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(event),
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(event)
     }
   );
 
