@@ -19,7 +19,7 @@ const serviceSchema = z.object({
   fullName: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
   companyName: z.string().min(2, "Nome da empresa deve ter pelo menos 2 caracteres"),
   email: z.string().email("Email deve ser válido"),
-  phone: z.string().min(5, "Telefone deve ter pelo menos 5 caracteres"),
+  phone: z.string().regex(/^[\+]?[0-9\s\-\(\)]+$/, "Telefone deve conter apenas números, espaços, parênteses, hífens e pode começar com +").min(9, "Telefone deve ter pelo menos 9 dígitos"),
   companyDomain: z.string().optional(),
   // Seção 2: Serviços selecionados
   selectedServices: z.array(z.string()).min(1, "Seleccione pelo menos um serviço"),
@@ -170,7 +170,7 @@ export default function ProjectRequest() {
                 <FormField control={form.control} name="fullName" render={({
                 field
               }) => <FormItem>
-                      <FormLabel>Qual é o seu nome?</FormLabel>
+                      <FormLabel>Qual é o seu nome? *</FormLabel>
                       <FormControl>
                         <Input placeholder="O seu nome completo" {...field} />
                       </FormControl>
@@ -180,7 +180,7 @@ export default function ProjectRequest() {
                 <FormField control={form.control} name="companyName" render={({
                 field
               }) => <FormItem>
-                      <FormLabel>Qual é o nome da sua empresa ou projeto?</FormLabel>
+                      <FormLabel>Qual é o nome da sua empresa ou projeto? *</FormLabel>
                       <FormControl>
                         <Input placeholder="Nome da empresa ou projeto" {...field} />
                       </FormControl>
@@ -190,7 +190,7 @@ export default function ProjectRequest() {
                 <FormField control={form.control} name="email" render={({
                 field
               }) => <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>Email *</FormLabel>
                       <FormControl>
                         <Input placeholder="email@exemplo.com" type="email" {...field} />
                       </FormControl>
@@ -200,7 +200,7 @@ export default function ProjectRequest() {
                 <FormField control={form.control} name="phone" render={({
                 field
               }) => <FormItem>
-                      <FormLabel>Telefone</FormLabel>
+                      <FormLabel>Telefone *</FormLabel>
                       <FormControl>
                         <Input placeholder="+351 123 456 789" type="tel" {...field} />
                       </FormControl>
@@ -222,7 +222,7 @@ export default function ProjectRequest() {
             {/* Seção 2: Seleção de Serviços */}
             <Card>
               <CardHeader>
-                <CardTitle>Quais serviços deseja?</CardTitle>
+                <CardTitle>Quais serviços deseja? *</CardTitle>
                 <CardDescription>
                   Seleccione um ou mais serviços que precisa para o seu projecto.
                 </CardDescription>
