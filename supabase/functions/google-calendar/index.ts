@@ -399,7 +399,7 @@ ${notes ? `Observações: ${notes}` : ''}
       dateTime: endDateTime.toISOString(),
       timeZone: 'America/Sao_Paulo',
     },
-    attendees: [{ email }],
+    // Removed attendees to avoid permission issues with service accounts
   };
 
   // Create event in Google Calendar
