@@ -22,12 +22,12 @@ const Scheduling = () => {
       </div>
 
       {/* Google Calendar Embed - Full Width */}
-      <div className="w-full">
+      <div className="w-full h-full">
         <iframe 
           src="https://calendar.google.com/calendar/appointments/schedules/AcZssZ0l1MqdSil-lmX5yQmCndkugzIdzLxO1Ut0BcpZ8Fj04LJpRHtOpltpWjB9P7ahbfoze2Q7ZDyl?gv=true" 
           style={{ border: 0, display: 'block' }} 
           width="100%" 
-          height="calc(100vh - 140px)"
+          height="800"
           frameBorder="0"
           title="Agendamento de Consulta Gratuita"
         />
