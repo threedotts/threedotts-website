@@ -186,11 +186,14 @@ async function getAvailability(data: AvailabilityRequest, accessToken: string): 
 
     const events = await eventsResponse.json();
     
-    // Try to get appointment schedules using the newer API
+    // Try to get appointment schedules using the Google Calendar API
     let appointmentSchedules = [];
+    console.log('Fetching appointment schedules for calendar:', calendarId);
+    
     try {
-      const appointmentResponse = await fetch(
-        `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/settings/appointmentSchedules`,
+      // First, try to get calendar working hours/settings
+      const calendarResponse = await fetch(
+        `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -198,12 +201,33 @@ async function getAvailability(data: AvailabilityRequest, accessToken: string): 
         }
       );
       
+      if (calendarResponse.ok) {
+        const calendarData = await calendarResponse.json();
+        console.log('Calendar data:', JSON.stringify(calendarData, null, 2));
+      }
+
+      // Try to get appointment schedules from the newer API
+      const appointmentResponse = await fetch(
+        `https://calendar.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/appointmentSchedules`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+      
+      console.log('Appointment schedules response status:', appointmentResponse.status);
+      
       if (appointmentResponse.ok) {
         const appointmentData = await appointmentResponse.json();
         appointmentSchedules = appointmentData.items || [];
+        console.log('Found appointment schedules:', JSON.stringify(appointmentSchedules, null, 2));
+      } else {
+        const errorText = await appointmentResponse.text();
+        console.log('Appointment schedules error:', errorText);
       }
     } catch (error) {
-      console.log('Appointment schedules not available, using default hours');
+      console.log('Error fetching appointment schedules:', error);
     }
 
     // If no appointment schedules found, use working hours from calendar settings
