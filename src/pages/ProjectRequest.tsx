@@ -591,9 +591,6 @@ export default function ProjectRequest() {
                 field
               }) => <FormItem>
                         <FormLabel>Que problema específico deseja resolver com esse software?</FormLabel>
-                        <FormDescription className="text-sm text-muted-foreground">
-                          Para entender seu objetivo.
-                        </FormDescription>
                         <FormControl>
                           <Textarea placeholder="Descreva o problema ou desafio..." {...field} />
                         </FormControl>
@@ -604,9 +601,6 @@ export default function ProjectRequest() {
                 field
               }) => <FormItem>
                         <FormLabel>Tem alguma ideia ou exemplo de como quer que funcione?</FormLabel>
-                        <FormDescription className="text-sm text-muted-foreground">
-                          Para visualizar sua visão.
-                        </FormDescription>
                         <FormControl>
                           <Textarea placeholder="Descreva sua ideia ou cite exemplos..." {...field} />
                         </FormControl>
@@ -617,9 +611,6 @@ export default function ProjectRequest() {
                 field
               }) => <FormItem>
                         <FormLabel>Vai ser usado por várias pessoas ou só pela sua equipa?</FormLabel>
-                        <FormDescription className="text-sm text-muted-foreground">
-                          Para planejarmos o uso.
-                        </FormDescription>
                         <FormControl>
                           {renderRadioGroup(field, [{
                     value: "individual",
