@@ -23,7 +23,7 @@ const serviceSchema = z.object({
   companyDomain: z.string().optional(),
   
   // Seção 2: Serviços selecionados
-  selectedServices: z.array(z.string()).min(1, "Selecione pelo menos um serviço"),
+  selectedServices: z.array(z.string()).min(1, "Seleccione pelo menos um serviço"),
   
   // Seção 3: Perguntas específicas por serviço
   // Aplicações Móveis
@@ -31,12 +31,14 @@ const serviceSchema = z.object({
   needsUserAccount: z.enum(["sim", "nao", "nao-sei"]).optional(),
   needsOfflineMode: z.enum(["sim", "nao", "nao-sei"]).optional(),
   hasDesignIdentity: z.enum(["sim", "nao", "em-desenvolvimento"]).optional(),
+  designFiles: z.string().optional(), // Para ficheiros de design móvel
   
   // Websites
   websiteType: z.string().optional(),
   websitePages: z.string().optional(),
   needsLoginPayments: z.enum(["login", "pagamentos", "ambos", "nenhum"]).optional(),
   hasDesignIdeasWeb: z.enum(["sim", "nao", "em-desenvolvimento"]).optional(),
+  webDesignFiles: z.string().optional(), // Para ficheiros de design web
   
   // Call Center
   supportChannels: z.array(z.string()).optional(),
@@ -155,21 +157,31 @@ export default function ProjectRequest() {
     field: any,
     options: { value: string; label: string }[]
   ) => (
-    <div className="space-y-2">
+    <div className="space-y-3">
       {options.map((option) => (
-        <div key={option.value} className="flex items-center space-x-2">
-          <input
-            type="radio"
-            id={`${field.name}-${option.value}`}
-            value={option.value}
-            checked={field.value === option.value}
-            onChange={() => field.onChange(option.value)}
-            className="h-4 w-4 text-primary border-gray-300 focus:ring-primary"
-          />
-          <Label
-            htmlFor={`${field.name}-${option.value}`}
-            className="text-sm font-normal cursor-pointer"
+        <div 
+          key={option.value} 
+          className={cn(
+            "flex items-center space-x-3 p-3 rounded-lg border cursor-pointer transition-all duration-200",
+            field.value === option.value
+              ? "border-primary bg-primary/5 shadow-sm"
+              : "border-border hover:border-primary/50 hover:bg-muted/30"
+          )}
+          onClick={() => field.onChange(option.value)}
+        >
+          <div
+            className={cn(
+              "w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors",
+              field.value === option.value
+                ? "border-primary bg-primary"
+                : "border-muted-foreground"
+            )}
           >
+            {field.value === option.value && (
+              <div className="w-2 h-2 rounded-full bg-primary-foreground" />
+            )}
+          </div>
+          <Label className="text-sm font-normal cursor-pointer flex-1">
             {option.label}
           </Label>
         </div>
@@ -409,7 +421,7 @@ export default function ProjectRequest() {
                     name="appPurpose"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>O que você quer que o app faça para o usuário?</FormLabel>
+                        <FormLabel>O que deseja que a aplicação faça para o utilizador?</FormLabel>
                         <FormDescription className="text-sm text-muted-foreground">
                           Ex.: pedir produtos, acompanhar compras — para entendermos o objetivo.
                         </FormDescription>
@@ -429,7 +441,7 @@ export default function ProjectRequest() {
                     name="needsUserAccount"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Os usuários vão precisar criar conta?</FormLabel>
+                        <FormLabel>Os utilizadores vão precisar de criar conta?</FormLabel>
                         <FormDescription className="text-sm text-muted-foreground">
                           Para saber se o app precisa de login.
                         </FormDescription>
@@ -450,7 +462,7 @@ export default function ProjectRequest() {
                     name="needsOfflineMode"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Quer que o app funcione mesmo sem internet?</FormLabel>
+                        <FormLabel>Deseja que a aplicação funcione mesmo sem internet?</FormLabel>
                         <FormDescription className="text-sm text-muted-foreground">
                           Para planejar uso offline.
                         </FormDescription>
@@ -471,7 +483,7 @@ export default function ProjectRequest() {
                     name="hasDesignIdentity"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Você já tem logo, cores ou estilo definido?</FormLabel>
+                        <FormLabel>Já tem logo, cores ou estilo definido?</FormLabel>
                         <FormDescription className="text-sm text-muted-foreground">
                           Para combinar o visual com sua marca.
                         </FormDescription>
@@ -486,6 +498,26 @@ export default function ProjectRequest() {
                       </FormItem>
                     )}
                   />
+
+                  {/* Campo para ficheiros de design móvel */}
+                  {form.watch("hasDesignIdentity") === "sim" && (
+                    <FormField
+                      control={form.control}
+                      name="designFiles"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Ficheiros de design (opcional)</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Pode descrever os ficheiros que tem ou indicar onde os podemos aceder..."
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
                 </CardContent>
               </Card>
             )}
@@ -496,7 +528,7 @@ export default function ProjectRequest() {
                 <CardHeader>
                   <CardTitle>Websites Profissionais e Sistemas Online</CardTitle>
                   <CardDescription>
-                    Vamos entender melhor o seu projeto web.
+                    Vamos entender melhor o seu projecto web.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -505,7 +537,7 @@ export default function ProjectRequest() {
                     name="websiteType"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Que tipo de site você quer?</FormLabel>
+                        <FormLabel>Que tipo de site deseja?</FormLabel>
                         <FormDescription className="text-sm text-muted-foreground">
                           Ex.: site informativo, loja online, sistema de reservas, portal de clientes — para definir o escopo.
                         </FormDescription>
@@ -525,7 +557,7 @@ export default function ProjectRequest() {
                     name="websitePages"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Quais páginas você precisa?</FormLabel>
+                        <FormLabel>Quais páginas precisa?</FormLabel>
                         <FormDescription className="text-sm text-muted-foreground">
                           Ex.: Início, Sobre, Contacto, Loja — para planejar o conteúdo.
                         </FormDescription>
@@ -545,13 +577,13 @@ export default function ProjectRequest() {
                     name="needsLoginPayments"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Vai ter cadastro, login ou pagamentos no site?</FormLabel>
+                        <FormLabel>Vai ter registo, login ou pagamentos no site?</FormLabel>
                         <FormDescription className="text-sm text-muted-foreground">
                           Para saber se precisamos dessas funções.
                         </FormDescription>
                         <FormControl>
                           {renderRadioGroup(field, [
-                            { value: "login", label: "Só login/cadastro" },
+                            { value: "login", label: "Só login/registo" },
                             { value: "pagamentos", label: "Só pagamentos" },
                             { value: "ambos", label: "Login e pagamentos" },
                             { value: "nenhum", label: "Nenhum dos dois" }
@@ -567,7 +599,7 @@ export default function ProjectRequest() {
                     name="hasDesignIdeasWeb"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Você já tem logo, cores ou ideias de design?</FormLabel>
+                        <FormLabel>Já tem logo, cores ou ideias de design?</FormLabel>
                         <FormDescription className="text-sm text-muted-foreground">
                           Para manter identidade visual.
                         </FormDescription>
@@ -582,11 +614,29 @@ export default function ProjectRequest() {
                       </FormItem>
                     )}
                   />
+
+                  {/* Campo para ficheiros de design web */}
+                  {form.watch("hasDesignIdeasWeb") === "sim" && (
+                    <FormField
+                      control={form.control}
+                      name="webDesignFiles"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Ficheiros de design web (opcional)</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Pode descrever os ficheiros que tem ou indicar onde os podemos aceder..."
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
                 </CardContent>
               </Card>
             )}
-
-            {/* Call Center */}
             {selectedServices.includes("call-center") && (
               <Card>
                 <CardHeader>
@@ -688,7 +738,7 @@ export default function ProjectRequest() {
                 <CardHeader>
                   <CardTitle>Poupe Tempo com Automação IA</CardTitle>
                   <CardDescription>
-                    Vamos identificar onde você pode economizar tempo.
+                    Vamos identificar onde pode economizar tempo.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -697,7 +747,7 @@ export default function ProjectRequest() {
                     name="manualTasks"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Quais tarefas manuais você faz hoje e quer automatizar?</FormLabel>
+                        <FormLabel>Quais tarefas manuais faz hoje e quer automatizar?</FormLabel>
                         <FormDescription className="text-sm text-muted-foreground">
                           Para saber onde economizar tempo.
                         </FormDescription>
@@ -717,7 +767,7 @@ export default function ProjectRequest() {
                     name="automationNeeds"
                     render={() => (
                       <FormItem>
-                        <FormLabel>Você gostaria de relatórios automáticos, leitura de documentos ou gerenciamento de estoque?</FormLabel>
+                        <FormLabel>Gostaria de relatórios automáticos, leitura de documentos ou gestão de stock?</FormLabel>
                         <FormDescription className="text-sm text-muted-foreground">
                           Para entendermos a automação necessária.
                         </FormDescription>
@@ -766,7 +816,7 @@ export default function ProjectRequest() {
                 <CardHeader>
                   <CardTitle>Soluções Empresariais Personalizadas</CardTitle>
                   <CardDescription>
-                    Vamos entender o problema que você quer resolver.
+                    Vamos entender o problema que deseja resolver.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -775,7 +825,7 @@ export default function ProjectRequest() {
                     name="businessProblem"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Que problema específico você quer resolver com esse software?</FormLabel>
+                        <FormLabel>Que problema específico deseja resolver com esse software?</FormLabel>
                         <FormDescription className="text-sm text-muted-foreground">
                           Para entender seu objetivo.
                         </FormDescription>
@@ -815,7 +865,7 @@ export default function ProjectRequest() {
                     name="userScope"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Vai ser usado por várias pessoas ou só por você/sua equipe?</FormLabel>
+                        <FormLabel>Vai ser usado por várias pessoas ou só pela sua equipa?</FormLabel>
                         <FormDescription className="text-sm text-muted-foreground">
                           Para planejarmos o uso.
                         </FormDescription>
@@ -840,7 +890,7 @@ export default function ProjectRequest() {
                 <CardHeader>
                   <CardTitle>Inteligência de Dados e Insights Empresariais</CardTitle>
                   <CardDescription>
-                    Vamos entender que tipo de análise você precisa.
+                    Vamos entender que tipo de análise precisa.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -849,7 +899,7 @@ export default function ProjectRequest() {
                     name="dataInsights"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Que tipo de informação você quer ver?</FormLabel>
+                        <FormLabel>Que tipo de informação deseja ver?</FormLabel>
                         <FormDescription className="text-sm text-muted-foreground">
                           Ex.: vendas, comportamento dos clientes, desempenho — para direcionar a análise.
                         </FormDescription>
@@ -914,7 +964,7 @@ export default function ProjectRequest() {
                 <CardHeader>
                   <CardTitle>Integração entre Serviços</CardTitle>
                   <CardDescription>
-                    Como você selecionou múltiplos serviços, vamos ver se eles devem trabalhar juntos.
+                    Como seleccionou múltiplos serviços, vamos ver se eles devem trabalhar juntos.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -923,7 +973,7 @@ export default function ProjectRequest() {
                     name="needsIntegration"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Você quer que esses serviços funcionem juntos (mesmo login, dados integrados)?</FormLabel>
+                        <FormLabel>Deseja que esses serviços funcionem juntos (mesmo login, dados integrados)?</FormLabel>
                         <FormDescription className="text-sm text-muted-foreground">
                           Para planejar integração.
                         </FormDescription>
@@ -976,7 +1026,7 @@ export default function ProjectRequest() {
                   name="additionalInfo"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Tem mais algo que gostaria de nos falar sobre seu projeto?</FormLabel>
+                      <FormLabel>Tem mais algo que gostaria de nos falar sobre o seu projecto?</FormLabel>
                       <FormDescription className="text-sm text-muted-foreground">
                         Para capturarmos tudo. Se quiser, pode enviar arquivos: logo, rascunhos, exemplos, planilhas, imagens...
                       </FormDescription>
