@@ -620,7 +620,7 @@ export default function ProjectRequest() {
                     label: "Pequena equipe (1-10 pessoas)"
                   }, {
                     value: "equipe",
-                    label: "Minha equipe (10-50 pessoas)"
+                    label: "Equipe média (10-50 pessoas)"
                   }, {
                     value: "empresa",
                     label: "Toda a empresa (50+ pessoas)"
