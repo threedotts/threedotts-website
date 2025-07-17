@@ -332,40 +332,21 @@ export function ContactSection() {
           <p className="text-lg text-primary-foreground/90 mb-8 max-w-2xl mx-auto">
             Dê o primeiro passo rumo à transformação digital. Vamos discutir o seu projecto e criar soluções que geram resultados reais para o seu negócio.
           </p>
-          <div 
-            id="calendar-scheduling-button" 
-            className="inline-block"
-            ref={(el) => {
-              if (el && typeof window !== 'undefined') {
-                // Load Google Calendar scheduling scripts
-                if (!document.getElementById('calendar-css')) {
-                  const link = document.createElement('link');
-                  link.id = 'calendar-css';
-                  link.href = 'https://calendar.google.com/calendar/scheduling-button-script.css';
-                  link.rel = 'stylesheet';
-                  document.head.appendChild(link);
-                }
-                
-                if (!document.getElementById('calendar-script')) {
-                  const script = document.createElement('script');
-                  script.id = 'calendar-script';
-                  script.src = 'https://calendar.google.com/calendar/scheduling-button-script.js';
-                  script.async = true;
-                  script.onload = () => {
-                    if (window.calendar && window.calendar.schedulingButton) {
-                      window.calendar.schedulingButton.load({
-                        url: 'https://calendar.google.com/calendar/appointments/schedules/AcZssZ0l1MqdSil-lmX5yQmCndkugzIdzLxO1Ut0BcpZ8Fj04LJpRHtOpltpWjB9P7ahbfoze2Q7ZDyl?gv=true',
-                        color: '#039BE5',
-                        label: 'Agende Consulta Gratuita',
-                        target: el,
-                      });
-                    }
-                  };
-                  document.head.appendChild(script);
-                }
-              }
+          <Button 
+            variant="secondary" 
+            size="lg" 
+            className="group w-full sm:w-auto px-4 sm:px-6"
+            onClick={() => {
+              window.open(
+                'https://calendar.google.com/calendar/appointments/schedules/AcZssZ0l1MqdSil-lmX5yQmCndkugzIdzLxO1Ut0BcpZ8Fj04LJpRHtOpltpWjB9P7ahbfoze2Q7ZDyl?gv=true',
+                'calendar-popup',
+                'width=800,height=600,resizable=yes,scrollbars=yes'
+              );
             }}
-          ></div>
+          >
+            <span className="truncate">Agende Consulta Gratuita</span>
+            <ArrowRight className="group-hover:translate-x-1 transition-transform ml-2 flex-shrink-0" />
+          </Button>
         </div>
       </div>
     </section>
