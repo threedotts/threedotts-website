@@ -120,12 +120,34 @@ export default function PhoneInput({ value, onChange, placeholder, className }: 
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target.value;
-    const cleaned = formatPhoneNumber(input);
+    const cursorPosition = e.target.selectionStart || 0;
+    const prevLength = displayValue.length;
     
-    // Limitar o tamanho máximo
-    if (cleaned.length > 20) return;
+    // Se o usuário está deletando (input é menor que display anterior)
+    const isDeleting = input.length < prevLength;
     
-    onChange(cleaned);
+    if (isDeleting) {
+      // Quando deletando, trabalhar com o valor limpo para evitar problemas com formatação
+      const cleaned = input.replace(/[^\d+]/g, '');
+      
+      // Se deletou tudo ou só restou +, limpar completamente
+      if (cleaned === '' || cleaned === '+') {
+        onChange('');
+        return;
+      }
+      
+      // Se não começar com +, adicionar
+      const finalValue = cleaned.startsWith('+') ? cleaned : '+' + cleaned;
+      onChange(finalValue);
+    } else {
+      // Quando adicionando caracteres, aplicar limpeza normal
+      const cleaned = formatPhoneNumber(input);
+      
+      // Limitar o tamanho máximo
+      if (cleaned.length > 20) return;
+      
+      onChange(cleaned);
+    }
   };
 
   return (
