@@ -71,37 +71,31 @@ const services = [
   {
     id: "mobile-apps",
     title: "Aplicações Móveis para o Seu Negócio",
-    subtitle: "(Android e iPhone)",
     icon: Smartphone,
   },
   {
     id: "websites",
     title: "Websites Profissionais e Sistemas Online",
-    subtitle: "(ex: lojas, portais, reservas)",
     icon: Globe,
   },
   {
     id: "call-center",
     title: "Call Center e Atendimento ao Cliente com IA",
-    subtitle: "",
     icon: Headphones,
   },
   {
     id: "automation",
     title: "Poupe Tempo com Automação IA",
-    subtitle: "",
     icon: Bot,
   },
   {
     id: "business-solutions",
     title: "Soluções Empresariais Personalizadas",
-    subtitle: "",
     icon: Cog,
   },
   {
     id: "data-intelligence",
     title: "Inteligência de Dados e Insights Empresariais",
-    subtitle: "",
     icon: BarChart3,
   },
 ];
@@ -292,9 +286,9 @@ export default function ProjectRequest() {
             {/* Seção 2: Seleção de Serviços */}
             <Card>
               <CardHeader>
-                <CardTitle>Qual(is) serviço(s) você quer?</CardTitle>
+                <CardTitle>Quais serviços deseja?</CardTitle>
                 <CardDescription>
-                  Selecione um ou mais serviços que precisa para o seu projeto.
+                  Seleccione um ou mais serviços que precisa para o seu projecto.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -316,10 +310,10 @@ export default function ProjectRequest() {
                                   <FormControl>
                                     <div
                                       className={cn(
-                                        "relative p-6 rounded-lg border-2 cursor-pointer transition-all duration-200 hover:shadow-md group",
+                                        "relative p-6 rounded-lg border-2 cursor-pointer transition-all duration-200 hover:shadow-lg group",
                                         isSelected
-                                          ? "border-primary bg-primary/5 shadow-sm"
-                                          : "border-border hover:border-primary/50"
+                                          ? "border-primary bg-gradient-to-br from-primary/10 to-primary/20 shadow-lg ring-2 ring-primary/20"
+                                          : "border-border hover:border-primary/50 hover:shadow-md"
                                       )}
                                       onClick={() => {
                                         const currentValue = field.value || [];
@@ -362,10 +356,10 @@ export default function ProjectRequest() {
                                       <div className="flex items-start space-x-4">
                                         <div
                                           className={cn(
-                                            "p-3 rounded-lg transition-colors",
+                                            "p-3 rounded-lg transition-all duration-200",
                                             isSelected
-                                              ? "bg-primary text-primary-foreground"
-                                              : "bg-muted group-hover:bg-primary/10"
+                                              ? "bg-primary text-primary-foreground shadow-md scale-110"
+                                              : "bg-muted group-hover:bg-primary/20 group-hover:scale-105"
                                           )}
                                         >
                                           <service.icon className="h-6 w-6" />
@@ -375,17 +369,12 @@ export default function ProjectRequest() {
                                             className={cn(
                                               "font-semibold text-base mb-1 transition-colors",
                                               isSelected
-                                                ? "text-primary"
+                                                ? "text-primary font-bold"
                                                 : "text-foreground group-hover:text-primary"
                                             )}
                                           >
                                             {service.title}
                                           </h3>
-                                          {service.subtitle && (
-                                            <p className="text-sm text-muted-foreground">
-                                              {service.subtitle}
-                                            </p>
-                                          )}
                                         </div>
                                       </div>
                                     </div>
