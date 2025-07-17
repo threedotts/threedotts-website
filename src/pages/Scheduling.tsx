@@ -1,6 +1,7 @@
 import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import SchedulingForm from "@/components/SchedulingForm";
 
 const Scheduling = () => {
   return (
@@ -13,25 +14,12 @@ const Scheduling = () => {
             Voltar ao Início
           </Button>
         </Link>
-        <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
-          Agende sua Consulta Gratuita
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Reserve um horário para conversarmos sobre seu projeto.
-        </p>
       </div>
 
-      {/* Google Calendar Appointment Scheduling begin */}
-      <div className="w-full h-full">
-        <iframe 
-          src="https://calendar.google.com/calendar/appointments/schedules/AcZssZ0l1MqdSil-lmX5yQmCndkugzIdzLxO1Ut0BcpZ8Fj04LJpRHtOpltpWjB9P7ahbfoze2Q7ZDyl?gv=true" 
-          style={{ border: 0 }} 
-          width="100%" 
-          height="100%"
-          frameBorder="0"
-        />
+      {/* Custom Scheduling Form */}
+      <div className="container mx-auto py-8">
+        <SchedulingForm />
       </div>
-      {/* end Google Calendar Appointment Scheduling */}
     </div>
   );
 };

@@ -350,20 +350,16 @@ export function ContactSection() {
               </DialogHeader>
               <div className="text-center space-y-4">
                 <p className="text-muted-foreground">
-                  Você será redirecionado para o Google Calendar onde poderá escolher o melhor horário para sua consulta gratuita.
+                  Acesse nossa página de agendamento para escolher o melhor horário para sua consulta gratuita.
                 </p>
                 <Button 
                   onClick={() => {
-                    window.open(
-                      'https://calendar.google.com/calendar/appointments/schedules/AcZssZ0l1MqdSil-lmX5yQmCndkugzIdzLxO1Ut0BcpZ8Fj04LJpRHtOpltpWjB9P7ahbfoze2Q7ZDyl?gv=true',
-                      '_blank',
-                      'noopener,noreferrer'
-                    );
+                    window.open('/scheduling', '_blank');
                   }}
                   className="w-full"
                   variant="default"
                 >
-                  Abrir Calendário
+                  Ir para Agendamento
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </div>
