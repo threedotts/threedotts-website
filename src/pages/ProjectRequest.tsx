@@ -561,7 +561,7 @@ export default function ProjectRequest() {
                 <CardHeader>
                   <CardTitle>Poupe Tempo com Automação IA</CardTitle>
                   <CardDescription>
-                    Vamos identificar onde pode economizar tempo.
+                    Vamos automatizar processos para sua empresa.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -569,41 +569,12 @@ export default function ProjectRequest() {
                 field
               }) => <FormItem>
                         <FormLabel>Quais tarefas manuais faz hoje e quer automatizar?</FormLabel>
-                        <FormDescription className="text-sm text-muted-foreground">
-                          Para saber onde economizar tempo.
-                        </FormDescription>
                         <FormControl>
-                          <Textarea placeholder="Descreva as tarefas que consome muito tempo..." {...field} />
+                          <Textarea placeholder="Ex.: Envio de relatórios diários por email, processamento manual de facturas, agendamento de reuniões, gestão de inventário..." {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>} />
 
-                  <FormField control={form.control} name="automationNeeds" render={() => <FormItem>
-                        <FormLabel>Gostaria de relatórios automáticos, leitura de documentos ou gestão de stock?</FormLabel>
-                        <FormDescription className="text-sm text-muted-foreground">
-                          Para entendermos a automação necessária.
-                        </FormDescription>
-                        <div className="space-y-2">
-                          {automationOptions.map(option => <FormField key={option} control={form.control} name="automationNeeds" render={({
-                    field
-                  }) => <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                                  <FormControl>
-                                    <Checkbox checked={field.value?.includes(option)} onCheckedChange={checked => {
-                        const currentValue = field.value || [];
-                        if (checked) {
-                          field.onChange([...currentValue, option]);
-                        } else {
-                          field.onChange(currentValue.filter((value: string) => value !== option));
-                        }
-                      }} />
-                                  </FormControl>
-                                  <FormLabel className="text-sm font-normal cursor-pointer">
-                                    {option}
-                                  </FormLabel>
-                                </FormItem>} />)}
-                        </div>
-                        <FormMessage />
-                      </FormItem>} />
                 </CardContent>
               </Card>}
 
