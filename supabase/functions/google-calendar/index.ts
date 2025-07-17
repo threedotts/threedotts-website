@@ -381,7 +381,7 @@ async function bookAppointment(
   const endDateTime = new Date(startDateTime.getTime() + 60 * 60000); // 1 hour duration
 
   // Create Google Calendar event
-  const event: any = {
+  const event = {
     summary: `Consulta com ${name}`,
     description: `
 Consulta gratuita agendada via website.
@@ -398,27 +398,19 @@ ${notes ? `Observações: ${notes}` : ''}
     end: {
       dateTime: endDateTime.toISOString(),
       timeZone: 'America/Sao_Paulo',
-    },
-    conferenceData: {
-      createRequest: {
-        requestId: `meet-${Date.now()}`,
-        conferenceSolutionKey: { 
-          type: 'hangoutsMeet' 
-        }
-      }
     }
   };
 
   // Create event in Google Calendar
   const calendarResponse = await fetch(
-    `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?conferenceDataVersion=1`,
+    `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events`,
     {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(event)
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(event)
     }
   );
 
