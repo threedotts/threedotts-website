@@ -51,7 +51,7 @@ const serviceSchema = z.object({
   // Soluções Empresariais
   businessProblem: z.string().optional(),
   solutionIdea: z.string().optional(),
-  userScope: z.enum(["individual", "equipe", "empresa"]).optional(),
+  userScope: z.enum(["individual", "pequena-equipe", "equipe", "empresa"]).optional(),
   // Inteligência de Dados
   dataInsights: z.string().optional(),
   currentDataSystems: z.string().optional(),
@@ -615,6 +615,9 @@ export default function ProjectRequest() {
                           {renderRadioGroup(field, [{
                     value: "individual",
                     label: "Somente eu"
+                  }, {
+                    value: "pequena-equipe",
+                    label: "Pequena equipe (1-10 pessoas)"
                   }, {
                     value: "equipe",
                     label: "Minha equipe (10-50 pessoas)"
