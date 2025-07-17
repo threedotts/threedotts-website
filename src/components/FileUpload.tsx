@@ -195,7 +195,7 @@ export default function FileUpload({
                 variant="ghost"
                 size="sm"
                 onClick={() => removeFile(index)}
-                className="text-destructive hover:text-red-400"
+                className="text-destructive hover:text-red-400 hover:bg-red-50"
               >
                 <X className="h-4 w-4" />
               </Button>
