@@ -1,8 +1,24 @@
 import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useEffect, useRef } from "react";
 
 const Scheduling = () => {
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  useEffect(() => {
+    // Force iframe reload on component mount
+    if (iframeRef.current) {
+      const src = iframeRef.current.src;
+      iframeRef.current.src = '';
+      setTimeout(() => {
+        if (iframeRef.current) {
+          iframeRef.current.src = src;
+        }
+      }, 100);
+    }
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header with back button */}
@@ -24,6 +40,7 @@ const Scheduling = () => {
       {/* Google Calendar Embed - Full Width */}
       <div className="w-full h-full">
         <iframe 
+          ref={iframeRef}
           src="https://calendar.google.com/calendar/appointments/schedules/AcZssZ0l1MqdSil-lmX5yQmCndkugzIdzLxO1Ut0BcpZ8Fj04LJpRHtOpltpWjB9P7ahbfoze2Q7ZDyl?gv=true" 
           style={{ border: 0, display: 'block' }} 
           width="100%" 
