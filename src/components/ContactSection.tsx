@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -332,21 +333,33 @@ export function ContactSection() {
           <p className="text-lg text-primary-foreground/90 mb-8 max-w-2xl mx-auto">
             Dê o primeiro passo rumo à transformação digital. Vamos discutir o seu projecto e criar soluções que geram resultados reais para o seu negócio.
           </p>
-          <Button 
-            variant="secondary" 
-            size="lg" 
-            className="group w-full sm:w-auto px-4 sm:px-6"
-            onClick={() => {
-              window.open(
-                'https://calendar.google.com/calendar/appointments/schedules/AcZssZ0l1MqdSil-lmX5yQmCndkugzIdzLxO1Ut0BcpZ8Fj04LJpRHtOpltpWjB9P7ahbfoze2Q7ZDyl?gv=true',
-                'calendar-popup',
-                'width=800,height=600,resizable=yes,scrollbars=yes'
-              );
-            }}
-          >
-            <span className="truncate">Agende Consulta Gratuita</span>
-            <ArrowRight className="group-hover:translate-x-1 transition-transform ml-2 flex-shrink-0" />
-          </Button>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button 
+                variant="secondary" 
+                size="lg" 
+                className="group w-full sm:w-auto px-4 sm:px-6"
+              >
+                <span className="truncate">Agende Consulta Gratuita</span>
+                <ArrowRight className="group-hover:translate-x-1 transition-transform ml-2 flex-shrink-0" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-4xl w-full h-[80vh]">
+              <DialogHeader>
+                <DialogTitle>Agende sua Consulta Gratuita</DialogTitle>
+              </DialogHeader>
+              <div className="w-full h-full min-h-[600px]">
+                <iframe 
+                  src="https://calendar.google.com/calendar/appointments/schedules/AcZssZ0l1MqdSil-lmX5yQmCndkugzIdzLxO1Ut0BcpZ8Fj04LJpRHtOpltpWjB9P7ahbfoze2Q7ZDyl?gv=true" 
+                  style={{ border: 0 }} 
+                  width="100%" 
+                  height="100%"
+                  frameBorder="0"
+                  title="Agendamento de Consulta Gratuita"
+                />
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
     </section>
