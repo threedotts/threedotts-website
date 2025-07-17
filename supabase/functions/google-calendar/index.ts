@@ -155,17 +155,69 @@ async function getAvailability(data: AvailabilityRequest, accessToken: string): 
   const { date, timeZone } = data;
 
   try {
-    // Get appointment schedules
-    const schedulesResponse = await fetch(
-      `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/acl`,
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
-    );
+    // Validate booking date constraints (minimum 3 days, maximum 60 days)
+    const today = new Date();
+    const requestedDate = new Date(date);
+    const minDate = new Date(today);
+    minDate.setDate(today.getDate() + 3);
+    const maxDate = new Date(today);
+    maxDate.setDate(today.getDate() + 60);
 
-    // Get existing events for the date to check conflicts
+    if (requestedDate < minDate) {
+      return new Response(
+        JSON.stringify({ 
+          availableSlots: [], 
+          error: 'Agendamento deve ser feito com pelo menos 3 dias de antecedência' 
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        }
+      );
+    }
+
+    if (requestedDate > maxDate) {
+      return new Response(
+        JSON.stringify({ 
+          availableSlots: [], 
+          error: 'Agendamento não pode ser feito para mais de 60 dias no futuro' 
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        }
+      );
+    }
+
+    // Get day of week (0 = Sunday, 1 = Monday, etc.)
+    const dayOfWeek = requestedDate.getDay();
+    
+    // Define working hours based on day of week
+    let workingHours = null;
+    
+    if (dayOfWeek >= 1 && dayOfWeek <= 4) {
+      // Segunda a quinta: das 9 às 17
+      workingHours = { start: 9, end: 17 };
+    } else if (dayOfWeek === 5) {
+      // Sexta: das 14:30 às 17
+      workingHours = { start: 14.5, end: 17 };
+    } else if (dayOfWeek === 6) {
+      // Sábado: das 10 às 14
+      workingHours = { start: 10, end: 14 };
+    } else {
+      // Domingo: não trabalha
+      return new Response(
+        JSON.stringify({ availableSlots: [] }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        }
+      );
+    }
+
+    console.log(`Working hours for ${date} (day ${dayOfWeek}):`, workingHours);
+
+    // Get existing events for the date to check conflicts and count appointments
     const startTime = new Date(`${date}T00:00:00.000Z`);
     const endTime = new Date(`${date}T23:59:59.999Z`);
 
@@ -185,55 +237,48 @@ async function getAvailability(data: AvailabilityRequest, accessToken: string): 
     );
 
     const events = await eventsResponse.json();
+    console.log(`Found ${events.items?.length || 0} existing events for ${date}`);
     
-    // Get calendar details and working hours
-    console.log('Fetching calendar details for:', calendarId);
-    
-    let workingHours = {
-      start: 9, // 9 AM
-      end: 17,  // 5 PM
-      interval: 60 // 1 hour slots
-    };
-    
-    try {
-      // Get calendar settings/details
-      const calendarResponse = await fetch(
-        `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}`,
+    // Check if maximum daily appointments (4) is reached
+    const existingAppointments = events.items?.length || 0;
+    if (existingAppointments >= 4) {
+      return new Response(
+        JSON.stringify({ 
+          availableSlots: [], 
+          error: 'Limite diário de 4 reuniões atingido para esta data' 
+        }),
         {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
+          status: 200,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
         }
       );
-      
-      if (calendarResponse.ok) {
-        const calendarData = await calendarResponse.json();
-        console.log('Calendar data:', JSON.stringify(calendarData, null, 2));
-        
-        // Extract timezone for proper time handling
-        if (calendarData.timeZone) {
-          console.log('Calendar timezone:', calendarData.timeZone);
-        }
-      }
-    } catch (error) {
-      console.log('Error fetching calendar details:', error);
     }
 
-    // Use default working hours since Appointment Schedules API is not available
+    // Generate time slots based on working hours
     let availableTimeSlots = [];
     
-    // Generate time slots based on working hours
-    const businessHours = {
-      start: workingHours.start,
-      end: workingHours.end,
-      duration: 60, // 1 hour slots
-    };
-
-    for (let hour = businessHours.start; hour < businessHours.end; hour++) {
+    if (workingHours.start % 1 === 0.5) {
+      // Handle half-hour start (e.g., 14:30)
+      const startHour = Math.floor(workingHours.start);
       availableTimeSlots.push({
-        time: `${hour.toString().padStart(2, '0')}:00`,
-        display: `${hour > 12 ? hour - 12 : hour === 12 ? 12 : hour}:00 ${hour >= 12 ? 'PM' : 'AM'}`,
+        time: `${startHour.toString().padStart(2, '0')}:30`,
+        display: `${startHour > 12 ? startHour - 12 : startHour}:30 ${startHour >= 12 ? 'PM' : 'AM'}`,
       });
+      
+      for (let hour = startHour + 1; hour < workingHours.end; hour++) {
+        availableTimeSlots.push({
+          time: `${hour.toString().padStart(2, '0')}:00`,
+          display: `${hour > 12 ? hour - 12 : hour === 12 ? 12 : hour}:00 ${hour >= 12 ? 'PM' : 'AM'}`,
+        });
+      }
+    } else {
+      // Regular hourly slots
+      for (let hour = workingHours.start; hour < workingHours.end; hour++) {
+        availableTimeSlots.push({
+          time: `${hour.toString().padStart(2, '0')}:00`,
+          display: `${hour > 12 ? hour - 12 : hour === 12 ? 12 : hour}:00 ${hour >= 12 ? 'PM' : 'AM'}`,
+        });
+      }
     }
 
     console.log(`Generated ${availableTimeSlots.length} time slots for ${date}`);
@@ -257,6 +302,8 @@ async function getAvailability(data: AvailabilityRequest, accessToken: string): 
 
       return !isBooked;
     });
+
+    console.log(`Final available slots: ${availableSlots.length}`);
 
     return new Response(
       JSON.stringify({ availableSlots }),
