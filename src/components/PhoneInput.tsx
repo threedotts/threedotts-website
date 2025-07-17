@@ -122,27 +122,31 @@ export default function PhoneInput({ value, onChange, placeholder, className }: 
     const input = e.target.value;
     
     // Permitir apenas números e o sinal +
-    const cleaned = input.replace(/[^\d+]/g, '');
+    let cleaned = input.replace(/[^\d+]/g, '');
     
-    // Se o campo está vazio, permitir vazio
-    if (cleaned === '') {
-      onChange('');
-      return;
-    }
-    
-    // Se só tem o +, permitir
-    if (cleaned === '+') {
+    // Se está vazio ou só tem espaços, forçar começar com +
+    if (cleaned === '' || !cleaned.includes('+')) {
       onChange('+');
       return;
     }
     
-    // Se começou com números sem +, adicionar +
-    if (/^\d/.test(cleaned)) {
-      onChange('+' + cleaned);
-      return;
+    // Se tem + mas está no meio ou no final, mover para o início
+    if (cleaned.includes('+')) {
+      const numbers = cleaned.replace(/\+/g, '');
+      cleaned = '+' + numbers;
     }
     
-    // Caso contrário, usar o valor limpo
+    // Garantir que sempre comece com + e tenha no máximo um +
+    if (!cleaned.startsWith('+')) {
+      cleaned = '+' + cleaned;
+    }
+    
+    // Remover + extras se houver
+    const plusCount = (cleaned.match(/\+/g) || []).length;
+    if (plusCount > 1) {
+      cleaned = '+' + cleaned.replace(/\+/g, '');
+    }
+    
     onChange(cleaned);
   };
 
