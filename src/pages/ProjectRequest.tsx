@@ -17,7 +17,9 @@ const serviceSchema = z.object({
   // Seção 1: Informações básicas
   fullName: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
   companyName: z.string().min(2, "Nome da empresa deve ter pelo menos 2 caracteres"),
-  contact: z.string().min(5, "Contacto deve ter pelo menos 5 caracteres"),
+  email: z.string().email("Email deve ser válido"),
+  phone: z.string().min(5, "Telefone deve ter pelo menos 5 caracteres"),
+  companyDomain: z.string().optional(),
   
   // Seção 2: Serviços selecionados
   selectedServices: z.array(z.string()).min(1, "Selecione pelo menos um serviço"),
@@ -220,9 +222,6 @@ export default function ProjectRequest() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Qual é o seu nome?</FormLabel>
-                      <FormDescription className="text-sm text-muted-foreground">
-                        Para sabermos quem está preenchendo.
-                      </FormDescription>
                       <FormControl>
                         <Input placeholder="O seu nome completo" {...field} />
                       </FormControl>
@@ -237,9 +236,6 @@ export default function ProjectRequest() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Qual é o nome da sua empresa ou projeto?</FormLabel>
-                      <FormDescription className="text-sm text-muted-foreground">
-                        Para manter tudo organizado.
-                      </FormDescription>
                       <FormControl>
                         <Input placeholder="Nome da empresa ou projeto" {...field} />
                       </FormControl>
@@ -250,15 +246,40 @@ export default function ProjectRequest() {
 
                 <FormField
                   control={form.control}
-                  name="contact"
+                  name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Qual o melhor contacto? (e-mail ou telefone)</FormLabel>
-                      <FormDescription className="text-sm text-muted-foreground">
-                        Para responder depois.
-                      </FormDescription>
+                      <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input placeholder="email@exemplo.com ou +351 123 456 789" {...field} />
+                        <Input placeholder="email@exemplo.com" type="email" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Telefone</FormLabel>
+                      <FormControl>
+                        <Input placeholder="+351 123 456 789" type="tel" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="companyDomain"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Domínio da empresa (opcional)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="www.exemplo.com" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
