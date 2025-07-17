@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { X } from "lucide-react";
 
 interface CountryCode {
   code: string;
@@ -153,6 +154,10 @@ export default function PhoneInput({ value, onChange, placeholder, className }: 
     }
   };
 
+  const handleClear = () => {
+    onChange('');
+  };
+
   return (
     <div className="relative">
       <div className="absolute left-3 top-1/2 transform -translate-y-1/2 flex items-center space-x-2 z-10">
@@ -169,9 +174,19 @@ export default function PhoneInput({ value, onChange, placeholder, className }: 
         placeholder={detectedCountry?.placeholder || placeholder || "+351 123 456 789"}
         className={cn(
           detectedCountry ? "pl-12" : "pl-3",
+          value ? "pr-10" : "pr-3",
           className
         )}
       />
+      {value && (
+        <button
+          type="button"
+          onClick={handleClear}
+          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors z-10"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      )}
     </div>
   );
 }
