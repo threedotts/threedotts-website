@@ -21,17 +21,17 @@ const Scheduling = () => {
         </p>
       </div>
 
-      {/* Google Calendar Embed - Full Width */}
+      {/* Google Calendar Appointment Scheduling begin */}
       <div className="w-full h-full">
         <iframe 
           src="https://calendar.google.com/calendar/appointments/schedules/AcZssZ0l1MqdSil-lmX5yQmCndkugzIdzLxO1Ut0BcpZ8Fj04LJpRHtOpltpWjB9P7ahbfoze2Q7ZDyl?gv=true" 
-          style={{ border: 0, display: 'block' }} 
+          style={{ border: 0 }} 
           width="100%" 
-          height="800"
+          height="100%"
           frameBorder="0"
-          title="Agendamento de Consulta Gratuita"
         />
       </div>
+      {/* end Google Calendar Appointment Scheduling */}
     </div>
   );
 };
