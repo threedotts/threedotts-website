@@ -151,7 +151,7 @@ async function createJWT(header: any, payload: any, privateKey: string): Promise
 }
 
 async function getAvailability(data: AvailabilityRequest, accessToken: string): Promise<Response> {
-  const calendarId = 'primary';
+  const calendarId = 'limatembe44@gmail.com';
   const { date, timeZone } = data;
 
   try {
@@ -334,7 +334,7 @@ async function bookAppointment(
   supabase: any
 ): Promise<Response> {
   const { name, email, phone, date, time, notes } = data;
-  const calendarId = 'primary';
+  const calendarId = 'limatembe44@gmail.com';
 
   // Create start and end times
   const [hours, minutes] = time.split(':').map(Number);
