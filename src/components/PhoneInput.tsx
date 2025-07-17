@@ -120,37 +120,30 @@ export default function PhoneInput({ value, onChange, placeholder, className }: 
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target.value;
-    const prevLength = displayValue.length;
     
-    // Se o usuário está deletando (input é menor que display anterior)
-    const isDeleting = input.length < prevLength;
+    // Permitir apenas números e o sinal +
+    const cleaned = input.replace(/[^\d+]/g, '');
     
-    if (isDeleting) {
-      // Permitir deletar tudo, incluindo o código do país
-      let cleaned = input.replace(/[^\d+]/g, '');
-      
-      // Se deletou tudo, permitir campo vazio
-      if (cleaned === '') {
-        onChange('');
-        return;
-      }
-      
-      // Se só restou números sem +, permitir isso também para o usuário poder digitar novo código
-      onChange(cleaned);
-    } else {
-      // Quando adicionando caracteres
-      let cleaned = input.replace(/[^\d+]/g, '');
-      
-      // Se começou a digitar números sem +, adicionar o +
-      if (cleaned && !cleaned.startsWith('+') && /^\d/.test(cleaned)) {
-        cleaned = '+' + cleaned;
-      }
-      
-      // Limitar o tamanho máximo
-      if (cleaned.length > 20) return;
-      
-      onChange(cleaned);
+    // Se o campo está vazio, permitir vazio
+    if (cleaned === '') {
+      onChange('');
+      return;
     }
+    
+    // Se só tem o +, permitir
+    if (cleaned === '+') {
+      onChange('+');
+      return;
+    }
+    
+    // Se começou com números sem +, adicionar +
+    if (/^\d/.test(cleaned)) {
+      onChange('+' + cleaned);
+      return;
+    }
+    
+    // Caso contrário, usar o valor limpo
+    onChange(cleaned);
   };
 
   return (
