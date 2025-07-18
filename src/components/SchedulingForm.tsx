@@ -34,6 +34,7 @@ const SchedulingForm = () => {
     phone: "",
     notes: "",
   });
+  const [webhookUrl, setWebhookUrl] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const { toast } = useToast();
@@ -154,27 +155,31 @@ const SchedulingForm = () => {
 
       if (error) throw error;
 
-      // Send data to webhook
-      try {
-        await fetch('http://localhost:5678/webhook-test/eea87148-1856-4f3a-b9fd-d576998e7224', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          mode: 'no-cors', // Handle CSP restrictions
-          body: JSON.stringify({
-            name: formData.name,
-            email: formData.email,
-            phone: formData.phone,
-            date: format(selectedDate!, 'yyyy-MM-dd'),
-            time: selectedTime,
-            notes: formData.notes,
-            appointmentData: data
-          }),
-        });
-      } catch (webhookError) {
-        console.error('Webhook error:', webhookError);
-        // Don't fail the appointment if webhook fails
+      // Send data to webhook if URL is provided
+      if (webhookUrl) {
+        try {
+          await fetch(webhookUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            mode: 'no-cors',
+            body: JSON.stringify({
+              name: formData.name,
+              email: formData.email,
+              phone: formData.phone,
+              date: format(selectedDate!, 'yyyy-MM-dd'),
+              time: selectedTime,
+              notes: formData.notes,
+              appointmentData: data,
+              timestamp: new Date().toISOString(),
+              triggered_from: window.location.origin
+            }),
+          });
+        } catch (webhookError) {
+          console.error('Webhook error:', webhookError);
+          // Don't fail the appointment if webhook fails
+        }
       }
 
       toast({
@@ -201,6 +206,15 @@ const SchedulingForm = () => {
   };
 
   const testWebhook = async () => {
+    if (!webhookUrl) {
+      toast({
+        title: "URL necessária",
+        description: "Por favor, insira a URL do webhook primeiro.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const testData = {
         name: "Test User",
@@ -209,32 +223,32 @@ const SchedulingForm = () => {
         date: "2025-07-25",
         time: "10:00",
         notes: "Test webhook call",
-        test: true
+        test: true,
+        timestamp: new Date().toISOString(),
+        triggered_from: window.location.origin
       };
 
-      console.log('Sending webhook request to:', 'http://localhost:5678/webhook-test/eea87148-1856-4f3a-b9fd-d576998e7224');
+      console.log('Sending webhook request to:', webhookUrl);
       console.log('Data being sent:', testData);
 
-      const response = await fetch('http://localhost:5678/webhook-test/eea87148-1856-4f3a-b9fd-d576998e7224', {
+      await fetch(webhookUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        mode: 'no-cors', // This handles CSP restrictions
+        mode: 'no-cors',
         body: JSON.stringify(testData),
       });
 
-      // Since we're using no-cors, we won't get a proper response status
-      // Instead, we'll show a success message
       toast({
         title: "Webhook enviado!",
-        description: "Requisição foi enviada para o webhook. Verifique se foi recebida no seu sistema.",
+        description: "Requisição foi enviada. Verifique se foi recebida no seu sistema.",
       });
     } catch (error) {
       console.error('Webhook test error details:', error);
       toast({
         title: "Erro no teste",
-        description: `Erro: ${error instanceof Error ? error.message : 'Não foi possível conectar ao webhook'}. Verifique se o servidor está rodando.`,
+        description: `Erro: ${error instanceof Error ? error.message : 'Não foi possível conectar ao webhook'}`,
         variant: "destructive",
       });
     }
@@ -400,6 +414,23 @@ const SchedulingForm = () => {
                   placeholder="Conte-nos um pouco sobre seu projeto ou necessidades..."
                   rows={3}
                 />
+              </div>
+
+              {/* Webhook URL Input */}
+              <div className="space-y-2">
+                <Label htmlFor="webhookUrl">
+                  URL do Webhook (opcional)
+                </Label>
+                <Input
+                  id="webhookUrl"
+                  type="url"
+                  value={webhookUrl}
+                  onChange={(e) => setWebhookUrl(e.target.value)}
+                  placeholder="https://hooks.zapier.com/hooks/catch/..."
+                />
+                <p className="text-xs text-muted-foreground">
+                  Use Zapier, webhook.site ou ngrok para criar um webhook público
+                </p>
               </div>
 
               {/* Summary */}
