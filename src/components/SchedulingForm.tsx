@@ -34,7 +34,6 @@ const SchedulingForm = () => {
     phone: "",
     notes: "",
   });
-  const [webhookUrl, setWebhookUrl] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const { toast } = useToast();
@@ -155,34 +154,6 @@ const SchedulingForm = () => {
 
       if (error) throw error;
 
-      // Send data to webhook if URL is provided
-      if (webhookUrl) {
-        try {
-          await fetch(webhookUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'ngrok-skip-browser-warning': 'true',
-            },
-            mode: 'no-cors',
-            body: JSON.stringify({
-              name: formData.name,
-              email: formData.email,
-              phone: formData.phone,
-              date: format(selectedDate!, 'yyyy-MM-dd'),
-              time: selectedTime,
-              notes: formData.notes,
-              appointmentData: data,
-              timestamp: new Date().toISOString(),
-              triggered_from: window.location.origin
-            }),
-          });
-        } catch (webhookError) {
-          console.error('Webhook error:', webhookError);
-          // Don't fail the appointment if webhook fails
-        }
-      }
-
       toast({
         title: "Consulta agendada!",
         description: "Sua consulta foi agendada com sucesso. Você receberá um email de confirmação em breve.",
@@ -206,56 +177,6 @@ const SchedulingForm = () => {
     }
   };
 
-  const testWebhook = async () => {
-    if (!webhookUrl) {
-      toast({
-        title: "URL necessária",
-        description: "Por favor, insira a URL do webhook primeiro.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      const testData = {
-        name: "Test User",
-        email: "test@example.com", 
-        phone: "+258123456789",
-        date: "2025-07-25",
-        time: "10:00",
-        notes: "Test webhook call",
-        test: true,
-        timestamp: new Date().toISOString(),
-        triggered_from: window.location.origin
-      };
-
-      console.log('Sending webhook request to:', webhookUrl);
-      console.log('Data being sent:', testData);
-
-      await fetch(webhookUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'ngrok-skip-browser-warning': 'true',
-        },
-        mode: 'no-cors',
-        body: JSON.stringify(testData),
-      });
-
-      toast({
-        title: "Webhook enviado!",
-        description: "Requisição foi enviada. Verifique se foi recebida no seu sistema.",
-      });
-    } catch (error) {
-      console.error('Webhook test error details:', error);
-      toast({
-        title: "Erro no teste",
-        description: `Erro: ${error instanceof Error ? error.message : 'Não foi possível conectar ao webhook'}`,
-        variant: "destructive",
-      });
-    }
-  };
-
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
 
@@ -271,13 +192,6 @@ const SchedulingForm = () => {
         <p className="text-muted-foreground">
           Escolha a data e horário que melhor se adequam à sua agenda
         </p>
-        <Button 
-          onClick={testWebhook}
-          variant="outline"
-          size="sm"
-        >
-          Testar Webhook
-        </Button>
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6">
@@ -416,23 +330,6 @@ const SchedulingForm = () => {
                   placeholder="Conte-nos um pouco sobre seu projeto ou necessidades..."
                   rows={3}
                 />
-              </div>
-
-              {/* Webhook URL Input */}
-              <div className="space-y-2">
-                <Label htmlFor="webhookUrl">
-                  URL do Webhook (opcional)
-                </Label>
-                <Input
-                  id="webhookUrl"
-                  type="url"
-                  value={webhookUrl}
-                  onChange={(e) => setWebhookUrl(e.target.value)}
-                  placeholder="https://hooks.zapier.com/hooks/catch/..."
-                />
-                <p className="text-xs text-muted-foreground">
-                  Use Zapier, webhook.site ou ngrok para criar um webhook público
-                </p>
               </div>
 
               {/* Summary */}
