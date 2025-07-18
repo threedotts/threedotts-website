@@ -154,6 +154,28 @@ const SchedulingForm = () => {
 
       if (error) throw error;
 
+      // Send data to webhook
+      try {
+        await fetch('http://localhost:5678/webhook-test/eea87148-1856-4f3a-b9fd-d576998e7224', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone,
+            date: format(selectedDate!, 'yyyy-MM-dd'),
+            time: selectedTime,
+            notes: formData.notes,
+            appointmentData: data
+          }),
+        });
+      } catch (webhookError) {
+        console.error('Webhook error:', webhookError);
+        // Don't fail the appointment if webhook fails
+      }
+
       toast({
         title: "Consulta agendada!",
         description: "Sua consulta foi agendada com sucesso. Você receberá um email de confirmação em breve.",
