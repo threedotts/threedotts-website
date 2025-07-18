@@ -211,6 +211,9 @@ const SchedulingForm = () => {
         test: true
       };
 
+      console.log('Sending webhook request to:', 'http://localhost:5678/webhook-test/eea87148-1856-4f3a-b9fd-d576998e7224');
+      console.log('Data being sent:', testData);
+
       const response = await fetch('http://localhost:5678/webhook-test/eea87148-1856-4f3a-b9fd-d576998e7224', {
         method: 'POST',
         headers: {
@@ -219,7 +222,12 @@ const SchedulingForm = () => {
         body: JSON.stringify(testData),
       });
 
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+
       if (response.ok) {
+        const responseData = await response.text();
+        console.log('Response data:', responseData);
         toast({
           title: "Webhook testado!",
           description: "Requisição enviada com sucesso para o webhook.",
@@ -228,10 +236,10 @@ const SchedulingForm = () => {
         throw new Error(`HTTP ${response.status}`);
       }
     } catch (error) {
-      console.error('Webhook test error:', error);
+      console.error('Webhook test error details:', error);
       toast({
         title: "Erro no teste",
-        description: "Não foi possível conectar ao webhook.",
+        description: `Erro: ${error instanceof Error ? error.message : 'Não foi possível conectar ao webhook'}. Verifique se o servidor está rodando.`,
         variant: "destructive",
       });
     }
