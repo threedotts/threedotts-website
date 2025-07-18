@@ -199,6 +199,44 @@ const SchedulingForm = () => {
     }
   };
 
+  const testWebhook = async () => {
+    try {
+      const testData = {
+        name: "Test User",
+        email: "test@example.com", 
+        phone: "+258123456789",
+        date: "2025-07-25",
+        time: "10:00",
+        notes: "Test webhook call",
+        test: true
+      };
+
+      const response = await fetch('http://localhost:5678/webhook-test/eea87148-1856-4f3a-b9fd-d576998e7224', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(testData),
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Webhook testado!",
+          description: "Requisição enviada com sucesso para o webhook.",
+        });
+      } else {
+        throw new Error(`HTTP ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Webhook test error:', error);
+      toast({
+        title: "Erro no teste",
+        description: "Não foi possível conectar ao webhook.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
 
@@ -214,6 +252,13 @@ const SchedulingForm = () => {
         <p className="text-muted-foreground">
           Escolha a data e horário que melhor se adequam à sua agenda
         </p>
+        <Button 
+          onClick={testWebhook}
+          variant="outline"
+          size="sm"
+        >
+          Testar Webhook
+        </Button>
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6">
