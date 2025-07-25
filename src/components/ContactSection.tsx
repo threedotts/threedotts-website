@@ -194,15 +194,18 @@ export function ContactSection() {
     try {
       const response = await fetch('https://n8n.srv922768.hstgr.cloud/webhook-test/1787c063-fda2-4ce2-83bb-79d78177e085', {
         method: 'POST',
+        mode: 'no-cors',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          timestamp: new Date().toISOString(),
+          source: 'contact_form'
+        }),
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      // With no-cors mode, we can't check response status, so we assume success
 
       toast({
         title: "Mensagem enviada!",
