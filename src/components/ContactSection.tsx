@@ -71,9 +71,9 @@ export function ContactSection() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  // Input sanitization
+  // Input sanitization - preserve spaces during typing, only trim on validation
   const sanitizeInput = (value: string) => {
-    return value.trim().replace(/[<>]/g, "");
+    return value.replace(/[<>]/g, ""); // Remove only dangerous HTML characters, keep spaces
   };
 
   // Email validation
@@ -91,46 +91,101 @@ export function ContactSection() {
       [name]: sanitizedValue
     }));
 
-    // Clear previous errors
-    if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ""
-      }));
+    // Clear previous errors and perform real-time validation
+    setErrors(prev => ({
+      ...prev,
+      [name]: ""
+    }));
+
+    // Real-time validation for better UX
+    if (value.trim()) {
+      let error = "";
+      
+      switch (name) {
+        case "firstName":
+        case "lastName":
+        case "company":
+          if (value.trim().length < 2) {
+            error = `${name === "firstName" ? "Primeiro nome" : 
+                      name === "lastName" ? "Último nome" : 
+                      "Nome da empresa"} deve ter pelo menos 2 caracteres`;
+          }
+          break;
+        case "email":
+          error = validateEmail(value.trim());
+          break;
+        case "message":
+          if (value.trim().length < 10) {
+            error = "Mensagem deve ter pelo menos 10 caracteres";
+          } else if (value.trim().length > 1000) {
+            error = "Mensagem deve ter no máximo 1000 caracteres";
+          }
+          break;
+      }
+      
+      if (error) {
+        setErrors(prev => ({
+          ...prev,
+          [name]: error
+        }));
+      }
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate inputs
+    // Validate all inputs
     const newErrors: Record<string, string> = {};
     
+    // First name validation
     if (!formData.firstName.trim()) {
       newErrors.firstName = "Primeiro nome é obrigatório";
+    } else if (formData.firstName.trim().length < 2) {
+      newErrors.firstName = "Primeiro nome deve ter pelo menos 2 caracteres";
     }
     
+    // Last name validation
     if (!formData.lastName.trim()) {
       newErrors.lastName = "Último nome é obrigatório";
+    } else if (formData.lastName.trim().length < 2) {
+      newErrors.lastName = "Último nome deve ter pelo menos 2 caracteres";
     }
     
+    // Email validation
+    if (!formData.email.trim()) {
+      newErrors.email = "Email é obrigatório";
+    } else {
+      const emailError = validateEmail(formData.email.trim());
+      if (emailError) {
+        newErrors.email = emailError;
+      }
+    }
+    
+    // Company validation
     if (!formData.company.trim()) {
       newErrors.company = "Nome da empresa é obrigatório";
+    } else if (formData.company.trim().length < 2) {
+      newErrors.company = "Nome da empresa deve ter pelo menos 2 caracteres";
     }
     
+    // Message validation
     if (!formData.message.trim()) {
       newErrors.message = "Mensagem é obrigatória";
-    } else if (formData.message.length < 10) {
+    } else if (formData.message.trim().length < 10) {
       newErrors.message = "Mensagem deve ter pelo menos 10 caracteres";
+    } else if (formData.message.trim().length > 1000) {
+      newErrors.message = "Mensagem deve ter no máximo 1000 caracteres";
     }
     
-    const emailError = validateEmail(formData.email);
-    if (emailError) {
-      newErrors.email = emailError;
-    }
-    
+    // If there are validation errors, show them and stop
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
+      toast({
+        title: "Erro de validação",
+        description: "Por favor, corrija os campos obrigatórios.",
+        variant: "destructive",
+      });
       return;
     }
 
