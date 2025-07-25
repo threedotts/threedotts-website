@@ -192,27 +192,24 @@ export function ContactSection() {
     setIsSubmitting(true);
 
     try {
-      // Add a timeout to the fetch request
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-
-      const response = await fetch('https://n8n.srv922768.hstgr.cloud/webhook-test/1787c063-fda2-4ce2-83bb-79d78177e085', {
-        method: 'POST',
-        mode: 'no-cors',
-        signal: controller.signal,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      const { data, error } = await supabase.functions.invoke('contact-form', {
+        body: {
           ...formData,
           timestamp: new Date().toISOString(),
-          source: 'contact_form'
-        }),
+          source: 'contact_form',
+          webhookUrl: 'https://n8n.srv922768.hstgr.cloud/webhook-test/1787c063-fda2-4ce2-83bb-79d78177e085'
+        }
       });
 
-      clearTimeout(timeoutId);
-
-      // With no-cors mode, we assume success if no error is thrown
+      if (error) {
+        console.error('Supabase function error:', error);
+        toast({
+          title: "Erro ao enviar mensagem",
+          description: error.message || "Erro interno do servidor.",
+          variant: "destructive",
+        });
+        return;
+      }
       toast({
         title: "Mensagem enviada!",
         description: "Obrigado pelo seu contacto. Responderemos em breve.",
@@ -229,21 +226,11 @@ export function ContactSection() {
 
     } catch (error: any) {
       console.error('Contact form error:', error);
-      
-      // Check if it's a timeout error
-      if (error.name === 'AbortError') {
-        toast({
-          title: "Timeout",
-          description: "A requisição demorou muito tempo. Verifique se o webhook n8n está online.",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Erro ao enviar mensagem",
-          description: `Erro: ${error.message}. Verifique o URL do webhook.`,
-          variant: "destructive",
-        });
-      }
+      toast({
+        title: "Erro ao enviar mensagem",
+        description: error.message || "Tente novamente mais tarde.",
+        variant: "destructive",
+      });
     } finally {
       setIsSubmitting(false);
     }

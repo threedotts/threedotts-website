@@ -149,10 +149,27 @@ serve(async (req) => {
       ip: clientIP
     });
 
-    // In a real implementation, you would:
-    // 1. Save to database
-    // 2. Send email notification
-    // 3. Integrate with CRM system
+    // Send to n8n webhook if provided
+    if (formData.webhookUrl) {
+      try {
+        const webhookResponse = await fetch(formData.webhookUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...sanitizedData,
+            timestamp: new Date().toISOString(),
+            source: 'contact_form'
+          }),
+        });
+        
+        console.log('Webhook response status:', webhookResponse.status);
+      } catch (webhookError) {
+        console.error('Error sending to webhook:', webhookError);
+        // Don't fail the entire request if webhook fails
+      }
+    }
     
     return new Response(
       JSON.stringify({ 
