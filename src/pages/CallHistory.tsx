@@ -264,7 +264,7 @@ export default function CallHistory() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 p-0 hover:bg-muted"
+                className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 p-0 hover:bg-muted hover:text-foreground"
                 onClick={clearEvaluation}
               >
                 <X className="h-3 w-3" />
@@ -294,7 +294,7 @@ export default function CallHistory() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 p-0 hover:bg-muted"
+                className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 p-0 hover:bg-muted hover:text-foreground"
                 onClick={clearAgent}
               >
                 <X className="h-3 w-3" />
