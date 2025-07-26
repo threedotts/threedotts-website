@@ -33,7 +33,6 @@ const Dashboard = () => {
   const { toast } = useToast();
 
   const getPageTitle = () => {
-    if (location.pathname === "/dashboard/call-history") return "Call History";
     return "Dashboard";
   };
 

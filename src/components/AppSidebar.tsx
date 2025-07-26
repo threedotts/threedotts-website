@@ -97,7 +97,12 @@ export function AppSidebar({ user, profile }: AppSidebarProps) {
   const currentPath = location.pathname;
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
-  const isActive = (path: string) => currentPath === path || currentPath.startsWith(path + '/');
+  const isActive = (path: string) => {
+    if (path === "/dashboard") {
+      return currentPath === "/dashboard";
+    }
+    return currentPath === path || currentPath.startsWith(path + '/');
+  };
   
   const toggleExpanded = (itemTitle: string) => {
     setExpandedItems(prev => 
