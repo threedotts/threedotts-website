@@ -119,29 +119,35 @@ export default function CallHistory() {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground mb-2">Histórico de Chamadas</h1>
-        <p className="text-muted-foreground">
-          Visualize e analise todas as interações do call center
-        </p>
+        <h1 className="text-2xl font-bold text-foreground mb-4">Histórico</h1>
+        
+        {/* Filter buttons */}
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" size="sm">
+            + Data Inicial
+          </Button>
+          <Button variant="outline" size="sm">
+            + Data Final
+          </Button>
+          <Button variant="outline" size="sm">
+            + Avaliação
+          </Button>
+          <Button variant="outline" size="sm">
+            + Agente
+          </Button>
+        </div>
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Phone className="h-5 w-5" />
-            Chamadas Recentes
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+        <CardContent className="p-0">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Data e Hora</TableHead>
+                <TableHead>Data</TableHead>
                 <TableHead>Agente</TableHead>
                 <TableHead>Duração</TableHead>
                 <TableHead>Mensagens</TableHead>
-                <TableHead>Avaliação</TableHead>
-                <TableHead>Ações</TableHead>
+                <TableHead>Resultado da Avaliação</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -158,34 +164,12 @@ export default function CallHistory() {
                     </div>
                   </TableCell>
                   <TableCell className="font-medium">{call.agent}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                      {call.duration}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <MessageSquare className="h-4 w-4 text-muted-foreground" />
-                      {call.messageCount}
-                    </div>
-                  </TableCell>
+                  <TableCell>{call.duration}</TableCell>
+                  <TableCell>{call.messageCount}</TableCell>
                   <TableCell>
                     <Badge className={getEvaluationColor(call.evaluationResult)}>
                       {call.evaluationResult}
                     </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleCallClick(call);
-                      }}
-                    >
-                      Ver Detalhes
-                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
