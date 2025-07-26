@@ -15,7 +15,8 @@ import {
   Settings,
   Star,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  PhoneCall
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -66,6 +67,11 @@ const menuItems = [
     title: "Messages", 
     url: "/dashboard/messages", 
     icon: MessageSquare,
+  },
+  { 
+    title: "Call History", 
+    url: "/dashboard/call-history", 
+    icon: PhoneCall,
   },
   { 
     title: "Leads", 
