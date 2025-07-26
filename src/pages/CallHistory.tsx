@@ -30,6 +30,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { Phone, Clock, MessageSquare, TrendingUp, CalendarIcon, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -127,6 +136,10 @@ export default function CallHistory() {
   const [selectedEvaluation, setSelectedEvaluation] = useState<string>("");
   const [selectedAgent, setSelectedAgent] = useState<string>("");
 
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
   // Get unique values for dropdowns
   const uniqueEvaluations = Array.from(new Set(mockCalls.map(call => call.evaluationResult)));
   const uniqueAgents = Array.from(new Set(mockCalls.map(call => call.agent)));
@@ -149,6 +162,17 @@ export default function CallHistory() {
       return true;
     });
   }, [startDate, endDate, selectedEvaluation, selectedAgent]);
+
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredCalls.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentPageCalls = filteredCalls.slice(startIndex, endIndex);
+
+  // Reset to first page when filters change
+  useMemo(() => {
+    setCurrentPage(1);
+  }, [filteredCalls.length]);
 
   // Clear individual filters
   const clearStartDate = () => setStartDate(undefined);
@@ -342,7 +366,7 @@ export default function CallHistory() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredCalls.map((call) => (
+              {currentPageCalls.map((call) => (
                 <TableRow 
                   key={call.id} 
                   className="cursor-pointer hover:bg-muted/50"
@@ -368,6 +392,52 @@ export default function CallHistory() {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="mt-4 flex justify-center">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious 
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setCurrentPage(Math.max(1, currentPage - 1));
+                  }}
+                  className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+                />
+              </PaginationItem>
+              
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <PaginationItem key={page}>
+                  <PaginationLink
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setCurrentPage(page);
+                    }}
+                    isActive={currentPage === page}
+                  >
+                    {page}
+                  </PaginationLink>
+                </PaginationItem>
+              ))}
+              
+              <PaginationItem>
+                <PaginationNext 
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setCurrentPage(Math.min(totalPages, currentPage + 1));
+                  }}
+                  className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
 
       {/* Call Details Drawer */}
       <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
