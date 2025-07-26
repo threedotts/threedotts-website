@@ -188,15 +188,17 @@ export default function CallHistory() {
               >
                 {startDate ? format(startDate, "dd/MM/yyyy") : "+ Data Inicial"}
                 {startDate && (
-                  <button 
-                    className="ml-2 h-4 w-4 rounded-sm hover:bg-muted flex items-center justify-center" 
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="ml-2 h-6 w-6 p-0 hover:bg-muted hover:text-foreground"
                     onClick={(e) => {
                       e.stopPropagation();
                       clearStartDate();
                     }}
                   >
                     <X className="h-3 w-3" />
-                  </button>
+                  </Button>
                 )}
               </Button>
             </PopoverTrigger>
@@ -222,15 +224,17 @@ export default function CallHistory() {
               >
                 {endDate ? format(endDate, "dd/MM/yyyy") : "+ Data Final"}
                 {endDate && (
-                  <button 
-                    className="ml-2 h-4 w-4 rounded-sm hover:bg-muted flex items-center justify-center" 
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="ml-2 h-6 w-6 p-0 hover:bg-muted hover:text-foreground"
                     onClick={(e) => {
                       e.stopPropagation();
                       clearEndDate();
                     }}
                   >
                     <X className="h-3 w-3" />
-                  </button>
+                  </Button>
                 )}
               </Button>
             </PopoverTrigger>
