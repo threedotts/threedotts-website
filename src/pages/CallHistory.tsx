@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,7 +17,21 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { Phone, Clock, MessageSquare, TrendingUp } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
+import { Phone, Clock, MessageSquare, TrendingUp, CalendarIcon, X } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 // Mock data - will be replaced with real data from database later
 const mockCalls = [
@@ -105,6 +120,44 @@ const getEvaluationColor = (result: string) => {
 export default function CallHistory() {
   const [selectedCall, setSelectedCall] = useState<typeof mockCalls[0] | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  
+  // Filter states
+  const [startDate, setStartDate] = useState<Date | undefined>();
+  const [endDate, setEndDate] = useState<Date | undefined>();
+  const [selectedEvaluation, setSelectedEvaluation] = useState<string>("");
+  const [selectedAgent, setSelectedAgent] = useState<string>("");
+
+  // Get unique values for dropdowns
+  const uniqueEvaluations = Array.from(new Set(mockCalls.map(call => call.evaluationResult)));
+  const uniqueAgents = Array.from(new Set(mockCalls.map(call => call.agent)));
+
+  // Filter calls based on selected filters
+  const filteredCalls = useMemo(() => {
+    return mockCalls.filter(call => {
+      const callDate = new Date(call.date);
+      
+      // Date filters
+      if (startDate && callDate < startDate) return false;
+      if (endDate && callDate > endDate) return false;
+      
+      // Evaluation filter
+      if (selectedEvaluation && call.evaluationResult !== selectedEvaluation) return false;
+      
+      // Agent filter
+      if (selectedAgent && call.agent !== selectedAgent) return false;
+      
+      return true;
+    });
+  }, [startDate, endDate, selectedEvaluation, selectedAgent]);
+
+  // Clear individual filters
+  const clearStartDate = () => setStartDate(undefined);
+  const clearEndDate = () => setEndDate(undefined);
+  const clearEvaluation = () => setSelectedEvaluation("");
+  const clearAgent = () => setSelectedAgent("");
+
+  // Check if any filters are active
+  const hasActiveFilters = startDate || endDate || selectedEvaluation || selectedAgent;
 
   const handleCallClick = (call: typeof mockCalls[0]) => {
     setSelectedCall(call);
@@ -123,18 +176,146 @@ export default function CallHistory() {
         
         {/* Filter buttons */}
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm">
-            + Data Inicial
-          </Button>
-          <Button variant="outline" size="sm">
-            + Data Final
-          </Button>
-          <Button variant="outline" size="sm">
-            + Avaliação
-          </Button>
-          <Button variant="outline" size="sm">
-            + Agente
-          </Button>
+          {/* Start Date Filter */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className={cn(
+                  "justify-start text-left font-normal",
+                  startDate && "bg-primary/10 border-primary"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {startDate ? format(startDate, "dd/MM/yyyy") : "+ Data Inicial"}
+                {startDate && (
+                  <X 
+                    className="ml-2 h-3 w-3 hover:bg-muted rounded-sm" 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      clearStartDate();
+                    }}
+                  />
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={startDate}
+                onSelect={setStartDate}
+                className="pointer-events-auto"
+              />
+            </PopoverContent>
+          </Popover>
+
+          {/* End Date Filter */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className={cn(
+                  "justify-start text-left font-normal",
+                  endDate && "bg-primary/10 border-primary"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {endDate ? format(endDate, "dd/MM/yyyy") : "+ Data Final"}
+                {endDate && (
+                  <X 
+                    className="ml-2 h-3 w-3 hover:bg-muted rounded-sm" 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      clearEndDate();
+                    }}
+                  />
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={endDate}
+                onSelect={setEndDate}
+                className="pointer-events-auto"
+              />
+            </PopoverContent>
+          </Popover>
+
+          {/* Evaluation Filter */}
+          <Select value={selectedEvaluation} onValueChange={setSelectedEvaluation}>
+            <SelectTrigger className={cn(
+              "w-auto min-w-[140px]",
+              selectedEvaluation && "bg-primary/10 border-primary"
+            )}>
+              <SelectValue placeholder="+ Avaliação" />
+              {selectedEvaluation && (
+                <X 
+                  className="ml-2 h-3 w-3 hover:bg-muted rounded-sm" 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    clearEvaluation();
+                  }}
+                />
+              )}
+            </SelectTrigger>
+            <SelectContent>
+              {uniqueEvaluations.map(evaluation => (
+                <SelectItem key={evaluation} value={evaluation}>
+                  {evaluation}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Agent Filter */}
+          <Select value={selectedAgent} onValueChange={setSelectedAgent}>
+            <SelectTrigger className={cn(
+              "w-auto min-w-[140px]",
+              selectedAgent && "bg-primary/10 border-primary"
+            )}>
+              <SelectValue placeholder="+ Agente" />
+              {selectedAgent && (
+                <X 
+                  className="ml-2 h-3 w-3 hover:bg-muted rounded-sm" 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    clearAgent();
+                  }}
+                />
+              )}
+            </SelectTrigger>
+            <SelectContent>
+              {uniqueAgents.map(agent => (
+                <SelectItem key={agent} value={agent}>
+                  {agent}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Show results count and clear all filters */}
+        <div className="flex items-center justify-between mt-4">
+          <div className="text-sm text-muted-foreground">
+            {filteredCalls.length} de {mockCalls.length} chamadas
+          </div>
+          {hasActiveFilters && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                clearStartDate();
+                clearEndDate();
+                clearEvaluation();
+                clearAgent();
+              }}
+            >
+              Limpar filtros
+            </Button>
+          )}
         </div>
       </div>
 
@@ -151,7 +332,7 @@ export default function CallHistory() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {mockCalls.map((call) => (
+              {filteredCalls.map((call) => (
                 <TableRow 
                   key={call.id} 
                   className="cursor-pointer hover:bg-muted/50"
