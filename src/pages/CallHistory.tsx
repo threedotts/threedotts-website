@@ -177,76 +177,74 @@ export default function CallHistory() {
         {/* Filter buttons */}
         <div className="flex flex-wrap gap-2 items-center">
           {/* Start Date Filter */}
-          <Popover>
-            <PopoverTrigger asChild>
+          <div className="relative">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "h-9 justify-start text-left font-normal pr-8",
+                    startDate && "bg-primary/10 border-primary"
+                  )}
+                >
+                  {startDate ? format(startDate, "dd/MM/yyyy") : "+ Data Inicial"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={startDate}
+                  onSelect={setStartDate}
+                  className="pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
+            {startDate && (
               <Button
-                variant="outline"
-                className={cn(
-                  "h-9 justify-start text-left font-normal",
-                  startDate && "bg-primary/10 border-primary"
-                )}
+                variant="ghost"
+                size="sm"
+                className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 p-0 hover:bg-muted hover:text-foreground"
+                onClick={clearStartDate}
               >
-                {startDate ? format(startDate, "dd/MM/yyyy") : "+ Data Inicial"}
-                {startDate && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="ml-2 h-6 w-6 p-0 hover:bg-muted hover:text-foreground"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      clearStartDate();
-                    }}
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
-                )}
+                <X className="h-3 w-3" />
               </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={startDate}
-                onSelect={setStartDate}
-                className="pointer-events-auto"
-              />
-            </PopoverContent>
-          </Popover>
+            )}
+          </div>
 
           {/* End Date Filter */}
-          <Popover>
-            <PopoverTrigger asChild>
+          <div className="relative">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "h-9 justify-start text-left font-normal pr-8",
+                    endDate && "bg-primary/10 border-primary"
+                  )}
+                >
+                  {endDate ? format(endDate, "dd/MM/yyyy") : "+ Data Final"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={endDate}
+                  onSelect={setEndDate}
+                  className="pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
+            {endDate && (
               <Button
-                variant="outline"
-                className={cn(
-                  "h-9 justify-start text-left font-normal",
-                  endDate && "bg-primary/10 border-primary"
-                )}
+                variant="ghost"
+                size="sm"
+                className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 p-0 hover:bg-muted hover:text-foreground"
+                onClick={clearEndDate}
               >
-                {endDate ? format(endDate, "dd/MM/yyyy") : "+ Data Final"}
-                {endDate && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="ml-2 h-6 w-6 p-0 hover:bg-muted hover:text-foreground"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      clearEndDate();
-                    }}
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
-                )}
+                <X className="h-3 w-3" />
               </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={endDate}
-                onSelect={setEndDate}
-                className="pointer-events-auto"
-              />
-            </PopoverContent>
-          </Popover>
+            )}
+          </div>
 
           {/* Evaluation Filter */}
           <div className="relative">
