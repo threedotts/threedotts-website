@@ -192,7 +192,7 @@ const Dashboard = () => {
                 Overview
               </h2>
               <p className="text-muted-foreground">
-                Visão geral das operações de call center e automação
+                Visão geral das operações de call center
               </p>
             </div>
 
@@ -224,77 +224,39 @@ const Dashboard = () => {
             </div>
 
             {/* Main Dashboard Content */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Call Center Activity */}
-              <Card className="bg-gradient-card border-border shadow-elegant">
-                <CardHeader>
-                  <CardTitle className="text-foreground">Atividade do Call Center</CardTitle>
-                  <CardDescription>
-                    Visão geral das chamadas em tempo real
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-3 h-3 bg-primary rounded-full animate-pulse"></div>
-                        <span className="text-foreground font-medium">Chamadas Ativas</span>
-                      </div>
-                      <span className="text-2xl font-bold text-primary">8</span>
+            <Card className="bg-gradient-card border-border shadow-elegant">
+              <CardHeader>
+                <CardTitle className="text-foreground">Atividade do Call Center</CardTitle>
+                <CardDescription>
+                  Visão geral das chamadas em tempo real
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-3 h-3 bg-primary rounded-full animate-pulse"></div>
+                      <span className="text-foreground font-medium">Chamadas Ativas</span>
                     </div>
-                    <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-3 h-3 bg-accent rounded-full"></div>
-                        <span className="text-foreground font-medium">Fila de Espera</span>
-                      </div>
-                      <span className="text-2xl font-bold text-accent">12</span>
-                    </div>
-                    <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-3 h-3 bg-primary-glow rounded-full"></div>
-                        <span className="text-foreground font-medium">Chamadas Hoje</span>
-                      </div>
-                      <span className="text-2xl font-bold text-primary-glow">247</span>
-                    </div>
+                    <span className="text-2xl font-bold text-primary">8</span>
                   </div>
-                </CardContent>
-              </Card>
-
-              {/* Automation Status */}
-              <Card className="bg-gradient-card border-border shadow-elegant">
-                <CardHeader>
-                  <CardTitle className="text-foreground">Status da Automação</CardTitle>
-                  <CardDescription>
-                    Sistemas de automação em funcionamento
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-3 h-3 bg-primary rounded-full"></div>
-                        <span className="text-foreground font-medium">Chatbot AI</span>
-                      </div>
-                      <span className="text-sm text-primary font-medium">Online</span>
+                  <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-3 h-3 bg-accent rounded-full"></div>
+                      <span className="text-foreground font-medium">Fila de Espera</span>
                     </div>
-                    <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-3 h-3 bg-primary rounded-full"></div>
-                        <span className="text-foreground font-medium">Auto-Resposta</span>
-                      </div>
-                      <span className="text-sm text-primary font-medium">Online</span>
-                    </div>
-                    <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-3 h-3 bg-primary rounded-full"></div>
-                        <span className="text-foreground font-medium">Roteamento</span>
-                      </div>
-                      <span className="text-sm text-primary font-medium">Online</span>
-                    </div>
+                    <span className="text-2xl font-bold text-accent">12</span>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
+                  <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-3 h-3 bg-primary-glow rounded-full"></div>
+                      <span className="text-foreground font-medium">Chamadas Hoje</span>
+                    </div>
+                    <span className="text-2xl font-bold text-primary-glow">247</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Performance Chart */}
             <div className="mt-8">

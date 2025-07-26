@@ -38,29 +38,9 @@ const menuItems = [
     icon: BarChart3,
   },
   { 
-    title: "Events", 
-    url: "/dashboard/events", 
-    icon: Star,
-  },
-  { 
     title: "Schedule", 
     url: "/dashboard/schedule", 
     icon: Calendar,
-    hasSubmenu: true,
-    submenu: [
-      { title: "Calendar View", url: "/dashboard/schedule/calendar" },
-      { title: "List View", url: "/dashboard/schedule/list" },
-    ]
-  },
-  { 
-    title: "Tasks", 
-    url: "/dashboard/tasks", 
-    icon: CheckSquare,
-    hasSubmenu: true,
-    submenu: [
-      { title: "Active Tasks", url: "/dashboard/tasks/active" },
-      { title: "Completed", url: "/dashboard/tasks/completed" },
-    ]
   },
   { 
     title: "Employees", 
@@ -71,31 +51,11 @@ const menuItems = [
     title: "Analytics", 
     url: "/dashboard/analytics", 
     icon: TrendingUp,
-    hasSubmenu: true,
-    submenu: [
-      { title: "Reports", url: "/dashboard/analytics/reports" },
-      { title: "Performance", url: "/dashboard/analytics/performance" },
-    ]
   },
   { 
     title: "Reports", 
     url: "/dashboard/reports", 
     icon: FileText,
-    hasSubmenu: true,
-    submenu: [
-      { title: "Monthly", url: "/dashboard/reports/monthly" },
-      { title: "Quarterly", url: "/dashboard/reports/quarterly" },
-    ]
-  },
-  { 
-    title: "Finances", 
-    url: "/dashboard/finances", 
-    icon: DollarSign,
-    hasSubmenu: true,
-    submenu: [
-      { title: "Income", url: "/dashboard/finances/income" },
-      { title: "Expenses", url: "/dashboard/finances/expenses" },
-    ]
   },
   { 
     title: "Customers", 
@@ -113,24 +73,9 @@ const menuItems = [
     icon: UserCheck,
   },
   { 
-    title: "Sales", 
-    url: "/dashboard/sales", 
-    icon: ShoppingCart,
-    hasSubmenu: true,
-    submenu: [
-      { title: "Active Deals", url: "/dashboard/sales/deals" },
-      { title: "Pipeline", url: "/dashboard/sales/pipeline" },
-    ]
-  },
-  { 
     title: "Settings", 
     url: "/dashboard/settings", 
     icon: Settings,
-    hasSubmenu: true,
-    submenu: [
-      { title: "General", url: "/dashboard/settings/general" },
-      { title: "Security", url: "/dashboard/settings/security" },
-    ]
   },
 ];
 
@@ -185,57 +130,21 @@ export function AppSidebar({ user, profile }: AppSidebarProps) {
           <SidebarMenu className="space-y-1">
             {menuItems.map((item) => {
               const IconComponent = item.icon;
-              const isExpanded = expandedItems.includes(item.title);
-              const hasActiveSubmenu = item.submenu?.some(sub => isActive(sub.url));
               
               return (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton 
                     asChild
-                    className={`${getNavCls(isActive(item.url) || hasActiveSubmenu)} h-10 px-3`}
+                    className={`${getNavCls(isActive(item.url))} h-10 px-3`}
                   >
-                    <div className="w-full flex items-center justify-between">
-                      <button
-                        onClick={() => item.hasSubmenu ? toggleExpanded(item.title) : navigate(item.url)}
-                        className="flex items-center space-x-3 flex-1 text-left"
-                      >
-                        <IconComponent className="h-4 w-4 flex-shrink-0" />
-                        <span className="text-sm">{item.title}</span>
-                      </button>
-                      {item.hasSubmenu && (
-                        <button
-                          onClick={() => toggleExpanded(item.title)}
-                          className="p-1 hover:bg-muted rounded"
-                        >
-                          {isExpanded ? (
-                            <ChevronDown className="h-3 w-3" />
-                          ) : (
-                            <ChevronRight className="h-3 w-3" />
-                          )}
-                        </button>
-                      )}
-                    </div>
+                    <button
+                      onClick={() => navigate(item.url)}
+                      className="w-full flex items-center space-x-3 text-left"
+                    >
+                      <IconComponent className="h-4 w-4 flex-shrink-0" />
+                      <span className="text-sm">{item.title}</span>
+                    </button>
                   </SidebarMenuButton>
-                  
-                  {/* Submenu */}
-                  {item.hasSubmenu && isExpanded && item.submenu && (
-                    <div className="ml-7 mt-1 space-y-1">
-                      {item.submenu.map((subItem) => (
-                        <SidebarMenuButton 
-                          key={subItem.title}
-                          asChild
-                          className={`${getSubmenuCls(isActive(subItem.url))} h-8 px-3 text-xs`}
-                        >
-                          <button
-                            onClick={() => navigate(subItem.url)}
-                            className="w-full text-left"
-                          >
-                            {subItem.title}
-                          </button>
-                        </SidebarMenuButton>
-                      ))}
-                    </div>
-                  )}
                 </SidebarMenuItem>
               );
             })}
