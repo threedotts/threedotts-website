@@ -244,7 +244,7 @@ export default function CallHistory() {
           <div className="relative">
             <Select value={selectedEvaluation} onValueChange={setSelectedEvaluation}>
               <SelectTrigger className={cn(
-                "h-9 w-auto min-w-[140px] pr-8",
+                "h-9 w-auto min-w-[140px] pr-8 justify-between",
                 selectedEvaluation && "bg-primary/10 border-primary",
                 selectedEvaluation && "[&>svg]:hidden"
               )}>
@@ -274,7 +274,7 @@ export default function CallHistory() {
           <div className="relative">
             <Select value={selectedAgent} onValueChange={setSelectedAgent}>
               <SelectTrigger className={cn(
-                "h-9 w-auto min-w-[140px] pr-8",
+                "h-9 w-auto min-w-[140px] pr-8 justify-between",
                 selectedAgent && "bg-primary/10 border-primary",
                 selectedAgent && "[&>svg]:hidden"
               )}>
