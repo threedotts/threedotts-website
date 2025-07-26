@@ -148,6 +148,7 @@ export default function CallHistory() {
                 <TableHead>Duração</TableHead>
                 <TableHead>Mensagens</TableHead>
                 <TableHead>Resultado da Avaliação</TableHead>
+                <TableHead>Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -170,6 +171,18 @@ export default function CallHistory() {
                     <Badge className={getEvaluationColor(call.evaluationResult)}>
                       {call.evaluationResult}
                     </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCallClick(call);
+                      }}
+                    >
+                      Ver Detalhes
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
