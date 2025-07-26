@@ -175,15 +175,14 @@ export default function CallHistory() {
         <h1 className="text-2xl font-bold text-foreground mb-4">Histórico</h1>
         
         {/* Filter buttons */}
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 items-center">
           {/* Start Date Filter */}
           <Popover>
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
-                size="sm"
                 className={cn(
-                  "justify-start text-left font-normal",
+                  "h-9 justify-start text-left font-normal",
                   startDate && "bg-primary/10 border-primary"
                 )}
               >
@@ -214,9 +213,8 @@ export default function CallHistory() {
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
-                size="sm"
                 className={cn(
-                  "justify-start text-left font-normal",
+                  "h-9 justify-start text-left font-normal",
                   endDate && "bg-primary/10 border-primary"
                 )}
               >
@@ -246,7 +244,7 @@ export default function CallHistory() {
           <div className="relative">
             <Select value={selectedEvaluation} onValueChange={setSelectedEvaluation}>
               <SelectTrigger className={cn(
-                "w-auto min-w-[140px] pr-8",
+                "h-9 w-auto min-w-[140px] pr-8",
                 selectedEvaluation && "bg-primary/10 border-primary",
                 selectedEvaluation && "[&>svg]:hidden"
               )}>
@@ -276,7 +274,7 @@ export default function CallHistory() {
           <div className="relative">
             <Select value={selectedAgent} onValueChange={setSelectedAgent}>
               <SelectTrigger className={cn(
-                "w-auto min-w-[140px] pr-8",
+                "h-9 w-auto min-w-[140px] pr-8",
                 selectedAgent && "bg-primary/10 border-primary",
                 selectedAgent && "[&>svg]:hidden"
               )}>
