@@ -69,7 +69,7 @@ const menuItems = [
     icon: MessageSquare,
   },
   { 
-    title: "Histórico de Chamadas", 
+    title: "Histórico", 
     url: "/dashboard/call-history", 
     icon: PhoneCall,
   },
