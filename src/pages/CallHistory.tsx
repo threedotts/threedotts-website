@@ -27,11 +27,11 @@ const mockCalls = [
     agent: "Maria Silva",
     duration: "5m 23s",
     messageCount: 12,
-    evaluationResult: "Excellent",
+    evaluationResult: "Excelente",
     customer: "João Santos",
     phone: "+55 11 98765-4321",
-    purpose: "Product inquiry",
-    notes: "Customer interested in premium package. Requested follow-up call.",
+    purpose: "Consulta sobre produto",
+    notes: "Cliente interessado no pacote premium. Solicitou ligação de acompanhamento.",
   },
   {
     id: "2",
@@ -40,11 +40,11 @@ const mockCalls = [
     agent: "Carlos Oliveira",
     duration: "8m 45s",
     messageCount: 18,
-    evaluationResult: "Good",
+    evaluationResult: "Bom",
     customer: "Ana Costa",
     phone: "+55 21 99876-5432",
-    purpose: "Support request",
-    notes: "Technical issue resolved. Customer satisfied with solution.",
+    purpose: "Solicitação de suporte",
+    notes: "Problema técnico resolvido. Cliente satisfeito com a solução.",
   },
   {
     id: "3",
@@ -53,11 +53,11 @@ const mockCalls = [
     agent: "Fernanda Lima",
     duration: "3m 12s",
     messageCount: 8,
-    evaluationResult: "Fair",
+    evaluationResult: "Regular",
     customer: "Pedro Almeida",
     phone: "+55 31 97654-3210",
-    purpose: "Billing question",
-    notes: "Billing clarification provided. Customer needs to contact finance.",
+    purpose: "Dúvida sobre cobrança",
+    notes: "Esclarecimento sobre cobrança fornecido. Cliente precisa entrar em contato com financeiro.",
   },
   {
     id: "4",
@@ -66,11 +66,11 @@ const mockCalls = [
     agent: "Roberto Santos",
     duration: "12m 18s",
     messageCount: 25,
-    evaluationResult: "Excellent",
+    evaluationResult: "Excelente",
     customer: "Luciana Ferreira",
     phone: "+55 11 96543-2109",
-    purpose: "New contract",
-    notes: "New contract negotiated successfully. Customer signed annual plan.",
+    purpose: "Novo contrato",
+    notes: "Novo contrato negociado com sucesso. Cliente assinou plano anual.",
   },
   {
     id: "5",
@@ -79,23 +79,23 @@ const mockCalls = [
     agent: "Juliana Rocha",
     duration: "6m 55s",
     messageCount: 14,
-    evaluationResult: "Poor",
+    evaluationResult: "Ruim",
     customer: "Marcos Souza",
     phone: "+55 85 95432-1098",
-    purpose: "Complaint",
-    notes: "Customer complaint about service delay. Escalated to supervisor.",
+    purpose: "Reclamação",
+    notes: "Reclamação do cliente sobre atraso no serviço. Escalado para supervisor.",
   },
 ];
 
 const getEvaluationColor = (result: string) => {
   switch (result.toLowerCase()) {
-    case "excellent":
+    case "excelente":
       return "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400";
-    case "good":
+    case "bom":
       return "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400";
-    case "fair":
+    case "regular":
       return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400";
-    case "poor":
+    case "ruim":
       return "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400";
     default:
       return "bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400";
@@ -119,9 +119,9 @@ export default function CallHistory() {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground mb-2">Call History</h1>
+        <h1 className="text-2xl font-bold text-foreground mb-2">Histórico de Chamadas</h1>
         <p className="text-muted-foreground">
-          View and analyze all call center interactions
+          Visualize e analise todas as interações do call center
         </p>
       </div>
 
@@ -129,19 +129,19 @@ export default function CallHistory() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Phone className="h-5 w-5" />
-            Recent Calls
+            Chamadas Recentes
           </CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Date & Time</TableHead>
-                <TableHead>Agent</TableHead>
-                <TableHead>Duration</TableHead>
-                <TableHead>Messages</TableHead>
-                <TableHead>Evaluation</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead>Data e Hora</TableHead>
+                <TableHead>Agente</TableHead>
+                <TableHead>Duração</TableHead>
+                <TableHead>Mensagens</TableHead>
+                <TableHead>Avaliação</TableHead>
+                <TableHead>Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -184,7 +184,7 @@ export default function CallHistory() {
                         handleCallClick(call);
                       }}
                     >
-                      View Details
+                      Ver Detalhes
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -198,32 +198,32 @@ export default function CallHistory() {
       <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
         <SheetContent className="w-[400px] sm:w-[540px]">
           <SheetHeader>
-            <SheetTitle>Call Details</SheetTitle>
+            <SheetTitle>Detalhes da Chamada</SheetTitle>
           </SheetHeader>
           
           {selectedCall && (
             <div className="mt-6 space-y-6">
               {/* Call Overview */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Call Overview</h3>
+                <h3 className="text-lg font-semibold">Resumo da Chamada</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-medium text-muted-foreground">Date</label>
+                    <label className="text-sm font-medium text-muted-foreground">Data</label>
                     <p className="text-sm">{selectedCall.date}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-muted-foreground">Time</label>
+                    <label className="text-sm font-medium text-muted-foreground">Hora</label>
                     <p className="text-sm">{selectedCall.time}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-muted-foreground">Duration</label>
+                    <label className="text-sm font-medium text-muted-foreground">Duração</label>
                     <p className="text-sm flex items-center gap-1">
                       <Clock className="h-4 w-4" />
                       {selectedCall.duration}
                     </p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-muted-foreground">Messages</label>
+                    <label className="text-sm font-medium text-muted-foreground">Mensagens</label>
                     <p className="text-sm flex items-center gap-1">
                       <MessageSquare className="h-4 w-4" />
                       {selectedCall.messageCount}
@@ -234,18 +234,18 @@ export default function CallHistory() {
 
               {/* Customer Information */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Customer Information</h3>
+                <h3 className="text-lg font-semibold">Informações do Cliente</h3>
                 <div className="space-y-2">
                   <div>
-                    <label className="text-sm font-medium text-muted-foreground">Name</label>
+                    <label className="text-sm font-medium text-muted-foreground">Nome</label>
                     <p className="text-sm">{selectedCall.customer}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-muted-foreground">Phone</label>
+                    <label className="text-sm font-medium text-muted-foreground">Telefone</label>
                     <p className="text-sm">{selectedCall.phone}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-muted-foreground">Purpose</label>
+                    <label className="text-sm font-medium text-muted-foreground">Motivo</label>
                     <p className="text-sm">{selectedCall.purpose}</p>
                   </div>
                 </div>
@@ -253,14 +253,14 @@ export default function CallHistory() {
 
               {/* Agent & Evaluation */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Agent & Evaluation</h3>
+                <h3 className="text-lg font-semibold">Agente e Avaliação</h3>
                 <div className="space-y-2">
                   <div>
-                    <label className="text-sm font-medium text-muted-foreground">Agent</label>
+                    <label className="text-sm font-medium text-muted-foreground">Agente</label>
                     <p className="text-sm">{selectedCall.agent}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-muted-foreground">Evaluation Result</label>
+                    <label className="text-sm font-medium text-muted-foreground">Resultado da Avaliação</label>
                     <Badge className={getEvaluationColor(selectedCall.evaluationResult)}>
                       <TrendingUp className="h-3 w-3 mr-1" />
                       {selectedCall.evaluationResult}
@@ -271,7 +271,7 @@ export default function CallHistory() {
 
               {/* Call Notes */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Call Notes</h3>
+                <h3 className="text-lg font-semibold">Observações da Chamada</h3>
                 <div className="bg-muted/50 p-3 rounded-lg">
                   <p className="text-sm">{selectedCall.notes}</p>
                 </div>
@@ -279,7 +279,7 @@ export default function CallHistory() {
 
               {/* Placeholder for future content */}
               <div className="text-sm text-muted-foreground italic">
-                Additional call details and analysis will be displayed here...
+                Detalhes adicionais da chamada e análise serão exibidos aqui...
               </div>
             </div>
           )}

@@ -39,37 +39,37 @@ const menuItems = [
     icon: BarChart3,
   },
   { 
-    title: "Schedule", 
+    title: "Agendamento", 
     url: "/dashboard/schedule", 
     icon: Calendar,
   },
   { 
-    title: "Employees", 
+    title: "Funcionários", 
     url: "/dashboard/employees", 
     icon: Users,
   },
   { 
-    title: "Analytics", 
+    title: "Análises", 
     url: "/dashboard/analytics", 
     icon: TrendingUp,
   },
   { 
-    title: "Reports", 
+    title: "Relatórios", 
     url: "/dashboard/reports", 
     icon: FileText,
   },
   { 
-    title: "Customers", 
+    title: "Clientes", 
     url: "/dashboard/customers", 
     icon: UserCheck,
   },
   { 
-    title: "Messages", 
+    title: "Mensagens", 
     url: "/dashboard/messages", 
     icon: MessageSquare,
   },
   { 
-    title: "Call History", 
+    title: "Histórico de Chamadas", 
     url: "/dashboard/call-history", 
     icon: PhoneCall,
   },
@@ -79,7 +79,7 @@ const menuItems = [
     icon: UserCheck,
   },
   { 
-    title: "Settings", 
+    title: "Configurações", 
     url: "/dashboard/settings", 
     icon: Settings,
   },
