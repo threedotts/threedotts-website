@@ -27,7 +27,6 @@ import ProjectRequest from "./pages/ProjectRequest";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
-import CallHistory from "./pages/CallHistory";
 import Scheduling from "./pages/Scheduling";
 import NotFound from "./pages/NotFound";
 import { ChatWidgetErrorBoundary } from "./components/ChatWidgetErrorBoundary";
@@ -133,8 +132,7 @@ const App = () => {
             <Route path="/" element={<Index />} />
             <Route path="/project-request" element={<ProjectRequest />} />
             <Route path="/auth" element={<Auth />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/dashboard/call-history" element={<CallHistory />} />
+            <Route path="/dashboard/*" element={<Dashboard />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/service/:serviceId" element={<ServiceDetails />} />
             <Route path="/scheduling" element={<Scheduling />} />
