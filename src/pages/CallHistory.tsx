@@ -243,62 +243,38 @@ export default function CallHistory() {
           </Popover>
 
           {/* Evaluation Filter */}
-          <div className="relative">
-            <Select value={selectedEvaluation} onValueChange={setSelectedEvaluation}>
-              <SelectTrigger className={cn(
-                "w-auto min-w-[140px]",
-                selectedEvaluation && "bg-primary/10 border-primary"
-              )}>
-                <SelectValue placeholder="+ Avaliação" />
-              </SelectTrigger>
-              <SelectContent>
-                {uniqueEvaluations.map(evaluation => (
-                  <SelectItem key={evaluation} value={evaluation}>
-                    {evaluation}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {selectedEvaluation && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 p-0 hover:bg-muted"
-                onClick={clearEvaluation}
-              >
-                <X className="h-3 w-3" />
-              </Button>
-            )}
-          </div>
+          <Select value={selectedEvaluation} onValueChange={setSelectedEvaluation}>
+            <SelectTrigger className={cn(
+              "w-auto min-w-[140px]",
+              selectedEvaluation && "bg-primary/10 border-primary"
+            )}>
+              <SelectValue placeholder="+ Avaliação" />
+            </SelectTrigger>
+            <SelectContent>
+              {uniqueEvaluations.map(evaluation => (
+                <SelectItem key={evaluation} value={evaluation}>
+                  {evaluation}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
           {/* Agent Filter */}
-          <div className="relative">
-            <Select value={selectedAgent} onValueChange={setSelectedAgent}>
-              <SelectTrigger className={cn(
-                "w-auto min-w-[140px]",
-                selectedAgent && "bg-primary/10 border-primary"
-              )}>
-                <SelectValue placeholder="+ Agente" />
-              </SelectTrigger>
-              <SelectContent>
-                {uniqueAgents.map(agent => (
-                  <SelectItem key={agent} value={agent}>
-                    {agent}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {selectedAgent && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 p-0 hover:bg-muted"
-                onClick={clearAgent}
-              >
-                <X className="h-3 w-3" />
-              </Button>
-            )}
-          </div>
+          <Select value={selectedAgent} onValueChange={setSelectedAgent}>
+            <SelectTrigger className={cn(
+              "w-auto min-w-[140px]",
+              selectedAgent && "bg-primary/10 border-primary"
+            )}>
+              <SelectValue placeholder="+ Agente" />
+            </SelectTrigger>
+            <SelectContent>
+              {uniqueAgents.map(agent => (
+                <SelectItem key={agent} value={agent}>
+                  {agent}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Show results count and clear all filters */}
