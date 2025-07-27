@@ -685,8 +685,46 @@ export default function CallHistory() {
                   <TabsContent value="transcription" className="p-6 mt-0">
                     <div className="space-y-4">
                       <h4 className="text-sm font-medium text-muted-foreground">Transcrição da Chamada</h4>
-                      <div className="bg-muted/50 p-4 rounded-lg">
-                        <p className="text-sm">O conteúdo da transcrição será exibido aqui...</p>
+                      <div className="space-y-3 max-h-96 overflow-y-auto">
+                        {/* Agent message */}
+                        <div className="flex justify-start">
+                          <div className="bg-muted p-3 rounded-lg max-w-[80%]">
+                            <p className="text-xs text-muted-foreground mb-1">{selectedCall?.agent}</p>
+                            <p className="text-sm">Olá! Como posso ajudá-lo hoje?</p>
+                          </div>
+                        </div>
+                        
+                        {/* Customer message */}
+                        <div className="flex justify-end">
+                          <div className="bg-primary text-primary-foreground p-3 rounded-lg max-w-[80%]">
+                            <p className="text-xs opacity-80 mb-1">{selectedCall?.customer}</p>
+                            <p className="text-sm">Estou com uma dúvida sobre o meu plano</p>
+                          </div>
+                        </div>
+                        
+                        {/* Agent message */}
+                        <div className="flex justify-start">
+                          <div className="bg-muted p-3 rounded-lg max-w-[80%]">
+                            <p className="text-xs text-muted-foreground mb-1">{selectedCall?.agent}</p>
+                            <p className="text-sm">Claro! Pode me dizer qual é a sua dúvida específica?</p>
+                          </div>
+                        </div>
+                        
+                        {/* Customer message */}
+                        <div className="flex justify-end">
+                          <div className="bg-primary text-primary-foreground p-3 rounded-lg max-w-[80%]">
+                            <p className="text-xs opacity-80 mb-1">{selectedCall?.customer}</p>
+                            <p className="text-sm">Quero saber sobre os benefícios do upgrade para o plano premium</p>
+                          </div>
+                        </div>
+                        
+                        {/* Agent message */}
+                        <div className="flex justify-start">
+                          <div className="bg-muted p-3 rounded-lg max-w-[80%]">
+                            <p className="text-xs text-muted-foreground mb-1">{selectedCall?.agent}</p>
+                            <p className="text-sm">Perfeito! O plano premium oferece várias vantagens. Deixe-me explicar...</p>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </TabsContent>
