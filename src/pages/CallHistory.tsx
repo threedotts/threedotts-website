@@ -644,7 +644,7 @@ export default function CallHistory() {
             <div className="flex-1 flex flex-col border-r">
               <div className="p-6 border-b">
                 <h3 className="text-sm font-medium text-muted-foreground mb-4">
-                  Conversation with {selectedCall?.agent}
+                  Conversa com {selectedCall?.agent}
                 </h3>
                 
                 {/* Audio Player */}
@@ -664,9 +664,9 @@ export default function CallHistory() {
               <Tabs defaultValue="overview" className="flex-1 flex flex-col">
                 <div className="px-6 pt-4">
                   <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="overview">Overview</TabsTrigger>
-                    <TabsTrigger value="transcription">Transcription</TabsTrigger>
-                    <TabsTrigger value="client-data">Client Data</TabsTrigger>
+                    <TabsTrigger value="overview">Resumo</TabsTrigger>
+                    <TabsTrigger value="transcription">Transcrição</TabsTrigger>
+                    <TabsTrigger value="client-data">Dados do Cliente</TabsTrigger>
                   </TabsList>
                 </div>
                 
@@ -674,36 +674,8 @@ export default function CallHistory() {
                   <TabsContent value="overview" className="p-6 mt-0">
                     {selectedCall && (
                       <div className="space-y-4">
-                        <div className="grid grid-cols-1 gap-4">
-                          <div>
-                            <p className="text-sm font-medium text-muted-foreground">Date</p>
-                            <p className="text-base">{selectedCall.date}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-muted-foreground">Time</p>
-                            <p className="text-base">{selectedCall.time}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-muted-foreground">Duration</p>
-                            <p className="text-base">{selectedCall.duration}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-muted-foreground">Messages</p>
-                            <p className="text-base">{selectedCall.messageCount}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-muted-foreground">Customer</p>
-                            <p className="text-base">{selectedCall.customer}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-muted-foreground">Evaluation</p>
-                            <Badge className={getEvaluationColor(selectedCall.evaluationResult)}>
-                              {selectedCall.evaluationResult}
-                            </Badge>
-                          </div>
-                        </div>
                         <div className="mt-6">
-                          <h4 className="text-sm font-medium text-muted-foreground mb-2">Call Summary</h4>
+                          <h4 className="text-sm font-medium text-muted-foreground mb-2">Resumo da Chamada</h4>
                           <p className="text-sm">{selectedCall.notes}</p>
                         </div>
                       </div>
@@ -712,29 +684,29 @@ export default function CallHistory() {
                   
                   <TabsContent value="transcription" className="p-6 mt-0">
                     <div className="space-y-4">
-                      <h4 className="text-sm font-medium text-muted-foreground">Call Transcription</h4>
+                      <h4 className="text-sm font-medium text-muted-foreground">Transcrição da Chamada</h4>
                       <div className="bg-muted/50 p-4 rounded-lg">
-                        <p className="text-sm">Transcription content will be displayed here...</p>
+                        <p className="text-sm">O conteúdo da transcrição será exibido aqui...</p>
                       </div>
                     </div>
                   </TabsContent>
                   
                   <TabsContent value="client-data" className="p-6 mt-0">
                     <div className="space-y-4">
-                      <h4 className="text-sm font-medium text-muted-foreground">Client Information</h4>
+                      <h4 className="text-sm font-medium text-muted-foreground">Informações do Cliente</h4>
                       <div className="space-y-3">
                         {selectedCall && (
                           <>
                             <div>
-                              <p className="text-sm font-medium text-muted-foreground">Customer Name</p>
+                              <p className="text-sm font-medium text-muted-foreground">Nome do Cliente</p>
                               <p className="text-sm">{selectedCall.customer}</p>
                             </div>
                             <div>
-                              <p className="text-sm font-medium text-muted-foreground">Phone</p>
+                              <p className="text-sm font-medium text-muted-foreground">Telefone</p>
                               <p className="text-sm">{selectedCall.phone}</p>
                             </div>
                             <div>
-                              <p className="text-sm font-medium text-muted-foreground">Purpose</p>
+                              <p className="text-sm font-medium text-muted-foreground">Propósito</p>
                               <p className="text-sm">{selectedCall.purpose}</p>
                             </div>
                           </>
@@ -783,9 +755,9 @@ export default function CallHistory() {
                         <TrendingUp className="h-4 w-4 text-muted-foreground" />
                         <div>
                           <p className="text-sm font-medium">Avaliação</p>
-                          <Badge className={getEvaluationColor(selectedCall.evaluationResult)}>
+                          <div className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium", getEvaluationColor(selectedCall.evaluationResult))}>
                             {selectedCall.evaluationResult}
-                          </Badge>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -799,12 +771,6 @@ export default function CallHistory() {
                       </div>
                     </div>
 
-                    <div>
-                      <h4 className="text-sm font-medium mb-2">Observações</h4>
-                      <div className="bg-muted/50 p-4 rounded-lg">
-                        <p className="text-sm">{selectedCall.notes}</p>
-                      </div>
-                    </div>
                   </div>
                 )}
               </div>
