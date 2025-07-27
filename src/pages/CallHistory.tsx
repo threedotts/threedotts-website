@@ -682,10 +682,10 @@ export default function CallHistory() {
                     )}
                   </TabsContent>
                   
-                  <TabsContent value="transcription" className="p-6 mt-0">
-                    <div className="space-y-4">
+                  <TabsContent value="transcription" className="p-6 mt-0 flex flex-col h-full">
+                    <div className="flex flex-col h-full space-y-4">
                       <h4 className="text-sm font-medium text-muted-foreground">Transcrição da Chamada</h4>
-                      <div className="space-y-3 max-h-96 overflow-y-auto">
+                      <div className="flex-1 space-y-3 overflow-y-auto">
                         {/* Agent message */}
                         <div className="flex justify-start">
                           <div className="bg-muted p-3 rounded-lg max-w-[80%]">
