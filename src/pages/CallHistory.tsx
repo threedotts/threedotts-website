@@ -674,8 +674,8 @@ export default function CallHistory() {
                   <TabsContent value="overview" className="p-6 mt-0">
                     {selectedCall && (
                       <div className="space-y-4">
-                        <div>
-                          <h4 className="text-sm font-medium text-muted-foreground mb-2">Resumo da Chamada</h4>
+                        <h4 className="text-sm font-medium text-muted-foreground">Resumo da Chamada</h4>
+                        <div className="bg-muted/50 p-4 rounded-lg">
                           <p className="text-sm">{selectedCall.notes}</p>
                         </div>
                       </div>
