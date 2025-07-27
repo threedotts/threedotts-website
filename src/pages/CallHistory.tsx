@@ -689,7 +689,10 @@ export default function CallHistory() {
                         {/* Agent message */}
                         <div className="flex justify-start">
                           <div className="bg-muted p-3 rounded-lg max-w-[80%]">
-                            <p className="text-xs text-muted-foreground mb-1">{selectedCall?.agent}</p>
+                            <div className="flex justify-between items-center mb-1">
+                              <p className="text-xs text-muted-foreground">{selectedCall?.agent}</p>
+                              <p className="text-xs text-muted-foreground">14:30</p>
+                            </div>
                             <p className="text-sm">Olá! Como posso ajudá-lo hoje?</p>
                           </div>
                         </div>
@@ -697,7 +700,10 @@ export default function CallHistory() {
                         {/* Customer message */}
                         <div className="flex justify-end">
                           <div className="bg-primary text-primary-foreground p-3 rounded-lg max-w-[80%]">
-                            <p className="text-xs opacity-80 mb-1">{selectedCall?.customer}</p>
+                            <div className="flex justify-between items-center mb-1">
+                              <p className="text-xs opacity-80">{selectedCall?.customer}</p>
+                              <p className="text-xs opacity-80">14:31</p>
+                            </div>
                             <p className="text-sm">Estou com uma dúvida sobre o meu plano</p>
                           </div>
                         </div>
@@ -705,7 +711,10 @@ export default function CallHistory() {
                         {/* Agent message */}
                         <div className="flex justify-start">
                           <div className="bg-muted p-3 rounded-lg max-w-[80%]">
-                            <p className="text-xs text-muted-foreground mb-1">{selectedCall?.agent}</p>
+                            <div className="flex justify-between items-center mb-1">
+                              <p className="text-xs text-muted-foreground">{selectedCall?.agent}</p>
+                              <p className="text-xs text-muted-foreground">14:32</p>
+                            </div>
                             <p className="text-sm">Claro! Pode me dizer qual é a sua dúvida específica?</p>
                           </div>
                         </div>
@@ -713,7 +722,10 @@ export default function CallHistory() {
                         {/* Customer message */}
                         <div className="flex justify-end">
                           <div className="bg-primary text-primary-foreground p-3 rounded-lg max-w-[80%]">
-                            <p className="text-xs opacity-80 mb-1">{selectedCall?.customer}</p>
+                            <div className="flex justify-between items-center mb-1">
+                              <p className="text-xs opacity-80">{selectedCall?.customer}</p>
+                              <p className="text-xs opacity-80">14:33</p>
+                            </div>
                             <p className="text-sm">Quero saber sobre os benefícios do upgrade para o plano premium</p>
                           </div>
                         </div>
@@ -721,7 +733,10 @@ export default function CallHistory() {
                         {/* Agent message */}
                         <div className="flex justify-start">
                           <div className="bg-muted p-3 rounded-lg max-w-[80%]">
-                            <p className="text-xs text-muted-foreground mb-1">{selectedCall?.agent}</p>
+                            <div className="flex justify-between items-center mb-1">
+                              <p className="text-xs text-muted-foreground">{selectedCall?.agent}</p>
+                              <p className="text-xs text-muted-foreground">14:34</p>
+                            </div>
                             <p className="text-sm">Perfeito! O plano premium oferece várias vantagens. Deixe-me explicar...</p>
                           </div>
                         </div>
