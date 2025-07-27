@@ -638,10 +638,10 @@ export default function CallHistory() {
 
       {/* Call Details Drawer */}
       <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-        <SheetContent className="w-[400px] sm:w-[540px] p-0">
+        <SheetContent className="w-[800px] sm:w-[900px] p-0">
           <div className="flex h-full">
-            <Separator orientation="vertical" className="h-full" />
-            <div className="flex-1 flex flex-col">
+            {/* Left side - New content */}
+            <div className="w-80 flex flex-col border-r">
               <div className="p-6 border-b">
                 <h3 className="text-sm font-medium text-muted-foreground mb-4">
                   Conversation with {selectedCall?.agent}
@@ -674,7 +674,7 @@ export default function CallHistory() {
                   <TabsContent value="overview" className="p-6 mt-0">
                     {selectedCall && (
                       <div className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 gap-4">
                           <div>
                             <p className="text-sm font-medium text-muted-foreground">Date</p>
                             <p className="text-base">{selectedCall.date}</p>
@@ -744,6 +744,70 @@ export default function CallHistory() {
                   </TabsContent>
                 </div>
               </Tabs>
+            </div>
+            
+            {/* Right side - Original content */}
+            <div className="flex-1 flex flex-col">
+              <SheetHeader className="p-6 border-b">
+                <SheetTitle>Detalhes da Chamada</SheetTitle>
+              </SheetHeader>
+              <div className="flex-1 p-6 overflow-auto">
+                {selectedCall && (
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="flex items-center gap-2">
+                        <Phone className="h-4 w-4 text-muted-foreground" />
+                        <div>
+                          <p className="text-sm font-medium">Cliente</p>
+                          <p className="text-sm text-muted-foreground">{selectedCall.customer}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-muted-foreground" />
+                        <div>
+                          <p className="text-sm font-medium">Duração</p>
+                          <p className="text-sm text-muted-foreground">{selectedCall.duration}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="flex items-center gap-2">
+                        <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                        <div>
+                          <p className="text-sm font-medium">Mensagens</p>
+                          <p className="text-sm text-muted-foreground">{selectedCall.messageCount} mensagens</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                        <div>
+                          <p className="text-sm font-medium">Avaliação</p>
+                          <Badge className={getEvaluationColor(selectedCall.evaluationResult)}>
+                            {selectedCall.evaluationResult}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="text-sm font-medium mb-2">Informações do Contato</h4>
+                      <div className="bg-muted/50 p-4 rounded-lg space-y-2">
+                        <p className="text-sm"><strong>Nome:</strong> {selectedCall.customer}</p>
+                        <p className="text-sm"><strong>Telefone:</strong> {selectedCall.phone}</p>
+                        <p className="text-sm"><strong>Propósito:</strong> {selectedCall.purpose}</p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="text-sm font-medium mb-2">Observações</h4>
+                      <div className="bg-muted/50 p-4 rounded-lg">
+                        <p className="text-sm">{selectedCall.notes}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </SheetContent>
