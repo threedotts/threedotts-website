@@ -62,6 +62,51 @@ export type Database = {
         }
         Relationships: []
       }
+      call_transcriptions: {
+        Row: {
+          agent: string
+          audio_storage_path: string | null
+          created_at: string
+          customer: string
+          date: string
+          duration: number
+          evaluation_result: string
+          id: string
+          summary: string | null
+          time: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          agent: string
+          audio_storage_path?: string | null
+          created_at?: string
+          customer: string
+          date: string
+          duration?: number
+          evaluation_result: string
+          id?: string
+          summary?: string | null
+          time: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          agent?: string
+          audio_storage_path?: string | null
+          created_at?: string
+          customer?: string
+          date?: string
+          duration?: number
+          evaluation_result?: string
+          id?: string
+          summary?: string | null
+          time?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       onboarding: {
         Row: {
           completed_at: string | null
@@ -145,6 +190,41 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      transcription_messages: {
+        Row: {
+          call_id: string
+          created_at: string
+          id: string
+          message: string
+          speaker: string
+          timestamp: string
+        }
+        Insert: {
+          call_id: string
+          created_at?: string
+          id?: string
+          message: string
+          speaker: string
+          timestamp: string
+        }
+        Update: {
+          call_id?: string
+          created_at?: string
+          id?: string
+          message?: string
+          speaker?: string
+          timestamp?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transcription_messages_call_id_fkey"
+            columns: ["call_id"]
+            isOneToOne: false
+            referencedRelation: "call_transcriptions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

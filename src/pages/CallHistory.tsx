@@ -1,8 +1,10 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 import {
   Table,
   TableBody,
@@ -44,269 +46,30 @@ import { Separator } from "@/components/ui/separator";
 import { Phone, Clock, MessageSquare, TrendingUp, CalendarIcon, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// Mock data - will be replaced with real data from database later
-const mockCalls = [
-  {
-    id: "1",
-    date: "2024-01-26",
-    time: "14:30",
-    agent: "Maria Silva",
-    duration: "5m 23s",
-    messageCount: 12,
-    evaluationResult: "Excelente",
-    customer: "João Santos",
-    phone: "+55 11 98765-4321",
-    purpose: "Consulta sobre produto",
-    notes: "Cliente interessado no pacote premium. Solicitou ligação de acompanhamento.",
-  },
-  {
-    id: "2",
-    date: "2024-01-26",
-    time: "13:15",
-    agent: "Carlos Oliveira",
-    duration: "8m 45s",
-    messageCount: 18,
-    evaluationResult: "Bom",
-    customer: "Ana Costa",
-    phone: "+55 21 99876-5432",
-    purpose: "Solicitação de suporte",
-    notes: "Problema técnico resolvido. Cliente satisfeito com a solução.",
-  },
-  {
-    id: "3",
-    date: "2024-01-26",
-    time: "11:20",
-    agent: "Fernanda Lima",
-    duration: "3m 12s",
-    messageCount: 8,
-    evaluationResult: "Regular",
-    customer: "Pedro Almeida",
-    phone: "+55 31 97654-3210",
-    purpose: "Dúvida sobre cobrança",
-    notes: "Esclarecimento sobre cobrança fornecido. Cliente precisa entrar em contato com financeiro.",
-  },
-  {
-    id: "4",
-    date: "2024-01-25",
-    time: "16:45",
-    agent: "Roberto Santos",
-    duration: "12m 18s",
-    messageCount: 25,
-    evaluationResult: "Excelente",
-    customer: "Luciana Ferreira",
-    phone: "+55 11 96543-2109",
-    purpose: "Novo contrato",
-    notes: "Novo contrato negociado com sucesso. Cliente assinou plano anual.",
-  },
-  {
-    id: "5",
-    date: "2024-01-25",
-    time: "15:30",
-    agent: "Juliana Rocha",
-    duration: "6m 55s",
-    messageCount: 14,
-    evaluationResult: "Ruim",
-    customer: "Marcos Souza",
-    phone: "+55 85 95432-1098",
-    purpose: "Reclamação",
-    notes: "Reclamação do cliente sobre atraso no serviço. Escalado para supervisor.",
-  },
-  {
-    id: "6",
-    date: "2024-01-25",
-    time: "14:15",
-    agent: "Maria Silva",
-    duration: "4m 30s",
-    messageCount: 10,
-    evaluationResult: "Bom",
-    customer: "Sandra Pereira",
-    phone: "+55 47 94321-0987",
-    purpose: "Informações sobre upgrade",
-    notes: "Cliente interessada em upgrade do plano. Agendou nova conversa.",
-  },
-  {
-    id: "7",
-    date: "2024-01-25",
-    time: "12:45",
-    agent: "Carlos Oliveira",
-    duration: "7m 22s",
-    messageCount: 16,
-    evaluationResult: "Excelente",
-    customer: "Rafael Mendes",
-    phone: "+55 19 93210-9876",
-    purpose: "Suporte técnico",
-    notes: "Problema de conectividade resolvido. Cliente muito satisfeito.",
-  },
-  {
-    id: "8",
-    date: "2024-01-24",
-    time: "17:20",
-    agent: "Fernanda Lima",
-    duration: "9m 15s",
-    messageCount: 20,
-    evaluationResult: "Bom",
-    customer: "Amanda Torres",
-    phone: "+55 27 92109-8765",
-    purpose: "Cancelamento",
-    notes: "Cliente cancelou serviço. Motivo: mudança para outro estado.",
-  },
-  {
-    id: "9",
-    date: "2024-01-24",
-    time: "16:10",
-    agent: "Roberto Santos",
-    duration: "2m 45s",
-    messageCount: 6,
-    evaluationResult: "Regular",
-    customer: "Bruno Cardoso",
-    phone: "+55 62 91098-7654",
-    purpose: "Consulta rápida",
-    notes: "Consulta sobre horário de funcionamento. Informação fornecida.",
-  },
-  {
-    id: "10",
-    date: "2024-01-24",
-    time: "15:35",
-    agent: "Juliana Rocha",
-    duration: "11m 30s",
-    messageCount: 22,
-    evaluationResult: "Excelente",
-    customer: "Patrícia Dias",
-    phone: "+55 51 90987-6543",
-    purpose: "Renovação",
-    notes: "Contrato renovado com desconto especial. Cliente fidelizada.",
-  },
-  {
-    id: "11",
-    date: "2024-01-24",
-    time: "14:20",
-    agent: "Maria Silva",
-    duration: "6m 12s",
-    messageCount: 13,
-    evaluationResult: "Bom",
-    customer: "Gustavo Reis",
-    phone: "+55 71 89876-5432",
-    purpose: "Dúvida técnica",
-    notes: "Dúvida sobre configuração esclarecida. Cliente conseguiu resolver.",
-  },
-  {
-    id: "12",
-    date: "2024-01-23",
-    time: "18:45",
-    agent: "Carlos Oliveira",
-    duration: "5m 50s",
-    messageCount: 11,
-    evaluationResult: "Regular",
-    customer: "Camila Barbosa",
-    phone: "+55 41 88765-4321",
-    purpose: "Reclamação",
-    notes: "Reclamação sobre atendimento anterior. Situação esclarecida.",
-  },
-  {
-    id: "13",
-    date: "2024-01-23",
-    time: "17:30",
-    agent: "Fernanda Lima",
-    duration: "8m 20s",
-    messageCount: 17,
-    evaluationResult: "Excelente",
-    customer: "Diego Martins",
-    phone: "+55 84 87654-3210",
-    purpose: "Upgrade de plano",
-    notes: "Upgrade realizado com sucesso. Cliente satisfeito com novas funcionalidades.",
-  },
-  {
-    id: "14",
-    date: "2024-01-23",
-    time: "16:15",
-    agent: "Roberto Santos",
-    duration: "4m 35s",
-    messageCount: 9,
-    evaluationResult: "Bom",
-    customer: "Renata Gomes",
-    phone: "+55 67 86543-2109",
-    purpose: "Informações gerais",
-    notes: "Informações sobre serviços fornecidas. Cliente demonstrou interesse.",
-  },
-  {
-    id: "15",
-    date: "2024-01-23",
-    time: "15:05",
-    agent: "Juliana Rocha",
-    duration: "10m 25s",
-    messageCount: 21,
-    evaluationResult: "Ruim",
-    customer: "Thiago Nunes",
-    phone: "+55 79 85432-1098",
-    purpose: "Problema técnico",
-    notes: "Problema não resolvido na primeira tentativa. Ticket criado para equipe técnica.",
-  },
-  {
-    id: "16",
-    date: "2024-01-22",
-    time: "17:40",
-    agent: "Maria Silva",
-    duration: "7m 08s",
-    messageCount: 15,
-    evaluationResult: "Excelente",
-    customer: "Vanessa Lima",
-    phone: "+55 63 84321-0987",
-    purpose: "Contratação",
-    notes: "Nova contratação finalizada. Cliente muito satisfeita com proposta.",
-  },
-  {
-    id: "17",
-    date: "2024-01-22",
-    time: "16:25",
-    agent: "Carlos Oliveira",
-    duration: "3m 42s",
-    messageCount: 7,
-    evaluationResult: "Bom",
-    customer: "Leandro Costa",
-    phone: "+55 69 83210-9876",
-    purpose: "Consulta sobre fatura",
-    notes: "Dúvida sobre fatura esclarecida. Cliente satisfeito.",
-  },
-  {
-    id: "18",
-    date: "2024-01-22",
-    time: "15:10",
-    agent: "Fernanda Lima",
-    duration: "9m 30s",
-    messageCount: 19,
-    evaluationResult: "Regular",
-    customer: "Cristina Santos",
-    phone: "+55 68 82109-8765",
-    purpose: "Mudança de endereço",
-    notes: "Mudança de endereço registrada. Aguardando confirmação técnica.",
-  },
-  {
-    id: "19",
-    date: "2024-01-22",
-    time: "14:55",
-    agent: "Roberto Santos",
-    duration: "6m 18s",
-    messageCount: 12,
-    evaluationResult: "Bom",
-    customer: "Henrique Moura",
-    phone: "+55 82 81098-7654",
-    purpose: "Suporte",
-    notes: "Suporte prestado com sucesso. Cliente conseguiu resolver a questão.",
-  },
-  {
-    id: "20",
-    date: "2024-01-21",
-    time: "18:20",
-    agent: "Juliana Rocha",
-    duration: "13m 45s",
-    messageCount: 28,
-    evaluationResult: "Excelente",
-    customer: "Isabela Ferraz",
-    phone: "+55 86 80987-6543",
-    purpose: "Negociação",
-    notes: "Negociação de desconto bem-sucedida. Cliente manteve o serviço.",
-  },
-];
+// Database types
+interface CallTranscription {
+  id: string;
+  user_id: string;
+  date: string;
+  time: string;
+  duration: number;
+  agent: string;
+  customer: string;
+  evaluation_result: string;
+  summary: string | null;
+  audio_storage_path: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+interface TranscriptionMessage {
+  id: string;
+  call_id: string;
+  speaker: string;
+  message: string;
+  timestamp: string;
+  created_at: string;
+}
 
 const getEvaluationColor = (result: string) => {
   switch (result.toLowerCase()) {
@@ -324,8 +87,11 @@ const getEvaluationColor = (result: string) => {
 };
 
 export default function CallHistory() {
-  const [selectedCall, setSelectedCall] = useState<typeof mockCalls[0] | null>(null);
+  const [selectedCall, setSelectedCall] = useState<CallTranscription | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [calls, setCalls] = useState<CallTranscription[]>([]);
+  const [messages, setMessages] = useState<TranscriptionMessage[]>([]);
+  const [loading, setLoading] = useState(true);
   
   // Filter states
   const [startDate, setStartDate] = useState<Date | undefined>();
@@ -337,13 +103,47 @@ export default function CallHistory() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
+  // Fetch calls from database
+  useEffect(() => {
+    const fetchCalls = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('call_transcriptions')
+          .select('*')
+          .order('date', { ascending: false })
+          .order('time', { ascending: false });
+
+        if (error) {
+          toast({
+            title: "Erro ao carregar chamadas",
+            description: error.message,
+            variant: "destructive",
+          });
+          return;
+        }
+
+        setCalls(data || []);
+      } catch (error) {
+        toast({
+          title: "Erro ao carregar chamadas",
+          description: "Ocorreu um erro inesperado",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCalls();
+  }, []);
+
   // Get unique values for dropdowns
-  const uniqueEvaluations = Array.from(new Set(mockCalls.map(call => call.evaluationResult)));
-  const uniqueAgents = Array.from(new Set(mockCalls.map(call => call.agent)));
+  const uniqueEvaluations = Array.from(new Set(calls.map(call => call.evaluation_result)));
+  const uniqueAgents = Array.from(new Set(calls.map(call => call.agent)));
 
   // Filter calls based on selected filters
   const filteredCalls = useMemo(() => {
-    return mockCalls.filter(call => {
+    return calls.filter(call => {
       const callDate = new Date(call.date);
       
       // Date filters
@@ -351,14 +151,14 @@ export default function CallHistory() {
       if (endDate && callDate > endDate) return false;
       
       // Evaluation filter
-      if (selectedEvaluation && call.evaluationResult !== selectedEvaluation) return false;
+      if (selectedEvaluation && call.evaluation_result !== selectedEvaluation) return false;
       
       // Agent filter
       if (selectedAgent && call.agent !== selectedAgent) return false;
       
       return true;
     });
-  }, [startDate, endDate, selectedEvaluation, selectedAgent]);
+  }, [calls, startDate, endDate, selectedEvaluation, selectedAgent]);
 
   // Calculate pagination
   const totalPages = Math.ceil(filteredCalls.length / itemsPerPage);
@@ -380,9 +180,37 @@ export default function CallHistory() {
   // Check if any filters are active
   const hasActiveFilters = startDate || endDate || selectedEvaluation || selectedAgent;
 
-  const handleCallClick = (call: typeof mockCalls[0]) => {
+  const handleCallClick = async (call: CallTranscription) => {
     setSelectedCall(call);
     setIsDrawerOpen(true);
+    
+    // Fetch messages for this call
+    if (call.id) {
+      try {
+        const { data, error } = await supabase
+          .from('transcription_messages')
+          .select('*')
+          .eq('call_id', call.id)
+          .order('timestamp', { ascending: true });
+
+        if (error) {
+          toast({
+            title: "Erro ao carregar mensagens",
+            description: error.message,
+            variant: "destructive",
+          });
+          return;
+        }
+
+        setMessages(data || []);
+      } catch (error) {
+        toast({
+          title: "Erro ao carregar mensagens",
+          description: "Ocorreu um erro inesperado",
+          variant: "destructive",
+        });
+      }
+    }
   };
 
   const handleCloseDrawer = () => {
@@ -531,7 +359,7 @@ export default function CallHistory() {
         {/* Show results count and clear all filters */}
         <div className="flex items-center justify-between mt-4">
           <div className="text-sm text-muted-foreground">
-            {filteredCalls.length} de {mockCalls.length} chamadas
+            {loading ? "Carregando..." : `${filteredCalls.length} de ${calls.length} chamadas`}
           </div>
           {hasActiveFilters && (
             <Button
@@ -576,11 +404,11 @@ export default function CallHistory() {
                     </div>
                   </TableCell>
                   <TableCell className="font-medium">{call.agent}</TableCell>
-                  <TableCell>{call.duration}</TableCell>
-                  <TableCell>{call.messageCount}</TableCell>
+                  <TableCell>{call.duration}s</TableCell>
+                  <TableCell>{messages.filter(m => m.call_id === call.id).length}</TableCell>
                   <TableCell>
-                    <Badge className={getEvaluationColor(call.evaluationResult)}>
-                      {call.evaluationResult}
+                    <Badge className={getEvaluationColor(call.evaluation_result)}>
+                      {call.evaluation_result}
                     </Badge>
                   </TableCell>
                 </TableRow>
@@ -654,7 +482,12 @@ export default function CallHistory() {
                     className="w-full"
                     preload="metadata"
                   >
-                    <source src="#" type="audio/mpeg" />
+                    {selectedCall?.audio_storage_path && (
+                      <source 
+                        src={`https://dkqzzypemdewomxrjftv.supabase.co/storage/v1/object/public/call-recordings/${selectedCall.audio_storage_path}`} 
+                        type="audio/mpeg" 
+                      />
+                    )}
                     Your browser does not support the audio element.
                   </audio>
                 </div>
@@ -676,7 +509,7 @@ export default function CallHistory() {
                       <div className="space-y-4">
                         <h4 className="text-sm font-medium text-muted-foreground">Resumo da Chamada</h4>
                         <div className="bg-muted/50 p-4 rounded-lg">
-                          <p className="text-sm">{selectedCall.notes}</p>
+                          <p className="text-sm">{selectedCall.summary || "Resumo não disponível"}</p>
                         </div>
                       </div>
                     )}
@@ -686,60 +519,39 @@ export default function CallHistory() {
                     <div className="space-y-4">
                       <h4 className="text-sm font-medium text-muted-foreground">Transcrição da Chamada</h4>
                       <div className="space-y-3 flex-1 overflow-y-auto">
-                        {/* Agent message */}
-                        <div className="flex justify-start">
-                          <div className="bg-muted p-3 rounded-lg max-w-[80%]">
-                            <div className="flex justify-between items-center mb-1">
-                              <p className="text-xs text-muted-foreground">{selectedCall?.agent}</p>
-                              <p className="text-xs text-muted-foreground">14:30</p>
+                        {messages.length > 0 ? (
+                          messages.map((message) => (
+                            <div key={message.id} className={`flex ${message.speaker === selectedCall?.agent ? 'justify-start' : 'justify-end'}`}>
+                              <div className={`p-3 rounded-lg max-w-[80%] ${
+                                message.speaker === selectedCall?.agent 
+                                  ? 'bg-muted' 
+                                  : 'bg-primary text-primary-foreground'
+                              }`}>
+                                <div className="flex justify-between items-center mb-1">
+                                  <p className={`text-xs ${
+                                    message.speaker === selectedCall?.agent 
+                                      ? 'text-muted-foreground' 
+                                      : 'opacity-80'
+                                  }`}>
+                                    {message.speaker}
+                                  </p>
+                                  <p className={`text-xs ${
+                                    message.speaker === selectedCall?.agent 
+                                      ? 'text-muted-foreground' 
+                                      : 'opacity-80'
+                                  }`}>
+                                    {message.timestamp}
+                                  </p>
+                                </div>
+                                <p className="text-sm">{message.message}</p>
+                              </div>
                             </div>
-                            <p className="text-sm">Olá! Como posso ajudá-lo hoje?</p>
+                          ))
+                        ) : (
+                          <div className="text-center text-muted-foreground py-8">
+                            <p>Nenhuma transcrição disponível para esta chamada</p>
                           </div>
-                        </div>
-                        
-                        {/* Customer message */}
-                        <div className="flex justify-end">
-                          <div className="bg-primary text-primary-foreground p-3 rounded-lg max-w-[80%]">
-                            <div className="flex justify-between items-center mb-1">
-                              <p className="text-xs opacity-80">{selectedCall?.customer}</p>
-                              <p className="text-xs opacity-80">14:31</p>
-                            </div>
-                            <p className="text-sm">Estou com uma dúvida sobre o meu plano</p>
-                          </div>
-                        </div>
-                        
-                        {/* Agent message */}
-                        <div className="flex justify-start">
-                          <div className="bg-muted p-3 rounded-lg max-w-[80%]">
-                            <div className="flex justify-between items-center mb-1">
-                              <p className="text-xs text-muted-foreground">{selectedCall?.agent}</p>
-                              <p className="text-xs text-muted-foreground">14:32</p>
-                            </div>
-                            <p className="text-sm">Claro! Pode me dizer qual é a sua dúvida específica?</p>
-                          </div>
-                        </div>
-                        
-                        {/* Customer message */}
-                        <div className="flex justify-end">
-                          <div className="bg-primary text-primary-foreground p-3 rounded-lg max-w-[80%]">
-                            <div className="flex justify-between items-center mb-1">
-                              <p className="text-xs opacity-80">{selectedCall?.customer}</p>
-                              <p className="text-xs opacity-80">14:33</p>
-                            </div>
-                            <p className="text-sm">Quero saber sobre os benefícios do upgrade para o plano premium</p>
-                          </div>
-                        </div>
-                        
-                        {/* Agent message */}
-                        <div className="flex justify-start">
-                          <div className="bg-muted p-3 rounded-lg max-w-[80%]">
-                            <div className="flex justify-between items-center mb-1">
-                              <p className="text-xs text-muted-foreground">{selectedCall?.agent}</p>
-                              <p className="text-xs text-muted-foreground">14:34</p>
-                            </div>
-                            <p className="text-sm">Perfeito! O plano premium oferece várias vantagens. Deixe-me explicar...</p>
-                          </div>
-                        </div>
+                        )}
                       </div>
                     </div>
                   </TabsContent>
@@ -755,12 +567,12 @@ export default function CallHistory() {
                               <p className="text-sm">{selectedCall.customer}</p>
                             </div>
                             <div>
-                              <p className="text-sm font-medium text-muted-foreground">Telefone</p>
-                              <p className="text-sm">{selectedCall.phone}</p>
+                              <p className="text-sm font-medium text-muted-foreground">Data da Chamada</p>
+                              <p className="text-sm">{selectedCall.date}</p>
                             </div>
                             <div>
-                              <p className="text-sm font-medium text-muted-foreground">Propósito</p>
-                              <p className="text-sm">{selectedCall.purpose}</p>
+                              <p className="text-sm font-medium text-muted-foreground">Horário</p>
+                              <p className="text-sm">{selectedCall.time}</p>
                             </div>
                           </>
                         )}
@@ -801,15 +613,15 @@ export default function CallHistory() {
                         <MessageSquare className="h-4 w-4 text-muted-foreground" />
                         <div>
                           <p className="text-sm font-medium">Mensagens</p>
-                          <p className="text-sm text-muted-foreground">{selectedCall.messageCount} mensagens</p>
+                          <p className="text-sm text-muted-foreground">{messages.filter(m => m.call_id === selectedCall.id).length} mensagens</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
                         <TrendingUp className="h-4 w-4 text-muted-foreground" />
                         <div>
                           <p className="text-sm font-medium">Avaliação</p>
-                          <div className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium", getEvaluationColor(selectedCall.evaluationResult))}>
-                            {selectedCall.evaluationResult}
+                          <div className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium", getEvaluationColor(selectedCall.evaluation_result))}>
+                            {selectedCall.evaluation_result}
                           </div>
                         </div>
                       </div>
@@ -819,8 +631,8 @@ export default function CallHistory() {
                       <h4 className="text-sm font-medium mb-2">Informações do Contato</h4>
                       <div className="bg-muted/50 p-4 rounded-lg space-y-2">
                         <p className="text-sm"><strong>Nome:</strong> {selectedCall.customer}</p>
-                        <p className="text-sm"><strong>Telefone:</strong> {selectedCall.phone}</p>
-                        <p className="text-sm"><strong>Propósito:</strong> {selectedCall.purpose}</p>
+                        <p className="text-sm"><strong>Data:</strong> {selectedCall.date}</p>
+                        <p className="text-sm"><strong>Horário:</strong> {selectedCall.time}</p>
                       </div>
                     </div>
 
