@@ -39,6 +39,8 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
 import { Phone, Clock, MessageSquare, TrendingUp, CalendarIcon, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -636,93 +638,114 @@ export default function CallHistory() {
 
       {/* Call Details Drawer */}
       <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-        <SheetContent className="w-[400px] sm:w-[540px]">
-          <SheetHeader>
-            <SheetTitle>Detalhes da Chamada</SheetTitle>
-          </SheetHeader>
-          
-          {selectedCall && (
-            <div className="mt-6 space-y-6">
-              {/* Call Overview */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Resumo da Chamada</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Data</label>
-                    <p className="text-sm">{selectedCall.date}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Hora</label>
-                    <p className="text-sm">{selectedCall.time}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Duração</label>
-                    <p className="text-sm flex items-center gap-1">
-                      <Clock className="h-4 w-4" />
-                      {selectedCall.duration}
-                    </p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Mensagens</label>
-                    <p className="text-sm flex items-center gap-1">
-                      <MessageSquare className="h-4 w-4" />
-                      {selectedCall.messageCount}
-                    </p>
-                  </div>
+        <SheetContent className="w-[400px] sm:w-[540px] p-0">
+          <div className="flex h-full">
+            <Separator orientation="vertical" className="h-full" />
+            <div className="flex-1 flex flex-col">
+              <div className="p-6 border-b">
+                <h3 className="text-sm font-medium text-muted-foreground mb-4">
+                  Conversation with {selectedCall?.agent}
+                </h3>
+                
+                {/* Audio Player */}
+                <div className="mb-6">
+                  <audio
+                    controls
+                    className="w-full"
+                    preload="metadata"
+                  >
+                    <source src="#" type="audio/mpeg" />
+                    Your browser does not support the audio element.
+                  </audio>
                 </div>
               </div>
 
-              {/* Customer Information */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Informações do Cliente</h3>
-                <div className="space-y-2">
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Nome</label>
-                    <p className="text-sm">{selectedCall.customer}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Telefone</label>
-                    <p className="text-sm">{selectedCall.phone}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Motivo</label>
-                    <p className="text-sm">{selectedCall.purpose}</p>
-                  </div>
+              {/* Tabs */}
+              <Tabs defaultValue="overview" className="flex-1 flex flex-col">
+                <div className="px-6 pt-4">
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="overview">Overview</TabsTrigger>
+                    <TabsTrigger value="transcription">Transcription</TabsTrigger>
+                    <TabsTrigger value="client-data">Client Data</TabsTrigger>
+                  </TabsList>
                 </div>
-              </div>
-
-              {/* Agent & Evaluation */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Agente e Avaliação</h3>
-                <div className="space-y-2">
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Agente</label>
-                    <p className="text-sm">{selectedCall.agent}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Resultado da Avaliação</label>
-                    <Badge className={getEvaluationColor(selectedCall.evaluationResult)}>
-                      <TrendingUp className="h-3 w-3 mr-1" />
-                      {selectedCall.evaluationResult}
-                    </Badge>
-                  </div>
+                
+                <div className="flex-1 overflow-auto">
+                  <TabsContent value="overview" className="p-6 mt-0">
+                    {selectedCall && (
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <p className="text-sm font-medium text-muted-foreground">Date</p>
+                            <p className="text-base">{selectedCall.date}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-muted-foreground">Time</p>
+                            <p className="text-base">{selectedCall.time}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-muted-foreground">Duration</p>
+                            <p className="text-base">{selectedCall.duration}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-muted-foreground">Messages</p>
+                            <p className="text-base">{selectedCall.messageCount}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-muted-foreground">Customer</p>
+                            <p className="text-base">{selectedCall.customer}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-muted-foreground">Evaluation</p>
+                            <Badge className={getEvaluationColor(selectedCall.evaluationResult)}>
+                              {selectedCall.evaluationResult}
+                            </Badge>
+                          </div>
+                        </div>
+                        <div className="mt-6">
+                          <h4 className="text-sm font-medium text-muted-foreground mb-2">Call Summary</h4>
+                          <p className="text-sm">{selectedCall.notes}</p>
+                        </div>
+                      </div>
+                    )}
+                  </TabsContent>
+                  
+                  <TabsContent value="transcription" className="p-6 mt-0">
+                    <div className="space-y-4">
+                      <h4 className="text-sm font-medium text-muted-foreground">Call Transcription</h4>
+                      <div className="bg-muted/50 p-4 rounded-lg">
+                        <p className="text-sm">Transcription content will be displayed here...</p>
+                      </div>
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="client-data" className="p-6 mt-0">
+                    <div className="space-y-4">
+                      <h4 className="text-sm font-medium text-muted-foreground">Client Information</h4>
+                      <div className="space-y-3">
+                        {selectedCall && (
+                          <>
+                            <div>
+                              <p className="text-sm font-medium text-muted-foreground">Customer Name</p>
+                              <p className="text-sm">{selectedCall.customer}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-muted-foreground">Phone</p>
+                              <p className="text-sm">{selectedCall.phone}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-muted-foreground">Purpose</p>
+                              <p className="text-sm">{selectedCall.purpose}</p>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </TabsContent>
                 </div>
-              </div>
-
-              {/* Call Notes */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Observações da Chamada</h3>
-                <div className="bg-muted/50 p-3 rounded-lg">
-                  <p className="text-sm">{selectedCall.notes}</p>
-                </div>
-              </div>
-
-              {/* Placeholder for future content */}
-              <div className="text-sm text-muted-foreground italic">
-                Detalhes adicionais da chamada e análise serão exibidos aqui...
-              </div>
+              </Tabs>
             </div>
-          )}
+          </div>
         </SheetContent>
       </Sheet>
     </div>
