@@ -638,7 +638,7 @@ export default function CallHistory() {
 
       {/* Call Details Drawer */}
       <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-        <SheetContent className="w-[1000px] sm:w-[1200px] max-w-[90vw] p-0">
+        <SheetContent className="w-[1400px] sm:w-[1600px] max-w-[95vw] p-0">
           <div className="flex h-full">
             {/* Left side - New content */}
             <div className="w-80 flex flex-col border-r">
