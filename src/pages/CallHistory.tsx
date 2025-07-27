@@ -405,7 +405,7 @@ export default function CallHistory() {
                   </TableCell>
                   <TableCell className="font-medium">{call.agent}</TableCell>
                   <TableCell>{call.duration}s</TableCell>
-                  <TableCell>{messages.filter(m => m.call_id === call.id).length}</TableCell>
+                  <TableCell>-</TableCell>
                   <TableCell>
                     <Badge className={getEvaluationColor(call.evaluation_result)}>
                       {call.evaluation_result}
