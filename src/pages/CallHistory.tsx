@@ -641,7 +641,7 @@ export default function CallHistory() {
         <SheetContent className="!w-[1000px] !max-w-[90vw] p-0">
           <div className="flex h-full">
             {/* Left side - New content */}
-            <div className="w-96 flex flex-col border-r">
+            <div className="w-80 flex flex-col border-r">
               <div className="p-6 border-b">
                 <h3 className="text-sm font-medium text-muted-foreground mb-4">
                   Conversation with {selectedCall?.agent}
