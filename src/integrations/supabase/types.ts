@@ -66,6 +66,7 @@ export type Database = {
         Row: {
           agent: string
           audio_storage_path: string | null
+          conversation_id: string
           customer: string
           date: string
           duration: number
@@ -79,6 +80,7 @@ export type Database = {
         Insert: {
           agent: string
           audio_storage_path?: string | null
+          conversation_id: string
           customer: string
           date: string
           duration?: number
@@ -92,6 +94,7 @@ export type Database = {
         Update: {
           agent?: string
           audio_storage_path?: string | null
+          conversation_id?: string
           customer?: string
           date?: string
           duration?: number
