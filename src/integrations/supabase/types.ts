@@ -62,6 +62,48 @@ export type Database = {
         }
         Relationships: []
       }
+      call_staging: {
+        Row: {
+          agent: string
+          audio_storage_path: string | null
+          customer: string
+          date: string
+          duration: number
+          evaluation_result: string
+          id: string
+          received_audio: boolean
+          received_metadata: boolean
+          summary: string | null
+          time: string
+        }
+        Insert: {
+          agent: string
+          audio_storage_path?: string | null
+          customer: string
+          date: string
+          duration?: number
+          evaluation_result: string
+          id?: string
+          received_audio?: boolean
+          received_metadata?: boolean
+          summary?: string | null
+          time: string
+        }
+        Update: {
+          agent?: string
+          audio_storage_path?: string | null
+          customer?: string
+          date?: string
+          duration?: number
+          evaluation_result?: string
+          id?: string
+          received_audio?: boolean
+          received_metadata?: boolean
+          summary?: string | null
+          time?: string
+        }
+        Relationships: []
+      }
       call_transcriptions: {
         Row: {
           agent: string
