@@ -58,17 +58,15 @@ interface CallTranscription {
   evaluation_result: string;
   summary: string | null;
   audio_storage_path: string | null;
+  messages: any; // This will be JSONB from the database
   created_at: string;
   updated_at: string;
 }
 
 interface TranscriptionMessage {
-  id: string;
-  call_id: string;
   speaker: string;
   message: string;
   timestamp: string;
-  created_at: string;
 }
 
 const getEvaluationColor = (result: string) => {
@@ -90,7 +88,6 @@ export default function CallHistory() {
   const [selectedCall, setSelectedCall] = useState<CallTranscription | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [calls, setCalls] = useState<CallTranscription[]>([]);
-  const [messages, setMessages] = useState<TranscriptionMessage[]>([]);
   const [loading, setLoading] = useState(true);
   
   // Filter states
@@ -180,37 +177,9 @@ export default function CallHistory() {
   // Check if any filters are active
   const hasActiveFilters = startDate || endDate || selectedEvaluation || selectedAgent;
 
-  const handleCallClick = async (call: CallTranscription) => {
+  const handleCallClick = (call: CallTranscription) => {
     setSelectedCall(call);
     setIsDrawerOpen(true);
-    
-    // Fetch messages for this call
-    if (call.id) {
-      try {
-        const { data, error } = await supabase
-          .from('transcription_messages')
-          .select('*')
-          .eq('call_id', call.id)
-          .order('timestamp', { ascending: true });
-
-        if (error) {
-          toast({
-            title: "Erro ao carregar mensagens",
-            description: error.message,
-            variant: "destructive",
-          });
-          return;
-        }
-
-        setMessages(data || []);
-      } catch (error) {
-        toast({
-          title: "Erro ao carregar mensagens",
-          description: "Ocorreu um erro inesperado",
-          variant: "destructive",
-        });
-      }
-    }
   };
 
   const handleCloseDrawer = () => {
@@ -405,7 +374,7 @@ export default function CallHistory() {
                   </TableCell>
                   <TableCell className="font-medium">{call.agent}</TableCell>
                   <TableCell>{call.duration}s</TableCell>
-                  <TableCell>-</TableCell>
+                  <TableCell>{call.messages && Array.isArray(call.messages) ? call.messages.length : 0}</TableCell>
                   <TableCell>
                     <Badge className={getEvaluationColor(call.evaluation_result)}>
                       {call.evaluation_result}
@@ -518,10 +487,10 @@ export default function CallHistory() {
                   <TabsContent value="transcription" className="p-6 mt-0">
                     <div className="space-y-4">
                       <h4 className="text-sm font-medium text-muted-foreground">Transcrição da Chamada</h4>
-                      <div className="space-y-3 flex-1 overflow-y-auto">
-                        {messages.length > 0 ? (
-                          messages.map((message) => (
-                            <div key={message.id} className={`flex ${message.speaker === selectedCall?.agent ? 'justify-start' : 'justify-end'}`}>
+                       <div className="space-y-3 flex-1 overflow-y-auto">
+                         {selectedCall?.messages && Array.isArray(selectedCall.messages) && selectedCall.messages.length > 0 ? (
+                            selectedCall.messages.map((message, index) => (
+                             <div key={index} className={`flex ${message.speaker === selectedCall?.agent ? 'justify-start' : 'justify-end'}`}>
                               <div className={`p-3 rounded-lg max-w-[80%] ${
                                 message.speaker === selectedCall?.agent 
                                   ? 'bg-muted' 
@@ -613,7 +582,7 @@ export default function CallHistory() {
                         <MessageSquare className="h-4 w-4 text-muted-foreground" />
                         <div>
                           <p className="text-sm font-medium">Mensagens</p>
-                          <p className="text-sm text-muted-foreground">{messages.filter(m => m.call_id === selectedCall.id).length} mensagens</p>
+                          <p className="text-sm text-muted-foreground">{selectedCall?.messages && Array.isArray(selectedCall.messages) ? selectedCall.messages.length : 0} mensagens</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">

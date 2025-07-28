@@ -64,46 +64,40 @@ export type Database = {
       }
       call_staging: {
         Row: {
-          agent: string
+          agent: string | null
           audio_storage_path: string | null
           conversation_id: string
-          customer: string
-          date: string
-          duration: number
-          evaluation_result: string
+          customer: string | null
+          duration: number | null
+          evaluation_result: string | null
           id: string
           received_audio: boolean
           received_metadata: boolean
           summary: string | null
-          time: string
         }
         Insert: {
-          agent: string
+          agent?: string | null
           audio_storage_path?: string | null
           conversation_id: string
-          customer: string
-          date: string
-          duration?: number
-          evaluation_result: string
+          customer?: string | null
+          duration?: number | null
+          evaluation_result?: string | null
           id?: string
           received_audio?: boolean
           received_metadata?: boolean
           summary?: string | null
-          time: string
         }
         Update: {
-          agent?: string
+          agent?: string | null
           audio_storage_path?: string | null
           conversation_id?: string
-          customer?: string
-          date?: string
-          duration?: number
-          evaluation_result?: string
+          customer?: string | null
+          duration?: number | null
+          evaluation_result?: string | null
           id?: string
           received_audio?: boolean
           received_metadata?: boolean
           summary?: string | null
-          time?: string
         }
         Relationships: []
       }
@@ -117,6 +111,7 @@ export type Database = {
           duration: number
           evaluation_result: string
           id: string
+          messages: Json | null
           summary: string | null
           time: string
           updated_at: string
@@ -131,6 +126,7 @@ export type Database = {
           duration?: number
           evaluation_result: string
           id?: string
+          messages?: Json | null
           summary?: string | null
           time: string
           updated_at?: string
@@ -145,6 +141,7 @@ export type Database = {
           duration?: number
           evaluation_result?: string
           id?: string
+          messages?: Json | null
           summary?: string | null
           time?: string
           updated_at?: string
@@ -235,41 +232,6 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
-      }
-      transcription_messages: {
-        Row: {
-          call_id: string
-          created_at: string
-          id: string
-          message: string
-          speaker: string
-          timestamp: string
-        }
-        Insert: {
-          call_id: string
-          created_at?: string
-          id?: string
-          message: string
-          speaker: string
-          timestamp: string
-        }
-        Update: {
-          call_id?: string
-          created_at?: string
-          id?: string
-          message?: string
-          speaker?: string
-          timestamp?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "transcription_messages_call_id_fkey"
-            columns: ["call_id"]
-            isOneToOne: false
-            referencedRelation: "call_transcriptions"
-            referencedColumns: ["id"]
-          },
-        ]
       }
     }
     Views: {
