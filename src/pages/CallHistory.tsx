@@ -471,7 +471,7 @@ export default function CallHistory() {
                   </TabsList>
                 </div>
                 
-                <div className="flex-1 overflow-auto">
+                <div className="flex-1 overflow-auto pb-6">
                   <TabsContent value="overview" className="p-6 mt-0">
                     {selectedCall && (
                       <div className="space-y-4">
