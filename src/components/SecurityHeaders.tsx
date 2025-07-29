@@ -12,6 +12,7 @@ export const SecurityHeaders = () => {
       font-src 'self' https://fonts.gstatic.com; 
       img-src 'self' data: https:; 
       connect-src 'self' https://dkqzzypemdewomxrjftv.supabase.co https://*.supabase.co https://elevenlabs.io https://*.elevenlabs.io wss://*.elevenlabs.io; 
+      media-src 'self' blob: https://dkqzzypemdewomxrjftv.supabase.co;
       frame-src 'self';
     `.replace(/\s+/g, ' ').trim();
     
