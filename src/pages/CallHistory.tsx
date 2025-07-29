@@ -449,9 +449,12 @@ export default function CallHistory() {
                     <div className="space-y-2">
                       <p className="text-sm text-muted-foreground">Gravação da chamada:</p>
                       <audio
+                        key={selectedCall.id} // Force re-render when call changes
                         controls
                         className="w-full"
                         preload="metadata"
+                        src={selectedCall.audio_storage_path}
+                        crossOrigin="anonymous"
                         onError={(e) => {
                           console.error('Audio error:', e);
                           console.log('Audio URL being used:', selectedCall.audio_storage_path);
@@ -469,10 +472,6 @@ export default function CallHistory() {
                         onCanPlay={() => console.log('Audio can play')}
                         onLoadedData={() => console.log('Audio loaded successfully')}
                       >
-                        <source 
-                          src={selectedCall.audio_storage_path} 
-                          type="audio/mpeg" 
-                        />
                         Your browser does not support the audio element.
                       </audio>
                       <p className="text-xs text-muted-foreground">URL: {selectedCall.audio_storage_path}</p>
