@@ -108,12 +108,6 @@ export function AudioPlayer({ audioUrl }: AudioPlayerProps) {
       >
         Your browser does not support the audio element.
       </audio>
-      <button 
-        onClick={() => window.open(audioUrl, '_blank')}
-        className="text-xs text-blue-500 hover:underline"
-      >
-        Abrir em nova aba
-      </button>
     </div>
   );
 }
