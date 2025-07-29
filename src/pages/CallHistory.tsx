@@ -445,19 +445,33 @@ export default function CallHistory() {
                 
                 {/* Audio Player */}
                 <div className="mb-6">
-                  <audio
-                    controls
-                    className="w-full"
-                    preload="metadata"
-                  >
-                    {selectedCall?.audio_storage_path && (
-                      <source 
-                        src={selectedCall.audio_storage_path} 
-                        type="audio/mpeg" 
-                      />
-                    )}
-                    Your browser does not support the audio element.
-                  </audio>
+                  {selectedCall?.audio_storage_path ? (
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground">Gravação da chamada:</p>
+                      <audio
+                        controls
+                        className="w-full"
+                        preload="metadata"
+                        onError={(e) => {
+                          console.error('Audio error:', e);
+                          console.log('Audio URL:', selectedCall.audio_storage_path);
+                        }}
+                        onLoadStart={() => console.log('Audio loading started')}
+                        onCanPlay={() => console.log('Audio can play')}
+                      >
+                        <source 
+                          src={selectedCall.audio_storage_path} 
+                          type="audio/mpeg" 
+                        />
+                        Your browser does not support the audio element.
+                      </audio>
+                      <p className="text-xs text-muted-foreground">URL: {selectedCall.audio_storage_path}</p>
+                    </div>
+                  ) : (
+                    <div className="bg-muted/50 p-4 rounded-lg">
+                      <p className="text-sm text-muted-foreground">Gravação não disponível</p>
+                    </div>
+                  )}
                 </div>
               </div>
 
