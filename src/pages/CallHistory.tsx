@@ -506,7 +506,7 @@ export default function CallHistory() {
                                      <div className={`p-3 rounded-lg ${
                                        isAgent 
                                          ? 'bg-muted border border-border rounded-tl-none' 
-                                         : 'bg-primary text-primary-foreground rounded-tr-none'
+                                         : 'bg-accent text-accent-foreground rounded-tr-none border border-accent/20'
                                      }`}>
                                        <p className="text-sm leading-relaxed">{message.message}</p>
                                        {message.timestamp && (
