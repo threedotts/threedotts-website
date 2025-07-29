@@ -497,7 +497,7 @@ export default function CallHistory() {
                                    <div className="flex flex-col max-w-[75%]">
                                      {/* Speaker name */}
                                      <p className={`text-xs font-medium mb-1 ${
-                                       isAgent ? 'text-left text-blue-600' : 'text-right text-green-600'
+                                       isAgent ? 'text-left text-muted-foreground' : 'text-right text-foreground'
                                      }`}>
                                        {isAgent ? `Agente • ${selectedCall.agent}` : `Cliente • ${selectedCall.customer}`}
                                      </p>
