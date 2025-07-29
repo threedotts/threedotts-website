@@ -483,7 +483,7 @@ export default function CallHistory() {
                     )}
                   </TabsContent>
                   
-                  <TabsContent value="transcription" className="p-6 mt-0 flex-1 flex flex-col">
+                  <TabsContent value="transcription" className="p-6 mt-0 flex-1 flex flex-col pb-3">
                     <div className="flex-1 flex flex-col min-h-0">
                       <h4 className="text-sm font-medium text-muted-foreground mb-4">Transcrição da Chamada</h4>
                         <div className="space-y-4 flex-1 overflow-y-auto pr-2 min-h-0">
