@@ -49,7 +49,6 @@ import { cn } from "@/lib/utils";
 // Database types
 interface CallTranscription {
   id: string;
-  user_id: string;
   date: string;
   time: string;
   duration: number;
@@ -487,36 +486,42 @@ export default function CallHistory() {
                   <TabsContent value="transcription" className="p-6 mt-0">
                     <div className="space-y-4">
                       <h4 className="text-sm font-medium text-muted-foreground">Transcrição da Chamada</h4>
-                       <div className="space-y-3 flex-1 overflow-y-auto">
-                         {selectedCall?.messages && Array.isArray(selectedCall.messages) && selectedCall.messages.length > 0 ? (
-                            selectedCall.messages.map((message, index) => (
-                             <div key={index} className={`flex ${message.speaker === selectedCall?.agent ? 'justify-start' : 'justify-end'}`}>
-                              <div className={`p-3 rounded-lg max-w-[80%] ${
-                                message.speaker === selectedCall?.agent 
-                                  ? 'bg-muted' 
-                                  : 'bg-primary text-primary-foreground'
-                              }`}>
-                                <div className="flex justify-between items-center mb-1">
-                                  <p className={`text-xs ${
-                                    message.speaker === selectedCall?.agent 
-                                      ? 'text-muted-foreground' 
-                                      : 'opacity-80'
-                                  }`}>
-                                    {message.speaker}
-                                  </p>
-                                  <p className={`text-xs ${
-                                    message.speaker === selectedCall?.agent 
-                                      ? 'text-muted-foreground' 
-                                      : 'opacity-80'
-                                  }`}>
-                                    {message.timestamp}
-                                  </p>
-                                </div>
-                                <p className="text-sm">{message.message}</p>
-                              </div>
-                            </div>
-                          ))
-                        ) : (
+                        <div className="space-y-4 flex-1 overflow-y-auto max-h-96 pr-2">
+                          {selectedCall?.messages && Array.isArray(selectedCall.messages) && selectedCall.messages.length > 0 ? (
+                             selectedCall.messages.map((message, index) => {
+                               const isAgent = message.speaker === selectedCall?.agent;
+                               const isCustomer = message.speaker === selectedCall?.customer;
+                               
+                               return (
+                                 <div key={index} className={`flex ${isAgent ? 'justify-start' : 'justify-end'}`}>
+                                   <div className="flex flex-col max-w-[75%]">
+                                     {/* Speaker name */}
+                                     <p className={`text-xs font-medium mb-1 ${
+                                       isAgent ? 'text-left text-blue-600' : 'text-right text-green-600'
+                                     }`}>
+                                       {isAgent ? 'Agente' : 'Cliente'} • {message.speaker}
+                                     </p>
+                                     
+                                     {/* Message bubble */}
+                                     <div className={`p-3 rounded-lg ${
+                                       isAgent 
+                                         ? 'bg-muted border border-border rounded-tl-none' 
+                                         : 'bg-primary text-primary-foreground rounded-tr-none'
+                                     }`}>
+                                       <p className="text-sm leading-relaxed">{message.message}</p>
+                                       {message.timestamp && (
+                                         <p className={`text-xs mt-2 ${
+                                           isAgent ? 'text-muted-foreground' : 'text-primary-foreground/70'
+                                         }`}>
+                                           {message.timestamp}
+                                         </p>
+                                       )}
+                                     </div>
+                                   </div>
+                                 </div>
+                                );
+                              })
+                         ) : (
                           <div className="text-center text-muted-foreground py-8">
                             <p>Nenhuma transcrição disponível para esta chamada</p>
                           </div>
