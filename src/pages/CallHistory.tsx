@@ -44,6 +44,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Phone, Clock, MessageSquare, TrendingUp, CalendarIcon, X } from "lucide-react";
+import { AudioPlayer } from "@/components/AudioPlayer";
 import { cn } from "@/lib/utils";
 
 // Database types
@@ -446,52 +447,7 @@ export default function CallHistory() {
                 {/* Audio Player */}
                 <div className="mb-6">
                   {selectedCall?.audio_storage_path ? (
-                    <div className="space-y-2">
-                      <p className="text-sm text-muted-foreground">Gravação da chamada:</p>
-                      <audio
-                        key={selectedCall.id}
-                        controls
-                        className="w-full"
-                        preload="auto"
-                        crossOrigin="anonymous"
-                        ref={(audioElement) => {
-                          if (audioElement && selectedCall?.audio_storage_path) {
-                            console.log('Setting audio src to:', selectedCall.audio_storage_path);
-                            audioElement.src = selectedCall.audio_storage_path;
-                            audioElement.load(); // Force reload
-                            
-                            // Check if src was set correctly
-                            setTimeout(() => {
-                              console.log('Audio element src after setting:', audioElement.src);
-                              console.log('Audio element duration:', audioElement.duration);
-                              console.log('Audio element readyState:', audioElement.readyState);
-                            }, 100);
-                          }
-                        }}
-                        onError={(e) => {
-                          console.error('Audio error event:', e);
-                          const target = e.target as HTMLAudioElement;
-                          console.log('Audio element src during error:', target.src);
-                          console.log('Audio element error code:', target.error?.code);
-                          console.log('Audio element error message:', target.error?.message);
-                        }}
-                        onLoadStart={() => console.log('Audio loadstart event')}
-                        onLoadedMetadata={() => console.log('Audio loadedmetadata event')}
-                        onCanPlay={() => console.log('Audio canplay event')}
-                        onLoadedData={() => console.log('Audio loadeddata event')}
-                      >
-                        Your browser does not support the audio element.
-                      </audio>
-                      <p className="text-xs text-muted-foreground">URL: {selectedCall.audio_storage_path}</p>
-                      <button 
-                        onClick={() => {
-                          window.open(selectedCall.audio_storage_path, '_blank');
-                        }}
-                        className="text-xs text-blue-500 hover:underline"
-                      >
-                        Test URL in new tab
-                      </button>
-                    </div>
+                    <AudioPlayer audioUrl={selectedCall.audio_storage_path} />
                   ) : (
                     <div className="bg-muted/50 p-4 rounded-lg">
                       <p className="text-sm text-muted-foreground">Gravação não disponível</p>
