@@ -454,10 +454,20 @@ export default function CallHistory() {
                         preload="metadata"
                         onError={(e) => {
                           console.error('Audio error:', e);
-                          console.log('Audio URL:', selectedCall.audio_storage_path);
+                          console.log('Audio URL being used:', selectedCall.audio_storage_path);
+                          
+                          // Test if it's a full URL or just filename
+                          const isFullUrl = selectedCall.audio_storage_path.startsWith('http');
+                          console.log('Is full URL:', isFullUrl);
+                          
+                          if (!isFullUrl) {
+                            const constructedUrl = `https://dkqzzypemdewomxrjftv.supabase.co/storage/v1/object/public/call-recordings/${selectedCall.audio_storage_path}`;
+                            console.log('Constructed URL would be:', constructedUrl);
+                          }
                         }}
                         onLoadStart={() => console.log('Audio loading started')}
                         onCanPlay={() => console.log('Audio can play')}
+                        onLoadedData={() => console.log('Audio loaded successfully')}
                       >
                         <source 
                           src={selectedCall.audio_storage_path} 
@@ -466,6 +476,14 @@ export default function CallHistory() {
                         Your browser does not support the audio element.
                       </audio>
                       <p className="text-xs text-muted-foreground">URL: {selectedCall.audio_storage_path}</p>
+                      <button 
+                        onClick={() => {
+                          window.open(selectedCall.audio_storage_path, '_blank');
+                        }}
+                        className="text-xs text-blue-500 hover:underline"
+                      >
+                        Test URL in new tab
+                      </button>
                     </div>
                   ) : (
                     <div className="bg-muted/50 p-4 rounded-lg">
