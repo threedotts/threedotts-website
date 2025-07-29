@@ -489,8 +489,8 @@ export default function CallHistory() {
                         <div className="space-y-4 flex-1 overflow-y-auto max-h-96 pr-2">
                           {selectedCall?.messages && Array.isArray(selectedCall.messages) && selectedCall.messages.length > 0 ? (
                              selectedCall.messages.map((message, index) => {
-                               const isAgent = message.speaker === selectedCall?.agent;
-                               const isCustomer = message.speaker === selectedCall?.customer;
+                               const isAgent = message.role === 'agent';
+                               const isUser = message.role === 'user';
                                
                                return (
                                  <div key={index} className={`flex ${isAgent ? 'justify-start' : 'justify-end'}`}>
