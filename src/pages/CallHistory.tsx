@@ -486,7 +486,7 @@ export default function CallHistory() {
                   <TabsContent value="transcription" className="p-6 mt-0">
                     <div className="space-y-4">
                       <h4 className="text-sm font-medium text-muted-foreground">Transcrição da Chamada</h4>
-                        <div className="space-y-4 flex-1 overflow-y-auto pb-3 pr-2">
+                        <div className="space-y-4 flex-1 overflow-y-auto max-h-[500px] pb-3 pr-2">
                           {selectedCall?.messages && Array.isArray(selectedCall.messages) && selectedCall.messages.length > 0 ? (
                              selectedCall.messages.map((message, index) => {
                                const isAgent = message.role === 'agent';
