@@ -471,7 +471,7 @@ export default function CallHistory() {
                   </TabsList>
                 </div>
                 
-                <div className="flex-1 overflow-auto h-0">
+                <div className="flex-1 overflow-auto">
                   <TabsContent value="overview" className="p-6 mt-0">
                     {selectedCall && (
                       <div className="space-y-4">
@@ -483,10 +483,10 @@ export default function CallHistory() {
                     )}
                   </TabsContent>
                   
-                  <TabsContent value="transcription" className="p-6 mt-0 flex-1 flex flex-col pb-3">
-                    <div className="flex-1 flex flex-col min-h-0">
-                      <h4 className="text-sm font-medium text-muted-foreground mb-4">Transcrição da Chamada</h4>
-                        <div className="space-y-4 flex-1 overflow-y-auto pr-2 min-h-0">
+                  <TabsContent value="transcription" className="p-6 mt-0">
+                    <div className="space-y-4">
+                      <h4 className="text-sm font-medium text-muted-foreground">Transcrição da Chamada</h4>
+                        <div className="space-y-4 flex-1 overflow-y-auto max-h-96 pr-2">
                           {selectedCall?.messages && Array.isArray(selectedCall.messages) && selectedCall.messages.length > 0 ? (
                              selectedCall.messages.map((message, index) => {
                                const isAgent = message.role === 'agent';
@@ -506,7 +506,7 @@ export default function CallHistory() {
                                      <div className={`p-3 rounded-lg ${
                                        isAgent 
                                          ? 'bg-muted border border-border rounded-tl-none' 
-                                         : 'bg-accent text-accent-foreground rounded-tr-none border border-accent/20'
+                                         : 'bg-primary text-primary-foreground rounded-tr-none'
                                      }`}>
                                        <p className="text-sm leading-relaxed">{message.message}</p>
                                        {message.timestamp && (
