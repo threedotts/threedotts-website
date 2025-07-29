@@ -13,6 +13,7 @@ export const SecurityHeaders = () => {
       img-src 'self' data: https:; 
       connect-src 'self' https://dkqzzypemdewomxrjftv.supabase.co https://*.supabase.co https://elevenlabs.io https://*.elevenlabs.io wss://*.elevenlabs.io https://api.us.elevenlabs.io wss://api.us.elevenlabs.io; 
       media-src 'self' blob: https://dkqzzypemdewomxrjftv.supabase.co;
+      worker-src 'self' blob: https://cdn.jsdelivr.net https://elevenlabs.io https://*.elevenlabs.io;
       frame-src 'self';
     `.replace(/\s+/g, ' ').trim();
     
