@@ -484,8 +484,8 @@ export default function CallHistory() {
                   </TabsContent>
                   
                   <TabsContent value="transcription" className="p-6 mt-0 flex-1 flex flex-col">
-                    <div className="space-y-4">
-                      <h4 className="text-sm font-medium text-muted-foreground">Transcrição da Chamada</h4>
+                    <div className="flex-1 flex flex-col">
+                      <h4 className="text-sm font-medium text-muted-foreground mb-4">Transcrição da Chamada</h4>
                         <div className="space-y-4 flex-1 overflow-y-auto pr-2">
                           {selectedCall?.messages && Array.isArray(selectedCall.messages) && selectedCall.messages.length > 0 ? (
                              selectedCall.messages.map((message, index) => {
