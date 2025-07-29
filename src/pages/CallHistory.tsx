@@ -499,7 +499,7 @@ export default function CallHistory() {
                                      <p className={`text-xs font-medium mb-1 ${
                                        isAgent ? 'text-left text-blue-600' : 'text-right text-green-600'
                                      }`}>
-                                       {isAgent ? 'Agente' : 'Cliente'} • {message.speaker}
+                                       {isAgent ? `Agente • ${selectedCall.agent}` : `Cliente • ${selectedCall.customer}`}
                                      </p>
                                      
                                      {/* Message bubble */}
