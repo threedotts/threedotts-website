@@ -452,7 +452,7 @@ export default function CallHistory() {
                   >
                     {selectedCall?.audio_storage_path && (
                       <source 
-                        src={`https://dkqzzypemdewomxrjftv.supabase.co/storage/v1/object/public/call-recordings/${selectedCall.audio_storage_path}`} 
+                        src={selectedCall.audio_storage_path} 
                         type="audio/mpeg" 
                       />
                     )}
