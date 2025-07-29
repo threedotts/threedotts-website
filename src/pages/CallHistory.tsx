@@ -449,28 +449,36 @@ export default function CallHistory() {
                     <div className="space-y-2">
                       <p className="text-sm text-muted-foreground">Gravação da chamada:</p>
                       <audio
-                        key={selectedCall.id} // Force re-render when call changes
+                        key={selectedCall.id}
                         controls
                         className="w-full"
-                        preload="metadata"
-                        src={selectedCall.audio_storage_path}
+                        preload="auto"
                         crossOrigin="anonymous"
-                        onError={(e) => {
-                          console.error('Audio error:', e);
-                          console.log('Audio URL being used:', selectedCall.audio_storage_path);
-                          
-                          // Test if it's a full URL or just filename
-                          const isFullUrl = selectedCall.audio_storage_path.startsWith('http');
-                          console.log('Is full URL:', isFullUrl);
-                          
-                          if (!isFullUrl) {
-                            const constructedUrl = `https://dkqzzypemdewomxrjftv.supabase.co/storage/v1/object/public/call-recordings/${selectedCall.audio_storage_path}`;
-                            console.log('Constructed URL would be:', constructedUrl);
+                        ref={(audioElement) => {
+                          if (audioElement && selectedCall?.audio_storage_path) {
+                            console.log('Setting audio src to:', selectedCall.audio_storage_path);
+                            audioElement.src = selectedCall.audio_storage_path;
+                            audioElement.load(); // Force reload
+                            
+                            // Check if src was set correctly
+                            setTimeout(() => {
+                              console.log('Audio element src after setting:', audioElement.src);
+                              console.log('Audio element duration:', audioElement.duration);
+                              console.log('Audio element readyState:', audioElement.readyState);
+                            }, 100);
                           }
                         }}
-                        onLoadStart={() => console.log('Audio loading started')}
-                        onCanPlay={() => console.log('Audio can play')}
-                        onLoadedData={() => console.log('Audio loaded successfully')}
+                        onError={(e) => {
+                          console.error('Audio error event:', e);
+                          const target = e.target as HTMLAudioElement;
+                          console.log('Audio element src during error:', target.src);
+                          console.log('Audio element error code:', target.error?.code);
+                          console.log('Audio element error message:', target.error?.message);
+                        }}
+                        onLoadStart={() => console.log('Audio loadstart event')}
+                        onLoadedMetadata={() => console.log('Audio loadedmetadata event')}
+                        onCanPlay={() => console.log('Audio canplay event')}
+                        onLoadedData={() => console.log('Audio loadeddata event')}
                       >
                         Your browser does not support the audio element.
                       </audio>
