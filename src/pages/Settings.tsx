@@ -198,7 +198,7 @@ export default function Settings({ selectedOrganization, onOrganizationUpdate }:
                     id="activation-code"
                     type="text"
                     value={activationCode}
-                    onChange={(e) => setActivationCode(e.target.value.toUpperCase())}
+                    onChange={(e) => setActivationCode(e.target.value)}
                     placeholder="Digite o código recebido por email"
                     className="font-mono"
                     disabled={loading}
