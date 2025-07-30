@@ -28,6 +28,7 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import Scheduling from "./pages/Scheduling";
+import CreateOrganization from "./pages/CreateOrganization";
 import NotFound from "./pages/NotFound";
 import { ChatWidgetErrorBoundary } from "./components/ChatWidgetErrorBoundary";
 import { SecurityHeaders } from "./components/SecurityHeaders";
@@ -133,6 +134,7 @@ const App = () => {
             <Route path="/project-request" element={<ProjectRequest />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/dashboard/*" element={<Dashboard />} />
+            <Route path="/create-organization" element={<CreateOrganization />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/service/:serviceId" element={<ServiceDetails />} />
             <Route path="/scheduling" element={<Scheduling />} />
