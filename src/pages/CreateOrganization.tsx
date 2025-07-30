@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,13 +8,51 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { User } from "@supabase/supabase-js";
 
 const CreateOrganization = () => {
   const [organizationName, setOrganizationName] = useState("");
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [checking, setChecking] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Check authentication on component mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          toast({
+            title: "Acesso negado",
+            description: "Você precisa estar logado para criar uma organização",
+            variant: "destructive",
+          });
+          navigate("/auth");
+          return;
+        }
+        setUser(session.user);
+      } catch (error) {
+        console.error("Error checking auth:", error);
+        navigate("/auth");
+      } finally {
+        setChecking(false);
+      }
+    };
+
+    checkAuth();
+  }, [navigate, toast]);
+
+  // Show loading while checking authentication
+  if (checking) {
+    return (
+      <div className="min-h-screen bg-gradient-hero flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,14 +69,13 @@ const CreateOrganization = () => {
     setLoading(true);
     
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
       if (!user) {
         toast({
           title: "Erro",
           description: "Usuário não encontrado",
           variant: "destructive",
         });
+        navigate("/auth");
         return;
       }
 
