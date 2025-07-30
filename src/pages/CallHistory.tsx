@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
+import { ShimmerSkeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
@@ -369,28 +370,54 @@ export default function CallHistory() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {currentPageCalls.map((call) => (
-                <TableRow 
-                  key={call.id} 
-                  className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => handleCallClick(call)}
-                >
-                  <TableCell>
-                    <div>
-                      <div className="font-medium">{call.date}</div>
-                      <div className="text-sm text-muted-foreground">{call.time}</div>
-                    </div>
-                  </TableCell>
-                  <TableCell className="font-medium">{call.agent}</TableCell>
-                  <TableCell>{call.duration}s</TableCell>
-                  <TableCell>{call.messages && Array.isArray(call.messages) ? call.messages.length : 0}</TableCell>
-                  <TableCell>
-                    <Badge className={cn(getEvaluationColor(call.evaluation_result), "hover:none")}>
-                      {call.evaluation_result}
-                    </Badge>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {loading ? (
+                // Shimmer loading effect
+                Array.from({ length: 5 }).map((_, index) => (
+                  <TableRow key={index}>
+                    <TableCell>
+                      <div className="space-y-2">
+                        <ShimmerSkeleton className="h-4 w-24" />
+                        <ShimmerSkeleton className="h-3 w-16" />
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <ShimmerSkeleton className="h-4 w-20" />
+                    </TableCell>
+                    <TableCell>
+                      <ShimmerSkeleton className="h-4 w-12" />
+                    </TableCell>
+                    <TableCell>
+                      <ShimmerSkeleton className="h-4 w-8" />
+                    </TableCell>
+                    <TableCell>
+                      <ShimmerSkeleton className="h-6 w-16 rounded-full" />
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                currentPageCalls.map((call) => (
+                  <TableRow 
+                    key={call.id} 
+                    className="cursor-pointer hover:bg-muted/50"
+                    onClick={() => handleCallClick(call)}
+                  >
+                    <TableCell>
+                      <div>
+                        <div className="font-medium">{call.date}</div>
+                        <div className="text-sm text-muted-foreground">{call.time}</div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="font-medium">{call.agent}</TableCell>
+                    <TableCell>{call.duration}s</TableCell>
+                    <TableCell>{call.messages && Array.isArray(call.messages) ? call.messages.length : 0}</TableCell>
+                    <TableCell>
+                      <Badge className={cn(getEvaluationColor(call.evaluation_result), "hover:none")}>
+                        {call.evaluation_result}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </CardContent>
