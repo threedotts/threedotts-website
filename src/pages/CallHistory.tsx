@@ -144,9 +144,17 @@ export default function CallHistory() {
     return calls.filter(call => {
       const callDate = new Date(call.date);
       
-      // Date filters
-      if (startDate && callDate < startDate) return false;
-      if (endDate && callDate > endDate) return false;
+      // Date filters - inclusive of start and end dates
+      if (startDate) {
+        const startOfDay = new Date(startDate);
+        startOfDay.setHours(0, 0, 0, 0);
+        if (callDate < startOfDay) return false;
+      }
+      if (endDate) {
+        const endOfDay = new Date(endDate);
+        endOfDay.setHours(23, 59, 59, 999);
+        if (callDate > endOfDay) return false;
+      }
       
       // Evaluation filter
       if (selectedEvaluation && call.evaluation_result !== selectedEvaluation) return false;
