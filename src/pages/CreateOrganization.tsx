@@ -85,7 +85,6 @@ const CreateOrganization = () => {
         .upsert({
           user_id: user.id,
           organization_name: organizationName.trim(),
-          organization_description: description.trim(),
           organization_members_count: 1,
           updated_at: new Date().toISOString(),
         });
