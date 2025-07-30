@@ -411,7 +411,7 @@ export default function CallHistory() {
                     <TableCell>{Math.floor(call.duration / 60).toString().padStart(2, '0')}:{(call.duration % 60).toString().padStart(2, '0')}</TableCell>
                     <TableCell>{call.messages && Array.isArray(call.messages) ? call.messages.length : 0}</TableCell>
                     <TableCell>
-                      <Badge className={cn(getEvaluationColor(call.evaluation_result), "hover:bg-current hover:text-current")}>
+                      <Badge className={cn(getEvaluationColor(call.evaluation_result), "pointer-events-none")}>
                         {call.evaluation_result}
                       </Badge>
                     </TableCell>
