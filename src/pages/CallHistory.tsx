@@ -377,7 +377,7 @@ export default function CallHistory() {
                   <TableCell>{call.duration}s</TableCell>
                   <TableCell>{call.messages && Array.isArray(call.messages) ? call.messages.length : 0}</TableCell>
                   <TableCell>
-                    <Badge className={getEvaluationColor(call.evaluation_result)}>
+                    <Badge className={cn(getEvaluationColor(call.evaluation_result), "hover:none")}>
                       {call.evaluation_result}
                     </Badge>
                   </TableCell>
