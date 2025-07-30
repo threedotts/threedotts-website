@@ -408,7 +408,7 @@ export default function CallHistory() {
                       </div>
                     </TableCell>
                     <TableCell className="font-medium">{call.agent}</TableCell>
-                    <TableCell>{call.duration}s</TableCell>
+                    <TableCell>{Math.floor(call.duration / 60).toString().padStart(2, '0')}:{(call.duration % 60).toString().padStart(2, '0')}</TableCell>
                     <TableCell>{call.messages && Array.isArray(call.messages) ? call.messages.length : 0}</TableCell>
                     <TableCell>
                       <Badge className={cn(getEvaluationColor(call.evaluation_result), "hover:none")}>
