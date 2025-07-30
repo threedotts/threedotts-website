@@ -68,6 +68,7 @@ export type Database = {
           duration: number | null
           evaluation_result: string | null
           id: string
+          messages: Json | null
           received_audio: boolean
           received_metadata: boolean
           summary: string | null
@@ -80,6 +81,7 @@ export type Database = {
           duration?: number | null
           evaluation_result?: string | null
           id?: string
+          messages?: Json | null
           received_audio?: boolean
           received_metadata?: boolean
           summary?: string | null
@@ -92,6 +94,7 @@ export type Database = {
           duration?: number | null
           evaluation_result?: string | null
           id?: string
+          messages?: Json | null
           received_audio?: boolean
           received_metadata?: boolean
           summary?: string | null
@@ -198,6 +201,8 @@ export type Database = {
           first_name: string | null
           id: string
           last_name: string | null
+          organization_description: string | null
+          organization_domain: string | null
           organization_members_count: number
           organization_name: string
           updated_at: string
@@ -209,6 +214,8 @@ export type Database = {
           first_name?: string | null
           id?: string
           last_name?: string | null
+          organization_description?: string | null
+          organization_domain?: string | null
           organization_members_count?: number
           organization_name: string
           updated_at?: string
@@ -220,6 +227,8 @@ export type Database = {
           first_name?: string | null
           id?: string
           last_name?: string | null
+          organization_description?: string | null
+          organization_domain?: string | null
           organization_members_count?: number
           organization_name?: string
           updated_at?: string

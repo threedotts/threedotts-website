@@ -13,6 +13,7 @@ import { User } from "@supabase/supabase-js";
 const CreateOrganization = () => {
   const [organizationName, setOrganizationName] = useState("");
   const [description, setDescription] = useState("");
+  const [domain, setDomain] = useState("");
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [checking, setChecking] = useState(true);
@@ -85,6 +86,8 @@ const CreateOrganization = () => {
         .upsert({
           user_id: user.id,
           organization_name: organizationName.trim(),
+          organization_description: description.trim() || null,
+          organization_domain: domain.trim() || null,
           organization_members_count: 1,
           updated_at: new Date().toISOString(),
         });
@@ -165,6 +168,19 @@ const CreateOrganization = () => {
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="Descreva brevemente a organização"
                     rows={4}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="domain">
+                    Domínio da Empresa (Opcional)
+                  </Label>
+                  <Input
+                    id="domain"
+                    type="text"
+                    value={domain}
+                    onChange={(e) => setDomain(e.target.value)}
+                    placeholder="exemplo: minhempresa.com"
                   />
                 </div>
 
