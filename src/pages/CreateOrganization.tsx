@@ -114,21 +114,6 @@ const CreateOrganization = () => {
         return;
       }
 
-      // Send activation email
-      const { error: emailError } = await supabase.functions.invoke('send-activation-email', {
-        body: {
-          email: user.email,
-          name: user.user_metadata?.full_name || user.email,
-          organizationName: organizationName.trim(),
-          activationCode: code,
-        }
-      });
-
-      if (emailError) {
-        console.error("Error sending email:", emailError);
-        // Don't block the flow if email fails, just log it
-      }
-
       // Show success dialog
       setShowSuccessDialog(true);
     } catch (error) {
@@ -251,12 +236,8 @@ const CreateOrganization = () => {
                 Você receberá um email com o código de ativação e instruções completas 
                 de como configurar seu call center.
               </p>
-              <div className="bg-muted p-4 rounded-lg">
-                <p className="font-semibold text-sm mb-2">Código de Ativação:</p>
-                <p className="text-lg font-mono font-bold text-primary">{activationCode}</p>
-              </div>
               <p className="text-sm text-muted-foreground">
-                Guarde este código - você precisará dele para ativar seu dashboard e call center.
+                O código será necessário para ativar seu dashboard e call center.
               </p>
             </DialogDescription>
           </DialogHeader>
