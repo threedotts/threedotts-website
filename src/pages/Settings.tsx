@@ -148,7 +148,7 @@ export default function Settings({ selectedOrganization, onOrganizationUpdate }:
   }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-6">{/* Removido max-w-4xl mx-auto para usar largura total */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground mb-2">Configurações</h1>
         <p className="text-muted-foreground">
@@ -232,18 +232,6 @@ export default function Settings({ selectedOrganization, onOrganizationUpdate }:
                     <span className="text-sm font-medium">Call Center</span>
                     <Badge variant={isActivated ? "default" : "secondary"}>
                       {isActivated ? "Ativo" : "Inativo"}
-                    </Badge>
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                    <span className="text-sm font-medium">Integrações</span>
-                    <Badge variant={isActivated ? "default" : "secondary"}>
-                      {isActivated ? "Disponível" : "Bloqueado"}
-                    </Badge>
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                    <span className="text-sm font-medium">Relatórios</span>
-                    <Badge variant={isActivated ? "default" : "secondary"}>
-                      {isActivated ? "Disponível" : "Bloqueado"}
                     </Badge>
                   </div>
                 </div>
