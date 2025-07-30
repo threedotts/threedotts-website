@@ -495,6 +495,25 @@ export default function CallHistory() {
                                const isAgent = message.role === 'agent';
                                const isUser = message.role === 'user';
                                
+                               // If message is null, check for tool calls
+                               if (!message.message) {
+                                 // Check if there are tool calls
+                                 if (message.tool_calls && message.tool_calls.length > 0) {
+                                   // Show tool call in the middle
+                                   return (
+                                     <div key={index} className="flex justify-center my-4">
+                                       <div className="text-center text-sm text-muted-foreground bg-muted/30 px-4 py-2 rounded-lg border border-border/50">
+                                         <p className="font-medium">{message.tool_calls[0].function?.name || 'Tool Call'}</p>
+                                         <p className="text-xs mt-1">User ended the conversation.</p>
+                                       </div>
+                                     </div>
+                                   );
+                                 } else {
+                                   // If both message and tool calls are null, don't show anything
+                                   return null;
+                                 }
+                               }
+                               
                                return (
                                  <div key={index} className={`flex ${isAgent ? 'justify-start' : 'justify-end'}`}>
                                    <div className="flex flex-col max-w-[75%]">
@@ -523,7 +542,7 @@ export default function CallHistory() {
                                    </div>
                                  </div>
                                 );
-                              })
+                              }).filter(Boolean)
                          ) : (
                           <div className="text-center text-muted-foreground py-8">
                             <p>Nenhuma transcrição disponível para esta chamada</p>
