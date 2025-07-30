@@ -638,7 +638,7 @@ export default function CallHistory() {
                         <Clock className="h-4 w-4 text-muted-foreground" />
                         <div>
                           <p className="text-sm font-medium">Duração</p>
-                          <p className="text-sm text-muted-foreground">{selectedCall.duration}</p>
+                          <p className="text-sm text-muted-foreground">{Math.floor(selectedCall.duration / 60).toString().padStart(2, '0')}:{(selectedCall.duration % 60).toString().padStart(2, '0')}</p>
                         </div>
                       </div>
                     </div>
