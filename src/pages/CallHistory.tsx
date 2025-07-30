@@ -159,6 +159,11 @@ export default function CallHistory({ selectedOrganization }: CallHistoryProps) 
     fetchCalls();
   }, []);
 
+  // Refetch calls when organization changes
+  useEffect(() => {
+    fetchCalls();
+  }, [selectedOrganization]);
+
   // Get unique values for dropdowns
   const uniqueEvaluations = Array.from(new Set(calls.map(call => call.evaluation_result)));
   const uniqueAgents = Array.from(new Set(calls.map(call => call.agent)));

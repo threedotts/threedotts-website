@@ -41,6 +41,7 @@ const Dashboard = () => {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null);
   const [loading, setLoading] = useState(true);
+  const [reloadKey, setReloadKey] = useState(0); // Key to force component remount
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
@@ -125,13 +126,43 @@ const Dashboard = () => {
       }
 
       setOrganizations(data || []);
-      if (data && data.length > 0) {
-        setSelectedOrg(data[0]); // Select first organization by default
+      
+      // Try to restore selected organization from localStorage
+      const savedOrgId = localStorage.getItem("selectedOrganizationId");
+      if (savedOrgId && data) {
+        const savedOrg = data.find(org => org.id === savedOrgId);
+        if (savedOrg) {
+          setSelectedOrg(savedOrg);
+        } else if (data.length > 0) {
+          // If saved org not found, select first one
+          setSelectedOrg(data[0]);
+          localStorage.setItem("selectedOrganizationId", data[0].id);
+        }
+      } else if (data && data.length > 0) {
+        // If no saved org, select first one
+        setSelectedOrg(data[0]);
+        localStorage.setItem("selectedOrganizationId", data[0].id);
       }
     } catch (error) {
       console.error("Error fetching organizations:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Handle organization change
+  const handleOrganizationChange = (organizationId: string) => {
+    const org = organizations.find(o => o.id === organizationId);
+    if (org) {
+      setSelectedOrg(org);
+      localStorage.setItem("selectedOrganizationId", org.id);
+      // Force reload of all dashboard components
+      setReloadKey(prev => prev + 1);
+      
+      toast({
+        title: "Organização alterada",
+        description: `Agora visualizando dados de: ${org.name}`,
+      });
     }
   };
 
@@ -173,10 +204,7 @@ const Dashboard = () => {
                 {organizations.length > 0 ? (
                   <Select 
                     value={selectedOrg?.id || ""} 
-                    onValueChange={(value) => {
-                      const org = organizations.find(o => o.id === value);
-                      setSelectedOrg(org || null);
-                    }}
+                    onValueChange={handleOrganizationChange}
                   >
                     <SelectTrigger className="w-[250px]">
                       <SelectValue placeholder="Selecionar organização" />
@@ -210,8 +238,8 @@ const Dashboard = () => {
           {/* Main Content */}
           <main className="flex-1 overflow-auto">
             <Routes>
-              <Route path="/" element={<DashboardHome selectedOrganization={selectedOrg} />} />
-              <Route path="/call-history" element={<CallHistory selectedOrganization={selectedOrg} />} />
+              <Route path="/" element={<DashboardHome key={`home-${reloadKey}`} selectedOrganization={selectedOrg} />} />
+              <Route path="/call-history" element={<CallHistory key={`history-${reloadKey}`} selectedOrganization={selectedOrg} />} />
             </Routes>
           </main>
         </div>
