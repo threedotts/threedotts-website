@@ -6,9 +6,10 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Building2, Mail, Lock, Eye, EyeOff, User, Shield } from "lucide-react";
+import { ArrowLeft, Building2, Mail, Lock, Eye, EyeOff, User, Shield, CheckCircle } from "lucide-react";
 import { useSecurityMonitor } from "@/hooks/useSecurityMonitor";
 import { useSessionTimeout } from "@/hooks/useSessionTimeout";
 import { 
@@ -22,6 +23,7 @@ import {
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -124,10 +126,9 @@ const Auth = () => {
       if (error) throw error;
 
       security.recordSuccessfulAttempt();
-      toast({
-        title: "Conta criada com sucesso!",
-        description: "Verifique seu email para confirmar a conta.",
-      });
+      
+      // Show success dialog instead of toast
+      setShowSuccessDialog(true);
     } catch (error: any) {
       security.recordFailedAttempt();
       toast({
@@ -138,6 +139,18 @@ const Auth = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleCloseDialog = () => {
+    setShowSuccessDialog(false);
+    // Reset form
+    setFormData({
+      email: "",
+      password: "",
+      firstName: "",
+      lastName: "",
+      organizationName: "",
+    });
   };
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
@@ -510,6 +523,35 @@ const Auth = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Success Dialog */}
+      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-green-100 rounded-full">
+              <CheckCircle className="w-6 h-6 text-green-600" />
+            </div>
+            <DialogTitle className="text-center">Conta Criada com Sucesso!</DialogTitle>
+            <DialogDescription className="text-center space-y-4">
+              <div className="flex items-center justify-center mb-4">
+                <Mail className="w-8 h-8 text-primary mr-2" />
+              </div>
+              <p>
+                Você receberá um email com o código de ativação e instruções completas 
+                de como configurar seu call center.
+              </p>
+              <p className="text-sm text-muted-foreground">
+                O código será necessário para ativar seu dashboard e call center.
+              </p>
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center mt-6">
+            <Button onClick={handleCloseDialog} className="w-full">
+              Continuar
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
