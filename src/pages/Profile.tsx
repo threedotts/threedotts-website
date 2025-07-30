@@ -29,8 +29,6 @@ interface Profile {
   user_id: string;
   first_name: string;
   last_name: string;
-  organization_name: string;
-  organization_members_count: number;
   avatar_url: string;
   created_at: string;
   updated_at: string;
@@ -52,8 +50,6 @@ const Profile = () => {
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
-    organizationName: "",
-    membersCount: 1,
     currentPassword: "",
     newPassword: "",
     confirmPassword: ""
@@ -112,8 +108,6 @@ const Profile = () => {
       setFormData({
         firstName: data.first_name || "",
         lastName: data.last_name || "",
-        organizationName: data.organization_name || "",
-        membersCount: data.organization_members_count || 1,
         currentPassword: "",
         newPassword: "",
         confirmPassword: ""
@@ -129,7 +123,7 @@ const Profile = () => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: name === "membersCount" ? Math.max(1, parseInt(value) || 1) : value
+      [name]: value
     }));
   };
 
@@ -144,8 +138,6 @@ const Profile = () => {
         .update({
           first_name: formData.firstName,
           last_name: formData.lastName,
-          organization_name: formData.organizationName,
-          organization_members_count: formData.membersCount,
           updated_at: new Date().toISOString()
         })
         .eq("user_id", user.id);
@@ -420,7 +412,7 @@ const Profile = () => {
                     <span>Informações Pessoais</span>
                   </CardTitle>
                   <CardDescription>
-                    Atualize suas informações pessoais e da organização
+                    Atualize suas informações pessoais
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -445,40 +437,6 @@ const Profile = () => {
                           value={formData.lastName}
                           onChange={handleInputChange}
                           placeholder="Seu apelido"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="organizationName">Nome da Organização</Label>
-                      <div className="relative">
-                        <Building2 className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          id="organizationName"
-                          name="organizationName"
-                          value={formData.organizationName}
-                          onChange={handleInputChange}
-                          className="pl-10"
-                          placeholder="Nome da sua empresa"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="membersCount">Número de Membros</Label>
-                      <div className="relative">
-                        <Users className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          id="membersCount"
-                          name="membersCount"
-                          type="number"
-                          min="1"
-                          value={formData.membersCount}
-                          onChange={handleInputChange}
-                          className="pl-10"
-                          placeholder="Número de membros"
                           required
                         />
                       </div>

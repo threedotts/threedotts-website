@@ -112,6 +112,7 @@ export type Database = {
           evaluation_result: string
           id: string
           messages: Json | null
+          organization_id: string | null
           summary: string | null
           time: string
           updated_at: string
@@ -126,6 +127,7 @@ export type Database = {
           evaluation_result: string
           id?: string
           messages?: Json | null
+          organization_id?: string | null
           summary?: string | null
           time: string
           updated_at?: string
@@ -140,11 +142,20 @@ export type Database = {
           evaluation_result?: string
           id?: string
           messages?: Json | null
+          organization_id?: string | null
           summary?: string | null
           time?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "call_transcriptions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       onboarding: {
         Row: {
@@ -194,6 +205,39 @@ export type Database = {
         }
         Relationships: []
       }
+      organizations: {
+        Row: {
+          created_at: string
+          description: string | null
+          domain: string | null
+          id: string
+          members_count: number
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          domain?: string | null
+          id?: string
+          members_count?: number
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          domain?: string | null
+          id?: string
+          members_count?: number
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -201,10 +245,6 @@ export type Database = {
           first_name: string | null
           id: string
           last_name: string | null
-          organization_description: string | null
-          organization_domain: string | null
-          organization_members_count: number
-          organization_name: string
           updated_at: string
           user_id: string
         }
@@ -214,10 +254,6 @@ export type Database = {
           first_name?: string | null
           id?: string
           last_name?: string | null
-          organization_description?: string | null
-          organization_domain?: string | null
-          organization_members_count?: number
-          organization_name: string
           updated_at?: string
           user_id: string
         }
@@ -227,10 +263,6 @@ export type Database = {
           first_name?: string | null
           id?: string
           last_name?: string | null
-          organization_description?: string | null
-          organization_domain?: string | null
-          organization_members_count?: number
-          organization_name?: string
           updated_at?: string
           user_id?: string
         }

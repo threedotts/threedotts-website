@@ -6,6 +6,21 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+
+interface Organization {
+  id: string;
+  user_id: string;
+  name: string;
+  description: string;
+  domain: string;
+  members_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+interface CallHistoryProps {
+  selectedOrganization: Organization | null;
+}
 import {
   Table,
   TableBody,
@@ -86,7 +101,7 @@ const getEvaluationColor = (result: string) => {
   }
 };
 
-export default function CallHistory() {
+export default function CallHistory({ selectedOrganization }: CallHistoryProps) {
   const [selectedCall, setSelectedCall] = useState<CallTranscription | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [calls, setCalls] = useState<CallTranscription[]>([]);
@@ -106,9 +121,16 @@ export default function CallHistory() {
   const fetchCalls = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('call_transcriptions')
-        .select('*')
+        .select('*');
+
+      // Filter by organization if selected
+      if (selectedOrganization) {
+        query = query.eq('organization_id', selectedOrganization.id);
+      }
+
+      const { data, error } = await query
         .order('date', { ascending: false })
         .order('time', { ascending: false });
 

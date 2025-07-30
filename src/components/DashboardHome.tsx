@@ -2,13 +2,22 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Users, Phone, TrendingUp, Clock } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
-interface DashboardHomeProps {
-  profile: {
-    organization_members_count: number;
-  };
+interface Organization {
+  id: string;
+  user_id: string;
+  name: string;
+  description: string;
+  domain: string;
+  members_count: number;
+  created_at: string;
+  updated_at: string;
 }
 
-export default function DashboardHome({ profile }: DashboardHomeProps) {
+interface DashboardHomeProps {
+  selectedOrganization: Organization | null;
+}
+
+export default function DashboardHome({ selectedOrganization }: DashboardHomeProps) {
   // Mock data for statistics
   const stats = [
     {
@@ -20,7 +29,7 @@ export default function DashboardHome({ profile }: DashboardHomeProps) {
     },
     {
       title: "Agentes Ativos",
-      value: profile.organization_members_count.toString(),
+      value: selectedOrganization?.members_count?.toString() || "0",
       change: "+2",
       icon: Users,
       color: "text-accent"

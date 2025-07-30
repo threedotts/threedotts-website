@@ -16,8 +16,20 @@ import DashboardHome from "@/components/DashboardHome";
 interface Profile {
   id: string;
   user_id: string;
-  organization_name: string;
-  organization_members_count: number;
+  first_name: string;
+  last_name: string;
+  avatar_url: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface Organization {
+  id: string;
+  user_id: string;
+  name: string;
+  description: string;
+  domain: string;
+  members_count: number;
   created_at: string;
   updated_at: string;
 }
@@ -26,8 +38,9 @@ const Dashboard = () => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedOrg, setSelectedOrg] = useState<string>("");
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
@@ -63,6 +76,7 @@ const Dashboard = () => {
   useEffect(() => {
     if (user) {
       fetchProfile();
+      fetchOrganizations();
     }
   }, [user]);
 
@@ -86,9 +100,36 @@ const Dashboard = () => {
       }
 
       setProfile(data);
-      setSelectedOrg(data.organization_name);
     } catch (error) {
       console.error("Error fetching profile:", error);
+    }
+  };
+
+  const fetchOrganizations = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from("organizations")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        toast({
+          title: "Erro",
+          description: "Erro ao carregar organizações: " + error.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setOrganizations(data || []);
+      if (data && data.length > 0) {
+        setSelectedOrg(data[0]); // Select first organization by default
+      }
+    } catch (error) {
+      console.error("Error fetching organizations:", error);
     } finally {
       setLoading(false);
     }
@@ -129,16 +170,30 @@ const Dashboard = () => {
               </div>
               
               <div className="flex items-center space-x-4">
-                <Select value={selectedOrg} onValueChange={setSelectedOrg}>
-                  <SelectTrigger className="w-[250px]">
-                    <SelectValue placeholder="Selecionar organização" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border border-border z-50">
-                    <SelectItem value={profile.organization_name}>
-                      {profile.organization_name}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
+                {organizations.length > 0 ? (
+                  <Select 
+                    value={selectedOrg?.id || ""} 
+                    onValueChange={(value) => {
+                      const org = organizations.find(o => o.id === value);
+                      setSelectedOrg(org || null);
+                    }}
+                  >
+                    <SelectTrigger className="w-[250px]">
+                      <SelectValue placeholder="Selecionar organização" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-popover border border-border z-50">
+                      {organizations.map((org) => (
+                        <SelectItem key={org.id} value={org.id}>
+                          {org.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <div className="text-muted-foreground">
+                    Nenhuma organização encontrada
+                  </div>
+                )}
                 
                 <Button 
                   variant="outline" 
@@ -155,8 +210,8 @@ const Dashboard = () => {
           {/* Main Content */}
           <main className="flex-1 overflow-auto">
             <Routes>
-              <Route path="/" element={<DashboardHome profile={profile} />} />
-              <Route path="/call-history" element={<CallHistory />} />
+              <Route path="/" element={<DashboardHome selectedOrganization={selectedOrg} />} />
+              <Route path="/call-history" element={<CallHistory selectedOrganization={selectedOrg} />} />
             </Routes>
           </main>
         </div>

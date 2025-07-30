@@ -80,41 +80,16 @@ const CreateOrganization = () => {
         return;
       }
 
-      // Check if user already has a profile
-      const { data: existingProfile } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("user_id", user.id)
-        .single();
-
-      let error;
-
-      if (existingProfile) {
-        // Update existing profile
-        const result = await supabase
-          .from("profiles")
-          .update({
-            organization_name: organizationName.trim(),
-            organization_description: description.trim() || null,
-            organization_domain: domain.trim() || null,
-            organization_members_count: 1,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("user_id", user.id);
-        error = result.error;
-      } else {
-        // Create new profile
-        const result = await supabase
-          .from("profiles")
-          .insert({
-            user_id: user.id,
-            organization_name: organizationName.trim(),
-            organization_description: description.trim() || null,
-            organization_domain: domain.trim() || null,
-            organization_members_count: 1,
-          });
-        error = result.error;
-      }
+      // Create new organization
+      const { error } = await supabase
+        .from("organizations")
+        .insert({
+          user_id: user.id,
+          name: organizationName.trim(),
+          description: description.trim() || null,
+          domain: domain.trim() || null,
+          members_count: 1,
+        });
 
       if (error) {
         toast({
@@ -163,7 +138,7 @@ const CreateOrganization = () => {
             <CardHeader>
               <CardTitle>Criar Nova Organização</CardTitle>
               <CardDescription>
-                Preencha os dados abaixo para criar uma nova organização
+                Preencha os dados abaixo para criar uma nova organização. Você pode ter múltiplas organizações na sua conta.
               </CardDescription>
             </CardHeader>
             <CardContent>
