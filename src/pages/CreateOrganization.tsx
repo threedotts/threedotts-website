@@ -80,17 +80,41 @@ const CreateOrganization = () => {
         return;
       }
 
-      // Create organization (you may need to create this table)
-      const { error } = await supabase
+      // Check if user already has a profile
+      const { data: existingProfile } = await supabase
         .from("profiles")
-        .upsert({
-          user_id: user.id,
-          organization_name: organizationName.trim(),
-          organization_description: description.trim() || null,
-          organization_domain: domain.trim() || null,
-          organization_members_count: 1,
-          updated_at: new Date().toISOString(),
-        });
+        .select("*")
+        .eq("user_id", user.id)
+        .single();
+
+      let error;
+
+      if (existingProfile) {
+        // Update existing profile
+        const result = await supabase
+          .from("profiles")
+          .update({
+            organization_name: organizationName.trim(),
+            organization_description: description.trim() || null,
+            organization_domain: domain.trim() || null,
+            organization_members_count: 1,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("user_id", user.id);
+        error = result.error;
+      } else {
+        // Create new profile
+        const result = await supabase
+          .from("profiles")
+          .insert({
+            user_id: user.id,
+            organization_name: organizationName.trim(),
+            organization_description: description.trim() || null,
+            organization_domain: domain.trim() || null,
+            organization_members_count: 1,
+          });
+        error = result.error;
+      }
 
       if (error) {
         toast({
