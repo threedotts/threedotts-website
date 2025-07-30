@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, CheckCircle, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
@@ -17,6 +18,8 @@ const CreateOrganization = () => {
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [checking, setChecking] = useState(true);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [activationCode, setActivationCode] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -55,6 +58,12 @@ const CreateOrganization = () => {
     );
   }
 
+  // Generate activation code
+  const generateActivationCode = () => {
+    return Math.random().toString(36).substring(2, 8).toUpperCase() + 
+           Math.random().toString(36).substring(2, 8).toUpperCase();
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -80,8 +89,12 @@ const CreateOrganization = () => {
         return;
       }
 
-      // Create new organization
-      const { error } = await supabase
+      // Generate activation code
+      const code = generateActivationCode();
+      setActivationCode(code);
+
+      // Create new organization with agent_id as activation code
+      const { error: orgError } = await supabase
         .from("organizations")
         .insert({
           user_id: user.id,
@@ -89,23 +102,35 @@ const CreateOrganization = () => {
           description: description.trim() || null,
           domain: domain.trim() || null,
           members_count: 1,
+          agent_id: code,
         });
 
-      if (error) {
+      if (orgError) {
         toast({
           title: "Erro",
-          description: "Erro ao criar organização: " + error.message,
+          description: "Erro ao criar organização: " + orgError.message,
           variant: "destructive",
         });
         return;
       }
 
-      toast({
-        title: "Sucesso",
-        description: "Organização criada com sucesso!",
+      // Send activation email
+      const { error: emailError } = await supabase.functions.invoke('send-activation-email', {
+        body: {
+          email: user.email,
+          name: user.user_metadata?.full_name || user.email,
+          organizationName: organizationName.trim(),
+          activationCode: code,
+        }
       });
 
-      navigate("/dashboard");
+      if (emailError) {
+        console.error("Error sending email:", emailError);
+        // Don't block the flow if email fails, just log it
+      }
+
+      // Show success dialog
+      setShowSuccessDialog(true);
     } catch (error) {
       toast({
         title: "Erro",
@@ -115,6 +140,11 @@ const CreateOrganization = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCloseDialog = () => {
+    setShowSuccessDialog(false);
+    navigate("/dashboard");
   };
 
   return (
@@ -204,6 +234,39 @@ const CreateOrganization = () => {
           </Card>
         </div>
       </div>
+
+      {/* Success Dialog */}
+      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-green-100 rounded-full">
+              <CheckCircle className="w-6 h-6 text-green-600" />
+            </div>
+            <DialogTitle className="text-center">Organização Criada com Sucesso!</DialogTitle>
+            <DialogDescription className="text-center space-y-4">
+              <div className="flex items-center justify-center mb-4">
+                <Mail className="w-8 h-8 text-primary mr-2" />
+              </div>
+              <p>
+                Você receberá um email com o código de ativação e instruções completas 
+                de como configurar seu call center.
+              </p>
+              <div className="bg-muted p-4 rounded-lg">
+                <p className="font-semibold text-sm mb-2">Código de Ativação:</p>
+                <p className="text-lg font-mono font-bold text-primary">{activationCode}</p>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Guarde este código - você precisará dele para ativar seu dashboard e call center.
+              </p>
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center mt-6">
+            <Button onClick={handleCloseDialog} className="w-full">
+              Ir para o Dashboard
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
