@@ -45,7 +45,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Phone, Clock, MessageSquare, TrendingUp, CalendarIcon, X } from "lucide-react";
+import { Phone, Clock, MessageSquare, TrendingUp, CalendarIcon, X, RefreshCw } from "lucide-react";
 import { AudioPlayer } from "@/components/AudioPlayer";
 import { cn } from "@/lib/utils";
 
@@ -103,36 +103,37 @@ export default function CallHistory() {
   const itemsPerPage = 10;
 
   // Fetch calls from database
-  useEffect(() => {
-    const fetchCalls = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('call_transcriptions')
-          .select('*')
-          .order('date', { ascending: false })
-          .order('time', { ascending: false });
+  const fetchCalls = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('call_transcriptions')
+        .select('*')
+        .order('date', { ascending: false })
+        .order('time', { ascending: false });
 
-        if (error) {
-          toast({
-            title: "Erro ao carregar chamadas",
-            description: error.message,
-            variant: "destructive",
-          });
-          return;
-        }
-
-        setCalls(data || []);
-      } catch (error) {
+      if (error) {
         toast({
           title: "Erro ao carregar chamadas",
-          description: "Ocorreu um erro inesperado",
+          description: error.message,
           variant: "destructive",
         });
-      } finally {
-        setLoading(false);
+        return;
       }
-    };
 
+      setCalls(data || []);
+    } catch (error) {
+      toast({
+        title: "Erro ao carregar chamadas",
+        description: "Ocorreu um erro inesperado",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchCalls();
   }, []);
 
@@ -337,8 +338,19 @@ export default function CallHistory() {
 
         {/* Show results count and clear all filters */}
         <div className="flex items-center justify-between mt-4">
-          <div className="text-sm text-muted-foreground">
-            {loading ? "Carregando..." : `${filteredCalls.length} de ${calls.length} chamadas`}
+          <div className="flex items-center gap-3">
+            <div className="text-sm text-muted-foreground">
+              {loading ? "Carregando..." : `${filteredCalls.length} de ${calls.length} chamadas`}
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={fetchCalls}
+              disabled={loading}
+              className="h-8 w-8 p-0"
+            >
+              <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
+            </Button>
           </div>
           {hasActiveFilters && (
             <Button
