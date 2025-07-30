@@ -503,8 +503,7 @@ export default function CallHistory() {
                                    return (
                                      <div key={index} className="flex justify-center my-4">
                                        <div className="text-center text-sm text-muted-foreground bg-muted/30 px-4 py-2 rounded-lg border border-border/50">
-                                         <p className="font-medium">{message.tool_calls[0].function?.name || 'Tool Call'}</p>
-                                         <p className="text-xs mt-1">User ended the conversation.</p>
+                                         <p className="font-medium">{message.tool_calls[0].tool_name}</p>
                                        </div>
                                      </div>
                                    );
