@@ -12,6 +12,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { useToast } from "@/hooks/use-toast";
 import CallHistory from "./CallHistory";
 import DashboardHome from "@/components/DashboardHome";
+import Settings from "./Settings";
 
 interface Profile {
   id: string;
@@ -27,9 +28,10 @@ interface Organization {
   id: string;
   user_id: string;
   name: string;
-  description: string;
-  domain: string;
+  description: string | null;
+  domain: string | null;
   members_count: number;
+  agent_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -240,6 +242,7 @@ const Dashboard = () => {
             <Routes>
               <Route path="/" element={<DashboardHome key={`home-${reloadKey}`} selectedOrganization={selectedOrg} />} />
               <Route path="/call-history" element={<CallHistory key={`history-${reloadKey}`} selectedOrganization={selectedOrg} />} />
+              <Route path="/settings" element={<Settings key={`settings-${reloadKey}`} selectedOrganization={selectedOrg} onOrganizationUpdate={setSelectedOrg} />} />
             </Routes>
           </main>
         </div>
