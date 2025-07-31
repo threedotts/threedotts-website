@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -19,6 +20,11 @@ serve(async (req) => {
   }
 
   try {
+    // Initialize Supabase client
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
     const { base64Data, audioID, mimeType = 'audio/mpeg', fileName }: ConvertRequest = await req.json();
 
     if (!base64Data) {
@@ -63,14 +69,33 @@ serve(async (req) => {
 
     const finalFileName = fileName || `${audioID}.${getFileExtension(mimeType)}`;
 
+    // Upload file to Supabase storage
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('call-recordings')
+      .upload(finalFileName, bytes, {
+        contentType: mimeType,
+        upsert: true
+      });
+
+    if (uploadError) {
+      throw new Error(`Failed to upload file: ${uploadError.message}`);
+    }
+
+    // Get public URL
+    const { data: urlData } = supabase.storage
+      .from('call-recordings')
+      .getPublicUrl(finalFileName);
+
     const response = {
       binary: {
         data: {
-          data: Array.from(bytes), // Convert Uint8Array to regular array for JSON serialization
+          data: Array.from(bytes),
           mimeType,
           fileName: finalFileName,
         },
       },
+      url: urlData.publicUrl,
+      path: uploadData.path
     };
 
     return new Response(JSON.stringify(response), {
