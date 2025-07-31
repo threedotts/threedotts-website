@@ -94,7 +94,19 @@ export default function Settings({ selectedOrganization, onOrganizationUpdate }:
 
     setLoading(true);
     try {
-      const { error } = await supabase
+      console.log("Attempting to update organization:", selectedOrganization.id);
+      console.log("Update data:", {
+        name: orgData.name.trim(),
+        description: orgData.description.trim() || null,
+        domain: orgData.domain.trim() || null,
+      });
+
+      // Check if user is authenticated
+      const { data: { user } } = await supabase.auth.getUser();
+      console.log("Current user:", user?.id);
+      console.log("Organization user_id:", selectedOrganization.user_id);
+
+      const { data, error } = await supabase
         .from("organizations")
         .update({
           name: orgData.name.trim(),
@@ -102,7 +114,10 @@ export default function Settings({ selectedOrganization, onOrganizationUpdate }:
           domain: orgData.domain.trim() || null,
           updated_at: new Date().toISOString(),
         })
-        .eq("id", selectedOrganization.id);
+        .eq("id", selectedOrganization.id)
+        .select();
+
+      console.log("Update result:", { data, error });
 
       if (error) throw error;
 
