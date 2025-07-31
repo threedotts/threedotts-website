@@ -87,15 +87,9 @@ serve(async (req) => {
       .getPublicUrl(finalFileName);
 
     const response = {
-      binary: {
-        data: {
-          data: Array.from(bytes),
-          mimeType,
-          fileName: finalFileName,
-        },
-      },
       url: urlData.publicUrl,
-      path: uploadData.path
+      path: uploadData.path,
+      fileName: finalFileName
     };
 
     return new Response(JSON.stringify(response), {
