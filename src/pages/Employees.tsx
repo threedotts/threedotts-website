@@ -392,11 +392,11 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
 
   if (!selectedOrganization) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <div className="text-center">
-          <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+      <div className="p-6">
+        <div className="text-center py-12">
+          <Users className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
           <h3 className="text-lg font-medium text-foreground mb-2">
-            Selecione uma organização
+            Nenhuma organização selecionada
           </h3>
           <p className="text-muted-foreground">
             Selecione uma organização para gerenciar os funcionários.
@@ -408,22 +408,24 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      <div className="p-6">
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground mb-2">Funcionários</h1>
-          <p className="text-muted-foreground">
-            Gerencie os membros de {selectedOrganization.name}
-          </p>
-        </div>
-        
+    <div className="p-6">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-foreground mb-2">Funcionários</h1>
+        <p className="text-muted-foreground">
+          Gerencie os membros de {selectedOrganization.name}
+        </p>
+      </div>
+      
+      <div className="flex justify-end mb-6">
         <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
           <DialogTrigger asChild>
             <Button className="gap-2">

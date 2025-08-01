@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { 
-  BarChart3, 
+  Home, 
   User, 
   Building, 
   Calendar,
@@ -36,7 +36,7 @@ const menuItems = [
   { 
     title: "Dashboard", 
     url: "/dashboard", 
-    icon: BarChart3,
+    icon: Home,
   },
   { 
     title: "Agendamento", 
