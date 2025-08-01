@@ -56,13 +56,14 @@ const AcceptInvitation = () => {
     }
 
     try {
+      console.log('Checking invitation for token:', token);
       const { data, error } = await supabase
         .from("organization_invitations")
         .select("*")
         .eq("invitation_token", token)
         .is("accepted_at", null)
         .gt("expires_at", new Date().toISOString())
-        .single();
+        .maybeSingle(); // Use maybeSingle instead of single to avoid errors
 
       if (error || !data) {
         toast({

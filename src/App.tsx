@@ -20,7 +20,7 @@ declare global {
 
 // Configuration for third-party integrations
 const ELEVENLABS_AGENT_ID = "agent_01k02ete3tfjgrq97y8a7v541y";
-const CHAT_WIDGET_ENABLED = import.meta.env.VITE_CHAT_WIDGET_ENABLED !== "false";
+const CHAT_WIDGET_ENABLED = false; // Temporarily disabled due to connection issues
 import Index from "./pages/Index";
 import ServiceDetails from "./pages/ServiceDetails";
 import ProjectRequest from "./pages/ProjectRequest";
