@@ -27,13 +27,15 @@ async function getGoogleAccessToken(): Promise<string> {
 
   const credentials = JSON.parse(serviceAccountKey);
   
-  // Criar JWT para autenticação
+  const now = Math.floor(Date.now() / 1000);
+  
+  // Criar o payload do JWT
   const header = {
     alg: 'RS256',
     typ: 'JWT',
+    kid: credentials.private_key_id,
   };
 
-  const now = Math.floor(Date.now() / 1000);
   const payload = {
     iss: credentials.client_email,
     scope: 'https://www.googleapis.com/auth/gmail.send',
@@ -42,14 +44,32 @@ async function getGoogleAccessToken(): Promise<string> {
     iat: now,
   };
 
-  // Encode header e payload
-  const encodedHeader = btoa(JSON.stringify(header)).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
-  const encodedPayload = btoa(JSON.stringify(payload)).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+  // Codificar header e payload
+  const encodedHeader = btoa(JSON.stringify(header))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=/g, '');
 
-  // Importar chave privada
-  const privateKey = await crypto.subtle.importKey(
+  const encodedPayload = btoa(JSON.stringify(payload))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=/g, '');
+
+  // Preparar dados para assinar
+  const signatureData = `${encodedHeader}.${encodedPayload}`;
+
+  // Preparar a chave privada para importação
+  const privateKeyPem = credentials.private_key
+    .replace(/-----BEGIN PRIVATE KEY-----/, '')
+    .replace(/-----END PRIVATE KEY-----/, '')
+    .replace(/\n/g, '');
+
+  const privateKeyDer = Uint8Array.from(atob(privateKeyPem), c => c.charCodeAt(0));
+
+  // Importar a chave privada
+  const cryptoKey = await crypto.subtle.importKey(
     'pkcs8',
-    new TextEncoder().encode(credentials.private_key),
+    privateKeyDer,
     {
       name: 'RSASSA-PKCS1-v1_5',
       hash: 'SHA-256',
@@ -58,11 +78,18 @@ async function getGoogleAccessToken(): Promise<string> {
     ['sign']
   );
 
-  // Assinar JWT
-  const dataToSign = new TextEncoder().encode(`${encodedHeader}.${encodedPayload}`);
-  const signature = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', privateKey, dataToSign);
+  // Assinar
+  const signature = await crypto.subtle.sign(
+    'RSASSA-PKCS1-v1_5',
+    cryptoKey,
+    new TextEncoder().encode(signatureData)
+  );
+
+  // Codificar assinatura
   const encodedSignature = btoa(String.fromCharCode(...new Uint8Array(signature)))
-    .replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=/g, '');
 
   const jwt = `${encodedHeader}.${encodedPayload}.${encodedSignature}`;
 
