@@ -57,20 +57,67 @@ const AcceptInvitation = () => {
 
     try {
       console.log('Checking invitation for token:', token);
+      const currentTime = new Date().toISOString();
+      console.log('Current time for comparison:', currentTime);
+      
       const { data, error } = await supabase
         .from("organization_invitations")
         .select("*")
         .eq("invitation_token", token)
         .is("accepted_at", null)
-        .gt("expires_at", new Date().toISOString())
-        .maybeSingle(); // Use maybeSingle instead of single to avoid errors
+        .gt("expires_at", currentTime)
+        .maybeSingle();
 
-      if (error || !data) {
+      console.log('Query result:', { data, error });
+
+      if (error) {
+        console.error("Database error:", error);
         toast({
-          title: "Convite inválido",
-          description: "O convite é inválido ou já expirou.",
+          title: "Erro",
+          description: "Erro ao verificar o convite: " + error.message,
           variant: "destructive",
         });
+        navigate("/");
+        return;
+      }
+
+      if (!data) {
+        // Try to fetch the invitation without date filter to see what's wrong
+        const { data: debugData } = await supabase
+          .from("organization_invitations")
+          .select("*, expires_at, accepted_at")
+          .eq("invitation_token", token)
+          .maybeSingle();
+        
+        console.log('Debug - invitation found:', debugData);
+        
+        if (debugData) {
+          if (debugData.accepted_at) {
+            toast({
+              title: "Convite já aceito",
+              description: "Este convite já foi aceito anteriormente.",
+              variant: "destructive",
+            });
+          } else if (new Date(debugData.expires_at) < new Date()) {
+            toast({
+              title: "Convite expirado",
+              description: "Este convite já expirou.",
+              variant: "destructive",
+            });
+          } else {
+            toast({
+              title: "Convite inválido",
+              description: "O convite não foi encontrado.",
+              variant: "destructive",
+            });
+          }
+        } else {
+          toast({
+            title: "Convite não encontrado",
+            description: "O token do convite não existe.",
+            variant: "destructive",
+          });
+        }
         navigate("/");
         return;
       }
