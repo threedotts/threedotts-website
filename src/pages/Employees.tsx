@@ -102,11 +102,17 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
       // Fix any invitations that should be marked as accepted
       const fixPendingInvitations = async () => {
         try {
-          await supabase.functions.invoke('mark-invitation-accepted');
-          // Refetch invitations after fixing
-          setTimeout(() => fetchInvitations(), 1000);
+          console.log('Running invitation sync...')
+          const { data, error } = await supabase.functions.invoke('sync-invitation-status');
+          if (error) {
+            console.error('Error syncing invitations:', error)
+          } else {
+            console.log('Invitation sync result:', data)
+            // Refetch invitations after fixing
+            setTimeout(() => fetchInvitations(), 1000);
+          }
         } catch (error) {
-          console.log('Could not fix pending invitations:', error);
+          console.log('Could not sync invitations:', error);
         }
       };
       
