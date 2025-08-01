@@ -207,7 +207,7 @@ export type Database = {
       }
       organizations: {
         Row: {
-          agent_id: string | null
+          agent_id: string[] | null
           created_at: string
           description: string | null
           domain: string | null
@@ -218,7 +218,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          agent_id?: string | null
+          agent_id?: string[] | null
           created_at?: string
           description?: string | null
           domain?: string | null
@@ -229,7 +229,7 @@ export type Database = {
           user_id: string
         }
         Update: {
-          agent_id?: string | null
+          agent_id?: string[] | null
           created_at?: string
           description?: string | null
           domain?: string | null
