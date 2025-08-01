@@ -1,7 +1,4 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { Resend } from "npm:resend@2.0.0";
-
-const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -21,6 +18,112 @@ interface InvitationWebhookData {
   invitation_link: string;
 }
 
+// Função para obter token de acesso do Google
+async function getGoogleAccessToken(): Promise<string> {
+  const serviceAccountKey = Deno.env.get('GOOGLE_CALENDAR_SERVICE_ACCOUNT_KEY');
+  if (!serviceAccountKey) {
+    throw new Error('Google Service Account Key not found');
+  }
+
+  const credentials = JSON.parse(serviceAccountKey);
+  
+  // Criar JWT para autenticação
+  const header = {
+    alg: 'RS256',
+    typ: 'JWT',
+  };
+
+  const now = Math.floor(Date.now() / 1000);
+  const payload = {
+    iss: credentials.client_email,
+    scope: 'https://www.googleapis.com/auth/gmail.send',
+    aud: 'https://oauth2.googleapis.com/token',
+    exp: now + 3600,
+    iat: now,
+  };
+
+  // Encode header e payload
+  const encodedHeader = btoa(JSON.stringify(header)).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+  const encodedPayload = btoa(JSON.stringify(payload)).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+
+  // Importar chave privada
+  const privateKey = await crypto.subtle.importKey(
+    'pkcs8',
+    new TextEncoder().encode(credentials.private_key),
+    {
+      name: 'RSASSA-PKCS1-v1_5',
+      hash: 'SHA-256',
+    },
+    false,
+    ['sign']
+  );
+
+  // Assinar JWT
+  const dataToSign = new TextEncoder().encode(`${encodedHeader}.${encodedPayload}`);
+  const signature = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', privateKey, dataToSign);
+  const encodedSignature = btoa(String.fromCharCode(...new Uint8Array(signature)))
+    .replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+
+  const jwt = `${encodedHeader}.${encodedPayload}.${encodedSignature}`;
+
+  // Trocar JWT por access token
+  const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: new URLSearchParams({
+      grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+      assertion: jwt,
+    }),
+  });
+
+  const tokenData = await tokenResponse.json();
+  if (!tokenResponse.ok) {
+    throw new Error(`Failed to get access token: ${JSON.stringify(tokenData)}`);
+  }
+
+  return tokenData.access_token;
+}
+
+// Função para enviar email via Gmail API
+async function sendGmailEmail(
+  accessToken: string,
+  to: string,
+  subject: string,
+  htmlContent: string,
+  fromEmail: string = 'noreply@threedotts.ai'
+): Promise<any> {
+  const emailContent = [
+    `To: ${to}`,
+    `From: ${fromEmail}`,
+    `Subject: ${subject}`,
+    'Content-Type: text/html; charset=utf-8',
+    '',
+    htmlContent,
+  ].join('\n');
+
+  const encodedMessage = btoa(emailContent).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+
+  const response = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      raw: encodedMessage,
+    }),
+  });
+
+  const result = await response.json();
+  if (!response.ok) {
+    throw new Error(`Failed to send email: ${JSON.stringify(result)}`);
+  }
+
+  return result;
+}
+
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -30,7 +133,7 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const webhookData: InvitationWebhookData = await req.json();
     
-    console.log('Enviando convite por email:', webhookData);
+    console.log('Enviando convite por email via Gmail API:', webhookData);
 
     // Criar o email usando o template fornecido
     const emailSubject = `Convite para ${webhookData.organization_name}`;
@@ -52,18 +155,23 @@ const handler = async (req: Request): Promise<Response> => {
       ${webhookData.organization_name}</p>
     `;
 
-    // Enviar email usando Resend
-    const emailResponse = await resend.emails.send({
-      from: 'Threedotts Platform <onboarding@resend.dev>',
-      to: [webhookData.email],
-      subject: emailSubject,
-      html: emailHtml,
-    });
+    // Obter token de acesso e enviar email
+    const accessToken = await getGoogleAccessToken();
+    const emailResponse = await sendGmailEmail(
+      accessToken,
+      webhookData.email,
+      emailSubject,
+      emailHtml
+    );
 
-    console.log('Email enviado com sucesso:', emailResponse);
+    console.log('Email enviado com sucesso via Gmail API:', emailResponse);
 
     return new Response(
-      JSON.stringify({ success: true, message: 'Email de convite enviado com sucesso', emailId: emailResponse.data?.id }),
+      JSON.stringify({ 
+        success: true, 
+        message: 'Email de convite enviado com sucesso via Gmail API', 
+        messageId: emailResponse.id 
+      }),
       {
         status: 200,
         headers: {
@@ -73,7 +181,7 @@ const handler = async (req: Request): Promise<Response> => {
       }
     );
   } catch (error: any) {
-    console.error('Erro ao enviar webhook:', error);
+    console.error('Erro ao enviar email via Gmail API:', error);
     
     return new Response(
       JSON.stringify({ 
