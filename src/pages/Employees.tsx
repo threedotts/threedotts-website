@@ -105,6 +105,8 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
     if (!selectedOrganization) return;
 
     try {
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      
       const { data, error } = await supabase
         .from("organization_members")
         .select("*")
@@ -124,10 +126,13 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
             .eq("user_id", member.user_id)
             .single();
 
+          // Use current user email if this member is the current user
+          const email = member.user_id === currentUser?.id ? currentUser.email : 'user@email.com';
+
           return {
             ...member,
             profiles: profile,
-            auth_users: { email: 'user@email.com' }
+            auth_users: { email: email || 'Email não disponível' }
           };
         })
       );
