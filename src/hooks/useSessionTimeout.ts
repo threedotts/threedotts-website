@@ -5,13 +5,16 @@ import { useToast } from '@/hooks/use-toast';
 const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes
 const WARNING_TIME = 5 * 60 * 1000; // 5 minutes before timeout
 
-export const useSessionTimeout = () => {
+export const useSessionTimeout = (isAuthenticated: boolean = false) => {
   const { toast } = useToast();
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const warningRef = useRef<NodeJS.Timeout | null>(null);
   const lastActivityRef = useRef<number>(Date.now());
 
   const resetTimeout = () => {
+    // Only start timeout for authenticated users
+    if (!isAuthenticated) return;
+    
     lastActivityRef.current = Date.now();
     
     // Clear existing timers
@@ -40,6 +43,14 @@ export const useSessionTimeout = () => {
   };
 
   useEffect(() => {
+    // Only set up activity tracking for authenticated users
+    if (!isAuthenticated) {
+      // Clear any existing timers if user becomes unauthenticated
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      if (warningRef.current) clearTimeout(warningRef.current);
+      return;
+    }
+
     // Track user activity
     const activities = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
     
@@ -64,7 +75,7 @@ export const useSessionTimeout = () => {
         document.removeEventListener(activity, handleActivity, true);
       });
     };
-  }, [toast]);
+  }, [toast, isAuthenticated]);
 
   return { resetTimeout };
 };

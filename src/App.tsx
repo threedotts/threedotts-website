@@ -104,8 +104,8 @@ const ElevenLabsWidget = () => {
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   
-  // Enable session timeout for authenticated users
-  useSessionTimeout();
+  // Enable session timeout only for authenticated users
+  useSessionTimeout(isAuthenticated);
 
   useEffect(() => {
     // Monitor authentication state for security logging
