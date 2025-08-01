@@ -93,7 +93,7 @@ const CreateOrganization = () => {
       const code = generateActivationCode();
       setActivationCode(code);
 
-      // Create new organization with agent_id as activation code
+      // Create new organization with agent_id as activation code array
       const { error: orgError } = await supabase
         .from("organizations")
         .insert({
@@ -102,7 +102,7 @@ const CreateOrganization = () => {
           description: description.trim() || null,
           domain: domain.trim() || null,
           members_count: 1,
-          agent_id: code,
+          agent_id: [code],
         });
 
       if (orgError) {

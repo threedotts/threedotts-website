@@ -18,7 +18,7 @@ interface Organization {
   description: string | null;
   domain: string | null;
   members_count: number;
-  agent_id: string | null;
+  agent_id: string[] | null;
   created_at: string;
   updated_at: string;
 }
@@ -46,8 +46,8 @@ export default function Settings({ selectedOrganization, onOrganizationUpdate }:
         description: selectedOrganization.description || "",
         domain: selectedOrganization.domain || "",
       });
-      setActivationCode(selectedOrganization.agent_id || "");
-      setIsActivated(!!selectedOrganization.agent_id);
+      setActivationCode(selectedOrganization.agent_id?.[0] || "");
+      setIsActivated(!!selectedOrganization.agent_id?.length);
     }
   }, [selectedOrganization]);
 
@@ -59,7 +59,7 @@ export default function Settings({ selectedOrganization, onOrganizationUpdate }:
     try {
       const { error } = await supabase
         .from("organizations")
-        .update({ agent_id: activationCode.trim() })
+        .update({ agent_id: [activationCode.trim()] })
         .eq("id", selectedOrganization.id);
 
       if (error) throw error;
@@ -74,7 +74,7 @@ export default function Settings({ selectedOrganization, onOrganizationUpdate }:
       if (onOrganizationUpdate) {
         onOrganizationUpdate({
           ...selectedOrganization,
-          agent_id: activationCode.trim(),
+          agent_id: [activationCode.trim()],
         });
       }
     } catch (error: any) {

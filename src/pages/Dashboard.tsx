@@ -31,7 +31,7 @@ interface Organization {
   description: string | null;
   domain: string | null;
   members_count: number;
-  agent_id: string | null;
+  agent_id: string[] | null;
   created_at: string;
   updated_at: string;
 }
