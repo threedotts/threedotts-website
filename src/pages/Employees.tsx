@@ -184,19 +184,24 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
-      const { error } = await supabase
+      // Criar convite e obter o token gerado automaticamente
+      const { data: invitationData, error } = await supabase
         .from("organization_invitations")
         .insert({
           organization_id: selectedOrganization.id,
           email: inviteEmail.trim(),
           role: inviteRole,
           invited_by: user.id,
-        });
+        })
+        .select('invitation_token')
+        .single();
 
       if (error) throw error;
 
       // Enviar dados para o webhook do n8n através da Edge Function
       try {
+        const invitationLink = `${window.location.origin}/accept-invitation/${invitationData.invitation_token}`;
+        
         const webhookData = {
           email: inviteEmail.trim(),
           role: inviteRole,
@@ -205,6 +210,8 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
           invited_by_email: user.email,
           invited_by_id: user.id,
           invitation_date: new Date().toISOString(),
+          invitation_token: invitationData.invitation_token,
+          invitation_link: invitationLink,
         };
 
         console.log('Enviando dados para webhook via Edge Function:', webhookData);

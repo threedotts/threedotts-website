@@ -13,6 +13,8 @@ interface InvitationWebhookData {
   invited_by_email: string;
   invited_by_id: string;
   invitation_date: string;
+  invitation_token: string;
+  invitation_link: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
