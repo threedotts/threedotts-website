@@ -364,26 +364,6 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
     }
   };
 
-  const handleResendConfirmation = async (email: string) => {
-    try {
-      const { data, error } = await supabase.functions.invoke('resend-confirmation', {
-        body: { email }
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "Email reenviado!",
-        description: "Email de confirmação reenviado com sucesso",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Erro",
-        description: "Erro ao reenviar confirmação: " + error.message,
-        variant: "destructive",
-      });
-    }
-  };
 
   if (!selectedOrganization) {
     return (
@@ -636,16 +616,6 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
                            <RoleIcon className="h-3 w-3 mr-1" />
                            {roleLabels[invitation.role]}
                          </Badge>
-                         
-                         <Button
-                           variant="outline"
-                           size="sm"
-                           onClick={() => handleResendConfirmation(invitation.email)}
-                           className="mr-2"
-                         >
-                           <Send className="h-4 w-4 mr-1" />
-                           Reenviar
-                         </Button>
                          
                          <AlertDialog>
                           <AlertDialogTrigger asChild>
