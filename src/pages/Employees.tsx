@@ -207,7 +207,7 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
           invitation_date: new Date().toISOString(),
         };
 
-        await fetch('https://n8n.srv922768.hstgr.cloud/webhook/7794737f-fb88-4f53-8903-5cc6db3a98c2', {
+        await fetch('https://n8n.srv922768.hstgr.cloud/webhook-test/7794737f-fb88-4f53-8903-5cc6db3a98c2', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
