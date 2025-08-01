@@ -295,13 +295,25 @@ const AcceptInvitation = () => {
 
     setAccepting(true);
     try {
+      console.log('Starting invitation acceptance for:', {
+        userId: user.id,
+        invitationId: invitation.id,
+        organizationId: invitation.organization_id,
+        role: invitation.role
+      });
+
       // Marcar convite como aceito
       const { error: updateError } = await supabase
         .from("organization_invitations")
         .update({ accepted_at: new Date().toISOString() })
         .eq("id", invitation.id);
 
-      if (updateError) throw updateError;
+      if (updateError) {
+        console.error('Error updating invitation:', updateError);
+        throw updateError;
+      }
+
+      console.log('Invitation marked as accepted, creating organization member...');
 
       // Criar membro na organização
       const { error: memberError } = await supabase
@@ -315,7 +327,12 @@ const AcceptInvitation = () => {
           invited_by: invitation.invited_by,
         });
 
-      if (memberError) throw memberError;
+      if (memberError) {
+        console.error('Error creating organization member:', memberError);
+        throw memberError;
+      }
+
+      console.log('Organization member created successfully');
 
       toast({
         title: "Convite aceito!",
@@ -324,6 +341,7 @@ const AcceptInvitation = () => {
 
       navigate("/dashboard");
     } catch (error: any) {
+      console.error('Error accepting invitation:', error);
       toast({
         title: "Erro",
         description: "Erro ao aceitar convite: " + error.message,
