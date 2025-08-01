@@ -111,6 +111,47 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
       };
       
       fixPendingInvitations();
+
+      // Set up real-time subscriptions for automatic updates
+      const membersChannel = supabase
+        .channel('members-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'organization_members',
+            filter: `organization_id=eq.${selectedOrganization.id}`
+          },
+          () => {
+            console.log('Organization members changed, refetching...');
+            fetchMembers();
+          }
+        )
+        .subscribe();
+
+      const invitationsChannel = supabase
+        .channel('invitations-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'organization_invitations',
+            filter: `organization_id=eq.${selectedOrganization.id}`
+          },
+          () => {
+            console.log('Organization invitations changed, refetching...');
+            fetchInvitations();
+          }
+        )
+        .subscribe();
+
+      // Cleanup subscriptions on unmount
+      return () => {
+        supabase.removeChannel(membersChannel);
+        supabase.removeChannel(invitationsChannel);
+      };
     }
   }, [selectedOrganization]);
 
