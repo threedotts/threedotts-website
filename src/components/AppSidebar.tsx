@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { 
-  Home, 
+  PieChart, 
   User, 
   Building, 
   Calendar,
@@ -36,7 +36,7 @@ const menuItems = [
   { 
     title: "Dashboard", 
     url: "/dashboard", 
-    icon: Home,
+    icon: PieChart,
   },
   { 
     title: "Agendamento", 

@@ -418,14 +418,14 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
 
   return (
     <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground mb-2">Funcionários</h1>
-        <p className="text-muted-foreground">
-          Gerencie os membros de {selectedOrganization.name}
-        </p>
-      </div>
-      
-      <div className="flex justify-end mb-6">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground mb-2">Funcionários</h1>
+          <p className="text-muted-foreground">
+            Gerencie os membros de {selectedOrganization.name}
+          </p>
+        </div>
+        
         <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
           <DialogTrigger asChild>
             <Button className="gap-2">
