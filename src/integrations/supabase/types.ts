@@ -370,7 +370,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_valid_invitation_token: {
+        Args: { token_value: string }
+        Returns: boolean
+      }
+      organization_has_valid_invitations: {
+        Args: { org_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       organization_role: "owner" | "admin" | "manager" | "employee"
