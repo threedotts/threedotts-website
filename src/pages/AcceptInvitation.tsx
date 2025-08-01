@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { validatePassword } from "@/utils/securityValidation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -160,10 +161,13 @@ const AcceptInvitation = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!password || password.length < 6) {
+    
+    // Validate password using the same validation as Auth page
+    const passwordError = validatePassword(password);
+    if (passwordError) {
       toast({
         title: "Senha inválida",
-        description: "A senha deve ter pelo menos 6 caracteres.",
+        description: passwordError,
         variant: "destructive",
       });
       return;
@@ -387,7 +391,7 @@ const AcceptInvitation = () => {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder={isSignUp ? "Crie uma senha (min. 6 caracteres)" : "Digite sua senha"}
+                    placeholder={isSignUp ? "Crie uma senha (min. 8 caracteres, maiúscula, minúscula, número e símbolo)" : "Digite sua senha"}
                     required
                   />
                 </div>
