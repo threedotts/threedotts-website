@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { create, verify, getNumericDate } from "https://deno.land/x/djwt@v3.0.1/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -19,152 +18,59 @@ interface InvitationWebhookData {
   invitation_link: string;
 }
 
-// Função para obter token de acesso do Google
-async function getGoogleAccessToken(): Promise<string> {
-  const serviceAccountKey = Deno.env.get('GOOGLE_CALENDAR_SERVICE_ACCOUNT_KEY');
-  if (!serviceAccountKey) {
-    throw new Error('Google Service Account Key not found');
-  }
-
-  const credentials = JSON.parse(serviceAccountKey);
-  
-  // Preparar a chave privada
-  const privateKeyPem = credentials.private_key;
-  const privateKey = await crypto.subtle.importKey(
-    'pkcs8',
-    new TextEncoder().encode(privateKeyPem),
-    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
-    false,
-    ['sign']
-  );
-
-  // Criar JWT
-  const now = getNumericDate(new Date());
-  const exp = getNumericDate(new Date(Date.now() + 3600 * 1000)); // 1 hora
-
-  const payload = {
-    iss: credentials.client_email,
-    scope: 'https://www.googleapis.com/auth/gmail.send',
-    aud: 'https://oauth2.googleapis.com/token',
-    exp,
-    iat: now,
-  };
-
-  const jwt = await create(
-    { alg: 'RS256', typ: 'JWT' },
-    payload,
-    privateKey
-  );
-
-  // Trocar JWT por access token
-  const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: new URLSearchParams({
-      grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-      assertion: jwt,
-    }),
-  });
-
-  const tokenData = await tokenResponse.json();
-  if (!tokenResponse.ok) {
-    throw new Error(`Failed to get access token: ${JSON.stringify(tokenData)}`);
-  }
-
-  return tokenData.access_token;
-}
-
-// Função para enviar email via Gmail API
-async function sendGmailEmail(
-  accessToken: string,
-  to: string,
-  subject: string,
-  htmlContent: string,
-  fromEmail: string = 'noreply@threedotts.ai'
-): Promise<any> {
-  const emailContent = [
-    `To: ${to}`,
-    `From: ${fromEmail}`,
-    `Subject: ${subject}`,
-    'Content-Type: text/html; charset=utf-8',
-    '',
-    htmlContent,
-  ].join('\n');
-
-  const encodedMessage = btoa(emailContent)
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=/g, '');
-
-  const response = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      raw: encodedMessage,
-    }),
-  });
-
-  const result = await response.json();
-  if (!response.ok) {
-    throw new Error(`Failed to send email: ${JSON.stringify(result)}`);
-  }
-
-  return result;
-}
-
 const handler = async (req: Request): Promise<Response> => {
+  console.log('Edge Function iniciada:', req.method);
+
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
+    console.log('Respondendo a CORS preflight');
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const webhookData: InvitationWebhookData = await req.json();
+    console.log('Processando request POST');
     
-    console.log('Enviando convite por email via Gmail API:', webhookData);
+    const webhookData: InvitationWebhookData = await req.json();
+    console.log('Dados recebidos:', JSON.stringify(webhookData, null, 2));
 
-    // Criar o email usando o template fornecido
-    const emailSubject = `Convite para ${webhookData.organization_name}`;
-    const emailHtml = `
-      <p>Olá,</p>
+    // Simular processamento do convite
+    console.log('Simulando envio de email para:', webhookData.email);
+    console.log('Template do email:');
+    console.log(`
+      Olá,
       
-      <p>Convite para o acesso ao nosso Dashboard do Call Center com a seguinte função:</p>
+      Convite para o acesso ao nosso Dashboard do Call Center com a seguinte função:
       
-      <p>📍 <strong>Cargo:</strong> ${webhookData.role}</p>
+      📍 Cargo: ${webhookData.role}
       
-      <p>Para ativar o acesso, basta clicar no link abaixo e concluir o cadastro utilizando exatamente o e-mail em que esta mensagem foi recebida (${webhookData.email}):</p>
+      Para ativar o acesso, basta clicar no link abaixo e concluir o cadastro utilizando exatamente o e-mail em que esta mensagem foi recebida (${webhookData.email}):
       
-      <p>👉 <a href="${webhookData.invitation_link}" style="color: #2563eb; text-decoration: underline;">${webhookData.invitation_link}</a></p>
+      👉 ${webhookData.invitation_link}
       
-      <p><strong>Bem-vindo(a) ao Threedotts Platform!</strong></p>
+      Bem-vindo(a) ao Threedotts Platform!
       
-      <p>Atenciosamente,<br>
-      ${webhookData.invited_by_name}<br>
-      ${webhookData.organization_name}</p>
-    `;
+      Atenciosamente,
+      ${webhookData.invited_by_name}
+      ${webhookData.organization_name}
+    `);
 
-    // Obter token de acesso e enviar email
-    const accessToken = await getGoogleAccessToken();
-    const emailResponse = await sendGmailEmail(
-      accessToken,
-      webhookData.email,
-      emailSubject,
-      emailHtml
-    );
+    console.log('Preparando resposta de sucesso');
 
-    console.log('Email enviado com sucesso via Gmail API:', emailResponse);
+    const response = {
+      success: true,
+      message: 'Convite processado com sucesso (simulação)',
+      data: {
+        email: webhookData.email,
+        role: webhookData.role,
+        organization: webhookData.organization_name,
+        invitation_link: webhookData.invitation_link
+      }
+    };
+
+    console.log('Enviando resposta:', JSON.stringify(response, null, 2));
 
     return new Response(
-      JSON.stringify({ 
-        success: true, 
-        message: 'Email de convite enviado com sucesso via Gmail API', 
-        messageId: emailResponse.id 
-      }),
+      JSON.stringify(response),
       {
         status: 200,
         headers: {
@@ -174,13 +80,19 @@ const handler = async (req: Request): Promise<Response> => {
       }
     );
   } catch (error: any) {
-    console.error('Erro ao enviar email via Gmail API:', error);
+    console.error('Erro capturado na Edge Function:', error);
+    console.error('Stack trace:', error.stack);
+    
+    const errorResponse = {
+      success: false,
+      error: error.message || 'Erro desconhecido',
+      stack: error.stack
+    };
+
+    console.log('Enviando resposta de erro:', JSON.stringify(errorResponse, null, 2));
     
     return new Response(
-      JSON.stringify({ 
-        success: false, 
-        error: error.message || 'Erro desconhecido' 
-      }),
+      JSON.stringify(errorResponse),
       {
         status: 500,
         headers: {
@@ -192,4 +104,5 @@ const handler = async (req: Request): Promise<Response> => {
   }
 };
 
+console.log('Edge Function carregada, iniciando servidor...');
 serve(handler);
