@@ -136,7 +136,23 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
 
       if (error) throw error;
 
-      // Get profiles for each member with their emails
+      // Get profiles and emails for each member
+      const userIds = (data || []).map(member => member.user_id);
+      
+      // Fetch emails using edge function
+      let emailMap: Record<string, string> = {};
+      try {
+        const { data: emailData, error: emailError } = await supabase.functions.invoke('get-user-emails', {
+          body: { userIds }
+        });
+        
+        if (!emailError && emailData?.emailMap) {
+          emailMap = emailData.emailMap;
+        }
+      } catch (error) {
+        console.log('Could not fetch emails:', error);
+      }
+
       const membersWithProfiles = await Promise.all(
         (data || []).map(async (member: any) => {
           const { data: profile } = await supabase
@@ -145,24 +161,23 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
             .eq("user_id", member.user_id)
             .maybeSingle();
 
-          // Use email from organization_members table or current user email
-          let email = member.email;
+          // Get email from various sources
+          let email = 'Email não disponível';
           
           if (member.user_id === currentUser?.id) {
             email = currentUser.email || 'Email não disponível';
-          } else if (!email) {
-            // Use the correct email for Silvio Junior based on the invitation
-            if (member.user_id === '9d527c72-a846-4f7f-ba20-bacfdc2b5b06') {
-              email = 'threedotts.inc@gmail.com'; // This is the actual invitation email
-            } else {
-              email = 'Email não disponível';
-            }
+          } else if (member.email) {
+            // Use email from organization_members table
+            email = member.email;
+          } else if (emailMap[member.user_id]) {
+            // Use email from auth.users via edge function
+            email = emailMap[member.user_id];
           }
 
           return {
             ...member,
             profiles: profile,
-            auth_users: { email: email || 'Email não disponível' }
+            auth_users: { email }
           };
         })
       );
