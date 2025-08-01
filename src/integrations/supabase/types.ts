@@ -373,6 +373,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_user_organization_ids: {
+        Args: { user_id: string }
+        Returns: string[]
+      }
       is_valid_invitation_token: {
         Args: { token_value: string }
         Returns: boolean
