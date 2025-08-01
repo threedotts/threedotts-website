@@ -30,7 +30,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log('Enviando dados para webhook n8n:', webhookData);
 
     // Fazer a chamada para o webhook n8n
-    const response = await fetch('https://n8n.srv922768.hstgr.cloud/webhook-test/7794737f-fb88-4f53-8903-5cc6db3a98c2', {
+    const response = await fetch('https://n8n.srv922768.hstgr.cloud/webhook/7794737f-fb88-4f53-8903-5cc6db3a98c2', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
