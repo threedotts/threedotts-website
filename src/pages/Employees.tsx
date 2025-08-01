@@ -111,47 +111,6 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
       };
       
       fixPendingInvitations();
-
-      // Set up real-time subscriptions for automatic updates
-      const membersChannel = supabase
-        .channel('members-changes')
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'organization_members',
-            filter: `organization_id=eq.${selectedOrganization.id}`
-          },
-          () => {
-            console.log('Organization members changed, refetching...');
-            fetchMembers();
-          }
-        )
-        .subscribe();
-
-      const invitationsChannel = supabase
-        .channel('invitations-changes')
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'organization_invitations',
-            filter: `organization_id=eq.${selectedOrganization.id}`
-          },
-          () => {
-            console.log('Organization invitations changed, refetching...');
-            fetchInvitations();
-          }
-        )
-        .subscribe();
-
-      // Cleanup subscriptions on unmount
-      return () => {
-        supabase.removeChannel(membersChannel);
-        supabase.removeChannel(invitationsChannel);
-      };
     }
   }, [selectedOrganization]);
 
@@ -219,6 +178,8 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
     if (!selectedOrganization) return;
 
     try {
+      console.log('Fetching invitations for organization:', selectedOrganization.id);
+      
       const { data, error } = await supabase
         .from("organization_invitations")
         .select("*")
@@ -226,6 +187,8 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
         .is("accepted_at", null)
         .gt("expires_at", new Date().toISOString())
         .order("created_at", { ascending: false });
+
+      console.log('Invitations query result:', { data, error });
 
       if (error) throw error;
       
