@@ -113,38 +113,90 @@ const Dashboard = () => {
     if (!user) return;
 
     try {
-      const { data, error } = await supabase
+      // Fetch organizations where user is the owner
+      const { data: ownedOrgs, error: ownedError } = await supabase
         .from("organizations")
         .select("*")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
-      if (error) {
+      if (ownedError) {
+        console.error("Error fetching owned organizations:", ownedError);
+      }
+
+      // Fetch organizations where user is a member
+      const { data: memberOrgs, error: memberError } = await supabase
+        .from("organization_members")
+        .select(`
+          organizations (
+            id,
+            user_id,
+            name,
+            description,
+            domain,
+            members_count,
+            agent_id,
+            created_at,
+            updated_at
+          )
+        `)
+        .eq("user_id", user.id)
+        .eq("status", "active");
+
+      if (memberError) {
+        console.error("Error fetching member organizations:", memberError);
+      }
+
+      // Combine both lists and remove duplicates
+      const allOrgs: Organization[] = [];
+      
+      // Add owned organizations
+      if (ownedOrgs) {
+        allOrgs.push(...ownedOrgs);
+      }
+
+      // Add member organizations (avoid duplicates)
+      if (memberOrgs) {
+        memberOrgs.forEach(member => {
+          if (member.organizations) {
+            const org = member.organizations;
+            const isDuplicate = allOrgs.some(existingOrg => existingOrg.id === org.id);
+            if (!isDuplicate) {
+              allOrgs.push(org as Organization);
+            }
+          }
+        });
+      }
+
+      // Sort by creation date
+      allOrgs.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+      if (ownedError && memberError) {
         toast({
           title: "Erro",
-          description: "Erro ao carregar organizações: " + error.message,
+          description: "Erro ao carregar organizações",
           variant: "destructive",
         });
         return;
       }
 
-      setOrganizations(data || []);
+      setOrganizations(allOrgs);
       
       // Try to restore selected organization from localStorage
       const savedOrgId = localStorage.getItem("selectedOrganizationId");
-      if (savedOrgId && data) {
-        const savedOrg = data.find(org => org.id === savedOrgId);
+      if (savedOrgId && allOrgs.length > 0) {
+        const savedOrg = allOrgs.find(org => org.id === savedOrgId);
         if (savedOrg) {
           setSelectedOrg(savedOrg);
-        } else if (data.length > 0) {
+        } else if (allOrgs.length > 0) {
           // If saved org not found, select first one
-          setSelectedOrg(data[0]);
-          localStorage.setItem("selectedOrganizationId", data[0].id);
+          setSelectedOrg(allOrgs[0]);
+          localStorage.setItem("selectedOrganizationId", allOrgs[0].id);
         }
-      } else if (data && data.length > 0) {
+      } else if (allOrgs.length > 0) {
         // If no saved org, select first one
-        setSelectedOrg(data[0]);
-        localStorage.setItem("selectedOrganizationId", data[0].id);
+        setSelectedOrg(allOrgs[0]);
+        localStorage.setItem("selectedOrganizationId", allOrgs[0].id);
       }
     } catch (error) {
       console.error("Error fetching organizations:", error);
