@@ -107,14 +107,7 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
     try {
       const { data, error } = await supabase
         .from("organization_members")
-        .select(`
-          *,
-          profiles:user_id (
-            first_name,
-            last_name,
-            avatar_url
-          )
-        `)
+        .select("*")
         .eq("organization_id", selectedOrganization.id)
         .eq("status", "active")
         .order("role")
@@ -122,14 +115,26 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
 
       if (error) throw error;
 
-      // For now, we'll use a simplified approach
-      const membersWithEmails = (data || []).map((member: any) => ({
-        ...member,
-        auth_users: { email: 'user@email.com' }
-      }));
+      // Get profiles for each member
+      const membersWithProfiles = await Promise.all(
+        (data || []).map(async (member: any) => {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("first_name, last_name, avatar_url")
+            .eq("user_id", member.user_id)
+            .single();
 
-      setMembers(membersWithEmails);
+          return {
+            ...member,
+            profiles: profile,
+            auth_users: { email: 'user@email.com' }
+          };
+        })
+      );
+
+      setMembers(membersWithProfiles);
     } catch (error: any) {
+      console.error("Error fetching members:", error);
       toast({
         title: "Erro",
         description: "Erro ao carregar membros: " + error.message,
@@ -146,13 +151,7 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
     try {
       const { data, error } = await supabase
         .from("organization_invitations")
-        .select(`
-          *,
-          invited_by_profile:invited_by (
-            first_name,
-            last_name
-          )
-        `)
+        .select("*")
         .eq("organization_id", selectedOrganization.id)
         .is("accepted_at", null)
         .gt("expires_at", new Date().toISOString())
@@ -160,14 +159,9 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
 
       if (error) throw error;
       
-      // Map the data with proper type handling
-      const mappedInvitations = (data || []).map((inv: any) => ({
-        ...inv,
-        invited_by_profile: inv.invited_by_profile || null
-      }));
-      
-      setInvitations(mappedInvitations);
+      setInvitations((data || []).map(inv => ({ ...inv, invited_by_profile: null })));
     } catch (error: any) {
+      console.error("Error fetching invitations:", error);
       toast({
         title: "Erro",
         description: "Erro ao carregar convites: " + error.message,
