@@ -12,65 +12,39 @@ interface InvitationWebhookData {
   organization_id: string;
   invited_by_email: string;
   invited_by_id: string;
-  invited_by_name: string;
   invitation_date: string;
   invitation_token: string;
   invitation_link: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
-  console.log('Edge Function iniciada:', req.method);
-
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    console.log('Respondendo a CORS preflight');
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    console.log('Processando request POST');
-    
     const webhookData: InvitationWebhookData = await req.json();
-    console.log('Dados recebidos:', JSON.stringify(webhookData, null, 2));
+    
+    console.log('Enviando dados para webhook n8n:', webhookData);
 
-    // Simular processamento do convite
-    console.log('Simulando envio de email para:', webhookData.email);
-    console.log('Template do email:');
-    console.log(`
-      Olá,
-      
-      Convite para o acesso ao nosso Dashboard do Call Center com a seguinte função:
-      
-      📍 Cargo: ${webhookData.role}
-      
-      Para ativar o acesso, basta clicar no link abaixo e concluir o cadastro utilizando exatamente o e-mail em que esta mensagem foi recebida (${webhookData.email}):
-      
-      👉 ${webhookData.invitation_link}
-      
-      Bem-vindo(a) ao Threedotts Platform!
-      
-      Atenciosamente,
-      ${webhookData.invited_by_name}
-      ${webhookData.organization_name}
-    `);
+    // Fazer a chamada para o webhook n8n
+    const response = await fetch('https://n8n.srv922768.hstgr.cloud/webhook-test/7794737f-fb88-4f53-8903-5cc6db3a98c2', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(webhookData),
+    });
 
-    console.log('Preparando resposta de sucesso');
+    console.log('Resposta do webhook n8n:', response.status);
 
-    const response = {
-      success: true,
-      message: 'Convite processado com sucesso (simulação)',
-      data: {
-        email: webhookData.email,
-        role: webhookData.role,
-        organization: webhookData.organization_name,
-        invitation_link: webhookData.invitation_link
-      }
-    };
-
-    console.log('Enviando resposta:', JSON.stringify(response, null, 2));
+    if (!response.ok) {
+      throw new Error(`Webhook responded with status: ${response.status}`);
+    }
 
     return new Response(
-      JSON.stringify(response),
+      JSON.stringify({ success: true, message: 'Webhook enviado com sucesso' }),
       {
         status: 200,
         headers: {
@@ -80,19 +54,13 @@ const handler = async (req: Request): Promise<Response> => {
       }
     );
   } catch (error: any) {
-    console.error('Erro capturado na Edge Function:', error);
-    console.error('Stack trace:', error.stack);
-    
-    const errorResponse = {
-      success: false,
-      error: error.message || 'Erro desconhecido',
-      stack: error.stack
-    };
-
-    console.log('Enviando resposta de erro:', JSON.stringify(errorResponse, null, 2));
+    console.error('Erro ao enviar webhook:', error);
     
     return new Response(
-      JSON.stringify(errorResponse),
+      JSON.stringify({ 
+        success: false, 
+        error: error.message || 'Erro desconhecido' 
+      }),
       {
         status: 500,
         headers: {
@@ -104,5 +72,4 @@ const handler = async (req: Request): Promise<Response> => {
   }
 };
 
-console.log('Edge Function carregada, iniciando servidor...');
 serve(handler);

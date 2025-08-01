@@ -198,20 +198,9 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
 
       if (error) throw error;
 
-      // Buscar perfil da pessoa que está convidando
-      const { data: inviterProfile } = await supabase
-        .from("profiles")
-        .select("first_name, last_name")
-        .eq("user_id", user.id)
-        .single();
-
       // Enviar dados para o webhook do n8n através da Edge Function
       try {
         const invitationLink = `${window.location.origin}/accept-invitation/${invitationData.invitation_token}`;
-        
-        const inviterName = inviterProfile 
-          ? `${inviterProfile.first_name || ''} ${inviterProfile.last_name || ''}`.trim()
-          : user.email?.split('@')[0] || 'Usuário';
         
         const webhookData = {
           email: inviteEmail.trim(),
@@ -220,7 +209,6 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
           organization_id: selectedOrganization.id,
           invited_by_email: user.email,
           invited_by_id: user.id,
-          invited_by_name: inviterName,
           invitation_date: new Date().toISOString(),
           invitation_token: invitationData.invitation_token,
           invitation_link: invitationLink,
@@ -239,7 +227,7 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
 
         console.log('Resposta da Edge Function:', data);
       } catch (webhookError) {
-        console.error('Erro ao enviar convite por email:', webhookError);
+        console.error('Erro ao enviar para webhook n8n:', webhookError);
         // Não falha o processo principal se o webhook falhar
         toast({
           title: "Aviso",
