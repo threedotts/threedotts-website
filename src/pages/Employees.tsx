@@ -195,6 +195,30 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
 
       if (error) throw error;
 
+      // Enviar dados para o webhook do n8n
+      try {
+        const webhookData = {
+          email: inviteEmail.trim(),
+          role: inviteRole,
+          organization_name: selectedOrganization.name,
+          organization_id: selectedOrganization.id,
+          invited_by_email: user.email,
+          invited_by_id: user.id,
+          invitation_date: new Date().toISOString(),
+        };
+
+        await fetch('https://n8n.srv922768.hstgr.cloud/webhook/7794737f-fb88-4f53-8903-5cc6db3a98c2', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(webhookData),
+        });
+      } catch (webhookError) {
+        console.error('Erro ao enviar para webhook n8n:', webhookError);
+        // Não falha o processo principal se o webhook falhar
+      }
+
       toast({
         title: "Convite enviado!",
         description: `Convite enviado para ${inviteEmail}`,
