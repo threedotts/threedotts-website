@@ -195,7 +195,7 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
 
       if (error) throw error;
 
-      // Enviar dados para o webhook do n8n
+      // Enviar dados para o webhook do n8n através da Edge Function
       try {
         const webhookData = {
           email: inviteEmail.trim(),
@@ -207,18 +207,18 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
           invitation_date: new Date().toISOString(),
         };
 
-        console.log('Enviando dados para webhook n8n:', webhookData);
+        console.log('Enviando dados para webhook via Edge Function:', webhookData);
 
-        const response = await fetch('https://n8n.srv922768.hstgr.cloud/webhook-test/7794737f-fb88-4f53-8903-5cc6db3a98c2', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(webhookData),
-          mode: 'no-cors',
+        const { data, error: webhookError } = await supabase.functions.invoke('send-invitation-webhook', {
+          body: webhookData,
         });
 
-        console.log('Resposta do webhook n8n:', response.status);
+        if (webhookError) {
+          console.error('Erro na Edge Function:', webhookError);
+          throw webhookError;
+        }
+
+        console.log('Resposta da Edge Function:', data);
       } catch (webhookError) {
         console.error('Erro ao enviar para webhook n8n:', webhookError);
         // Não falha o processo principal se o webhook falhar
