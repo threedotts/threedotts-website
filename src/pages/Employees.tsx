@@ -124,7 +124,7 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
             .from("profiles")
             .select("first_name, last_name, avatar_url")
             .eq("user_id", member.user_id)
-            .single();
+            .maybeSingle();
 
           // Get user email from auth.users via API call
           let email = 'Email não disponível';
