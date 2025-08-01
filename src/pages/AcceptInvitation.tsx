@@ -228,7 +228,7 @@ const AcceptInvitation = () => {
 
       toast({
         title: "Conta criada!",
-        description: "Verifique seu email para confirmar a conta e depois aceite o convite.",
+        description: "Verifique seu email para confirmar a conta. Atenção: O email será enviado pelo Supabase (pode aparecer como 'noreply@mail.app.supabase.io'). Após confirmar, retorne aqui para aceitar o convite.",
       });
     } catch (error: any) {
       toast({
