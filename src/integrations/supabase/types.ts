@@ -381,6 +381,10 @@ export type Database = {
         Args: { org_id: string }
         Returns: boolean
       }
+      user_can_access_organization: {
+        Args: { org_id: string; user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       organization_role: "owner" | "admin" | "manager" | "employee"
