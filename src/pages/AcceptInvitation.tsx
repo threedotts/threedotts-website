@@ -2,7 +2,12 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { validatePassword } from "@/utils/securityValidation";
+import { 
+  validatePassword, 
+  validateName, 
+  validateEmail, 
+  sanitizeInput 
+} from "@/utils/securityValidation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -31,8 +36,13 @@ const AcceptInvitation = () => {
   const [loading, setLoading] = useState(true);
   const [accepting, setAccepting] = useState(false);
   const [user, setUser] = useState<any>(null);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    firstName: "",
+    lastName: "",
+  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSignUp, setIsSignUp] = useState(false);
 
   useEffect(() => {
@@ -145,7 +155,7 @@ const AcceptInvitation = () => {
       console.log('Final invitation data:', invitationWithOrg);
 
       setInvitation(invitationWithOrg);
-      setEmail(data.email);
+      setFormData(prev => ({ ...prev, email: data.email }));
     } catch (error) {
       console.error("Erro ao verificar convite:", error);
       toast({
@@ -159,27 +169,58 @@ const AcceptInvitation = () => {
     }
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    const sanitizedValue = sanitizeInput(value);
+    
+    setFormData(prev => ({
+      ...prev,
+      [name]: sanitizedValue
+    }));
+
+    // Clear previous errors
+    if (errors[name]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: ""
+      }));
+    }
+  };
+
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate password using the same validation as Auth page
-    const passwordError = validatePassword(password);
-    if (passwordError) {
-      toast({
-        title: "Senha inválida",
-        description: passwordError,
-        variant: "destructive",
-      });
+    // Enhanced validation using security utils
+    const newErrors: Record<string, string> = {};
+    
+    const firstNameError = validateName(formData.firstName, "Primeiro nome");
+    if (firstNameError) newErrors.firstName = firstNameError;
+    
+    const lastNameError = validateName(formData.lastName, "Último nome");
+    if (lastNameError) newErrors.lastName = lastNameError;
+    
+    const emailError = validateEmail(formData.email);
+    if (emailError) newErrors.email = emailError;
+    
+    const passwordError = validatePassword(formData.password);
+    if (passwordError) newErrors.password = passwordError;
+    
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
 
     setAccepting(true);
     try {
       const { error } = await supabase.auth.signUp({
-        email,
-        password,
+        email: formData.email,
+        password: formData.password,
         options: {
           emailRedirectTo: `${window.location.origin}/accept-invitation/${token}`,
+          data: {
+            first_name: formData.firstName,
+            last_name: formData.lastName,
+          }
         },
       });
 
@@ -202,11 +243,27 @@ const AcceptInvitation = () => {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Enhanced validation
+    const newErrors: Record<string, string> = {};
+    
+    const emailError = validateEmail(formData.email);
+    if (emailError) newErrors.email = emailError;
+    
+    if (!formData.password.trim()) {
+      newErrors.password = "Senha é obrigatória";
+    }
+    
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
     setAccepting(true);
     try {
       const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+        email: formData.email,
+        password: formData.password,
       });
 
       if (error) throw error;
@@ -372,28 +429,63 @@ const AcceptInvitation = () => {
               </div>
               
               <form onSubmit={isSignUp ? handleSignUp : handleSignIn} className="space-y-4">
+                {isSignUp && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="firstName">Primeiro Nome</Label>
+                      <Input
+                        id="firstName"
+                        name="firstName"
+                        type="text"
+                        required
+                        placeholder="Seu primeiro nome"
+                        value={formData.firstName}
+                        onChange={handleInputChange}
+                      />
+                      {errors.firstName && <p className="text-sm text-destructive mt-1">{errors.firstName}</p>}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="lastName">Apelido</Label>
+                      <Input
+                        id="lastName"
+                        name="lastName"
+                        type="text"
+                        required
+                        placeholder="Seu apelido"
+                        value={formData.lastName}
+                        onChange={handleInputChange}
+                      />
+                      {errors.lastName && <p className="text-sm text-destructive mt-1">{errors.lastName}</p>}
+                    </div>
+                  </div>
+                )}
+                
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <Input
                     id="email"
+                    name="email"
                     type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    value={formData.email}
+                    onChange={handleInputChange}
                     disabled
                     className="bg-muted"
                   />
+                  {errors.email && <p className="text-sm text-destructive mt-1">{errors.email}</p>}
                 </div>
                 
                 <div className="space-y-2">
                   <Label htmlFor="password">Senha</Label>
                   <Input
                     id="password"
+                    name="password"
                     type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder={isSignUp ? "Crie uma senha (min. 8 caracteres, maiúscula, minúscula, número e símbolo)" : "Digite sua senha"}
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    placeholder={isSignUp ? "Mín. 8 caracteres, maiúscula, minúscula, número e símbolo" : "Digite sua senha"}
                     required
                   />
+                  {errors.password && <p className="text-sm text-destructive mt-1">{errors.password}</p>}
                 </div>
                 
                 <Button type="submit" disabled={accepting} className="w-full">
