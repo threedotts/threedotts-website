@@ -239,7 +239,7 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
 
         console.log('Resposta da Edge Function:', data);
       } catch (webhookError) {
-        console.error('Erro ao enviar para webhook n8n:', webhookError);
+        console.error('Erro ao enviar convite por email:', webhookError);
         // Não falha o processo principal se o webhook falhar
         toast({
           title: "Aviso",
