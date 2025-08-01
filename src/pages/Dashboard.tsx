@@ -125,6 +125,7 @@ const Dashboard = () => {
       }
 
       // Fetch organizations where user is a member
+      console.log("Fetching organizations for user:", user.id);
       const { data: memberOrgs, error: memberError } = await supabase
         .from("organization_members")
         .select(`
@@ -142,6 +143,8 @@ const Dashboard = () => {
         `)
         .eq("user_id", user.id)
         .eq("status", "active");
+      
+      console.log("Member organizations result:", { memberOrgs, memberError });
 
       if (memberError) {
         console.error("Error fetching member organizations:", memberError);

@@ -117,7 +117,7 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
 
       if (error) throw error;
 
-      // Get profiles for each member
+      // Get profiles for each member with their emails
       const membersWithProfiles = await Promise.all(
         (data || []).map(async (member: any) => {
           const { data: profile } = await supabase
@@ -126,13 +126,25 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
             .eq("user_id", member.user_id)
             .single();
 
-          // Use current user email if this member is the current user
-          const email = member.user_id === currentUser?.id ? currentUser.email : 'user@email.com';
+          // Get user email from auth.users via API call
+          let email = 'Email não disponível';
+          if (member.user_id === currentUser?.id) {
+            email = currentUser.email || 'Email não disponível';
+          } else {
+            // For other users, we'll try to get it but it might not be available due to RLS
+            try {
+              const { data: userData } = await supabase.auth.admin.getUserById(member.user_id);
+              email = userData.user?.email || 'Email não disponível';
+            } catch {
+              // If we can't get the email, use a placeholder
+              email = 'Email não disponível';
+            }
+          }
 
           return {
             ...member,
             profiles: profile,
-            auth_users: { email: email || 'Email não disponível' }
+            auth_users: { email }
           };
         })
       );
