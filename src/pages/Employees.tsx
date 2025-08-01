@@ -64,7 +64,7 @@ interface EmployeesProps {
 }
 
 const roleColors = {
-  owner: "bg-black text-white relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent before:translate-x-[-100%] before:animate-[shimmer_2s_infinite] before:skew-x-12",
+  owner: "bg-gradient-to-r from-yellow-500 to-yellow-600 text-white",
   admin: "bg-gradient-to-r from-red-500 to-red-600 text-white",
   manager: "bg-gradient-to-r from-blue-500 to-blue-600 text-white",
   employee: "bg-gradient-to-r from-green-500 to-green-600 text-white",
@@ -429,11 +429,9 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
                       </div>
                       
                       <div className="flex items-center space-x-2">
-                        <Badge className={member.role === 'owner' ? roleColors[member.role] : roleColors[member.role]}>
-                          <RoleIcon className={member.role === 'owner' ? "h-3 w-3 mr-1 bg-gradient-to-r from-[hsl(175,85%,35%)] to-[hsl(165,90%,40%)] bg-clip-text text-transparent" : "h-3 w-3 mr-1"} />
-                          <span className={member.role === 'owner' ? "bg-gradient-to-r from-[hsl(175,85%,35%)] to-[hsl(165,90%,40%)] bg-clip-text text-transparent font-bold" : ""}>
-                            {roleLabels[member.role]}
-                          </span>
+                        <Badge className={roleColors[member.role]}>
+                          <RoleIcon className="h-3 w-3 mr-1" />
+                          {roleLabels[member.role]}
                         </Badge>
                         
                         {member.role !== 'owner' && (
