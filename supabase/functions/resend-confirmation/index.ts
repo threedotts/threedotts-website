@@ -39,7 +39,23 @@ serve(async (req) => {
 
     console.log('Attempting to resend confirmation for email:', email)
 
-    // Try to resend confirmation email using resend method
+    // First, try to delete any unconfirmed user with this email
+    try {
+      const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers()
+      const unconfirmedUser = existingUsers.users.find(user => 
+        user.email === email && !user.email_confirmed_at
+      )
+      
+      if (unconfirmedUser) {
+        console.log('Found unconfirmed user, deleting:', unconfirmedUser.id)
+        await supabaseAdmin.auth.admin.deleteUser(unconfirmedUser.id)
+        console.log('Deleted unconfirmed user successfully')
+      }
+    } catch (deleteError) {
+      console.error('Error deleting unconfirmed user:', deleteError)
+    }
+
+    // Now try to resend confirmation email using resend method
     const { error } = await supabaseAdmin.auth.resend({
       type: 'signup',
       email: email,
