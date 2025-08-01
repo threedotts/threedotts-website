@@ -207,16 +207,26 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
           invitation_date: new Date().toISOString(),
         };
 
-        await fetch('https://n8n.srv922768.hstgr.cloud/webhook-test/7794737f-fb88-4f53-8903-5cc6db3a98c2', {
+        console.log('Enviando dados para webhook n8n:', webhookData);
+
+        const response = await fetch('https://n8n.srv922768.hstgr.cloud/webhook-test/7794737f-fb88-4f53-8903-5cc6db3a98c2', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(webhookData),
+          mode: 'no-cors',
         });
+
+        console.log('Resposta do webhook n8n:', response.status);
       } catch (webhookError) {
         console.error('Erro ao enviar para webhook n8n:', webhookError);
         // Não falha o processo principal se o webhook falhar
+        toast({
+          title: "Aviso",
+          description: "Convite criado, mas houve problema ao enviar notificação por email",
+          variant: "default",
+        });
       }
 
       toast({
