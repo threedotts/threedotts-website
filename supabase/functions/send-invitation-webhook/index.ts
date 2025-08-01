@@ -12,6 +12,7 @@ interface InvitationWebhookData {
   organization_id: string;
   invited_by_email: string;
   invited_by_id: string;
+  invited_by_name: string;
   invitation_date: string;
   invitation_token: string;
   invitation_link: string;
