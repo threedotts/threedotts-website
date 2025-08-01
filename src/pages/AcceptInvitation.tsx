@@ -123,11 +123,14 @@ const AcceptInvitation = () => {
       }
 
       // Fetch organization details separately
+      console.log('Fetching organization data for ID:', data.organization_id);
       const { data: orgData, error: orgError } = await supabase
         .from("organizations")
         .select("name, description")
         .eq("id", data.organization_id)
         .single();
+
+      console.log('Organization query result:', { orgData, orgError });
 
       if (orgError) {
         console.error("Error fetching organization:", orgError);
@@ -137,6 +140,8 @@ const AcceptInvitation = () => {
         ...data,
         organizations: orgData || { name: "Unknown Organization", description: null }
       };
+
+      console.log('Final invitation data:', invitationWithOrg);
 
       setInvitation(invitationWithOrg);
       setEmail(data.email);
