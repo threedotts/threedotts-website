@@ -325,6 +325,7 @@ const AcceptInvitation = () => {
           status: "active",
           joined_at: new Date().toISOString(),
           invited_by: invitation.invited_by,
+          email: invitation.email, // Include email from invitation
         });
 
       if (memberError) {
