@@ -1,4 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { Resend } from "npm:resend@2.0.0";
+
+const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -27,25 +30,40 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const webhookData: InvitationWebhookData = await req.json();
     
-    console.log('Enviando dados para webhook n8n:', webhookData);
+    console.log('Enviando convite por email:', webhookData);
 
-    // Fazer a chamada para o webhook n8n
-    const response = await fetch('https://n8n.srv922768.hstgr.cloud/webhook-test/7794737f-fb88-4f53-8903-5cc6db3a98c2', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(webhookData),
+    // Criar o email usando o template fornecido
+    const emailSubject = `Convite para ${webhookData.organization_name}`;
+    const emailHtml = `
+      <p>Olá,</p>
+      
+      <p>Convite para o acesso ao nosso Dashboard do Call Center com a seguinte função:</p>
+      
+      <p>📍 <strong>Cargo:</strong> ${webhookData.role}</p>
+      
+      <p>Para ativar o acesso, basta clicar no link abaixo e concluir o cadastro utilizando exatamente o e-mail em que esta mensagem foi recebida (${webhookData.email}):</p>
+      
+      <p>👉 <a href="${webhookData.invitation_link}" style="color: #2563eb; text-decoration: underline;">${webhookData.invitation_link}</a></p>
+      
+      <p><strong>Bem-vindo(a) ao Threedotts Platform!</strong></p>
+      
+      <p>Atenciosamente,<br>
+      ${webhookData.invited_by_name}<br>
+      ${webhookData.organization_name}</p>
+    `;
+
+    // Enviar email usando Resend
+    const emailResponse = await resend.emails.send({
+      from: 'Threedotts Platform <onboarding@resend.dev>',
+      to: [webhookData.email],
+      subject: emailSubject,
+      html: emailHtml,
     });
 
-    console.log('Resposta do webhook n8n:', response.status);
-
-    if (!response.ok) {
-      throw new Error(`Webhook responded with status: ${response.status}`);
-    }
+    console.log('Email enviado com sucesso:', emailResponse);
 
     return new Response(
-      JSON.stringify({ success: true, message: 'Webhook enviado com sucesso' }),
+      JSON.stringify({ success: true, message: 'Email de convite enviado com sucesso', emailId: emailResponse.data?.id }),
       {
         status: 200,
         headers: {
