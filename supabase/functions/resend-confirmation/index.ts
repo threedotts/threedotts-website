@@ -37,12 +37,14 @@ serve(async (req) => {
       }
     )
 
-    // Resend confirmation email
-    const { error } = await supabaseAdmin.auth.admin.generateLink({
+    console.log('Attempting to resend confirmation for email:', email)
+
+    // Try to resend confirmation email using resend method
+    const { error } = await supabaseAdmin.auth.resend({
       type: 'signup',
       email: email,
       options: {
-        redirectTo: `${req.headers.get('origin')}/`,
+        emailRedirectTo: `${req.headers.get('origin') || 'https://d641cc7c-1eb2-4b38-9c11-73630dae5f26.lovableproject.com'}/`,
       }
     })
 
