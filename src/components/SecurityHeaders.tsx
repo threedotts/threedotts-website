@@ -25,11 +25,9 @@ export const SecurityHeaders = () => {
     
     document.head.appendChild(cspMeta);
 
-    // Add additional security headers via meta tags
+    // Add security headers that can be set via meta tags
     const securityHeaders = [
       { name: 'X-Content-Type-Options', content: 'nosniff' },
-      { name: 'X-Frame-Options', content: 'DENY' },
-      { name: 'X-XSS-Protection', content: '1; mode=block' },
       { name: 'Referrer-Policy', content: 'strict-origin-when-cross-origin' }
     ];
 
@@ -53,8 +51,6 @@ export const SecurityHeaders = () => {
         if (httpEquiv && [
           'Content-Security-Policy',
           'X-Content-Type-Options',
-          'X-Frame-Options',
-          'X-XSS-Protection',
           'Referrer-Policy'
         ].includes(httpEquiv)) {
           meta.remove();

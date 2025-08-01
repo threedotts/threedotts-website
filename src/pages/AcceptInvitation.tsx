@@ -58,13 +58,7 @@ const AcceptInvitation = () => {
     try {
       const { data, error } = await supabase
         .from("organization_invitations")
-        .select(`
-          *,
-          organizations (
-            name,
-            description
-          )
-        `)
+        .select("*")
         .eq("invitation_token", token)
         .is("accepted_at", null)
         .gt("expires_at", new Date().toISOString())
@@ -80,7 +74,23 @@ const AcceptInvitation = () => {
         return;
       }
 
-      setInvitation(data);
+      // Fetch organization details separately
+      const { data: orgData, error: orgError } = await supabase
+        .from("organizations")
+        .select("name, description")
+        .eq("id", data.organization_id)
+        .single();
+
+      if (orgError) {
+        console.error("Error fetching organization:", orgError);
+      }
+
+      const invitationWithOrg = {
+        ...data,
+        organizations: orgData || { name: "Unknown Organization", description: null }
+      };
+
+      setInvitation(invitationWithOrg);
       setEmail(data.email);
     } catch (error) {
       console.error("Erro ao verificar convite:", error);
