@@ -101,6 +101,22 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
     }
   }, [selectedOrganization]);
 
+  // Fix missing email for existing member
+  useEffect(() => {
+    const fixMemberEmail = async () => {
+      try {
+        await supabase.functions.invoke('fix-member-email');
+        console.log('Fixed member email');
+      } catch (error) {
+        console.log('Could not fix member email:', error);
+      }
+    };
+    
+    if (selectedOrganization) {
+      fixMemberEmail();
+    }
+  }, [selectedOrganization]);
+
   const fetchMembers = async () => {
     if (!selectedOrganization) return;
 
