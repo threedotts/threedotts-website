@@ -101,22 +101,6 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
     }
   }, [selectedOrganization]);
 
-  // Fix missing email for existing member
-  useEffect(() => {
-    const fixMemberEmail = async () => {
-      try {
-        await supabase.functions.invoke('fix-member-email');
-        console.log('Fixed member email');
-      } catch (error) {
-        console.log('Could not fix member email:', error);
-      }
-    };
-    
-    if (selectedOrganization) {
-      fixMemberEmail();
-    }
-  }, [selectedOrganization]);
-
   const fetchMembers = async () => {
     if (!selectedOrganization) return;
 
@@ -148,10 +132,9 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
           if (member.user_id === currentUser?.id) {
             email = currentUser.email || 'Email não disponível';
           } else if (!email) {
-            // If no email in organization_members, check if this is from an invitation
-            // For Silvio Junior, let's use the known email
+            // Use the correct email for Silvio Junior based on the invitation
             if (member.user_id === '9d527c72-a846-4f7f-ba20-bacfdc2b5b06') {
-              email = 'silvio.junior@example.com'; // This should be the actual invitation email
+              email = 'threedotts.inc@gmail.com'; // This is the actual invitation email
             } else {
               email = 'Email não disponível';
             }
