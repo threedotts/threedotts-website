@@ -22,6 +22,7 @@ interface Organization {
   domain: string | null;
   members_count: number;
   agent_id: string[] | null;
+  user_id: string;
   created_at: string;
   updated_at: string;
 }
@@ -93,7 +94,82 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState<'admin' | 'manager' | 'employee'>('employee');
   const [inviteLoading, setInviteLoading] = useState(false);
+  const [currentUserRole, setCurrentUserRole] = useState<'owner' | 'admin' | 'manager' | 'employee' | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const { toast } = useToast();
+
+  // Permission system functions
+  const canInviteMembers = () => {
+    return currentUserRole && ['owner', 'admin', 'manager'].includes(currentUserRole);
+  };
+
+  const canRemoveMember = (member: OrganizationMember) => {
+    if (!currentUserRole || !currentUserId) return false;
+    if (member.user_id === currentUserId) return false; // Can't remove self
+    if (member.role === 'owner') return false; // Can't remove owner
+    
+    const roleHierarchy = { owner: 4, admin: 3, manager: 2, employee: 1 };
+    const currentUserLevel = roleHierarchy[currentUserRole];
+    const targetUserLevel = roleHierarchy[member.role];
+    
+    return currentUserLevel > targetUserLevel;
+  };
+
+  const canChangeRole = (member: OrganizationMember) => {
+    if (!currentUserRole || !currentUserId) return false;
+    if (member.user_id === currentUserId) return false; // Can't change own role
+    if (member.role === 'owner') return false; // Can't change owner role
+    
+    const roleHierarchy = { owner: 4, admin: 3, manager: 2, employee: 1 };
+    const currentUserLevel = roleHierarchy[currentUserRole];
+    const targetUserLevel = roleHierarchy[member.role];
+    
+    return currentUserLevel > targetUserLevel;
+  };
+
+  const canCancelInvitation = (invitation: OrganizationInvitation) => {
+    if (!currentUserRole || !currentUserId) return false;
+    
+    // Owner and admin can cancel any invitation
+    if (['owner', 'admin'].includes(currentUserRole)) return true;
+    
+    // Manager can cancel invitations they created or for employee role
+    if (currentUserRole === 'manager') {
+      return invitation.invited_by === currentUserId || invitation.role === 'employee';
+    }
+    
+    return false;
+  };
+
+  const getAvailableRolesForInvite = () => {
+    if (!currentUserRole) return [];
+    
+    switch (currentUserRole) {
+      case 'owner':
+        return ['admin', 'manager', 'employee'];
+      case 'admin':
+        return ['manager', 'employee'];
+      case 'manager':
+        return ['employee'];
+      default:
+        return [];
+    }
+  };
+
+  const getAvailableRolesForChange = (member: OrganizationMember) => {
+    if (!currentUserRole || !canChangeRole(member)) return [];
+    
+    const roleHierarchy = { owner: 4, admin: 3, manager: 2, employee: 1 };
+    const currentUserLevel = roleHierarchy[currentUserRole];
+    
+    const availableRoles: ('admin' | 'manager' | 'employee')[] = [];
+    
+    if (currentUserLevel > roleHierarchy.admin) availableRoles.push('admin');
+    if (currentUserLevel > roleHierarchy.manager) availableRoles.push('manager');
+    if (currentUserLevel > roleHierarchy.employee) availableRoles.push('employee');
+    
+    return availableRoles;
+  };
 
   useEffect(() => {
     if (selectedOrganization) {
@@ -136,6 +212,20 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
         .order("joined_at");
 
       if (error) throw error;
+
+      // Determine current user's role and ID
+      if (currentUser) {
+        setCurrentUserId(currentUser.id);
+        const currentMember = data?.find(member => member.user_id === currentUser.id);
+        if (currentMember) {
+          setCurrentUserRole(currentMember.role);
+        } else {
+          // Check if user is organization owner
+          if (selectedOrganization.user_id === currentUser.id) {
+            setCurrentUserRole('owner');
+          }
+        }
+      }
 
       // Get profiles and emails for each member
       const userIds = (data || []).map(member => member.user_id);
@@ -455,14 +545,15 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
           </p>
         </div>
         
-        <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="gap-2">
-              <Plus className="h-4 w-4" />
-              Convidar Membro
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-md">
+        {canInviteMembers() && (
+          <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="gap-2">
+                <Plus className="h-4 w-4" />
+                Convidar Membro
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle>Convidar novo membro</DialogTitle>
               <DialogDescription>
@@ -488,9 +579,9 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="employee">Funcionário</SelectItem>
-                    <SelectItem value="manager">Gerente</SelectItem>
-                    <SelectItem value="admin">Administrador</SelectItem>
+                    {getAvailableRolesForInvite().includes('employee') && <SelectItem value="employee">Funcionário</SelectItem>}
+                    {getAvailableRolesForInvite().includes('manager') && <SelectItem value="manager">Gerente</SelectItem>}
+                    {getAvailableRolesForInvite().includes('admin') && <SelectItem value="admin">Administrador</SelectItem>}
                   </SelectContent>
                 </Select>
               </div>
@@ -506,6 +597,7 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
             </form>
           </DialogContent>
         </Dialog>
+        )}
       </div>
 
       <Tabs defaultValue="members" className="space-y-4">
@@ -568,7 +660,7 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
                           {roleLabels[member.role]}
                         </Badge>
                         
-                        {member.role !== 'owner' && (
+                        {(canChangeRole(member) || canRemoveMember(member)) && (
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" size="sm">
@@ -576,44 +668,43 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => handleChangeRole(member.id, 'admin')}>
-                                <Shield className="h-4 w-4 mr-2" />
-                                Tornar Admin
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleChangeRole(member.id, 'manager')}>
-                                <Briefcase className="h-4 w-4 mr-2" />
-                                Tornar Gerente
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleChangeRole(member.id, 'employee')}>
-                                <User className="h-4 w-4 mr-2" />
-                                Tornar Funcionário
-                              </DropdownMenuItem>
-                              <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                                    <Trash2 className="h-4 w-4 mr-2" />
-                                    Remover
+                              {canChangeRole(member) && getAvailableRolesForChange(member).map((role) => {
+                                const RoleIcon = roleIcons[role];
+                                return (
+                                  <DropdownMenuItem key={role} onClick={() => handleChangeRole(member.id, role)}>
+                                    <RoleIcon className="h-4 w-4 mr-2" />
+                                    Tornar {roleLabels[role]}
                                   </DropdownMenuItem>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                  <AlertDialogHeader>
-                                    <AlertDialogTitle>Remover membro</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                      Tem certeza que deseja remover este membro da organização? 
-                                      Esta ação não pode ser desfeita.
-                                    </AlertDialogDescription>
-                                  </AlertDialogHeader>
-                                  <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                    <AlertDialogAction 
-                                      onClick={() => handleRemoveMember(member.id)}
-                                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                    >
+                                );
+                              })}
+                              {canRemoveMember(member) && (
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                      <Trash2 className="h-4 w-4 mr-2" />
                                       Remover
-                                    </AlertDialogAction>
-                                  </AlertDialogFooter>
-                                </AlertDialogContent>
-                              </AlertDialog>
+                                    </DropdownMenuItem>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Remover membro</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        Tem certeza que deseja remover este membro da organização? 
+                                        Esta ação não pode ser desfeita.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                      <AlertDialogAction 
+                                        onClick={() => handleRemoveMember(member.id)}
+                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                      >
+                                        Remover
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              )}
                             </DropdownMenuContent>
                           </DropdownMenu>
                         )}
@@ -672,13 +763,14 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
                            <RoleIcon className="h-3 w-3 mr-1" />
                            {roleLabels[invitation.role]}
                          </Badge>
-                         
-                         <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </AlertDialogTrigger>
+                          
+                          {canCancelInvitation(invitation) && (
+                            <AlertDialog>
+                             <AlertDialogTrigger asChild>
+                               <Button variant="ghost" size="sm">
+                                 <Trash2 className="h-4 w-4" />
+                               </Button>
+                             </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
                               <AlertDialogTitle>Cancelar convite</AlertDialogTitle>
@@ -696,9 +788,10 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
                                 Cancelar Convite
                               </AlertDialogAction>
                             </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
+                           </AlertDialogContent>
+                         </AlertDialog>
+                           )}
+                       </div>
                     </CardContent>
                   </Card>
                 );
