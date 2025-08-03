@@ -103,12 +103,13 @@ export const useUserPresence = (currentOrganizationId?: string) => {
     }
   };
 
-  // Set up realtime subscription for presence updates
+  // Set up realtime subscription for presence updates and periodic refresh
   useEffect(() => {
     if (!currentOrganizationId) return;
 
+    // Set up realtime subscription
     const channel = supabase
-      .channel('user-presence-changes')
+      .channel(`user-presence-${currentOrganizationId}`)
       .on(
         'postgres_changes',
         {
@@ -161,16 +162,42 @@ export const useUserPresence = (currentOrganizationId?: string) => {
     };
   }, [currentOrganizationId]);
 
-  // Set user as online when hook initializes
+  // Periodic refresh of presence data
+  useEffect(() => {
+    if (!currentOrganizationId) return;
+
+    const refreshPresence = setInterval(() => {
+      // Re-fetch presence data for all current users
+      const currentUserIds = Object.keys(presenceData);
+      if (currentUserIds.length > 0) {
+        fetchPresenceData(currentUserIds);
+      }
+    }, 20000); // Refresh every 20 seconds
+
+    return () => {
+      clearInterval(refreshPresence);
+    };
+  }, [currentOrganizationId, presenceData]);
+
+  // Set user as online when hook initializes and manage cleanup
   useEffect(() => {
     if (!currentOrganizationId) return;
 
     updatePresence(true, currentOrganizationId);
 
-    // Set up periodic heartbeat to maintain online status
+    // Set up more frequent heartbeat (every 15 seconds)
     const heartbeat = setInterval(() => {
       updatePresence(true, currentOrganizationId);
-    }, 30000); // Update every 30 seconds
+    }, 15000);
+
+    // Set up cleanup of inactive users (every 30 seconds)
+    const cleanup = setInterval(async () => {
+      try {
+        await supabase.functions.invoke('cleanup-inactive-users');
+      } catch (error) {
+        console.error('Error cleaning up inactive users:', error);
+      }
+    }, 30000);
 
     // Set user as offline when page unloads
     const handleBeforeUnload = () => {
@@ -186,13 +213,28 @@ export const useUserPresence = (currentOrganizationId?: string) => {
       }
     };
 
+    // Set user as offline when window loses focus
+    const handleBlur = () => {
+      updatePresence(false, currentOrganizationId);
+    };
+
+    // Set user as online when window gains focus
+    const handleFocus = () => {
+      updatePresence(true, currentOrganizationId);
+    };
+
     window.addEventListener('beforeunload', handleBeforeUnload);
     document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('blur', handleBlur);
+    window.addEventListener('focus', handleFocus);
 
     return () => {
       clearInterval(heartbeat);
+      clearInterval(cleanup);
       window.removeEventListener('beforeunload', handleBeforeUnload);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('blur', handleBlur);
+      window.removeEventListener('focus', handleFocus);
       updatePresence(false, currentOrganizationId);
     };
   }, [currentOrganizationId]);
