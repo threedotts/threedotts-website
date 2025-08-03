@@ -34,6 +34,8 @@ export const useUserPresence = (currentOrganizationId?: string) => {
           organization_id: organizationId,
           is_online: isOnline,
           last_seen_at: new Date().toISOString(),
+        }, {
+          onConflict: 'user_id,organization_id'
         });
 
       if (error) {
@@ -115,11 +117,22 @@ export const useUserPresence = (currentOrganizationId?: string) => {
           table: 'user_presence'
         },
         (payload) => {
+          console.log('Presence change detected:', payload);
+          
           if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
             const presence = payload.new as UserPresence;
             
             setPresenceData(prev => {
               const updated = { ...prev };
+              
+              // Initialize the user if not present
+              if (!updated[presence.user_id]) {
+                updated[presence.user_id] = {
+                  isOnlineInCurrentOrg: false,
+                  isOnlineInOtherOrg: false,
+                  lastSeenAt: null,
+                };
+              }
               
               if (presence.organization_id === currentOrganizationId) {
                 // Update current org status
