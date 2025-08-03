@@ -164,9 +164,9 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
     
     const availableRoles: ('admin' | 'manager' | 'employee')[] = [];
     
-    if (currentUserLevel > roleHierarchy.admin) availableRoles.push('admin');
-    if (currentUserLevel > roleHierarchy.manager) availableRoles.push('manager');
-    if (currentUserLevel > roleHierarchy.employee) availableRoles.push('employee');
+    if (currentUserLevel > roleHierarchy.admin && member.role !== 'admin') availableRoles.push('admin');
+    if (currentUserLevel > roleHierarchy.manager && member.role !== 'manager') availableRoles.push('manager');
+    if (currentUserLevel > roleHierarchy.employee && member.role !== 'employee') availableRoles.push('employee');
     
     return availableRoles;
   };
