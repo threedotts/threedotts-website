@@ -4,16 +4,25 @@ import { useToast } from '@/hooks/use-toast';
 
 interface UserPresence {
   user_id: string;
+  organization_id: string;
   is_online: boolean;
   last_seen_at: string;
 }
 
-export const useUserPresence = () => {
-  const [presenceData, setPresenceData] = useState<Record<string, UserPresence>>({});
+interface PresenceStatus {
+  isOnlineInCurrentOrg: boolean;
+  isOnlineInOtherOrg: boolean;
+  lastSeenAt: string | null;
+}
+
+export const useUserPresence = (currentOrganizationId?: string) => {
+  const [presenceData, setPresenceData] = useState<Record<string, PresenceStatus>>({});
   const { toast } = useToast();
 
-  // Update user's own presence status
-  const updatePresence = async (isOnline: boolean) => {
+  // Update user's own presence status for a specific organization
+  const updatePresence = async (isOnline: boolean, organizationId?: string) => {
+    if (!organizationId) return;
+    
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
@@ -22,6 +31,7 @@ export const useUserPresence = () => {
         .from('user_presence')
         .upsert({
           user_id: user.id,
+          organization_id: organizationId,
           is_online: isOnline,
           last_seen_at: new Date().toISOString(),
         });
@@ -36,19 +46,53 @@ export const useUserPresence = () => {
 
   // Fetch presence data for organization members
   const fetchPresenceData = async (userIds: string[]) => {
-    if (userIds.length === 0) return;
+    if (userIds.length === 0 || !currentOrganizationId) return;
 
     try {
-      const { data, error } = await supabase
+      // Get presence data for current organization
+      const { data: currentOrgPresence, error: currentError } = await supabase
         .from('user_presence')
         .select('*')
-        .in('user_id', userIds);
+        .in('user_id', userIds)
+        .eq('organization_id', currentOrganizationId);
 
-      if (error) throw error;
+      if (currentError) throw currentError;
 
-      const presenceMap: Record<string, UserPresence> = {};
-      data?.forEach((presence) => {
-        presenceMap[presence.user_id] = presence;
+      // Get presence data for other organizations to detect "away" status
+      const { data: allPresence, error: allError } = await supabase
+        .from('user_presence')
+        .select('*')
+        .in('user_id', userIds)
+        .neq('organization_id', currentOrganizationId)
+        .eq('is_online', true);
+
+      if (allError) throw allError;
+
+      const presenceMap: Record<string, PresenceStatus> = {};
+      
+      // Initialize all users with offline status
+      userIds.forEach(userId => {
+        presenceMap[userId] = {
+          isOnlineInCurrentOrg: false,
+          isOnlineInOtherOrg: false,
+          lastSeenAt: null,
+        };
+      });
+
+      // Set current org presence
+      currentOrgPresence?.forEach((presence) => {
+        presenceMap[presence.user_id] = {
+          ...presenceMap[presence.user_id],
+          isOnlineInCurrentOrg: presence.is_online,
+          lastSeenAt: presence.last_seen_at,
+        };
+      });
+
+      // Set other org presence (away status)
+      allPresence?.forEach((presence) => {
+        if (presenceMap[presence.user_id]) {
+          presenceMap[presence.user_id].isOnlineInOtherOrg = true;
+        }
       });
 
       setPresenceData(presenceMap);
@@ -59,6 +103,8 @@ export const useUserPresence = () => {
 
   // Set up realtime subscription for presence updates
   useEffect(() => {
+    if (!currentOrganizationId) return;
+
     const channel = supabase
       .channel('user-presence-changes')
       .on(
@@ -71,10 +117,27 @@ export const useUserPresence = () => {
         (payload) => {
           if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
             const presence = payload.new as UserPresence;
-            setPresenceData(prev => ({
-              ...prev,
-              [presence.user_id]: presence
-            }));
+            
+            setPresenceData(prev => {
+              const updated = { ...prev };
+              
+              if (presence.organization_id === currentOrganizationId) {
+                // Update current org status
+                updated[presence.user_id] = {
+                  ...updated[presence.user_id],
+                  isOnlineInCurrentOrg: presence.is_online,
+                  lastSeenAt: presence.last_seen_at,
+                };
+              } else {
+                // Update other org status (away)
+                updated[presence.user_id] = {
+                  ...updated[presence.user_id],
+                  isOnlineInOtherOrg: presence.is_online,
+                };
+              }
+              
+              return updated;
+            });
           }
         }
       )
@@ -83,28 +146,30 @@ export const useUserPresence = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [currentOrganizationId]);
 
   // Set user as online when hook initializes
   useEffect(() => {
-    updatePresence(true);
+    if (!currentOrganizationId) return;
+
+    updatePresence(true, currentOrganizationId);
 
     // Set up periodic heartbeat to maintain online status
     const heartbeat = setInterval(() => {
-      updatePresence(true);
+      updatePresence(true, currentOrganizationId);
     }, 30000); // Update every 30 seconds
 
     // Set user as offline when page unloads
     const handleBeforeUnload = () => {
-      updatePresence(false);
+      updatePresence(false, currentOrganizationId);
     };
 
     // Set user as offline when tab becomes hidden
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        updatePresence(false);
+        updatePresence(false, currentOrganizationId);
       } else {
-        updatePresence(true);
+        updatePresence(true, currentOrganizationId);
       }
     };
 
@@ -115,9 +180,9 @@ export const useUserPresence = () => {
       clearInterval(heartbeat);
       window.removeEventListener('beforeunload', handleBeforeUnload);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-      updatePresence(false);
+      updatePresence(false, currentOrganizationId);
     };
-  }, []);
+  }, [currentOrganizationId]);
 
   return {
     presenceData,

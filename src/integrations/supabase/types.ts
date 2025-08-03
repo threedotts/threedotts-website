@@ -374,6 +374,7 @@ export type Database = {
           id: string
           is_online: boolean
           last_seen_at: string
+          organization_id: string | null
           updated_at: string
           user_id: string
         }
@@ -382,6 +383,7 @@ export type Database = {
           id?: string
           is_online?: boolean
           last_seen_at?: string
+          organization_id?: string | null
           updated_at?: string
           user_id: string
         }
@@ -390,10 +392,19 @@ export type Database = {
           id?: string
           is_online?: boolean
           last_seen_at?: string
+          organization_id?: string | null
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_presence_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
