@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ShimmerSkeleton } from "@/components/ui/skeleton";
 import { Users, Plus, Mail, MoreVertical, Crown, Shield, User, Briefcase, Trash2, Edit, Send } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
@@ -409,8 +410,36 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
   if (loading) {
     return (
       <div className="p-6">
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <ShimmerSkeleton className="h-8 w-48 mb-2" />
+            <ShimmerSkeleton className="h-4 w-64" />
+          </div>
+          <ShimmerSkeleton className="h-10 w-32" />
+        </div>
+        
+        <div className="space-y-4">
+          <ShimmerSkeleton className="h-10 w-full" />
+          
+          {/* Shimmer loading effect for member cards */}
+          {Array.from({ length: 5 }).map((_, index) => (
+            <Card key={index}>
+              <CardContent className="flex items-center justify-between p-6">
+                <div className="flex items-center space-x-4">
+                  <ShimmerSkeleton className="h-12 w-12 rounded-full" />
+                  <div className="space-y-2">
+                    <ShimmerSkeleton className="h-4 w-32" />
+                    <ShimmerSkeleton className="h-3 w-48" />
+                    <ShimmerSkeleton className="h-3 w-24" />
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <ShimmerSkeleton className="h-6 w-20 rounded-full" />
+                  <ShimmerSkeleton className="h-8 w-8" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </div>
     );
