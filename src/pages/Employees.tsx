@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useUserPresence } from "@/hooks/useUserPresence";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -97,6 +98,7 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
   const [currentUserRole, setCurrentUserRole] = useState<'owner' | 'admin' | 'manager' | 'employee' | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const { toast } = useToast();
+  const { presenceData, fetchPresenceData } = useUserPresence();
 
   // Permission system functions
   const canInviteMembers = () => {
@@ -274,6 +276,10 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
       );
 
       setMembers(membersWithProfiles);
+      
+      // Fetch presence data for all members
+      const memberUserIds = membersWithProfiles.map(member => member.user_id);
+      fetchPresenceData(memberUserIds);
     } catch (error: any) {
       console.error("Error fetching members:", error);
       toast({
@@ -631,53 +637,84 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
                   ? `${member.profiles.first_name || ''} ${member.profiles.last_name || ''}`.trim()
                   : 'Usuário';
 
-                return (
-                  <Card key={member.id}>
-                    <CardContent className="flex items-center justify-between p-6">
-                      <div className="flex items-center space-x-4">
-                        <Avatar className="h-12 w-12">
-                          <AvatarImage src={member.profiles?.avatar_url || ''} />
-                          <AvatarFallback>
-                            {fullName.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <h3 className="font-medium text-foreground">
-                            {fullName || 'Nome não informado'}
-                          </h3>
-                          <p className="text-sm text-muted-foreground">
-                            {member.auth_users?.email || 'Email não disponível'}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            Membro desde {new Date(member.joined_at || member.created_at).toLocaleDateString('pt-BR')}
-                          </p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center space-x-2">
-                        <Badge className={roleColors[member.role]}>
-                          <RoleIcon className="h-3 w-3 mr-1" />
-                          {roleLabels[member.role]}
-                        </Badge>
-                        
-                        {(canChangeRole(member) || canRemoveMember(member)) && (
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              {canChangeRole(member) && getAvailableRolesForChange(member).map((role) => {
-                                const RoleIcon = roleIcons[role];
-                                return (
-                                  <DropdownMenuItem key={role} onClick={() => handleChangeRole(member.id, role)}>
-                                    <RoleIcon className="h-4 w-4 mr-2" />
-                                    Tornar {roleLabels[role]}
-                                  </DropdownMenuItem>
-                                );
-                              })}
-                              {canRemoveMember(member) && (
+                 return (
+                   <Card key={member.id}>
+                     <CardContent className="flex items-center justify-between p-6">
+                       <div className="flex items-center space-x-4">
+                         <div className="relative">
+                           <Avatar className="h-12 w-12">
+                             <AvatarImage src={member.profiles?.avatar_url || ''} />
+                             <AvatarFallback>
+                               {fullName.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
+                             </AvatarFallback>
+                           </Avatar>
+                           {/* Online/Offline status indicator */}
+                           <div 
+                             className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-background ${
+                               presenceData[member.user_id]?.is_online 
+                                 ? 'bg-green-500' 
+                                 : 'bg-gray-400'
+                             }`}
+                             title={
+                               presenceData[member.user_id]?.is_online 
+                                 ? 'Online' 
+                                 : `Última vez online: ${
+                                     presenceData[member.user_id]?.last_seen_at 
+                                       ? new Date(presenceData[member.user_id].last_seen_at).toLocaleString('pt-BR')
+                                       : 'Nunca'
+                                   }`
+                             }
+                           />
+                         </div>
+                         <div>
+                           <div className="flex items-center gap-2">
+                             <h3 className="font-medium text-foreground">
+                               {fullName || 'Nome não informado'}
+                             </h3>
+                             {presenceData[member.user_id]?.is_online && (
+                               <span className="text-xs text-green-600 font-medium">Online</span>
+                             )}
+                           </div>
+                           <p className="text-sm text-muted-foreground">
+                             {member.auth_users?.email || 'Email não disponível'}
+                           </p>
+                           <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                             <span>
+                               Membro desde {new Date(member.joined_at || member.created_at).toLocaleDateString('pt-BR')}
+                             </span>
+                             {!presenceData[member.user_id]?.is_online && presenceData[member.user_id]?.last_seen_at && (
+                               <span>
+                                 Última vez online: {new Date(presenceData[member.user_id].last_seen_at).toLocaleString('pt-BR')}
+                               </span>
+                             )}
+                           </div>
+                         </div>
+                       </div>
+                       
+                       <div className="flex items-center space-x-2">
+                         <Badge className={roleColors[member.role]}>
+                           <RoleIcon className="h-3 w-3 mr-1" />
+                           {roleLabels[member.role]}
+                         </Badge>
+                         
+                         {(canChangeRole(member) || canRemoveMember(member)) && (
+                           <DropdownMenu>
+                             <DropdownMenuTrigger asChild>
+                               <Button variant="ghost" size="sm">
+                                 <MoreVertical className="h-4 w-4" />
+                               </Button>
+                             </DropdownMenuTrigger>
+                             <DropdownMenuContent align="end">
+                               {canChangeRole(member) && getAvailableRolesForChange(member).map((role) => {
+                                 const RoleIcon = roleIcons[role];
+                                 return (
+                                   <DropdownMenuItem key={role} onClick={() => handleChangeRole(member.id, role)}>
+                                     <RoleIcon className="h-4 w-4 mr-2" />
+                                     Tornar {roleLabels[role]}
+                                   </DropdownMenuItem>
+                                 );
+                               })}
+                               {canRemoveMember(member) && (
                                 <AlertDialog>
                                   <AlertDialogTrigger asChild>
                                     <DropdownMenuItem onSelect={(e) => e.preventDefault()}>

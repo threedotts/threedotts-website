@@ -10,6 +10,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { Plus, Users, Phone, TrendingUp, Clock } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useToast } from "@/hooks/use-toast";
+import { useUserPresence } from "@/hooks/useUserPresence";
 import CallHistory from "./CallHistory";
 import DashboardHome from "@/components/DashboardHome";
 import Settings from "./Settings";
@@ -48,6 +49,9 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
+  
+  // Initialize user presence tracking
+  useUserPresence();
 
   const getPageTitle = () => {
     return "Dashboard";
