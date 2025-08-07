@@ -277,6 +277,22 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
   // Count online agents
   const onlineAgents = Object.values(presenceData).filter(p => p.isOnlineInCurrentOrg).length;
 
+  // Get performance title based on filter
+  const getPerformanceTitle = () => {
+    switch (selectedTimeFilter) {
+      case 'diario':
+        return 'Performance Diária';
+      case 'semanal':
+        return 'Performance Semanal';
+      case 'mensal':
+        return 'Performance Mensal';
+      case 'anual':
+        return 'Performance Anual';
+      default:
+        return 'Performance';
+    }
+  };
+
   // Get comparison period text
   const getComparisonText = () => {
     switch (selectedTimeFilter) {
@@ -440,7 +456,7 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
       <div className="mt-8">
         <Card className="bg-gradient-card border-border shadow-elegant">
           <CardHeader>
-            <CardTitle className="text-foreground">Performance Mensal</CardTitle>
+            <CardTitle className="text-foreground">{getPerformanceTitle()}</CardTitle>
             <CardDescription>
               Evolução de chamadas e conversões ao longo do tempo
             </CardDescription>
