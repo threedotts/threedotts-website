@@ -539,11 +539,18 @@ const Auth = () => {
                 <Mail className="w-8 h-8 text-primary mr-2" />
               </div>
               <p>
-                Você receberá um email com o código de ativação e instruções completas 
-                de como configurar seu call center.
+                Você receberá <strong>dois emails importantes</strong>:
               </p>
+              <div className="text-left space-y-2">
+                <p className="text-sm">
+                  <strong>1. Email de confirmação do Supabase:</strong> Confirme seu email para ativar a conta.
+                </p>
+                <p className="text-sm">
+                  <strong>2. Código de ativação:</strong> Necessário para configurar seu call center e dashboard.
+                </p>
+              </div>
               <p className="text-sm text-muted-foreground">
-                O código será necessário para ativar seu dashboard e call center.
+                Verifique sua caixa de entrada e spam. Ambos os emails são necessários para usar a plataforma.
               </p>
             </DialogDescription>
           </DialogHeader>
