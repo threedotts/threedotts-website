@@ -249,7 +249,9 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
       value: dashboardData.totalCalls.toString(),
       change: callsChange,
       icon: Phone,
-      color: "text-primary",
+      gradient: "from-primary/20 to-primary/5",
+      iconBg: "bg-primary/10",
+      iconColor: "text-primary",
       changeText: `desde ${comparisonText}`
     },
     {
@@ -257,23 +259,19 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
       value: onlineAgents.toString(),
       change: `de ${members.length} total`,
       icon: Users,
-      color: "text-accent",
+      gradient: "from-accent/20 to-accent/5",
+      iconBg: "bg-accent/10",
+      iconColor: "text-accent",
       changeText: "agora"
-    },
-    {
-      title: "Taxa de Sucesso",
-      value: dashboardData.successRate,
-      change: successRateChange,
-      icon: TrendingUp,
-      color: "text-primary-glow",
-      changeText: `desde ${comparisonText}`
     },
     {
       title: "Tempo Médio",
       value: dashboardData.averageDuration,
       change: durationChange,
       icon: Clock,
-      color: "text-muted-foreground",
+      gradient: "from-muted-foreground/20 to-muted-foreground/5",
+      iconBg: "bg-muted-foreground/10",
+      iconColor: "text-muted-foreground",
       changeText: `desde ${comparisonText}`
     }
   ];
@@ -311,25 +309,29 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         {stats.map((stat, index) => {
           const IconComponent = stat.icon;
           return (
-            <Card key={index} className="bg-gradient-card border-border shadow-elegant">
+            <Card key={index} className={`relative overflow-hidden bg-gradient-to-br ${stat.gradient} border-border shadow-elegant hover:shadow-lg transition-all duration-300`}>
               <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">
-                      {stat.title}
-                    </p>
-                    <p className="text-2xl font-bold text-foreground">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className={`p-2 rounded-lg ${stat.iconBg}`}>
+                        <IconComponent className={`h-5 w-5 ${stat.iconColor}`} />
+                      </div>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        {stat.title}
+                      </p>
+                    </div>
+                    <p className="text-3xl font-bold text-foreground mb-2">
                       {stat.value}
                     </p>
-                    <p className={`text-sm ${stat.color}`}>
+                    <p className={`text-sm font-medium ${stat.iconColor}`}>
                       {stat.change} {stat.changeText}
                     </p>
                   </div>
-                  <IconComponent className={`h-8 w-8 ${stat.color}`} />
                 </div>
               </CardContent>
             </Card>
