@@ -103,13 +103,13 @@ export const useUserPresence = (currentOrganizationId?: string) => {
     }
   };
 
-  // Set up realtime subscription for presence updates and periodic refresh
+  // Set up realtime subscription for presence updates
   useEffect(() => {
     if (!currentOrganizationId) return;
 
-    // Set up realtime subscription
+    // Set up realtime subscription for all presence changes
     const channel = supabase
-      .channel(`user-presence-${currentOrganizationId}`)
+      .channel(`user-presence-global`)
       .on(
         'postgres_changes',
         {
@@ -117,23 +117,19 @@ export const useUserPresence = (currentOrganizationId?: string) => {
           schema: 'public',
           table: 'user_presence'
         },
-        (payload) => {
+        async (payload) => {
           console.log('Presence change detected:', payload);
           
           if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
             const presence = payload.new as UserPresence;
             
+            // Only update if this user is in our current presence data
             setPresenceData(prev => {
-              const updated = { ...prev };
-              
-              // Initialize the user if not present
-              if (!updated[presence.user_id]) {
-                updated[presence.user_id] = {
-                  isOnlineInCurrentOrg: false,
-                  isOnlineInOtherOrg: false,
-                  lastSeenAt: null,
-                };
+              if (!prev[presence.user_id]) {
+                return prev; // Don't add new users automatically
               }
+              
+              const updated = { ...prev };
               
               if (presence.organization_id === currentOrganizationId) {
                 // Update current org status
@@ -147,6 +143,35 @@ export const useUserPresence = (currentOrganizationId?: string) => {
                 updated[presence.user_id] = {
                   ...updated[presence.user_id],
                   isOnlineInOtherOrg: presence.is_online,
+                };
+              }
+              
+              return updated;
+            });
+          }
+
+          if (payload.eventType === 'DELETE') {
+            const presence = payload.old as UserPresence;
+            
+            setPresenceData(prev => {
+              if (!prev[presence.user_id]) {
+                return prev;
+              }
+              
+              const updated = { ...prev };
+              
+              if (presence.organization_id === currentOrganizationId) {
+                // User went offline in current org
+                updated[presence.user_id] = {
+                  ...updated[presence.user_id],
+                  isOnlineInCurrentOrg: false,
+                  lastSeenAt: presence.last_seen_at,
+                };
+              } else {
+                // User went offline in other org
+                updated[presence.user_id] = {
+                  ...updated[presence.user_id],
+                  isOnlineInOtherOrg: false,
                 };
               }
               
