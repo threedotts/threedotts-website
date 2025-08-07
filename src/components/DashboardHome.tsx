@@ -249,7 +249,6 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
       value: dashboardData.totalCalls.toString(),
       change: callsChange,
       icon: Phone,
-      gradient: "from-primary/20 to-primary/5",
       iconBg: "bg-primary/10",
       iconColor: "text-primary",
       changeText: `desde ${comparisonText}`
@@ -259,7 +258,6 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
       value: onlineAgents.toString(),
       change: `de ${members.length} total`,
       icon: Users,
-      gradient: "from-accent/20 to-accent/5",
       iconBg: "bg-accent/10",
       iconColor: "text-accent",
       changeText: "agora"
@@ -269,7 +267,6 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
       value: dashboardData.averageDuration,
       change: durationChange,
       icon: Clock,
-      gradient: "from-muted-foreground/20 to-muted-foreground/5",
       iconBg: "bg-muted-foreground/10",
       iconColor: "text-muted-foreground",
       changeText: `desde ${comparisonText}`
@@ -313,7 +310,7 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
         {stats.map((stat, index) => {
           const IconComponent = stat.icon;
           return (
-            <Card key={index} className={`relative overflow-hidden bg-gradient-to-br ${stat.gradient} border-border shadow-elegant hover:shadow-lg transition-all duration-300`}>
+            <Card key={index} className="bg-muted/30 border-border shadow-elegant hover:shadow-lg transition-all duration-300">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
