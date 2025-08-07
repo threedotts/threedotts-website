@@ -245,31 +245,31 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
 
   const stats = [
     {
-      title: "Total de Chamadas",
+      title: "Chamadas Realizadas",
       value: dashboardData.totalCalls.toString(),
       change: callsChange,
       icon: Phone,
       iconBg: "bg-primary/10",
       iconColor: "text-primary",
-      changeText: `desde ${comparisonText}`
+      changeText: `vs ${comparisonText}`
     },
     {
-      title: "Agentes Online",
+      title: "Agentes Ativos",
       value: onlineAgents.toString(),
       change: `de ${members.length} total`,
       icon: Users,
       iconBg: "bg-accent/10",
       iconColor: "text-accent",
-      changeText: "agora"
+      changeText: "online agora"
     },
     {
-      title: "Tempo Médio",
+      title: "Duração Média das Chamadas",
       value: dashboardData.averageDuration,
       change: durationChange,
       icon: Clock,
       iconBg: "bg-muted-foreground/10",
       iconColor: "text-muted-foreground",
-      changeText: `desde ${comparisonText}`
+      changeText: `vs ${comparisonText}`
     }
   ];
 
