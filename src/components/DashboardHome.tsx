@@ -206,10 +206,16 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
             weekStart.setHours(0, 0, 0, 0);
             const weekEnd = new Date(weekStart);
             weekEnd.setDate(weekStart.getDate() + 7);
+            
+            // Format label as "dd/mm"
+            const startDay = weekStart.getDate().toString().padStart(2, '0');
+            const startMonth = (weekStart.getMonth() + 1).toString().padStart(2, '0');
+            const label = `${startDay}/${startMonth}`;
+            
             periods.push({
               start: weekStart,
               end: weekEnd,
-              label: `S${i === 0 ? '' : i + 1}`
+              label: label
             });
           }
           break;
