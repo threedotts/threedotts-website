@@ -335,7 +335,7 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
       changeText: `vs ${comparisonText}`
     },
     {
-      title: "Agentes Ativos",
+      title: "Funcionários",
       value: onlineAgents.toString(),
       change: `de ${members.length} total`,
       icon: Users,
