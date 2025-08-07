@@ -4,6 +4,8 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useUserPresence } from '@/hooks/useUserPresence';
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface Organization {
   id: string;
@@ -32,8 +34,47 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
   });
   const [chartData, setChartData] = useState<any[]>([]);
   const [members, setMembers] = useState<any[]>([]);
+  const [selectedTimeFilter, setSelectedTimeFilter] = useState<string>('mensal');
   
   const { presenceData, fetchPresenceData } = useUserPresence(selectedOrganization?.id);
+
+  // Time filter options
+  const timeFilters = [
+    { value: 'diario', label: 'Hoje' },
+    { value: 'semanal', label: 'Esta Semana' },
+    { value: 'mensal', label: 'Este Mês' },
+    { value: 'anual', label: 'Este Ano' }
+  ];
+
+  // Get date range based on selected filter
+  const getDateRange = () => {
+    const now = new Date();
+    let startDate: Date;
+    let endDate = now;
+
+    switch (selectedTimeFilter) {
+      case 'diario':
+        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        break;
+      case 'semanal':
+        const dayOfWeek = now.getDay();
+        const diff = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Monday = 0
+        startDate = new Date(now);
+        startDate.setDate(now.getDate() - diff);
+        startDate.setHours(0, 0, 0, 0);
+        break;
+      case 'mensal':
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        break;
+      case 'anual':
+        startDate = new Date(now.getFullYear(), 0, 1);
+        break;
+      default:
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+    }
+
+    return { startDate, endDate };
+  };
 
   // Fetch organization members
   useEffect(() => {
@@ -60,30 +101,33 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
     if (!selectedOrganization?.id) return;
 
     const fetchDashboardData = async () => {
-      const now = new Date();
-      const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-      const previousMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-      const endPreviousMonth = new Date(now.getFullYear(), now.getMonth(), 0);
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-      // Get current month calls
+      const { startDate, endDate } = getDateRange();
+      
+      // Get current period calls
       const { data: currentCalls } = await supabase
         .from('call_transcriptions')
-        .select('duration, evaluation_result, date')
+        .select('duration, evaluation_result, date, created_at')
         .eq('organization_id', selectedOrganization.id)
-        .gte('created_at', currentMonth.toISOString());
+        .gte('created_at', startDate.toISOString())
+        .lte('created_at', endDate.toISOString());
 
-      // Get previous month calls for comparison
+      // Get previous period for comparison (same duration, shifted back)
+      const periodDuration = endDate.getTime() - startDate.getTime();
+      const prevStartDate = new Date(startDate.getTime() - periodDuration);
+      const prevEndDate = new Date(startDate.getTime());
+
       const { data: previousCalls } = await supabase
         .from('call_transcriptions')
         .select('duration, evaluation_result')
         .eq('organization_id', selectedOrganization.id)
-        .gte('created_at', previousMonth.toISOString())
-        .lt('created_at', currentMonth.toISOString());
+        .gte('created_at', prevStartDate.toISOString())
+        .lt('created_at', prevEndDate.toISOString());
 
-      // Get today's calls
+      // Get today's calls for the specific metric
+      const today = new Date();
+      const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
       const todayCalls = currentCalls?.filter(call => 
-        new Date(call.date).toDateString() === today.toDateString()
+        new Date(call.created_at) >= todayStart
       ) || [];
 
       // Calculate metrics
@@ -95,34 +139,36 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
       const successfulCalls = currentCalls?.filter(call => 
         call.evaluation_result?.toLowerCase().includes('positiv') || 
         call.evaluation_result?.toLowerCase().includes('sucesso') ||
-        call.evaluation_result?.toLowerCase().includes('bom')
+        call.evaluation_result?.toLowerCase().includes('bom') ||
+        call.evaluation_result?.toLowerCase().includes('excelente')
       ).length || 0;
       const successRate = totalCalls > 0 ? Math.round((successfulCalls / totalCalls) * 100) : 0;
 
-      // Previous month comparison
-      const previousMonthCalls = previousCalls?.length || 0;
-      const previousMonthDuration = previousCalls?.reduce((sum, call) => sum + (call.duration || 0), 0) || 0;
-      const previousMonthAvgDuration = previousMonthCalls > 0 ? Math.round(previousMonthDuration / previousMonthCalls) : 0;
+      // Previous period comparison
+      const previousPeriodCalls = previousCalls?.length || 0;
+      const previousPeriodDuration = previousCalls?.reduce((sum, call) => sum + (call.duration || 0), 0) || 0;
+      const previousPeriodAvgDuration = previousPeriodCalls > 0 ? Math.round(previousPeriodDuration / previousPeriodCalls) : 0;
       const previousSuccessfulCalls = previousCalls?.filter(call => 
         call.evaluation_result?.toLowerCase().includes('positiv') || 
         call.evaluation_result?.toLowerCase().includes('sucesso') ||
-        call.evaluation_result?.toLowerCase().includes('bom')
+        call.evaluation_result?.toLowerCase().includes('bom') ||
+        call.evaluation_result?.toLowerCase().includes('excelente')
       ).length || 0;
-      const previousMonthSuccessRate = previousMonthCalls > 0 ? Math.round((previousSuccessfulCalls / previousMonthCalls) * 100) : 0;
+      const previousPeriodSuccessRate = previousPeriodCalls > 0 ? Math.round((previousSuccessfulCalls / previousPeriodCalls) * 100) : 0;
 
       setDashboardData({
         totalCalls,
         averageDuration,
         successRate: `${successRate}%`,
         callsToday: todayCalls.length,
-        previousMonthCalls,
-        previousMonthDuration: previousMonthAvgDuration,
-        previousMonthSuccessRate
+        previousMonthCalls: previousPeriodCalls,
+        previousMonthDuration: previousPeriodAvgDuration,
+        previousMonthSuccessRate: previousPeriodSuccessRate
       });
     };
 
     fetchDashboardData();
-  }, [selectedOrganization?.id]);
+  }, [selectedOrganization?.id, selectedTimeFilter]);
 
   // Fetch chart data for last 7 months
   useEffect(() => {
@@ -166,7 +212,23 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
   // Count online agents
   const onlineAgents = Object.values(presenceData).filter(p => p.isOnlineInCurrentOrg).length;
 
-  // Calculate changes from previous month
+  // Get comparison period text
+  const getComparisonText = () => {
+    switch (selectedTimeFilter) {
+      case 'diario':
+        return 'ontem';
+      case 'semanal':
+        return 'semana anterior';
+      case 'mensal':
+        return 'mês anterior';
+      case 'anual':
+        return 'ano anterior';
+      default:
+        return 'período anterior';
+    }
+  };
+
+  // Calculate changes from previous period
   const callsChange = dashboardData.previousMonthCalls > 0 
     ? `${dashboardData.totalCalls > dashboardData.previousMonthCalls ? '+' : ''}${Math.round(((dashboardData.totalCalls - dashboardData.previousMonthCalls) / dashboardData.previousMonthCalls) * 100)}%`
     : '+0%';
@@ -179,34 +241,40 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
     ? `${parseInt(dashboardData.successRate) > dashboardData.previousMonthSuccessRate ? '+' : ''}${parseInt(dashboardData.successRate) - dashboardData.previousMonthSuccessRate}%`
     : '+0%';
 
+  const comparisonText = getComparisonText();
+
   const stats = [
     {
       title: "Total de Chamadas",
       value: dashboardData.totalCalls.toString(),
       change: callsChange,
       icon: Phone,
-      color: "text-primary"
+      color: "text-primary",
+      changeText: `desde ${comparisonText}`
     },
     {
       title: "Agentes Online",
       value: onlineAgents.toString(),
       change: `de ${members.length} total`,
       icon: Users,
-      color: "text-accent"
+      color: "text-accent",
+      changeText: "agora"
     },
     {
       title: "Taxa de Sucesso",
       value: dashboardData.successRate,
       change: successRateChange,
       icon: TrendingUp,
-      color: "text-primary-glow"
+      color: "text-primary-glow",
+      changeText: `desde ${comparisonText}`
     },
     {
       title: "Tempo Médio",
       value: dashboardData.averageDuration,
       change: durationChange,
       icon: Clock,
-      color: "text-muted-foreground"
+      color: "text-muted-foreground",
+      changeText: `desde ${comparisonText}`
     }
   ];
 
@@ -220,6 +288,26 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
         <p className="text-muted-foreground">
           Visão geral das operações de call center
         </p>
+      </div>
+
+      {/* Time Filter Buttons */}
+      <div className="mb-6">
+        <div className="flex flex-wrap gap-2">
+          {timeFilters.map((filter) => (
+            <Button
+              key={filter.value}
+              variant={selectedTimeFilter === filter.value ? "default" : "outline"}
+              size="sm"
+              onClick={() => setSelectedTimeFilter(filter.value)}
+              className={cn(
+                "h-9",
+                selectedTimeFilter === filter.value && "bg-primary text-primary-foreground"
+              )}
+            >
+              {filter.label}
+            </Button>
+          ))}
+        </div>
       </div>
 
       {/* Stats Grid */}
@@ -238,7 +326,7 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
                       {stat.value}
                     </p>
                     <p className={`text-sm ${stat.color}`}>
-                      {stat.change} desde o último mês
+                      {stat.change} {stat.changeText}
                     </p>
                   </div>
                   <IconComponent className={`h-8 w-8 ${stat.color}`} />
