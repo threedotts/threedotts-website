@@ -40,10 +40,10 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
 
   // Time filter options
   const timeFilters = [
-    { value: 'diario', label: 'Hoje' },
-    { value: 'semanal', label: 'Esta Semana' },
-    { value: 'mensal', label: 'Este Mês' },
-    { value: 'anual', label: 'Este Ano' }
+    { value: 'diario', label: 'Diário' },
+    { value: 'semanal', label: 'Semanal' },
+    { value: 'mensal', label: 'Mensal' },
+    { value: 'anual', label: 'Anual' }
   ];
 
   // Get date range based on selected filter
