@@ -170,7 +170,7 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
     fetchDashboardData();
   }, [selectedOrganization?.id, selectedTimeFilter]);
 
-  // Fetch chart data for last 7 months
+  // Fetch chart data based on selected filter
   useEffect(() => {
     if (!selectedOrganization?.id) return;
 
@@ -178,26 +178,85 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
       const chartDataArray = [];
       const now = new Date();
       
-      for (let i = 6; i >= 0; i--) {
-        const monthDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
-        const nextMonth = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
-        
-        const { data: monthCalls } = await supabase
+      // Define periods based on filter
+      let periods: { start: Date; end: Date; label: string }[] = [];
+      
+      switch (selectedTimeFilter) {
+        case 'diario':
+          // Last 7 days
+          for (let i = 6; i >= 0; i--) {
+            const date = new Date(now);
+            date.setDate(now.getDate() - i);
+            const start = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+            const end = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
+            periods.push({
+              start,
+              end,
+              label: date.toLocaleDateString('pt-BR', { weekday: 'short' })
+            });
+          }
+          break;
+        case 'semanal':
+          // Last 8 weeks
+          for (let i = 7; i >= 0; i--) {
+            const weekStart = new Date(now);
+            const dayOfWeek = now.getDay();
+            const diff = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+            weekStart.setDate(now.getDate() - diff - (i * 7));
+            weekStart.setHours(0, 0, 0, 0);
+            const weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekStart.getDate() + 7);
+            periods.push({
+              start: weekStart,
+              end: weekEnd,
+              label: `S${i === 0 ? '' : i + 1}`
+            });
+          }
+          break;
+        case 'mensal':
+          // Last 7 months
+          for (let i = 6; i >= 0; i--) {
+            const monthDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const nextMonth = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
+            periods.push({
+              start: monthDate,
+              end: nextMonth,
+              label: monthDate.toLocaleDateString('pt-BR', { month: 'short' })
+            });
+          }
+          break;
+        case 'anual':
+          // Last 5 years
+          for (let i = 4; i >= 0; i--) {
+            const yearStart = new Date(now.getFullYear() - i, 0, 1);
+            const yearEnd = new Date(now.getFullYear() - i + 1, 0, 1);
+            periods.push({
+              start: yearStart,
+              end: yearEnd,
+              label: yearStart.getFullYear().toString()
+            });
+          }
+          break;
+      }
+      
+      // Fetch data for each period
+      for (const period of periods) {
+        const { data: periodCalls } = await supabase
           .from('call_transcriptions')
           .select('evaluation_result')
           .eq('organization_id', selectedOrganization.id)
-          .gte('created_at', monthDate.toISOString())
-          .lt('created_at', nextMonth.toISOString());
+          .gte('created_at', period.start.toISOString())
+          .lt('created_at', period.end.toISOString());
 
-        const totalCalls = monthCalls?.length || 0;
-        const successfulCalls = monthCalls?.filter(call => 
+        const totalCalls = periodCalls?.length || 0;
+        const successfulCalls = periodCalls?.filter(call => 
           call.evaluation_result?.toLowerCase().includes('positiv') || 
           call.evaluation_result?.toLowerCase().includes('sucesso') ||
           call.evaluation_result?.toLowerCase().includes('bom')
         ).length || 0;
 
         chartDataArray.push({
-          name: monthDate.toLocaleDateString('pt-BR', { month: 'short' }),
+          name: period.label,
           chamadas: totalCalls,
           sucessos: successfulCalls
         });
@@ -207,7 +266,7 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
     };
 
     fetchChartData();
-  }, [selectedOrganization?.id]);
+  }, [selectedOrganization?.id, selectedTimeFilter]);
 
   // Count online agents
   const onlineAgents = Object.values(presenceData).filter(p => p.isOnlineInCurrentOrg).length;
