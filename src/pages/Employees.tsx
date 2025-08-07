@@ -330,6 +330,13 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
+      // First, delete any existing invitations for this email in this organization
+      await supabase
+        .from("organization_invitations")
+        .delete()
+        .eq("organization_id", selectedOrganization.id)
+        .eq("email", inviteEmail.trim());
+
       // Criar convite e obter o token gerado automaticamente
       const { data: invitationData, error } = await supabase
         .from("organization_invitations")
