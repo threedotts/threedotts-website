@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, Phone, TrendingUp, Clock } from "lucide-react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useUserPresence } from '@/hooks/useUserPresence';
@@ -33,6 +33,7 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
     previousMonthSuccessRate: 0
   });
   const [chartData, setChartData] = useState<any[]>([]);
+  const [evaluationData, setEvaluationData] = useState<any[]>([]);
   const [members, setMembers] = useState<any[]>([]);
   const [selectedTimeFilter, setSelectedTimeFilter] = useState<string>('mensal');
   
@@ -268,6 +269,52 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
     fetchChartData();
   }, [selectedOrganization?.id, selectedTimeFilter]);
 
+  // Fetch evaluation data for pie chart
+  useEffect(() => {
+    if (!selectedOrganization?.id) return;
+
+    const fetchEvaluationData = async () => {
+      const { startDate, endDate } = getDateRange();
+      
+      const { data: calls } = await supabase
+        .from('call_transcriptions')
+        .select('evaluation_result')
+        .eq('organization_id', selectedOrganization.id)
+        .gte('created_at', startDate.toISOString())
+        .lte('created_at', endDate.toISOString());
+
+      if (calls) {
+        // Group evaluations by result
+        const evaluationCounts: Record<string, number> = {};
+        
+        calls.forEach(call => {
+          const result = call.evaluation_result || 'Não avaliado';
+          evaluationCounts[result] = (evaluationCounts[result] || 0) + 1;
+        });
+
+        const pieData = Object.entries(evaluationCounts).map(([name, value]) => ({
+          name,
+          value,
+          percentage: calls.length > 0 ? Math.round((value / calls.length) * 100) : 0
+        }));
+
+        setEvaluationData(pieData);
+      }
+    };
+
+    fetchEvaluationData();
+  }, [selectedOrganization?.id, selectedTimeFilter]);
+
+  // Colors for pie chart
+  const COLORS = [
+    'hsl(var(--primary))',
+    'hsl(var(--accent))',
+    'hsl(var(--secondary))',
+    'hsl(var(--muted-foreground))',
+    'hsl(var(--destructive))',
+    'hsl(var(--warning))',
+  ];
+
   // Count online agents
   const onlineAgents = Object.values(presenceData).filter(p => p.isOnlineInCurrentOrg).length;
 
@@ -487,6 +534,81 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
                   />
                 </LineChart>
               </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Evaluation Results Pie Chart */}
+      <div className="mt-8">
+        <Card className="bg-gradient-card border-border shadow-elegant">
+          <CardHeader>
+            <CardTitle className="text-foreground">Resultados das Avaliações</CardTitle>
+            <CardDescription>
+              Distribuição das avaliações das chamadas por categoria
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Pie Chart */}
+              <div className="h-80 w-full flex items-center justify-center">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={evaluationData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={120}
+                      paddingAngle={2}
+                      dataKey="value"
+                    >
+                      {evaluationData.map((entry, index) => (
+                        <Cell 
+                          key={`cell-${index}`} 
+                          fill={COLORS[index % COLORS.length]} 
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      contentStyle={{
+                        backgroundColor: 'hsl(var(--background))',
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: '8px',
+                        color: 'hsl(var(--foreground))'
+                      }}
+                      formatter={(value: number, name: string) => [
+                        `${value} chamadas`,
+                        name
+                      ]}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Legend */}
+              <div className="flex flex-col justify-center space-y-3">
+                {evaluationData.map((entry, index) => (
+                  <div key={entry.name} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div 
+                        className="w-4 h-4 rounded-full"
+                        style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                      />
+                      <span className="text-foreground font-medium">{entry.name}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-2xl font-bold text-foreground">{entry.value}</span>
+                      <span className="text-sm text-muted-foreground ml-2">({entry.percentage}%)</span>
+                    </div>
+                  </div>
+                ))}
+                {evaluationData.length === 0 && (
+                  <div className="text-center text-muted-foreground py-8">
+                    Nenhuma avaliação encontrada no período selecionado
+                  </div>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
