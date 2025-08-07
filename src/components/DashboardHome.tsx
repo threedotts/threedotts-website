@@ -258,10 +258,7 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
         const successfulCalls = periodCalls?.filter(call => 
           call.evaluation_result?.toLowerCase().includes('positiv') || 
           call.evaluation_result?.toLowerCase().includes('sucesso') ||
-          call.evaluation_result?.toLowerCase().includes('bom') ||
-          call.evaluation_result?.toLowerCase().includes('excelente') ||
-          call.evaluation_result?.toLowerCase().includes('ótim') ||
-          call.evaluation_result?.toLowerCase().includes('satisfatóri')
+          call.evaluation_result?.toLowerCase().includes('bom')
         ).length || 0;
 
         chartDataArray.push({
