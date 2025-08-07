@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -15,10 +15,12 @@ interface PresenceStatus {
   lastSeenAt: string | null;
 }
 
-export const useOrganizationMemberChanges = () => {
+export const useOrganizationMemberChanges = (
+  onShowRefreshDialog: (message: string) => void
+) => {
   const { toast } = useToast();
   const connectionAttempts = useRef(0);
-  const maxAttempts = 3;
+  const maxAttempts = 2; // Reduzir tentativas
   const retryTimeout = useRef<NodeJS.Timeout>();
   const isInitializedRef = useRef(false);
 
@@ -86,50 +88,18 @@ export const useOrganizationMemberChanges = () => {
                     employee: "Funcionário"
                   };
                   
-                  toast({
-                    title: "Seu cargo foi alterado",
-                    description: `Seu cargo foi alterado para ${roleLabels[newData.role as keyof typeof roleLabels] || newData.role}`,
-                    duration: 5000,
-                  });
-
-                  // Refresh page after 2 seconds to show new permissions
-                  setTimeout(() => {
-                    console.log('Refreshing page due to role change...');
-                    window.location.reload();
-                  }, 2000);
+                  onShowRefreshDialog(`Seu cargo foi alterado para ${roleLabels[newData.role as keyof typeof roleLabels] || newData.role}. Deseja atualizar a página para ver as novas permissões?`);
                 }
 
                 // Check if status changed to inactive
                 if (oldData.status === 'active' && newData.status !== 'active') {
-                  toast({
-                    title: "Acesso revogado",
-                    description: "Seu acesso a esta organização foi revogado",
-                    variant: "destructive",
-                    duration: 5000,
-                  });
-
-                  // Refresh page after 2 seconds
-                  setTimeout(() => {
-                    console.log('Refreshing page due to status change...');
-                    window.location.reload();
-                  }, 2000);
+                  onShowRefreshDialog("Seu acesso a esta organização foi revogado. A página será atualizada.");
                 }
               }
 
               if (payload.eventType === 'DELETE') {
                 console.log('User removed from organization');
-                toast({
-                  title: "Removido da organização",
-                  description: "Você foi removido desta organização",
-                  variant: "destructive",
-                  duration: 5000,
-                });
-
-                // Refresh page after 2 seconds to redirect to available organizations
-                setTimeout(() => {
-                  console.log('Refreshing page due to removal...');
-                  window.location.reload();
-                }, 2000);
+                onShowRefreshDialog("Você foi removido desta organização. A página será atualizada.");
               }
             }
           )
@@ -158,15 +128,12 @@ export const useOrganizationMemberChanges = () => {
                   }
                 }, 3000);
               } else {
-                console.log('Max connection attempts reached, falling back to periodic polling');
-                // Fallback to periodic polling every 30 seconds
-                retryTimeout.current = setTimeout(() => {
-                  if (isSubscribed) {
-                    // Simple polling check - reload if user data might have changed
-                    console.log('Performing periodic check for organization changes');
-                    // You could implement a more sophisticated check here
-                  }
-                }, 30000);
+                console.log('Max connection attempts reached, realtime disabled for this session');
+                toast({
+                  title: "Conexão em tempo real indisponível",
+                  description: "As atualizações automáticas estão temporariamente indisponíveis. Por favor, recarregue a página ocasionalmente para ver mudanças.",
+                  duration: 8000,
+                });
               }
             }
           });
@@ -205,5 +172,5 @@ export const useOrganizationMemberChanges = () => {
         supabase.removeChannel(channel);
       }
     };
-  }, [toast]);
+  }, [toast, onShowRefreshDialog]);
 };
