@@ -335,6 +335,10 @@ const AcceptInvitation = () => {
 
       console.log('Organization member created successfully');
 
+      // Save the accepted organization ID for automatic selection
+      localStorage.setItem("selectedOrganizationId", invitation.organization_id);
+      localStorage.setItem("justAcceptedInvitation", "true");
+
       toast({
         title: "Convite aceito!",
         description: `Você agora é membro de ${invitation.organizations.name}`,

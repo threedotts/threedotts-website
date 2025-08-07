@@ -205,9 +205,29 @@ const Dashboard = () => {
 
       setOrganizations(allOrgs);
       
-      // Try to restore selected organization from localStorage
+      // Check if user just accepted an invitation
+      const justAcceptedInvitation = localStorage.getItem("justAcceptedInvitation");
       const savedOrgId = localStorage.getItem("selectedOrganizationId");
-      if (savedOrgId && allOrgs.length > 0) {
+      
+      if (justAcceptedInvitation === "true" && savedOrgId && allOrgs.length > 0) {
+        // User just accepted an invitation, prioritize the accepted organization
+        const acceptedOrg = allOrgs.find(org => org.id === savedOrgId);
+        if (acceptedOrg) {
+          setSelectedOrg(acceptedOrg);
+          localStorage.setItem("selectedOrganizationId", acceptedOrg.id);
+          // Clear the flag
+          localStorage.removeItem("justAcceptedInvitation");
+          toast({
+            title: "Bem-vindo!",
+            description: `Agora você está visualizando ${acceptedOrg.name}`,
+          });
+        } else {
+          // Fallback to first organization if accepted org not found
+          setSelectedOrg(allOrgs[0]);
+          localStorage.setItem("selectedOrganizationId", allOrgs[0].id);
+        }
+      } else if (savedOrgId && allOrgs.length > 0) {
+        // Try to restore selected organization from localStorage
         const savedOrg = allOrgs.find(org => org.id === savedOrgId);
         if (savedOrg) {
           setSelectedOrg(savedOrg);
