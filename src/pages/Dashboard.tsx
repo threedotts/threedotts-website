@@ -49,9 +49,6 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
-  
-  // Hook for listening to organization member changes
-  useOrganizationMemberChanges();
 
   const getPageTitle = () => {
     return "Dashboard";

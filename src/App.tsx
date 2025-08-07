@@ -33,6 +33,7 @@ import NotFound from "./pages/NotFound";
 import AcceptInvitation from "./pages/AcceptInvitation";
 import { ChatWidgetErrorBoundary } from "./components/ChatWidgetErrorBoundary";
 import { SecurityHeaders } from "./components/SecurityHeaders";
+import { OrganizationMemberListener } from "./components/OrganizationMemberListener";
 
 const queryClient = new QueryClient();
 
@@ -134,7 +135,11 @@ const App = () => {
             <Route path="/" element={<Index />} />
             <Route path="/project-request" element={<ProjectRequest />} />
             <Route path="/auth" element={<Auth />} />
-            <Route path="/dashboard/*" element={<Dashboard />} />
+            <Route path="/dashboard/*" element={
+              <OrganizationMemberListener>
+                <Dashboard />
+              </OrganizationMemberListener>
+            } />
             <Route path="/create-organization" element={<CreateOrganization />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/service/:serviceId" element={<ServiceDetails />} />

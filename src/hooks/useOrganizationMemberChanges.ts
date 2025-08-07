@@ -20,8 +20,13 @@ export const useOrganizationMemberChanges = () => {
   const connectionAttempts = useRef(0);
   const maxAttempts = 3;
   const retryTimeout = useRef<NodeJS.Timeout>();
+  const isInitializedRef = useRef(false);
 
   useEffect(() => {
+    // Prevent multiple initializations
+    if (isInitializedRef.current) return;
+    isInitializedRef.current = true;
+    
     let isSubscribed = true;
     let channel: any;
 
@@ -186,6 +191,7 @@ export const useOrganizationMemberChanges = () => {
     setupRealtimeSubscription();
 
     return () => {
+      isInitializedRef.current = false;
       isSubscribed = false;
       
       // Clear timeout
