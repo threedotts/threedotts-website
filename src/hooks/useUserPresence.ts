@@ -39,6 +39,12 @@ export const useUserPresence = (currentOrganizationId?: string) => {
         });
 
       if (error) {
+        // If it's an RLS error (user no longer has access to this organization),
+        // silently fail instead of causing issues
+        if (error.code === '42501') {
+          console.log('User no longer has access to organization presence tracking');
+          return;
+        }
         console.error('Error updating presence:', error);
       }
     } catch (error) {
