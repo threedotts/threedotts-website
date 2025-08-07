@@ -2,12 +2,13 @@
 
 export const sanitizeInput = (value: string): string => {
   return value
-    .trim()
     .replace(/[<>]/g, "") // Remove potential HTML tags
     .replace(/['"`;]/g, "") // Remove potential SQL injection chars
     .replace(/javascript:/gi, "") // Remove javascript: protocol
     .replace(/data:/gi, "") // Remove data: protocol
-    .substring(0, 1000); // Limit length
+    .substring(0, 1000) // Limit length
+    .replace(/^\s+|\s+$/g, '') // Only trim leading/trailing spaces, preserve internal spaces
+    .replace(/\s+/g, ' '); // Normalize multiple spaces to single space
 };
 
 export const validateEmail = (email: string): string => {
