@@ -245,28 +245,22 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
           break;
       }
       
-      // Fetch data for each period
-      for (const period of periods) {
-        const { data: periodCalls } = await supabase
-          .from('call_transcriptions')
-          .select('evaluation_result')
-          .eq('organization_id', selectedOrganization.id)
-          .gte('created_at', period.start.toISOString())
-          .lt('created_at', period.end.toISOString());
+        // Fetch data for each period
+        for (const period of periods) {
+          const { data: periodCalls } = await supabase
+            .from('call_transcriptions')
+            .select('id')
+            .eq('organization_id', selectedOrganization.id)
+            .gte('created_at', period.start.toISOString())
+            .lt('created_at', period.end.toISOString());
 
-        const totalCalls = periodCalls?.length || 0;
-        const successfulCalls = periodCalls?.filter(call => 
-          call.evaluation_result?.toLowerCase().includes('positiv') || 
-          call.evaluation_result?.toLowerCase().includes('sucesso') ||
-          call.evaluation_result?.toLowerCase().includes('bom')
-        ).length || 0;
+          const totalCalls = periodCalls?.length || 0;
 
-        chartDataArray.push({
-          name: period.label,
-          chamadas: totalCalls,
-          sucessos: successfulCalls
-        });
-      }
+          chartDataArray.push({
+            name: period.label,
+            chamadas: totalCalls
+          });
+        }
       
       setChartData(chartDataArray);
     };
@@ -458,7 +452,7 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
           <CardHeader>
             <CardTitle className="text-foreground">{getPerformanceTitle()}</CardTitle>
             <CardDescription>
-              Evolução de chamadas e conversões ao longo do tempo
+              Evolução de chamadas ao longo do tempo
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -490,14 +484,6 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
                     strokeWidth={3}
                     dot={{ fill: 'hsl(var(--primary))', strokeWidth: 2, r: 5 }}
                     name="Chamadas"
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="sucessos" 
-                    stroke="hsl(var(--accent))" 
-                    strokeWidth={3}
-                    dot={{ fill: 'hsl(var(--accent))', strokeWidth: 2, r: 5 }}
-                    name="Sucessos"
                   />
                 </LineChart>
               </ResponsiveContainer>
