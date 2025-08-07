@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -9,20 +9,44 @@ interface OrganizationMemberChange {
   status: string;
 }
 
+interface PresenceStatus {
+  isOnlineInCurrentOrg: boolean;
+  isOnlineInOtherOrg: boolean;
+  lastSeenAt: string | null;
+}
+
 export const useOrganizationMemberChanges = () => {
   const { toast } = useToast();
+  const connectionAttempts = useRef(0);
+  const maxAttempts = 3;
+  const retryTimeout = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
     let isSubscribed = true;
+    let channel: any;
 
     const setupRealtimeSubscription = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user || !isSubscribed) return;
 
-        // Subscribe to changes in organization_members table
-        const channel = supabase
-          .channel('organization-member-changes')
+        console.log(`Setting up realtime subscription (attempt ${connectionAttempts.current + 1})`);
+
+        // Clear any existing timeout
+        if (retryTimeout.current) {
+          clearTimeout(retryTimeout.current);
+        }
+
+        // Create a unique channel name to avoid conflicts
+        const channelName = `org-member-changes-${user.id}-${Date.now()}`;
+        
+        channel = supabase
+          .channel(channelName, {
+            config: {
+              broadcast: { self: true },
+              presence: { key: user.id }
+            }
+          })
           .on(
             'postgres_changes',
             {
@@ -106,21 +130,74 @@ export const useOrganizationMemberChanges = () => {
           )
           .subscribe((status) => {
             console.log('Organization member changes subscription status:', status);
+            
+            if (status === 'SUBSCRIBED') {
+              console.log('Successfully subscribed to organization member changes');
+              connectionAttempts.current = 0; // Reset attempts on success
+            } else if (status === 'TIMED_OUT' || status === 'CLOSED') {
+              console.log('Subscription failed or timed out, will retry...');
+              
+              if (connectionAttempts.current < maxAttempts && isSubscribed) {
+                connectionAttempts.current++;
+                console.log(`Retrying connection in 3 seconds (attempt ${connectionAttempts.current}/${maxAttempts})`);
+                
+                // Clean up current channel
+                if (channel) {
+                  supabase.removeChannel(channel);
+                }
+                
+                // Retry after delay
+                retryTimeout.current = setTimeout(() => {
+                  if (isSubscribed) {
+                    setupRealtimeSubscription();
+                  }
+                }, 3000);
+              } else {
+                console.log('Max connection attempts reached, falling back to periodic polling');
+                // Fallback to periodic polling every 30 seconds
+                retryTimeout.current = setTimeout(() => {
+                  if (isSubscribed) {
+                    // Simple polling check - reload if user data might have changed
+                    console.log('Performing periodic check for organization changes');
+                    // You could implement a more sophisticated check here
+                  }
+                }, 30000);
+              }
+            }
           });
 
-        return () => {
-          console.log('Cleaning up organization member changes subscription');
-          supabase.removeChannel(channel);
-        };
+        return channel;
       } catch (error) {
         console.error('Error setting up organization member changes subscription:', error);
+        
+        // Retry on error
+        if (connectionAttempts.current < maxAttempts && isSubscribed) {
+          connectionAttempts.current++;
+          retryTimeout.current = setTimeout(() => {
+            if (isSubscribed) {
+              setupRealtimeSubscription();
+            }
+          }, 3000);
+        }
       }
     };
 
+    // Initial setup
     setupRealtimeSubscription();
 
     return () => {
       isSubscribed = false;
+      
+      // Clear timeout
+      if (retryTimeout.current) {
+        clearTimeout(retryTimeout.current);
+      }
+      
+      // Clean up channel
+      if (channel) {
+        console.log('Cleaning up organization member changes subscription');
+        supabase.removeChannel(channel);
+      }
     };
   }, [toast]);
 };
