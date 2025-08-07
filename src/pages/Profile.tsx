@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useToast } from "@/hooks/use-toast";
+import { useOrganizationMemberChanges } from "@/hooks/useOrganizationMemberChanges";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { 
@@ -46,6 +47,9 @@ const Profile = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Hook for listening to organization member changes
+  useOrganizationMemberChanges();
 
   const [formData, setFormData] = useState({
     firstName: "",
