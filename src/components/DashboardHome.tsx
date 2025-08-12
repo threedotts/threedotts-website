@@ -350,30 +350,67 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
     }
   };
 
-  // Calculate changes from previous period
-  const callsChange = dashboardData.previousMonthCalls > 0 
-    ? `${dashboardData.totalCalls > dashboardData.previousMonthCalls ? '+' : ''}${Math.round(((dashboardData.totalCalls - dashboardData.previousMonthCalls) / dashboardData.previousMonthCalls) * 100)}%`
-    : '+0%';
+  // Calculate changes from previous period with better messaging
+  const getCallsChangeMessage = () => {
+    if (dashboardData.previousMonthCalls === 0) return { message: 'Primeira medição', color: 'text-muted-foreground' };
+    
+    const percentChange = Math.round(((dashboardData.totalCalls - dashboardData.previousMonthCalls) / dashboardData.previousMonthCalls) * 100);
+    
+    if (percentChange > 0) {
+      return { 
+        message: `↑ ${percentChange}% mais chamadas que no ${comparisonText}`, 
+        color: 'text-green-600' 
+      };
+    } else if (percentChange < 0) {
+      return { 
+        message: `↓ ${Math.abs(percentChange)}% menos chamadas que no ${comparisonText}`, 
+        color: 'text-red-600' 
+      };
+    } else {
+      return { 
+        message: `Mesmo número de chamadas do ${comparisonText}`, 
+        color: 'text-muted-foreground' 
+      };
+    }
+  };
 
-  const durationChange = dashboardData.previousMonthDuration > 0
-    ? `${Math.round((dashboardData.averageDuration.split(':').reduce((acc, val, i) => acc + parseInt(val) * (i === 0 ? 60 : 1), 0) - dashboardData.previousMonthDuration) / 60)}min`
-    : '0min';
-
-  const successRateChange = dashboardData.previousMonthSuccessRate > 0
-    ? `${parseInt(dashboardData.successRate) > dashboardData.previousMonthSuccessRate ? '+' : ''}${parseInt(dashboardData.successRate) - dashboardData.previousMonthSuccessRate}%`
-    : '+0%';
+  const getDurationChangeMessage = () => {
+    if (dashboardData.previousMonthDuration === 0) return { message: 'Primeira medição', color: 'text-muted-foreground' };
+    
+    const currentDurationSeconds = dashboardData.averageDuration.split(':').reduce((acc, val, i) => acc + parseInt(val) * (i === 0 ? 60 : 1), 0);
+    const diffMinutes = Math.round((currentDurationSeconds - dashboardData.previousMonthDuration) / 60);
+    
+    if (diffMinutes > 0) {
+      return { 
+        message: `↑ ${diffMinutes}min mais longa que no ${comparisonText}`, 
+        color: 'text-red-600' 
+      };
+    } else if (diffMinutes < 0) {
+      return { 
+        message: `↓ ${Math.abs(diffMinutes)}min mais rápida que no ${comparisonText}`, 
+        color: 'text-green-600' 
+      };
+    } else {
+      return { 
+        message: `Mesma duração do ${comparisonText}`, 
+        color: 'text-muted-foreground' 
+      };
+    }
+  };
 
   const comparisonText = getComparisonText();
+  const callsChangeInfo = getCallsChangeMessage();
+  const durationChangeInfo = getDurationChangeMessage();
 
   const stats = [
     {
       title: "Chamadas Realizadas",
       value: dashboardData.totalCalls.toString(),
-      change: callsChange,
+      change: callsChangeInfo.message,
       icon: Phone,
       iconBg: "bg-primary/10",
-      iconColor: "text-primary",
-      changeText: `vs ${comparisonText}`
+      iconColor: callsChangeInfo.color,
+      changeText: ""
     },
     {
       title: "Funcionários",
@@ -387,11 +424,11 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
     {
       title: "Duração Média das Chamadas",
       value: dashboardData.averageDuration,
-      change: durationChange,
+      change: durationChangeInfo.message,
       icon: Clock,
       iconBg: "bg-muted-foreground/10",
-      iconColor: "text-muted-foreground",
-      changeText: `vs ${comparisonText}`
+      iconColor: durationChangeInfo.color,
+      changeText: ""
     }
   ];
 
