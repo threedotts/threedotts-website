@@ -838,15 +838,15 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
       case 'diario':
         return `Distribuição por hora do dia ${periodDesc}`;
       case 'semanal':
-        return `Total de chamadas por hora agregado de toda a semana (${periodDesc})`;
+        return `Soma total de chamadas por hora de todos os dias da semana (${periodDesc})`;
       case 'mensal':
-        return `Total de chamadas por hora agregado de todo o mês (${periodDesc})`;
+        return `Soma total de chamadas por hora de todos os dias do mês (${periodDesc})`;
       case 'anual':
-        return `Total de chamadas por hora agregado de todo o ano ${periodDesc}`;
+        return `Soma total de chamadas por hora de todos os dias do ano ${periodDesc}`;
       case 'personalizado':
-        return `Total de chamadas por hora agregado de todo o período (${periodDesc})`;
+        return `Soma total de chamadas por hora de todos os dias do período (${periodDesc})`;
       default:
-        return `Total de chamadas por hora agregado do período selecionado`;
+        return `Soma total de chamadas por hora do período selecionado`;
     }
   };
 
@@ -858,13 +858,13 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
       case 'semanal':
         return `Distribuição por dia da semana (${periodDesc})`;
       case 'mensal':
-        return `Total de chamadas por dia da semana agregado de todo o mês (${periodDesc})`;
+        return `Soma de todas as segundas, terças, etc. do mês (${periodDesc})`;
       case 'anual':
-        return `Total de chamadas por dia da semana agregado de todo o ano ${periodDesc}`;
+        return `Soma de todas as segundas, terças, etc. do ano ${periodDesc}`;
       case 'personalizado':
-        return `Total de chamadas por dia da semana agregado de todo o período (${periodDesc})`;
+        return `Soma de todas as segundas, terças, etc. do período (${periodDesc})`;
       default:
-        return `Total de chamadas por dia da semana agregado do período selecionado`;
+        return `Soma por dia da semana do período selecionado`;
     }
   };
 
