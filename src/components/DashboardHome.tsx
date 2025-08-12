@@ -377,12 +377,12 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
     },
     {
       title: "Funcionários",
-      value: onlineAgents.toString(),
-      change: `de ${members.length} total`,
+      value: `${onlineAgents}/${members.length}`,
+      change: `${onlineAgents} online`,
       icon: Users,
       iconBg: "bg-accent/10",
       iconColor: "text-accent",
-      changeText: "online agora"
+      changeText: "de " + members.length + " total"
     },
     {
       title: "Duração Média das Chamadas",
