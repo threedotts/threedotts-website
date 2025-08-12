@@ -235,37 +235,12 @@ export const useUserPresence = (currentOrganizationId?: string) => {
       updatePresence(false, currentOrganizationId);
     };
 
-    // Set user as offline when tab becomes hidden
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        updatePresence(false, currentOrganizationId);
-      } else {
-        updatePresence(true, currentOrganizationId);
-      }
-    };
-
-    // Set user as offline when window loses focus
-    const handleBlur = () => {
-      updatePresence(false, currentOrganizationId);
-    };
-
-    // Set user as online when window gains focus
-    const handleFocus = () => {
-      updatePresence(true, currentOrganizationId);
-    };
-
     window.addEventListener('beforeunload', handleBeforeUnload);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('blur', handleBlur);
-    window.addEventListener('focus', handleFocus);
 
     return () => {
       clearInterval(heartbeat);
       clearInterval(cleanup);
       window.removeEventListener('beforeunload', handleBeforeUnload);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('blur', handleBlur);
-      window.removeEventListener('focus', handleFocus);
       updatePresence(false, currentOrganizationId);
     };
   }, [currentOrganizationId]);
