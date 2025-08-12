@@ -834,12 +834,38 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
   // Generate specific descriptions for hourly and weekly charts
   const getHourlyChartDescription = () => {
     const periodDesc = getTimeFilterDescription();
-    return `Volume de chamadas por hora do dia no período: ${periodDesc}`;
+    switch (selectedTimeFilter) {
+      case 'diario':
+        return `Distribuição por hora do dia ${periodDesc}`;
+      case 'semanal':
+        return `Total de chamadas por hora agregado de toda a semana (${periodDesc})`;
+      case 'mensal':
+        return `Total de chamadas por hora agregado de todo o mês (${periodDesc})`;
+      case 'anual':
+        return `Total de chamadas por hora agregado de todo o ano ${periodDesc}`;
+      case 'personalizado':
+        return `Total de chamadas por hora agregado de todo o período (${periodDesc})`;
+      default:
+        return `Total de chamadas por hora agregado do período selecionado`;
+    }
   };
 
   const getWeeklyChartDescription = () => {
     const periodDesc = getTimeFilterDescription();
-    return `Volume de chamadas por dia da semana no período: ${periodDesc}`;
+    switch (selectedTimeFilter) {
+      case 'diario':
+        return `Dia da semana de ${periodDesc}`;
+      case 'semanal':
+        return `Distribuição por dia da semana (${periodDesc})`;
+      case 'mensal':
+        return `Total de chamadas por dia da semana agregado de todo o mês (${periodDesc})`;
+      case 'anual':
+        return `Total de chamadas por dia da semana agregado de todo o ano ${periodDesc}`;
+      case 'personalizado':
+        return `Total de chamadas por dia da semana agregado de todo o período (${periodDesc})`;
+      default:
+        return `Total de chamadas por dia da semana agregado do período selecionado`;
+    }
   };
 
   return (
