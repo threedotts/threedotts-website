@@ -474,7 +474,7 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-3">
-                      <div className={`p-2 rounded-lg ${stat.iconBg}`}>
+                      <div className="p-2 rounded-lg bg-muted/50">
                         <IconComponent className={`h-5 w-5 ${stat.iconColor}`} />
                       </div>
                       <p className="text-sm font-medium text-muted-foreground">
