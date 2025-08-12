@@ -446,11 +446,11 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
     fetchEvaluationData();
   }, [selectedOrganization?.id, selectedTimeFilter, customDateRange]);
 
-  // Fetch hourly distribution data
+  // Fetch temporal analysis data based on selected period
   useEffect(() => {
     if (!selectedOrganization?.id) return;
 
-    const fetchHourlyData = async () => {
+    const fetchTemporalData = async () => {
       const { startDate, endDate } = getDateRange();
       
       const { data: calls } = await supabase
@@ -460,66 +460,234 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
         .gte('created_at', startDate.toISOString())
         .lte('created_at', endDate.toISOString());
 
-      if (calls) {
+      if (!calls) return;
+
+      // Generate temporal data based on selected filter
+      if (selectedTimeFilter === 'diario' || selectedTimeFilter === 'semanal') {
+        // For daily/weekly: show hourly distribution
         const hourCounts: Record<number, number> = {};
         for (let i = 0; i < 24; i++) {
           hourCounts[i] = 0;
         }
-
+        
         calls.forEach(call => {
           const hour = new Date(call.created_at).getHours();
           hourCounts[hour]++;
         });
 
-        const hourlyArray = Object.entries(hourCounts).map(([hour, count]) => ({
-          hour: `${hour}:00`,
-          chamadas: count
+        const hourlyDataArray = Array.from({ length: 24 }, (_, hour) => ({
+          period: `${hour.toString().padStart(2, '0')}:00`,
+          chamadas: hourCounts[hour] || 0,
+          type: 'hora'
         }));
 
-        setHourlyData(hourlyArray);
-      }
-    };
+        setHourlyData(hourlyDataArray);
 
-    fetchHourlyData();
-  }, [selectedOrganization?.id, selectedTimeFilter, customDateRange]);
-
-  // Fetch weekly distribution data  
-  useEffect(() => {
-    if (!selectedOrganization?.id) return;
-
-    const fetchWeeklyData = async () => {
-      const { startDate, endDate } = getDateRange();
-      
-      const { data: calls } = await supabase
-        .from('call_transcriptions')
-        .select('created_at')
-        .eq('organization_id', selectedOrganization.id)
-        .gte('created_at', startDate.toISOString())
-        .lte('created_at', endDate.toISOString());
-
-      if (calls) {
-        const dayNames = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
-        const dayCounts: Record<number, number> = {};
-        for (let i = 0; i < 7; i++) {
-          dayCounts[i] = 0;
-        }
-
+        // For weekly distribution, show days of current period with specific dates
+        const dayCountsWithDate: Record<string, { count: number; dates: string[] }> = {};
+        const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+        
         calls.forEach(call => {
-          const dayOfWeek = new Date(call.created_at).getDay();
-          dayCounts[dayOfWeek]++;
+          const callDate = new Date(call.created_at);
+          const dayOfWeek = callDate.getDay();
+          const dayKey = dayNames[dayOfWeek];
+          const dateStr = callDate.toLocaleDateString('pt-BR', { 
+            day: '2-digit', 
+            month: '2-digit' 
+          });
+          
+          if (!dayCountsWithDate[dayKey]) {
+            dayCountsWithDate[dayKey] = { count: 0, dates: [] };
+          }
+          dayCountsWithDate[dayKey].count++;
+          if (!dayCountsWithDate[dayKey].dates.includes(dateStr)) {
+            dayCountsWithDate[dayKey].dates.push(dateStr);
+          }
         });
 
-        const weeklyArray = Object.entries(dayCounts).map(([day, count]) => ({
-          day: dayNames[Number(day)],
-          chamadas: count
-        }));
+        const weeklyDataArray = dayNames.map(day => {
+          const dayData = dayCountsWithDate[day];
+          const dateInfo = dayData?.dates.length > 0 ? ` (${dayData.dates.join(', ')})` : '';
+          
+          return {
+            period: `${day}${dateInfo}`,
+            chamadas: dayData?.count || 0,
+            type: 'dia'
+          };
+        });
 
-        setWeeklyData(weeklyArray);
+        setWeeklyData(weeklyDataArray);
+      } else if (selectedTimeFilter === 'mensal') {
+        // For monthly: show daily distribution with specific dates
+        const dailyCounts: Record<string, number> = {};
+        
+        calls.forEach(call => {
+          const callDate = new Date(call.created_at);
+          const dateKey = callDate.toLocaleDateString('pt-BR', { 
+            day: '2-digit', 
+            month: '2-digit',
+            weekday: 'short'
+          });
+          dailyCounts[dateKey] = (dailyCounts[dateKey] || 0) + 1;
+        });
+
+        // Get all days in the current month
+        const monthStart = new Date(startDate);
+        const monthlyDataArray = [];
+        
+        while (monthStart <= endDate) {
+          const dateKey = monthStart.toLocaleDateString('pt-BR', { 
+            day: '2-digit', 
+            month: '2-digit',
+            weekday: 'short'
+          });
+          
+          monthlyDataArray.push({
+            period: dateKey,
+            chamadas: dailyCounts[dateKey] || 0,
+            type: 'dia'
+          });
+          
+          monthStart.setDate(monthStart.getDate() + 1);
+        }
+
+        // Split month data in two charts for better readability
+        const midPoint = Math.ceil(monthlyDataArray.length / 2);
+        setHourlyData(monthlyDataArray.slice(0, midPoint));
+        setWeeklyData(monthlyDataArray.slice(midPoint));
+      } else if (selectedTimeFilter === 'anual') {
+        // For annual: show monthly distribution with specific months and year
+        const monthlyCounts: Record<string, number> = {};
+        
+        calls.forEach(call => {
+          const callDate = new Date(call.created_at);
+          const monthKey = callDate.toLocaleDateString('pt-BR', { 
+            month: 'short', 
+            year: 'numeric' 
+          });
+          monthlyCounts[monthKey] = (monthlyCounts[monthKey] || 0) + 1;
+        });
+
+        // Generate all months in the year
+        const monthsArray = [];
+        const currentYear = startDate.getFullYear();
+        
+        for (let month = 0; month < 12; month++) {
+          const monthDate = new Date(currentYear, month, 1);
+          const monthKey = monthDate.toLocaleDateString('pt-BR', { 
+            month: 'short', 
+            year: 'numeric' 
+          });
+          
+          monthsArray.push({
+            period: monthKey,
+            chamadas: monthlyCounts[monthKey] || 0,
+            type: 'mês'
+          });
+        }
+
+        // Split year data in two charts
+        setHourlyData(monthsArray.slice(0, 6));
+        setWeeklyData(monthsArray.slice(6));
+      } else if (selectedTimeFilter === 'personalizado' && customDateRange?.from && customDateRange?.to) {
+        // For custom range: adapt based on range duration
+        const rangeDuration = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
+        
+        if (rangeDuration <= 7) {
+          // Show hourly for short ranges
+          const hourCounts: Record<number, number> = {};
+          for (let i = 0; i < 24; i++) {
+            hourCounts[i] = 0;
+          }
+          
+          calls.forEach(call => {
+            const hour = new Date(call.created_at).getHours();
+            hourCounts[hour]++;
+          });
+
+          const hourlyDataArray = Array.from({ length: 24 }, (_, hour) => ({
+            period: `${hour.toString().padStart(2, '0')}:00`,
+            chamadas: hourCounts[hour] || 0,
+            type: 'hora'
+          }));
+
+          setHourlyData(hourlyDataArray);
+          setWeeklyData([]);
+        } else if (rangeDuration <= 31) {
+          // Show daily for medium ranges with specific dates
+          const dailyCounts: Record<string, number> = {};
+          
+          calls.forEach(call => {
+            const callDate = new Date(call.created_at);
+            const dateKey = callDate.toLocaleDateString('pt-BR', { 
+              day: '2-digit', 
+              month: '2-digit',
+              year: '2-digit'
+            });
+            dailyCounts[dateKey] = (dailyCounts[dateKey] || 0) + 1;
+          });
+
+          const currentDate = new Date(startDate);
+          const dailyDataArray = [];
+          
+          while (currentDate <= endDate) {
+            const dateKey = currentDate.toLocaleDateString('pt-BR', { 
+              day: '2-digit', 
+              month: '2-digit',
+              year: '2-digit'
+            });
+            
+            dailyDataArray.push({
+              period: dateKey,
+              chamadas: dailyCounts[dateKey] || 0,
+              type: 'dia'
+            });
+            
+            currentDate.setDate(currentDate.getDate() + 1);
+          }
+
+          setHourlyData(dailyDataArray);
+          setWeeklyData([]);
+        } else {
+          // Show monthly for long ranges
+          const monthlyCounts: Record<string, number> = {};
+          
+          calls.forEach(call => {
+            const callDate = new Date(call.created_at);
+            const monthKey = callDate.toLocaleDateString('pt-BR', { 
+              month: 'short', 
+              year: 'numeric' 
+            });
+            monthlyCounts[monthKey] = (monthlyCounts[monthKey] || 0) + 1;
+          });
+
+          const monthsInRange = [];
+          const currentDate = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+          
+          while (currentDate <= endDate) {
+            const monthKey = currentDate.toLocaleDateString('pt-BR', { 
+              month: 'short', 
+              year: 'numeric' 
+            });
+            
+            monthsInRange.push({
+              period: monthKey,
+              chamadas: monthlyCounts[monthKey] || 0,
+              type: 'mês'
+            });
+            
+            currentDate.setMonth(currentDate.getMonth() + 1);
+          }
+
+          setHourlyData(monthsInRange);
+          setWeeklyData([]);
+        }
       }
     };
 
-    fetchWeeklyData();
+    fetchTemporalData();
   }, [selectedOrganization?.id, selectedTimeFilter, customDateRange]);
+
 
   // Fetch customer segment data
   useEffect(() => {
@@ -1051,17 +1219,33 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Distribuição por Horário */}
+          {/* Distribuição Temporal Primária */}
           <Card>
             <CardHeader>
-              <CardTitle>Distribuição por Horário</CardTitle>
-              <CardDescription>Volume de chamadas por hora do dia</CardDescription>
+              <CardTitle className="flex items-center gap-2">
+                <BarChart3 className="h-5 w-5" />
+                Distribuição Temporal - {hourlyData[0]?.type === 'hora' ? 'Por Horário' : 
+                  hourlyData[0]?.type === 'dia' ? 'Por Dia' : 'Por Mês'}
+              </CardTitle>
+              <CardDescription>
+                {hourlyData[0]?.type === 'hora' ? 'Volume de chamadas por hora do dia' :
+                 hourlyData[0]?.type === 'dia' ? 'Volume de chamadas por dia específico' :
+                 'Volume de chamadas por mês específico'}
+                {selectedTimeFilter === 'anual' && ' (Janeiro - Junho)'}
+                {selectedTimeFilter === 'mensal' && ' (Primeira quinzena)'}
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={hourlyData}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="hour" />
+                  <XAxis 
+                    dataKey="period" 
+                    angle={hourlyData.length > 12 ? -45 : 0}
+                    textAnchor={hourlyData.length > 12 ? "end" : "middle"}
+                    height={hourlyData.length > 12 ? 80 : 60}
+                    fontSize={hourlyData.length > 20 ? 10 : 12}
+                  />
                   <YAxis />
                   <Tooltip />
                   <Bar dataKey="chamadas" fill="hsl(var(--primary))" />
@@ -1070,24 +1254,39 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
             </CardContent>
           </Card>
 
-          {/* Distribuição por Dia da Semana */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Distribuição Semanal</CardTitle>
-              <CardDescription>Volume de chamadas por dia da semana</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={weeklyData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="day" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="chamadas" fill="hsl(var(--accent))" />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
+          {/* Distribuição Temporal Secundária */}
+          {weeklyData.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5" />
+                  Distribuição Temporal - {weeklyData[0]?.type === 'dia' ? 'Por Dia' : 'Por Mês'}
+                </CardTitle>
+                <CardDescription>
+                  {weeklyData[0]?.type === 'dia' ? 'Volume de chamadas por dia da semana (com datas específicas)' : 'Volume de chamadas por mês específico'}
+                  {selectedTimeFilter === 'anual' && ' (Julho - Dezembro)'}
+                  {selectedTimeFilter === 'mensal' && ' (Segunda quinzena)'}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={weeklyData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis 
+                      dataKey="period" 
+                      angle={weeklyData.length > 7 ? -45 : 0}
+                      textAnchor={weeklyData.length > 7 ? "end" : "middle"}
+                      height={weeklyData.length > 7 ? 80 : 60}
+                      fontSize={weeklyData.length > 20 ? 10 : 12}
+                    />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="chamadas" fill="hsl(var(--secondary))" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
 
