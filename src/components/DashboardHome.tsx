@@ -6,6 +6,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useUserPresence } from '@/hooks/useUserPresence';
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
+import { DateRange } from "react-day-picker";
 
 interface Organization {
   id: string;
@@ -36,6 +38,7 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
   const [evaluationData, setEvaluationData] = useState<any[]>([]);
   const [members, setMembers] = useState<any[]>([]);
   const [selectedTimeFilter, setSelectedTimeFilter] = useState<string>('mensal');
+  const [customDateRange, setCustomDateRange] = useState<DateRange | undefined>();
   
   const { presenceData, fetchPresenceData } = useUserPresence(selectedOrganization?.id);
 
@@ -44,7 +47,8 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
     { value: 'diario', label: 'Diário' },
     { value: 'semanal', label: 'Semanal' },
     { value: 'mensal', label: 'Mensal' },
-    { value: 'anual', label: 'Anual' }
+    { value: 'anual', label: 'Anual' },
+    { value: 'personalizado', label: 'Personalizado' }
   ];
 
   // Get date range based on selected filter
@@ -69,6 +73,16 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
         break;
       case 'anual':
         startDate = new Date(now.getFullYear(), 0, 1);
+        break;
+      case 'personalizado':
+        if (customDateRange?.from && customDateRange?.to) {
+          startDate = new Date(customDateRange.from);
+          endDate = new Date(customDateRange.to);
+          startDate.setHours(0, 0, 0, 0);
+          endDate.setHours(23, 59, 59, 999);
+        } else {
+          startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        }
         break;
       default:
         startDate = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -169,7 +183,7 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
     };
 
     fetchDashboardData();
-  }, [selectedOrganization?.id, selectedTimeFilter]);
+  }, [selectedOrganization?.id, selectedTimeFilter, customDateRange]);
 
   // Fetch chart data based on selected filter
   useEffect(() => {
@@ -244,6 +258,50 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
             });
           }
           break;
+        case 'personalizado':
+          if (customDateRange?.from && customDateRange?.to) {
+            // For custom range, divide into daily periods
+            const startDate = new Date(customDateRange.from);
+            const endDate = new Date(customDateRange.to);
+            const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+            
+            // If range is more than 30 days, group by weeks, otherwise by days
+            if (totalDays > 30) {
+              // Group by weeks
+              let currentDate = new Date(startDate);
+              while (currentDate <= endDate) {
+                const weekEnd = new Date(currentDate);
+                weekEnd.setDate(currentDate.getDate() + 6);
+                if (weekEnd > endDate) {
+                  weekEnd.setTime(endDate.getTime());
+                }
+                
+                periods.push({
+                  start: new Date(currentDate),
+                  end: weekEnd,
+                  label: `${currentDate.getDate().toString().padStart(2, '0')}/${(currentDate.getMonth() + 1).toString().padStart(2, '0')}`
+                });
+                
+                currentDate.setDate(currentDate.getDate() + 7);
+              }
+            } else {
+              // Group by days
+              let currentDate = new Date(startDate);
+              while (currentDate <= endDate) {
+                const dayEnd = new Date(currentDate);
+                dayEnd.setHours(23, 59, 59, 999);
+                
+                periods.push({
+                  start: new Date(currentDate),
+                  end: dayEnd,
+                  label: `${currentDate.getDate().toString().padStart(2, '0')}/${(currentDate.getMonth() + 1).toString().padStart(2, '0')}`
+                });
+                
+                currentDate.setDate(currentDate.getDate() + 1);
+              }
+            }
+          }
+          break;
       }
       
         // Fetch data for each period
@@ -267,7 +325,7 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
     };
 
     fetchChartData();
-  }, [selectedOrganization?.id, selectedTimeFilter]);
+  }, [selectedOrganization?.id, selectedTimeFilter, customDateRange]);
 
   // Fetch evaluation data for pie chart
   useEffect(() => {
@@ -303,7 +361,7 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
     };
 
     fetchEvaluationData();
-  }, [selectedOrganization?.id, selectedTimeFilter]);
+  }, [selectedOrganization?.id, selectedTimeFilter, customDateRange]);
 
   // Colors for pie chart
   const COLORS = [
@@ -446,7 +504,7 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
 
       {/* Time Filter Buttons */}
       <div className="mb-6">
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 items-center">
           {timeFilters.map((filter) => (
             <Button
               key={filter.value}
@@ -461,6 +519,16 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
               {filter.label}
             </Button>
           ))}
+          
+          {/* Custom Date Range Picker */}
+          {selectedTimeFilter === 'personalizado' && (
+            <DateRangePicker
+              value={customDateRange}
+              onChange={setCustomDateRange}
+              placeholder="Selecione o intervalo"
+              className="ml-2"
+            />
+          )}
         </div>
       </div>
 
