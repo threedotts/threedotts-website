@@ -799,6 +799,49 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
     }
   ];
 
+  // Generate description for the time period
+  const getTimeFilterDescription = () => {
+    const { startDate, endDate } = getDateRange();
+    
+    switch (selectedTimeFilter) {
+      case 'diario':
+        return startDate.toLocaleDateString('pt-BR', { 
+          day: '2-digit', 
+          month: 'long', 
+          year: 'numeric' 
+        });
+      case 'semanal':
+        const endOfWeek = new Date(startDate);
+        endOfWeek.setDate(startDate.getDate() + 6);
+        return `${startDate.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} - ${endOfWeek.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })}`;
+      case 'mensal':
+        return startDate.toLocaleDateString('pt-BR', { 
+          month: 'long', 
+          year: 'numeric' 
+        });
+      case 'anual':
+        return startDate.getFullYear().toString();
+      case 'personalizado':
+        if (customDateRange?.from && customDateRange?.to) {
+          return `${customDateRange.from.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })} - ${customDateRange.to.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })}`;
+        }
+        return 'Período personalizado';
+      default:
+        return 'Período selecionado';
+    }
+  };
+
+  // Generate specific descriptions for hourly and weekly charts
+  const getHourlyChartDescription = () => {
+    const periodDesc = getTimeFilterDescription();
+    return `Volume de chamadas por hora do dia no período: ${periodDesc}`;
+  };
+
+  const getWeeklyChartDescription = () => {
+    const periodDesc = getTimeFilterDescription();
+    return `Volume de chamadas por dia da semana no período: ${periodDesc}`;
+  };
+
   return (
     <div className="p-6">
       {/* Welcome Section */}
@@ -1055,7 +1098,7 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
           <Card>
             <CardHeader>
               <CardTitle>Distribuição por Horário</CardTitle>
-              <CardDescription>Volume de chamadas por hora do dia</CardDescription>
+              <CardDescription>{getHourlyChartDescription()}</CardDescription>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
@@ -1074,7 +1117,7 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
           <Card>
             <CardHeader>
               <CardTitle>Distribuição Semanal</CardTitle>
-              <CardDescription>Volume de chamadas por dia da semana</CardDescription>
+              <CardDescription>{getWeeklyChartDescription()}</CardDescription>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
