@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { DateRange } from "react-day-picker";
-import { ShimmerSkeleton } from "@/components/ui/skeleton";
 
 interface Organization {
   id: string;
@@ -40,7 +39,6 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
   const [members, setMembers] = useState<any[]>([]);
   const [selectedTimeFilter, setSelectedTimeFilter] = useState<string>('mensal');
   const [customDateRange, setCustomDateRange] = useState<DateRange | undefined>();
-  const [isLoading, setIsLoading] = useState(true);
   
   const { presenceData, fetchPresenceData } = useUserPresence(selectedOrganization?.id);
 
@@ -118,7 +116,6 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
     if (!selectedOrganization?.id) return;
 
     const fetchDashboardData = async () => {
-      setIsLoading(true);
       const { startDate, endDate } = getDateRange();
       
       // Get current period calls
@@ -183,7 +180,6 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
         previousMonthDuration: previousPeriodAvgDuration,
         previousMonthSuccessRate: previousPeriodSuccessRate
       });
-      setIsLoading(false);
     };
 
     fetchDashboardData();
@@ -538,53 +534,33 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        {isLoading ? (
-          // Shimmer loading states
-          Array.from({ length: 3 }).map((_, index) => (
-            <Card key={index} className="bg-muted/30 border-border shadow-elegant">
+        {stats.map((stat, index) => {
+          const IconComponent = stat.icon;
+          return (
+            <Card key={index} className="bg-muted/30 border-border shadow-elegant hover:shadow-lg transition-all duration-300">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-3">
-                      <ShimmerSkeleton className="h-9 w-9 rounded-lg" />
-                      <ShimmerSkeleton className="h-4 w-24" />
+                      <div className="p-2 rounded-lg bg-background border border-border">
+                        <IconComponent className={`h-5 w-5 ${stat.iconColor}`} />
+                      </div>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        {stat.title}
+                      </p>
                     </div>
-                    <ShimmerSkeleton className="h-9 w-16 mb-2" />
-                    <ShimmerSkeleton className="h-4 w-32" />
+                    <p className="text-3xl font-bold text-foreground mb-2">
+                      {stat.value}
+                    </p>
+                    <p className={`text-sm font-medium ${stat.iconColor}`}>
+                      {stat.change} {stat.changeText}
+                    </p>
                   </div>
                 </div>
               </CardContent>
             </Card>
-          ))
-        ) : (
-          stats.map((stat, index) => {
-            const IconComponent = stat.icon;
-            return (
-              <Card key={index} className="bg-muted/30 border-border shadow-elegant hover:shadow-lg transition-all duration-300">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="p-2 rounded-lg bg-background border border-border">
-                          <IconComponent className={`h-5 w-5 ${stat.iconColor}`} />
-                        </div>
-                        <p className="text-sm font-medium text-muted-foreground">
-                          {stat.title}
-                        </p>
-                      </div>
-                      <p className="text-3xl font-bold text-foreground mb-2">
-                        {stat.value}
-                      </p>
-                      <p className={`text-sm font-medium ${stat.iconColor}`}>
-                        {stat.change} {stat.changeText}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })
-        )}
+          );
+        })}
       </div>
 
       {/* Main Dashboard Content */}
@@ -632,55 +608,38 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {isLoading || chartData.length === 0 ? (
-              <div className="h-80 w-full p-4">
-                <div className="space-y-4">
-                  <div className="flex justify-between items-end h-16">
-                    {Array.from({ length: 7 }).map((_, i) => (
-                      <ShimmerSkeleton key={i} className={`w-8 h-${8 + (i % 4) * 4}`} />
-                    ))}
-                  </div>
-                  <div className="flex justify-between">
-                    {Array.from({ length: 7 }).map((_, i) => (
-                      <ShimmerSkeleton key={i} className="w-8 h-4" />
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="h-80 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                    <XAxis 
-                      dataKey="name" 
-                      stroke="hsl(var(--muted-foreground))"
-                      fontSize={12}
-                    />
-                    <YAxis 
-                      stroke="hsl(var(--muted-foreground))"
-                      fontSize={12}
-                    />
-                    <Tooltip 
-                      contentStyle={{
-                        backgroundColor: 'hsl(var(--background))',
-                        border: '1px solid hsl(var(--border))',
-                        borderRadius: '8px',
-                        color: 'hsl(var(--foreground))'
-                      }}
-                    />
-                    <Line 
-                      type="monotone" 
-                      dataKey="chamadas" 
-                      stroke="hsl(var(--primary))" 
-                      strokeWidth={3}
-                      dot={{ fill: 'hsl(var(--primary))', strokeWidth: 2, r: 5 }}
-                      name="Chamadas"
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            )}
+            <div className="h-80 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis 
+                    dataKey="name" 
+                    stroke="hsl(var(--muted-foreground))"
+                    fontSize={12}
+                  />
+                  <YAxis 
+                    stroke="hsl(var(--muted-foreground))"
+                    fontSize={12}
+                  />
+                  <Tooltip 
+                    contentStyle={{
+                      backgroundColor: 'hsl(var(--background))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px',
+                      color: 'hsl(var(--foreground))'
+                    }}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="chamadas" 
+                    stroke="hsl(var(--primary))" 
+                    strokeWidth={3}
+                    dot={{ fill: 'hsl(var(--primary))', strokeWidth: 2, r: 5 }}
+                    name="Chamadas"
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -695,87 +654,67 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {isLoading || evaluationData.length === 0 ? (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Pie Chart Shimmer */}
-                <div className="h-80 w-full flex items-center justify-center">
-                  <ShimmerSkeleton className="h-60 w-60 rounded-full" />
-                </div>
-                
-                {/* Legend Shimmer */}
-                <div className="flex flex-col justify-center space-y-3">
-                  {Array.from({ length: 4 }).map((_, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
-                      <div className="flex items-center space-x-3">
-                        <ShimmerSkeleton className="w-4 h-4 rounded-full" />
-                        <ShimmerSkeleton className="h-4 w-24" />
-                      </div>
-                      <div className="text-right space-y-1">
-                        <ShimmerSkeleton className="h-6 w-8" />
-                        <ShimmerSkeleton className="h-3 w-12" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Pie Chart */}
-                <div className="h-80 w-full flex items-center justify-center">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={evaluationData}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={60}
-                        outerRadius={120}
-                        paddingAngle={2}
-                        dataKey="value"
-                      >
-                        {evaluationData.map((entry, index) => (
-                          <Cell 
-                            key={`cell-${index}`} 
-                            fill={COLORS[index % COLORS.length]} 
-                          />
-                        ))}
-                      </Pie>
-                      <Tooltip 
-                        contentStyle={{
-                          backgroundColor: 'hsl(var(--background))',
-                          border: '1px solid hsl(var(--border))',
-                          borderRadius: '8px',
-                          color: 'hsl(var(--foreground))'
-                        }}
-                        formatter={(value: number, name: string) => [
-                          `${value} chamadas`,
-                          name
-                        ]}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-
-                {/* Legend */}
-                <div className="flex flex-col justify-center space-y-3">
-                  {evaluationData.map((entry, index) => (
-                    <div key={entry.name} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
-                      <div className="flex items-center space-x-3">
-                        <div 
-                          className="w-4 h-4 rounded-full"
-                          style={{ backgroundColor: COLORS[index % COLORS.length] }}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Pie Chart */}
+              <div className="h-80 w-full flex items-center justify-center">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={evaluationData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={120}
+                      paddingAngle={2}
+                      dataKey="value"
+                    >
+                      {evaluationData.map((entry, index) => (
+                        <Cell 
+                          key={`cell-${index}`} 
+                          fill={COLORS[index % COLORS.length]} 
                         />
-                        <span className="text-foreground font-medium">{entry.name}</span>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-2xl font-bold text-foreground">{entry.value}</span>
-                        <span className="text-sm text-muted-foreground ml-2">({entry.percentage}%)</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      contentStyle={{
+                        backgroundColor: 'hsl(var(--background))',
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: '8px',
+                        color: 'hsl(var(--foreground))'
+                      }}
+                      formatter={(value: number, name: string) => [
+                        `${value} chamadas`,
+                        name
+                      ]}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
               </div>
-            )}
+
+              {/* Legend */}
+              <div className="flex flex-col justify-center space-y-3">
+                {evaluationData.map((entry, index) => (
+                  <div key={entry.name} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div 
+                        className="w-4 h-4 rounded-full"
+                        style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                      />
+                      <span className="text-foreground font-medium">{entry.name}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-2xl font-bold text-foreground">{entry.value}</span>
+                      <span className="text-sm text-muted-foreground ml-2">({entry.percentage}%)</span>
+                    </div>
+                  </div>
+                ))}
+                {evaluationData.length === 0 && (
+                  <div className="text-center text-muted-foreground py-8">
+                    Nenhuma avaliação encontrada no período selecionado
+                  </div>
+                )}
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
