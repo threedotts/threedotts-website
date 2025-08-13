@@ -8,7 +8,6 @@ import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   CreditCard, 
   Wallet, 
@@ -321,157 +320,62 @@ export default function Billing() {
 
   return (
     <div className="container mx-auto p-6 space-y-8">
-      <div className="text-center space-y-2">
-        <h1 className="text-4xl font-bold">Planos e Faturamento</h1>
-        <p className="text-muted-foreground text-lg">Gerencie seu plano atual e créditos</p>
-      </div>
-
       {/* Plano Atual */}
-      <div className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-lg p-6 border border-primary/20">
-        <h2 className="text-2xl font-semibold mb-4">Plano Atual</h2>
-        {currentPlan ? (
+      <Card className="relative overflow-hidden border-0 shadow-lg">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-background" />
+        <CardContent className="relative p-8">
           <div className="flex items-center justify-between">
-            <div className="space-y-2">
-              <div className="flex items-center gap-3">
-                <Badge variant="default" className="text-lg px-3 py-1">
-                  {currentPlan}
-                </Badge>
-                <span className="text-muted-foreground">ativo</span>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Seu plano atual está ativo e funcionando perfeitamente
-              </p>
-            </div>
-            <Button variant="outline">
-              Gerenciar Plano
-            </Button>
-          </div>
-        ) : (
-          <div className="text-center py-8">
             <div className="space-y-3">
-              <AlertTriangle className="h-12 w-12 text-muted-foreground mx-auto" />
-              <h3 className="text-xl font-semibold">Nenhum plano ativo</h3>
-              <p className="text-muted-foreground">
-                Você não possui nenhum plano ativo no momento. Escolha um plano abaixo para começar.
-              </p>
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-primary/20 rounded-full blur-sm" />
+                  <Badge variant="default" className="relative text-base px-4 py-2 bg-primary/90 hover:bg-primary">
+                    {currentPlan || "Nenhum Plano"}
+                  </Badge>
+                </div>
+                {currentPlan && (
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                    <span className="text-sm font-medium text-green-600">Ativo</span>
+                  </div>
+                )}
+              </div>
+              {currentPlan ? (
+                <div className="space-y-1">
+                  <h2 className="text-2xl font-bold">Seu plano está funcionando perfeitamente</h2>
+                  <p className="text-muted-foreground">
+                    Aproveite todos os benefícios do seu plano {currentPlan}
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  <h2 className="text-2xl font-bold flex items-center gap-2">
+                    <AlertTriangle className="h-6 w-6 text-amber-500" />
+                    Nenhum plano ativo
+                  </h2>
+                  <p className="text-muted-foreground">
+                    Escolha um plano para começar a aproveitar todos os recursos
+                  </p>
+                </div>
+              )}
+            </div>
+            <div className="flex flex-col gap-2">
+              <Button variant="outline" className="bg-background/80 backdrop-blur-sm">
+                {currentPlan ? "Gerenciar Plano" : "Escolher Plano"}
+              </Button>
+              {currentPlan && (
+                <Button variant="ghost" size="sm" className="text-muted-foreground">
+                  Ver detalhes
+                </Button>
+              )}
             </div>
           </div>
-        )}
-      </div>
-
-      {/* Planos Disponíveis */}
-      <div className="space-y-4">
-        <h2 className="text-2xl font-semibold text-center">Planos Disponíveis</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Plano Basic */}
-          <Card className="relative border-2 hover:border-primary/20 transition-all duration-200">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-xl">Basic</CardTitle>
-                <Badge variant="secondary">Mais Popular</Badge>
-              </div>
-              <CardDescription>Para equipes pequenas que estão começando</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="text-3xl font-bold">$200<span className="text-base font-normal text-muted-foreground">/mês</span></div>
-              <ul className="space-y-2 text-sm">
-                <li className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-                  800 créditos mensais inclusos
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-                  5 créditos diários extras
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-                  Projetos privados
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-                  Funções e permissões de usuário
-                </li>
-              </ul>
-              <Button className="w-full" variant="default">
-                {currentPlan === "Basic" ? "Plano Atual" : "Upgrade"}
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Plano Pro */}
-          <Card className="relative border-2 border-primary shadow-lg transform scale-105">
-            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-              <Badge className="bg-primary text-primary-foreground">Recomendado</Badge>
-            </div>
-            <CardHeader>
-              <CardTitle className="text-xl">Pro</CardTitle>
-              <CardDescription>Controles avançados para departamentos em crescimento</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="text-3xl font-bold">$400<span className="text-base font-normal text-muted-foreground">/mês</span></div>
-              <p className="text-sm text-muted-foreground">Tudo no Basic, além de:</p>
-              <ul className="space-y-2 text-sm">
-                <li className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-                  1.500 créditos mensais inclusos
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-                  10 créditos diários extras
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-                  SSO
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-                  Projetos Pessoais
-                </li>
-              </ul>
-              <Button className="w-full" variant="default">
-                {currentPlan === "Pro" ? "Plano Atual" : "Upgrade"}
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Plano Enterprise */}
-          <Card className="relative border-2 hover:border-primary/20 transition-all duration-200">
-            <CardHeader>
-              <CardTitle className="text-xl">Enterprise</CardTitle>
-              <CardDescription>Para grandes organizações que precisam de flexibilidade</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="text-2xl font-bold">Faturamento flexível</div>
-              <p className="text-sm text-muted-foreground">Tudo no Pro, além de:</p>
-              <ul className="space-y-2 text-sm">
-                <li className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-                  Créditos ilimitados
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-                  Suporte dedicado
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-                  Integrações personalizadas
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-                  Controle de acesso avançado
-                </li>
-              </ul>
-              <Button className="w-full" variant="outline">
-                {currentPlan === "Enterprise" ? "Plano Atual" : "Agendar Demo"}
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Estatísticas Atuais */}
-      <div className="bg-muted/20 rounded-lg p-6">
-        <h2 className="text-xl font-semibold mb-4">Uso Atual</h2>
+      <Card className="p-6">
+        <h2 className="text-xl font-semibold mb-4">Uso de Créditos</h2>
         {isLowCredit && (
           <Alert className="mb-4">
             <AlertTriangle className="h-4 w-4" />
@@ -520,7 +424,7 @@ export default function Billing() {
             </CardContent>
           </Card>
         </div>
-      </div>
+      </Card>
 
       <Tabs defaultValue="topup" className="space-y-4">
         <TabsList>
@@ -682,6 +586,119 @@ export default function Billing() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Planos Disponíveis */}
+      <div className="space-y-6 mt-12 pt-8 border-t">
+        <div className="text-center space-y-2">
+          <h2 className="text-2xl font-semibold">Planos Disponíveis</h2>
+          <p className="text-muted-foreground">Escolha o plano ideal para suas necessidades</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Plano Basic */}
+          <Card className="relative border-2 hover:border-primary/20 transition-all duration-200">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xl">Basic</CardTitle>
+                <Badge variant="secondary">Mais Popular</Badge>
+              </div>
+              <CardDescription>Para equipes pequenas que estão começando</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="text-3xl font-bold">$200<span className="text-base font-normal text-muted-foreground">/mês</span></div>
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                  800 créditos mensais inclusos
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                  5 créditos diários extras
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                  Projetos privados
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                  Funções e permissões de usuário
+                </li>
+              </ul>
+              <Button className="w-full" variant="default">
+                {currentPlan === "Basic" ? "Plano Atual" : "Upgrade"}
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Plano Pro */}
+          <Card className="relative border-2 border-primary shadow-lg transform scale-105">
+            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+              <Badge className="bg-primary text-primary-foreground">Recomendado</Badge>
+            </div>
+            <CardHeader>
+              <CardTitle className="text-xl">Pro</CardTitle>
+              <CardDescription>Controles avançados para departamentos em crescimento</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="text-3xl font-bold">$400<span className="text-base font-normal text-muted-foreground">/mês</span></div>
+              <p className="text-sm text-muted-foreground">Tudo no Basic, além de:</p>
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                  1.500 créditos mensais inclusos
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                  10 créditos diários extras
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                  SSO
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                  Projetos Pessoais
+                </li>
+              </ul>
+              <Button className="w-full" variant="default">
+                {currentPlan === "Pro" ? "Plano Atual" : "Upgrade"}
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Plano Enterprise */}
+          <Card className="relative border-2 hover:border-primary/20 transition-all duration-200">
+            <CardHeader>
+              <CardTitle className="text-xl">Enterprise</CardTitle>
+              <CardDescription>Para grandes organizações que precisam de flexibilidade</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="text-2xl font-bold">Faturamento flexível</div>
+              <p className="text-sm text-muted-foreground">Tudo no Pro, além de:</p>
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                  Créditos ilimitados
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                  Suporte dedicado
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                  Integrações personalizadas
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                  Controle de acesso avançado
+                </li>
+              </ul>
+              <Button className="w-full" variant="outline">
+                {currentPlan === "Enterprise" ? "Plano Atual" : "Agendar Demo"}
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }
