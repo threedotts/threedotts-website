@@ -342,9 +342,11 @@ export default function Billing() {
             )}
           </div>
         </div>
-        <Button variant="outline" size="sm">
-          {currentPlan ? "Gerenciar" : "Escolher Plano"}
-        </Button>
+        {currentPlan && (
+          <Button variant="outline" size="sm">
+            Gerenciar
+          </Button>
+        )}
       </div>
 
       {/* Estatísticas Atuais */}
