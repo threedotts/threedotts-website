@@ -320,58 +320,32 @@ export default function Billing() {
 
   return (
     <div className="container mx-auto p-6 space-y-8">
-      {/* Plano Atual */}
-      <Card className="relative overflow-hidden border-0 shadow-lg">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-background" />
-        <CardContent className="relative p-8">
-          <div className="flex items-center justify-between">
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <div className="relative">
-                  <div className="absolute inset-0 bg-primary/20 rounded-full blur-sm" />
-                  <Badge variant="default" className="relative text-base px-4 py-2 bg-primary/90 hover:bg-primary">
-                    {currentPlan || "Nenhum Plano"}
-                  </Badge>
+      {/* Plano Atual - Simples */}
+      <div className="flex items-center justify-between p-4 rounded-lg border bg-card">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Plano atual:</span>
+            {currentPlan ? (
+              <>
+                <Badge variant="default" className="font-medium">
+                  {currentPlan}
+                </Badge>
+                <div className="flex items-center gap-1">
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                  <span className="text-xs text-green-600">Ativo</span>
                 </div>
-                {currentPlan && (
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                    <span className="text-sm font-medium text-green-600">Ativo</span>
-                  </div>
-                )}
-              </div>
-              {currentPlan ? (
-                <div className="space-y-1">
-                  <h2 className="text-2xl font-bold">Seu plano está funcionando perfeitamente</h2>
-                  <p className="text-muted-foreground">
-                    Aproveite todos os benefícios do seu plano {currentPlan}
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-1">
-                  <h2 className="text-2xl font-bold flex items-center gap-2">
-                    <AlertTriangle className="h-6 w-6 text-amber-500" />
-                    Nenhum plano ativo
-                  </h2>
-                  <p className="text-muted-foreground">
-                    Escolha um plano para começar a aproveitar todos os recursos
-                  </p>
-                </div>
-              )}
-            </div>
-            <div className="flex flex-col gap-2">
-              <Button variant="outline" className="bg-background/80 backdrop-blur-sm">
-                {currentPlan ? "Gerenciar Plano" : "Escolher Plano"}
-              </Button>
-              {currentPlan && (
-                <Button variant="ghost" size="sm" className="text-muted-foreground">
-                  Ver detalhes
-                </Button>
-              )}
-            </div>
+              </>
+            ) : (
+              <Badge variant="outline" className="text-muted-foreground">
+                Nenhum plano
+              </Badge>
+            )}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+        <Button variant="outline" size="sm">
+          {currentPlan ? "Gerenciar" : "Escolher Plano"}
+        </Button>
+      </div>
 
       {/* Estatísticas Atuais */}
       <Card className="p-6">
