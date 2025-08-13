@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   CreditCard, 
   Wallet, 
@@ -57,6 +58,9 @@ export default function Billing() {
   const [loading, setLoading] = useState(true);
   const [topUpAmount, setTopUpAmount] = useState(1000);
   const [userOrganization, setUserOrganization] = useState<any>(null);
+  const [selectedCreditsBasic, setSelectedCreditsBasic] = useState("800");
+  const [selectedCreditsPro, setSelectedCreditsPro] = useState("800");
+  const [selectedCreditsEnterprise, setSelectedCreditsEnterprise] = useState("custom");
 
   useEffect(() => {
     const getUser = async () => {
@@ -280,6 +284,14 @@ export default function Billing() {
     }
   };
 
+  const creditOptions = [
+    { value: "500", label: "500 créditos" },
+    { value: "800", label: "800 créditos" },
+    { value: "1200", label: "1.200 créditos" },
+    { value: "2000", label: "2.000 créditos" },
+    { value: "5000", label: "5.000 créditos" }
+  ];
+
   if (loading) {
     return (
       <div className="container mx-auto p-6">
@@ -335,15 +347,26 @@ export default function Billing() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <div className="text-3xl font-bold">$200<span className="text-base font-normal text-muted-foreground">/mês</span></div>
-              <div className="flex items-center gap-2">
-                <input type="radio" name="credits-basic" className="w-3 h-3" />
-                <span className="text-sm">800 créditos/mês</span>
+              <div className="space-y-2">
+                <Label htmlFor="credits-basic">Créditos inclusos:</Label>
+                <Select value={selectedCreditsBasic} onValueChange={setSelectedCreditsBasic}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione os créditos" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {creditOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <ul className="space-y-2 text-sm">
               <li className="flex items-center gap-2">
                 <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-                800 créditos mensais
+                {selectedCreditsBasic} créditos mensais
               </li>
               <li className="flex items-center gap-2">
                 <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
@@ -376,16 +399,26 @@ export default function Billing() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <div className="text-3xl font-bold">$400<span className="text-base font-normal text-muted-foreground">/mês</span></div>
-              <div className="flex items-center gap-2">
-                <input type="radio" name="credits-pro" className="w-3 h-3" />
-                <span className="text-sm">800 créditos/mês</span>
+              <div className="space-y-2">
+                <Label htmlFor="credits-pro">Créditos inclusos:</Label>
+                <Select value={selectedCreditsPro} onValueChange={setSelectedCreditsPro}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione os créditos" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {creditOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
-            <p className="text-sm text-muted-foreground">Tudo no Basic, além de:</p>
             <ul className="space-y-2 text-sm">
               <li className="flex items-center gap-2">
                 <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-                800 créditos mensais
+                {selectedCreditsPro} créditos mensais
               </li>
               <li className="flex items-center gap-2">
                 <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
@@ -415,7 +448,22 @@ export default function Billing() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <div className="text-2xl font-bold">Faturamento flexível</div>
-              <div className="text-sm text-muted-foreground">Planos personalizados</div>
+              <div className="space-y-2">
+                <Label htmlFor="credits-enterprise">Créditos inclusos:</Label>
+                <Select value={selectedCreditsEnterprise} onValueChange={setSelectedCreditsEnterprise}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione os créditos" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {creditOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                    <SelectItem value="custom">Plano personalizado</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             <p className="text-sm text-muted-foreground">Tudo no Business, além de:</p>
             <ul className="space-y-2 text-sm">

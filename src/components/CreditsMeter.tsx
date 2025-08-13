@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Progress } from '@/components/ui/progress';
 import { useCreditConsumption } from '@/hooks/useCreditConsumption';
-import { Zap } from 'lucide-react';
 
 interface CreditsMeterProps {
   organizationId: string;
@@ -66,7 +65,9 @@ export function CreditsMeter({ organizationId, isCollapsed }: CreditsMeterProps)
             />
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
-            <Zap className={`w-4 h-4 ${getColorClass()}`} />
+            <span className={`text-xs font-bold ${getColorClass()}`}>
+              {Math.round(percentage)}%
+            </span>
           </div>
         </div>
       </button>
@@ -106,12 +107,9 @@ export function CreditsMeter({ organizationId, isCollapsed }: CreditsMeterProps)
             />
           </svg>
           <div className="absolute inset-0 flex items-center justify-center z-20">
-            <div className="text-center">
-              <Zap className={`w-5 h-5 ${getColorClass()} mx-auto mb-1`} />
-              <span className={`text-xs font-bold ${getColorClass()}`}>
-                {Math.round(percentage)}%
-              </span>
-            </div>
+            <span className={`text-sm font-bold ${getColorClass()}`}>
+              {Math.round(percentage)}%
+            </span>
           </div>
         </div>
         
