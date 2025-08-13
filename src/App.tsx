@@ -20,7 +20,7 @@ declare global {
 
 // Configuration for third-party integrations
 const ELEVENLABS_AGENT_ID = "agent_01k02ete3tfjgrq97y8a7v541y";
-const CHAT_WIDGET_ENABLED = false; // ElevenLabs chat widget disabled due to configuration issues
+const CHAT_WIDGET_ENABLED = true; // ElevenLabs chat widget enabled
 import Index from "./pages/Index";
 import ServiceDetails from "./pages/ServiceDetails";
 import ProjectRequest from "./pages/ProjectRequest";
