@@ -85,7 +85,7 @@ export function CreditsMeter({ organizationId, isCollapsed }: CreditsMeterProps)
               Nenhum plano
             </Badge>
           )}
-          <span className="text-xs text-muted-foreground">Plano</span>
+          
         </div>
       </div>
 
