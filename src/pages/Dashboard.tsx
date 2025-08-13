@@ -14,6 +14,7 @@ import CallHistory from "./CallHistory";
 import DashboardHome from "@/components/DashboardHome";
 import Settings from "./Settings";
 import Employees from "./Employees";
+import Billing from "./Billing";
 
 interface Profile {
   id: string;
@@ -336,6 +337,7 @@ const Dashboard = () => {
               <Route path="/call-history" element={<CallHistory key={`history-${reloadKey}`} selectedOrganization={selectedOrg} />} />
               <Route path="/settings" element={<Settings key={`settings-${reloadKey}`} selectedOrganization={selectedOrg} onOrganizationUpdate={setSelectedOrg} />} />
               <Route path="/employees" element={<Employees key={`employees-${reloadKey}`} selectedOrganization={selectedOrg} />} />
+              <Route path="/billing" element={<Billing key={`billing-${reloadKey}`} />} />
             </Routes>
           </main>
         </div>

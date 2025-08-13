@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   PieChart, 
   User, 
@@ -32,7 +33,14 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-const menuItems = [
+interface MenuItem {
+  title: string;
+  url: string;
+  icon: any;
+  adminOnly?: boolean;
+}
+
+const menuItems: MenuItem[] = [
   { 
     title: "Dashboard", 
     url: "/dashboard", 
@@ -79,6 +87,12 @@ const menuItems = [
     icon: UserCheck,
   },
   { 
+    title: "Faturamento", 
+    url: "/dashboard/billing", 
+    icon: DollarSign,
+    adminOnly: true,
+  },
+  { 
     title: "Configurações", 
     url: "/dashboard/settings", 
     icon: Settings,
@@ -96,6 +110,34 @@ export function AppSidebar({ user, profile }: AppSidebarProps) {
   const navigate = useNavigate();
   const currentPath = location.pathname;
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
+  const [userRole, setUserRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      if (!user) return;
+
+      try {
+        const { data, error } = await supabase
+          .from('organization_members')
+          .select('role')
+          .eq('user_id', user.id)
+          .eq('status', 'active')
+          .in('role', ['owner', 'admin'])
+          .maybeSingle();
+
+        if (error) {
+          console.error('Error fetching user role:', error);
+          return;
+        }
+
+        setUserRole(data?.role || null);
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    };
+
+    fetchUserRole();
+  }, [user]);
 
   const isActive = (path: string) => {
     if (path === "/dashboard") {
@@ -141,6 +183,11 @@ export function AppSidebar({ user, profile }: AppSidebarProps) {
           <SidebarMenu className="space-y-1">
             {menuItems.map((item) => {
               const IconComponent = item.icon;
+              
+              // Hide admin-only items if user is not admin or owner
+              if (item.adminOnly && !['owner', 'admin'].includes(userRole || '')) {
+                return null;
+              }
               
               return (
                 <SidebarMenuItem key={item.title}>

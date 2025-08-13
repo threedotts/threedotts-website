@@ -28,6 +28,7 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import Scheduling from "./pages/Scheduling";
+import Billing from "./pages/Billing";
 import CreateOrganization from "./pages/CreateOrganization";
 import NotFound from "./pages/NotFound";
 import AcceptInvitation from "./pages/AcceptInvitation";
