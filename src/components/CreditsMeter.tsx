@@ -1,49 +1,74 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Progress } from '@/components/ui/progress';
-import { useCreditConsumption } from '@/hooks/useCreditConsumption';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
+import { Settings, TrendingUp } from 'lucide-react';
 
 interface CreditsMeterProps {
   organizationId: string;
   isCollapsed?: boolean;
 }
 
+interface CreditData {
+  currentCredits: number;
+  totalPurchased: number;
+  totalUsed: number;
+}
+
 export function CreditsMeter({ organizationId, isCollapsed }: CreditsMeterProps) {
-  const [credits, setCredits] = useState<number | null>(null);
-  const { checkCreditBalance } = useCreditConsumption();
+  const [creditData, setCreditData] = useState<CreditData | null>(null);
+  const [currentPlan, setCurrentPlan] = useState<string>('Basic');
   const navigate = useNavigate();
   const location = useLocation();
   const isActive = location.pathname === '/dashboard/billing';
 
   useEffect(() => {
-    const fetchCredits = async () => {
-      const balance = await checkCreditBalance(organizationId);
-      setCredits(balance);
+    const fetchCreditData = async () => {
+      try {
+        const { data } = await supabase
+          .from('user_credits')
+          .select('current_credits, total_credits_purchased, total_credits_used')
+          .eq('organization_id', organizationId)
+          .maybeSingle();
+
+        if (data) {
+          setCreditData({
+            currentCredits: data.current_credits || 0,
+            totalPurchased: data.total_credits_purchased || 0,
+            totalUsed: data.total_credits_used || 0
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching credit data:', error);
+      }
     };
 
     if (organizationId) {
-      fetchCredits();
+      fetchCreditData();
     }
-  }, [organizationId, checkCreditBalance]);
+  }, [organizationId]);
 
-  const maxCredits = 1000; // Assumindo um máximo de 1000 créditos
-  const usedCredits = maxCredits - (credits || 0);
-  const usagePercentage = credits !== null ? Math.min((usedCredits / maxCredits) * 100, 100) : 0;
+  // Usar a mesma lógica da página de billing
+  const usagePercentage = creditData ? 
+    (creditData.totalUsed / Math.max(creditData.totalPurchased, 1)) * 100 : 0;
 
   if (isCollapsed) {
     return (
       <button
         onClick={() => navigate('/dashboard/billing')}
-        className={`w-full p-2 rounded-lg transition-all duration-200 flex items-center justify-center bg-card border ${
+        className={`w-full p-2 rounded-lg transition-all duration-200 flex flex-col items-center bg-card border ${
           isActive 
             ? 'border-primary shadow-sm' 
             : 'border-border hover:border-primary/30'
         }`}
       >
-        <div className="relative w-6 h-6">
-          <Progress 
-            value={usagePercentage} 
-            className="w-full h-1.5 rotate-90 origin-center"
+        <TrendingUp className="w-4 h-4 text-muted-foreground mb-1" />
+        <div className="w-full h-1 bg-muted rounded-full">
+          <div 
+            className="h-full bg-primary rounded-full transition-all duration-300"
+            style={{ width: `${Math.min(usagePercentage, 100)}%` }}
           />
         </div>
       </button>
@@ -51,31 +76,59 @@ export function CreditsMeter({ organizationId, isCollapsed }: CreditsMeterProps)
   }
 
   return (
-    <button
-      onClick={() => navigate('/dashboard/billing')}
-      className={`w-full p-3 rounded-lg transition-all duration-200 flex items-center gap-3 bg-card border ${
-        isActive 
-          ? 'border-primary shadow-sm' 
-          : 'border-border hover:border-primary/30'
-      }`}
-    >
-      <div className="relative w-8 h-8 flex-shrink-0">
-        <Progress 
-          value={usagePercentage} 
-          className="w-full h-2"
-        />
-      </div>
-      
-      <div className="flex-1 text-left min-w-0">
+    <div className={`w-full p-4 rounded-lg border space-y-3 bg-card ${
+      isActive 
+        ? 'border-primary shadow-sm' 
+        : 'border-border'
+    }`}>
+      {/* Header do Plano */}
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-foreground">
-            Taxa de Uso
-          </span>
+          <Badge variant="default" className="text-xs font-medium">
+            {currentPlan}
+          </Badge>
+          <span className="text-xs text-muted-foreground">Plano</span>
         </div>
-        <p className="text-xs text-muted-foreground">
-          {credits !== null ? `${usagePercentage.toFixed(1)}%` : 'Carregando...'}
-        </p>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate('/dashboard/billing')}
+          className="h-6 px-2 text-xs"
+        >
+          <Settings className="w-3 h-3" />
+        </Button>
       </div>
-    </button>
+
+      {/* Métricas */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-muted-foreground">Créditos atuais</span>
+          <span className="font-medium">{creditData?.currentCredits || 0}</span>
+        </div>
+        
+        <div className="space-y-1">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-muted-foreground">Taxa de uso</span>
+            <span className="font-medium">{usagePercentage.toFixed(1)}%</span>
+          </div>
+          <div className="w-full h-2 bg-muted rounded-full">
+            <div 
+              className="h-full bg-primary rounded-full transition-all duration-300"
+              style={{ width: `${Math.min(usagePercentage, 100)}%` }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Botão Gerenciar */}
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => navigate('/dashboard/billing')}
+        className="w-full h-8 text-xs"
+      >
+        Gerenciar Plano
+      </Button>
+    </div>
   );
 }
