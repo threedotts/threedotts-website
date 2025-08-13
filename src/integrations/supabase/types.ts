@@ -59,6 +59,90 @@ export type Database = {
         }
         Relationships: []
       }
+      billing_history: {
+        Row: {
+          amount: number
+          cost: number | null
+          created_at: string
+          currency: string | null
+          description: string | null
+          id: string
+          metadata: Json | null
+          organization_id: string
+          payment_method: string | null
+          payment_reference: string | null
+          status: string
+          type: string
+        }
+        Insert: {
+          amount: number
+          cost?: number | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          organization_id: string
+          payment_method?: string | null
+          payment_reference?: string | null
+          status?: string
+          type: string
+        }
+        Update: {
+          amount?: number
+          cost?: number | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          organization_id?: string
+          payment_method?: string | null
+          payment_reference?: string | null
+          status?: string
+          type?: string
+        }
+        Relationships: []
+      }
+      billing_settings: {
+        Row: {
+          auto_top_up_amount: number | null
+          auto_top_up_enabled: boolean | null
+          auto_top_up_threshold: number | null
+          created_at: string
+          enable_low_credit_notifications: boolean | null
+          id: string
+          low_credit_warning_threshold: number | null
+          notification_webhook_url: string | null
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          auto_top_up_amount?: number | null
+          auto_top_up_enabled?: boolean | null
+          auto_top_up_threshold?: number | null
+          created_at?: string
+          enable_low_credit_notifications?: boolean | null
+          id?: string
+          low_credit_warning_threshold?: number | null
+          notification_webhook_url?: string | null
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          auto_top_up_amount?: number | null
+          auto_top_up_enabled?: boolean | null
+          auto_top_up_threshold?: number | null
+          created_at?: string
+          enable_low_credit_notifications?: boolean | null
+          id?: string
+          low_credit_warning_threshold?: number | null
+          notification_webhook_url?: string | null
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       call_staging: {
         Row: {
           agent: string | null
@@ -156,6 +240,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      credit_usage: {
+        Row: {
+          call_duration_minutes: number | null
+          call_transcription_id: string | null
+          cost_per_minute: number | null
+          created_at: string
+          credits_consumed: number
+          id: string
+          organization_id: string
+        }
+        Insert: {
+          call_duration_minutes?: number | null
+          call_transcription_id?: string | null
+          cost_per_minute?: number | null
+          created_at?: string
+          credits_consumed: number
+          id?: string
+          organization_id: string
+        }
+        Update: {
+          call_duration_minutes?: number | null
+          call_transcription_id?: string | null
+          cost_per_minute?: number | null
+          created_at?: string
+          credits_consumed?: number
+          id?: string
+          organization_id?: string
+        }
+        Relationships: []
       }
       onboarding: {
         Row: {
@@ -368,6 +482,39 @@ export type Database = {
         }
         Relationships: []
       }
+      user_credits: {
+        Row: {
+          created_at: string
+          current_credits: number
+          id: string
+          last_top_up_at: string | null
+          organization_id: string
+          total_credits_purchased: number
+          total_credits_used: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          current_credits?: number
+          id?: string
+          last_top_up_at?: string | null
+          organization_id: string
+          total_credits_purchased?: number
+          total_credits_used?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          current_credits?: number
+          id?: string
+          last_top_up_at?: string | null
+          organization_id?: string
+          total_credits_purchased?: number
+          total_credits_used?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_presence: {
         Row: {
           created_at: string
@@ -411,6 +558,25 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_credits: {
+        Args: {
+          org_id: string
+          credits_to_add: number
+          cost_amount?: number
+          payment_method?: string
+          payment_ref?: string
+        }
+        Returns: boolean
+      }
+      consume_credits: {
+        Args: {
+          org_id: string
+          credits_to_consume: number
+          call_id?: string
+          duration_minutes?: number
+        }
+        Returns: boolean
+      }
       get_user_organization_ids: {
         Args: { user_id: string }
         Returns: string[]
