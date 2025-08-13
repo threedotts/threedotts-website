@@ -117,7 +117,7 @@ export function CreditsMeter({ organizationId, isCollapsed }: CreditsMeterProps)
         onClick={() => navigate('/dashboard/billing')}
         className="w-full h-8 text-xs"
       >
-        Gerenciar Plano
+        Gerenciar
       </Button>
     </div>
   );
