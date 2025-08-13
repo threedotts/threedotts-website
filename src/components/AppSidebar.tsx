@@ -118,13 +118,12 @@ export function AppSidebar({ user, profile }: AppSidebarProps) {
 
       try {
         // Check if user is organization owner
-        const { data: ownedOrg, error: ownedError } = await supabase
+        const { data: ownedOrgs, error: ownedError } = await supabase
           .from('organizations')
           .select('id')
-          .eq('user_id', user.id)
-          .maybeSingle();
+          .eq('user_id', user.id);
 
-        if (ownedOrg) {
+        if (ownedOrgs && ownedOrgs.length > 0) {
           setUserRole('owner');
           return;
         }

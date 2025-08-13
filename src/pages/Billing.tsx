@@ -89,14 +89,14 @@ export default function Billing() {
   const fetchUserOrganization = async () => {
     try {
       // First check if user owns any organization
-      const { data: ownedOrg, error: ownedError } = await supabase
+      const { data: ownedOrgs, error: ownedError } = await supabase
         .from('organizations')
         .select('*')
-        .eq('user_id', user?.id)
-        .maybeSingle();
+        .eq('user_id', user?.id);
 
-      if (ownedOrg) {
-        setUserOrganization(ownedOrg);
+      if (ownedOrgs && ownedOrgs.length > 0) {
+        // Use the first organization owned by the user
+        setUserOrganization(ownedOrgs[0]);
         return;
       }
 
