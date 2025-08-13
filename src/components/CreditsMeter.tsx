@@ -4,7 +4,7 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-import { Settings, TrendingUp } from 'lucide-react';
+import { TrendingUp } from 'lucide-react';
 
 interface CreditsMeterProps {
   organizationId: string;
@@ -19,7 +19,7 @@ interface CreditData {
 
 export function CreditsMeter({ organizationId, isCollapsed }: CreditsMeterProps) {
   const [creditData, setCreditData] = useState<CreditData | null>(null);
-  const [currentPlan, setCurrentPlan] = useState<string>('Basic');
+  const [currentPlan, setCurrentPlan] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const isActive = location.pathname === '/dashboard/billing';
@@ -58,11 +58,7 @@ export function CreditsMeter({ organizationId, isCollapsed }: CreditsMeterProps)
     return (
       <button
         onClick={() => navigate('/dashboard/billing')}
-        className={`w-full p-2 rounded-lg transition-all duration-200 flex flex-col items-center bg-card border ${
-          isActive 
-            ? 'border-primary shadow-sm' 
-            : 'border-border hover:border-primary/30'
-        }`}
+        className="w-full p-2 rounded-lg transition-all duration-200 flex flex-col items-center bg-card border border-border hover:border-border"
       >
         <TrendingUp className="w-4 h-4 text-muted-foreground mb-1" />
         <div className="w-full h-1 bg-muted rounded-full">
@@ -76,27 +72,21 @@ export function CreditsMeter({ organizationId, isCollapsed }: CreditsMeterProps)
   }
 
   return (
-    <div className={`w-full p-4 rounded-lg border space-y-3 bg-card ${
-      isActive 
-        ? 'border-primary shadow-sm' 
-        : 'border-border'
-    }`}>
+    <div className="w-full p-4 rounded-lg border border-border space-y-3 bg-card">
       {/* Header do Plano */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Badge variant="default" className="text-xs font-medium">
-            {currentPlan}
-          </Badge>
+          {currentPlan ? (
+            <Badge variant="default" className="text-xs font-medium">
+              {currentPlan}
+            </Badge>
+          ) : (
+            <Badge variant="outline" className="text-xs text-muted-foreground">
+              Nenhum plano
+            </Badge>
+          )}
           <span className="text-xs text-muted-foreground">Plano</span>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => navigate('/dashboard/billing')}
-          className="h-6 px-2 text-xs"
-        >
-          <Settings className="w-3 h-3" />
-        </Button>
       </div>
 
       {/* Métricas */}

@@ -120,7 +120,7 @@ export default function Billing() {
       }
       
       // Simulate current plan - in real app, this would come from database
-      setCurrentPlan("Basic"); // Could be "Basic", "Pro", "Enterprise", or null
+      setCurrentPlan(null); // Could be "Basic", "Pro", "Enterprise", or null
     } catch (error) {
       console.error('Error:', error);
     }
