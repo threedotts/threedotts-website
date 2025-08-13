@@ -32,6 +32,7 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { CreditsMeter } from "@/components/CreditsMeter";
 
 interface MenuItem {
   title: string;
@@ -87,12 +88,6 @@ const menuItems: MenuItem[] = [
     icon: UserCheck,
   },
   { 
-    title: "Faturamento", 
-    url: "/dashboard/billing", 
-    icon: DollarSign,
-    adminOnly: true,
-  },
-  { 
     title: "Configurações", 
     url: "/dashboard/settings", 
     icon: Settings,
@@ -111,6 +106,7 @@ export function AppSidebar({ user, profile }: AppSidebarProps) {
   const currentPath = location.pathname;
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [organizationId, setOrganizationId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchUserRole = async () => {
@@ -125,13 +121,14 @@ export function AppSidebar({ user, profile }: AppSidebarProps) {
 
         if (ownedOrgs && ownedOrgs.length > 0) {
           setUserRole('owner');
+          setOrganizationId(ownedOrgs[0].id);
           return;
         }
 
         // Check if user is member with admin/owner role
         const { data: memberRole, error: memberError } = await supabase
           .from('organization_members')
-          .select('role')
+          .select('role, organization_id')
           .eq('user_id', user.id)
           .eq('status', 'active')
           .in('role', ['owner', 'admin'])
@@ -142,7 +139,10 @@ export function AppSidebar({ user, profile }: AppSidebarProps) {
           return;
         }
 
-        setUserRole(memberRole?.role || null);
+        if (memberRole) {
+          setUserRole(memberRole.role);
+          setOrganizationId(memberRole.organization_id);
+        }
       } catch (error) {
         console.error('Error:', error);
       }
@@ -219,6 +219,16 @@ export function AppSidebar({ user, profile }: AppSidebarProps) {
               );
             })}
           </SidebarMenu>
+          
+          {/* Credits Meter Card - only for admin/owner */}
+          {organizationId && ['owner', 'admin'].includes(userRole || '') && (
+            <div className="mt-6">
+              <CreditsMeter 
+                organizationId={organizationId} 
+                isCollapsed={state === 'collapsed'} 
+              />
+            </div>
+          )}
         </div>
 
         {/* User Profile at Bottom */}
