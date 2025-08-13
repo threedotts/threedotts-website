@@ -38,18 +38,12 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
     mostActiveDayOfWeek: "N/A",
     avgTimeBetweenCalls: "N/A",
     // Qualidade e Satisfação
-    npsScore: 0,
-    followUpRate: "0%",
     avgResolutionTime: "0:00",
     // Métricas Operacionais
-    costPerCall: 0,
     conversionRate: "0%",
-    avgWaitTime: "0:00",
-    missedCalls: 0,
     // Análise de Clientes
     returningCustomers: "0%",
-    newCustomers: 0,
-    avgCustomerValue: 0
+    newCustomers: 0
   });
   const [chartData, setChartData] = useState<any[]>([]);
   const [evaluationData, setEvaluationData] = useState<any[]>([]);
@@ -250,18 +244,12 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
         mostActiveDayOfWeek: dayNames[Number(mostActiveDayOfWeek)],
         avgTimeBetweenCalls: avgTimeBetweenCallsHours > 0 ? `${avgTimeBetweenCallsHours}h` : "N/A",
         // Qualidade e Satisfação  
-        npsScore: Math.round(Math.random() * 100), // Simulado - implementar com dados reais
-        followUpRate: `${Math.round(Math.random() * 30)}%`, // Simulado
         avgResolutionTime: `${Math.round(averageDurationSeconds / 60)}min`,
         // Métricas Operacionais
-        costPerCall: Math.round((Math.random() * 50 + 10) * 100) / 100,
         conversionRate: `${successRate}%`,
-        avgWaitTime: `${Math.round(Math.random() * 5)}min`,
-        missedCalls: Math.round(totalCalls * 0.05), // Estimativa de 5%
         // Análise de Clientes
         returningCustomers: `${returningCustomersRate}%`,
-        newCustomers: uniqueCustomers.size - returningCustomersCount,
-        avgCustomerValue: Math.round((Math.random() * 500 + 100) * 100) / 100
+        newCustomers: uniqueCustomers.size - returningCustomersCount
       });
     };
 
@@ -712,22 +700,6 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
 
   const qualityStats = [
     {
-      title: "NPS Score",
-      value: dashboardData.npsScore.toString(),
-      change: "Net Promoter Score",
-      icon: Target,
-      iconBg: "bg-green-100",
-      iconColor: "text-green-600"
-    },
-    {
-      title: "Taxa de Follow-up",
-      value: dashboardData.followUpRate,
-      change: "Chamadas de retorno",
-      icon: Phone,
-      iconBg: "bg-yellow-100",
-      iconColor: "text-yellow-600"
-    },
-    {
       title: "Tempo de Resolução",
       value: dashboardData.avgResolutionTime,
       change: "Média de atendimento",
@@ -739,36 +711,12 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
 
   const operationalStats = [
     {
-      title: "Custo por Chamada",
-      value: `R$ ${dashboardData.costPerCall.toFixed(2)}`,
-      change: "Custo operacional",
-      icon: DollarSign,
-      iconBg: "bg-red-100",
-      iconColor: "text-red-600"
-    },
-    {
       title: "Taxa de Conversão",
       value: dashboardData.conversionRate,
       change: "Objetivos alcançados",
       icon: Target,
       iconBg: "bg-green-100",
       iconColor: "text-green-600"
-    },
-    {
-      title: "Tempo de Espera",
-      value: dashboardData.avgWaitTime,
-      change: "Média de espera",
-      icon: Timer,
-      iconBg: "bg-gray-100",
-      iconColor: "text-gray-600"
-    },
-    {
-      title: "Chamadas Perdidas",
-      value: dashboardData.missedCalls.toString(),
-      change: "Não atendidas",
-      icon: Phone,
-      iconBg: "bg-red-100",
-      iconColor: "text-red-600"
     }
   ];
 
@@ -788,14 +736,6 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
       icon: Users,
       iconBg: "bg-blue-100",
       iconColor: "text-blue-600"
-    },
-    {
-      title: "Valor Médio por Cliente",
-      value: `R$ ${dashboardData.avgCustomerValue.toFixed(2)}`,
-      change: "Valor gerado",
-      icon: DollarSign,
-      iconBg: "bg-green-100",
-      iconColor: "text-green-600"
     }
   ];
 
