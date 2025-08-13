@@ -88,20 +88,35 @@ export default function Billing() {
 
   const fetchUserOrganization = async () => {
     try {
-      const { data: membership, error } = await supabase
+      // First check if user owns any organization
+      const { data: ownedOrg, error: ownedError } = await supabase
+        .from('organizations')
+        .select('*')
+        .eq('user_id', user?.id)
+        .maybeSingle();
+
+      if (ownedOrg) {
+        setUserOrganization(ownedOrg);
+        return;
+      }
+
+      // If not owner, check if user is a member with admin role
+      const { data: membership, error: memberError } = await supabase
         .from('organization_members')
         .select('organization_id, role, organizations(*)')
         .eq('user_id', user?.id)
         .eq('status', 'active')
-        .in('role', ['owner', 'admin'])
-        .single();
+        .in('role', ['admin'])
+        .maybeSingle();
 
-      if (error) {
-        console.error('Error fetching organization:', error);
+      if (memberError) {
+        console.error('Error fetching organization:', memberError);
         return;
       }
 
-      setUserOrganization(membership?.organizations);
+      if (membership?.organizations) {
+        setUserOrganization(membership.organizations);
+      }
     } catch (error) {
       console.error('Error:', error);
     }

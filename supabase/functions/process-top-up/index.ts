@@ -41,16 +41,34 @@ serve(async (req) => {
       );
     }
 
-    // Get user's organization (admin/owner only)
-    const { data: membership, error: memberError } = await supabaseClient
-      .from('organization_members')
-      .select('organization_id, role')
+    // Check if user is organization owner or admin
+    let organizationId = null;
+    
+    // First check if user owns any organization
+    const { data: ownedOrg, error: ownedError } = await supabaseClient
+      .from('organizations')
+      .select('id')
       .eq('user_id', user.id)
-      .eq('status', 'active')
-      .in('role', ['owner', 'admin'])
-      .single();
+      .maybeSingle();
 
-    if (memberError || !membership) {
+    if (ownedOrg) {
+      organizationId = ownedOrg.id;
+    } else {
+      // Check if user is a member with admin role
+      const { data: membership, error: memberError } = await supabaseClient
+        .from('organization_members')
+        .select('organization_id, role')
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .in('role', ['admin'])
+        .maybeSingle();
+
+      if (membership) {
+        organizationId = membership.organization_id;
+      }
+    }
+
+    if (!organizationId) {
       return new Response(
         JSON.stringify({ error: 'Access denied. Only organization owners and admins can top up credits.' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -77,7 +95,7 @@ serve(async (req) => {
     const { data: billingRecord, error: billingError } = await supabaseService
       .from('billing_history')
       .insert({
-        organization_id: membership.organization_id,
+        organization_id: organizationId,
         type: 'top_up',
         amount: amount,
         cost: totalCost,

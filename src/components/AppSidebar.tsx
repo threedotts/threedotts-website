@@ -117,7 +117,20 @@ export function AppSidebar({ user, profile }: AppSidebarProps) {
       if (!user) return;
 
       try {
-        const { data, error } = await supabase
+        // Check if user is organization owner
+        const { data: ownedOrg, error: ownedError } = await supabase
+          .from('organizations')
+          .select('id')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (ownedOrg) {
+          setUserRole('owner');
+          return;
+        }
+
+        // Check if user is member with admin/owner role
+        const { data: memberRole, error: memberError } = await supabase
           .from('organization_members')
           .select('role')
           .eq('user_id', user.id)
@@ -125,12 +138,12 @@ export function AppSidebar({ user, profile }: AppSidebarProps) {
           .in('role', ['owner', 'admin'])
           .maybeSingle();
 
-        if (error) {
-          console.error('Error fetching user role:', error);
+        if (memberError) {
+          console.error('Error fetching user role:', memberError);
           return;
         }
 
-        setUserRole(data?.role || null);
+        setUserRole(memberRole?.role || null);
       } catch (error) {
         console.error('Error:', error);
       }
