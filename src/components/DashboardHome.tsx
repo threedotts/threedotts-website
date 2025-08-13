@@ -231,8 +231,8 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
         previousMonthDuration: previousPeriodAvgDuration,
         previousMonthSuccessRate: previousPeriodSuccessRate,
         // Análise Temporal
-        peakHour: peakHour ? `${peakHour}:00h` : "Sem dados",
-        mostActiveDayOfWeek: mostActiveDayOfWeek ? dayNames[Number(mostActiveDayOfWeek)] : "Sem dados",
+        peakHour: peakHour ? `${peakHour}:00h` : "N/A",
+        mostActiveDayOfWeek: mostActiveDayOfWeek ? dayNames[Number(mostActiveDayOfWeek)] : "N/A",
         avgTimeBetweenCalls: avgTimeBetweenCallsHours > 0 ? `${avgTimeBetweenCallsHours}h` : "N/A"
       });
     };
