@@ -589,7 +589,7 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
   const stats = [
     {
       title: "Chamadas Realizadas",
-      value: dashboardData.totalCalls.toString(),
+      value: (dashboardData.totalCalls || 0).toString(),
       change: callsChangeInfo.message,
       icon: Phone,
       iconBg: "bg-primary/10",
@@ -607,7 +607,7 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
     },
     {
       title: "Duração Média das Chamadas",
-      value: dashboardData.averageDuration,
+      value: dashboardData.averageDuration || "0:00",
       change: durationChangeInfo.message,
       icon: Clock,
       iconBg: "bg-muted-foreground/10",
