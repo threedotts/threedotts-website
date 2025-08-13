@@ -27,39 +27,56 @@ export function CreditsMeter({ organizationId, isCollapsed }: CreditsMeterProps)
   }, [organizationId, checkCreditBalance]);
 
   const maxCredits = 1000; // Assumindo um máximo de 1000 créditos
-  const percentage = credits !== null ? Math.min((credits / maxCredits) * 100, 100) : 0;
+  const usedCredits = maxCredits - (credits || 0);
+  const usagePercentage = credits !== null ? Math.min((usedCredits / maxCredits) * 100, 100) : 0;
   
-  // Cor baseada na percentagem
+  // Cor baseada na percentagem de uso
   const getColorClass = () => {
-    if (percentage > 60) return 'text-green-500';
-    if (percentage > 30) return 'text-yellow-500';
+    if (usagePercentage < 40) return 'text-green-500';
+    if (usagePercentage < 70) return 'text-yellow-500';
     return 'text-red-500';
+  };
+
+  const getProgressColor = () => {
+    if (usagePercentage < 40) return '#10b981'; // green-500
+    if (usagePercentage < 70) return '#f59e0b'; // yellow-500
+    return '#ef4444'; // red-500
   };
 
   if (isCollapsed) {
     return (
       <button
         onClick={() => navigate('/dashboard/billing')}
-        className={`w-full p-3 rounded-lg transition-all duration-200 flex items-center justify-center bg-white border border-border ${
+        className={`w-full p-3 rounded-lg transition-all duration-200 flex items-center justify-center bg-gray-50 border border-gray-200 ${
           isActive 
             ? 'border-primary shadow-sm' 
-            : 'hover:border-primary/30'
+            : 'hover:border-gray-300'
         }`}
       >
         <div className="relative w-6 h-6">
-          <div className={`w-full h-full rounded-full border-2 ${
-            isActive ? 'border-primary-foreground/30' : 'border-muted'
-          }`} />
-          <div 
-            className={`absolute inset-0 rounded-full ${
-              percentage > 60 ? 'bg-green-500/20' : percentage > 30 ? 'bg-yellow-500/20' : 'bg-red-500/20'
-            }`}
-          />
-          <div 
-            className={`absolute top-1/2 left-1/2 w-1.5 h-1.5 rounded-full transform -translate-x-1/2 -translate-y-1/2 ${
-              percentage > 60 ? 'bg-green-500' : percentage > 30 ? 'bg-yellow-500' : 'bg-red-500'
-            }`}
-          />
+          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 24 24">
+            <circle
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="2"
+              fill="none"
+              className="text-gray-300"
+            />
+            <circle
+              cx="12"
+              cy="12"
+              r="10"
+              stroke={getProgressColor()}
+              strokeWidth="2"
+              fill="none"
+              strokeLinecap="round"
+              strokeDasharray={`${2 * Math.PI * 10}`}
+              strokeDashoffset={`${2 * Math.PI * 10 * (1 - usagePercentage / 100)}`}
+              className="transition-all duration-500"
+            />
+          </svg>
         </div>
       </button>
     );
@@ -68,26 +85,36 @@ export function CreditsMeter({ organizationId, isCollapsed }: CreditsMeterProps)
   return (
     <button
       onClick={() => navigate('/dashboard/billing')}
-      className={`w-full p-3 rounded-lg transition-all duration-200 flex items-center gap-3 bg-white border border-border ${
+      className={`w-full p-3 rounded-lg transition-all duration-200 flex items-center gap-3 bg-gray-50 border border-gray-200 ${
         isActive 
           ? 'border-primary shadow-sm' 
-          : 'hover:border-primary/30'
+          : 'hover:border-gray-300'
       }`}
     >
       <div className="relative w-8 h-8 flex-shrink-0">
-        <div className={`w-full h-full rounded-full border-2 ${
-          isActive ? 'border-primary-foreground/30' : 'border-muted'
-        }`} />
-        <div 
-          className={`absolute inset-0 rounded-full ${
-            percentage > 60 ? 'bg-green-500/20' : percentage > 30 ? 'bg-yellow-500/20' : 'bg-red-500/20'
-          }`}
-        />
-        <div 
-          className={`absolute top-1/2 left-1/2 w-2 h-2 rounded-full transform -translate-x-1/2 -translate-y-1/2 ${
-            percentage > 60 ? 'bg-green-500' : percentage > 30 ? 'bg-yellow-500' : 'bg-red-500'
-          }`}
-        />
+        <svg className="w-full h-full transform -rotate-90" viewBox="0 0 24 24">
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="2"
+            fill="none"
+            className="text-gray-300"
+          />
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+            stroke={getProgressColor()}
+            strokeWidth="2"
+            fill="none"
+            strokeLinecap="round"
+            strokeDasharray={`${2 * Math.PI * 10}`}
+            strokeDashoffset={`${2 * Math.PI * 10 * (1 - usagePercentage / 100)}`}
+            className="transition-all duration-500"
+          />
+        </svg>
       </div>
       
       <div className="flex-1 text-left min-w-0">
@@ -97,7 +124,7 @@ export function CreditsMeter({ organizationId, isCollapsed }: CreditsMeterProps)
           </span>
         </div>
         <p className="text-xs text-muted-foreground">
-          {credits !== null ? `${credits.toLocaleString()} disponíveis` : 'Carregando...'}
+          {credits !== null ? `${usagePercentage.toFixed(1)}% utilizado` : 'Carregando...'}
         </p>
       </div>
     </button>
