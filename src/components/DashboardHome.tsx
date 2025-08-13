@@ -36,21 +36,12 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
     // Análise Temporal
     peakHour: "N/A",
     mostActiveDayOfWeek: "N/A",
-    avgTimeBetweenCalls: "N/A",
-    // Qualidade e Satisfação
-    avgResolutionTime: "0:00",
-    // Métricas Operacionais
-    conversionRate: "0%",
-    // Análise de Clientes
-    returningCustomers: "0%",
-    newCustomers: 0
+    avgTimeBetweenCalls: "N/A"
   });
   const [chartData, setChartData] = useState<any[]>([]);
   const [evaluationData, setEvaluationData] = useState<any[]>([]);
   const [hourlyData, setHourlyData] = useState<any[]>([]);
   const [weeklyData, setWeeklyData] = useState<any[]>([]);
-  const [customerSegmentData, setCustomerSegmentData] = useState<any[]>([]);
-  const [conversionData, setConversionData] = useState<any[]>([]);
   const [members, setMembers] = useState<any[]>([]);
   const [selectedTimeFilter, setSelectedTimeFilter] = useState<string>('mensal');
   const [customDateRange, setCustomDateRange] = useState<DateRange | undefined>();
@@ -225,11 +216,6 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
       });
       const avgTimeBetweenCallsHours = callIntervals > 0 ? Math.round(totalTimeBetween / callIntervals / (1000 * 60 * 60)) : 0;
 
-      // Análise de Clientes - using available data or simulated
-      const uniqueCustomers = new Set(currentCalls?.map(call => call.customer || `cliente_${Math.floor(Math.random() * 50)}`));
-      const previousCustomers = new Set(previousCalls?.map(call => call.customer || `cliente_${Math.floor(Math.random() * 50)}`));
-      const returningCustomersCount = Array.from(uniqueCustomers).filter(customer => previousCustomers.has(customer)).length;
-      const returningCustomersRate = uniqueCustomers.size > 0 ? Math.round((returningCustomersCount / uniqueCustomers.size) * 100) : 0;
 
       setDashboardData({
         totalCalls,
@@ -242,14 +228,7 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
         // Análise Temporal
         peakHour: `${peakHour}:00h`,
         mostActiveDayOfWeek: dayNames[Number(mostActiveDayOfWeek)],
-        avgTimeBetweenCalls: avgTimeBetweenCallsHours > 0 ? `${avgTimeBetweenCallsHours}h` : "N/A",
-        // Qualidade e Satisfação  
-        avgResolutionTime: `${Math.round(averageDurationSeconds / 60)}min`,
-        // Métricas Operacionais
-        conversionRate: `${successRate}%`,
-        // Análise de Clientes
-        returningCustomers: `${returningCustomersRate}%`,
-        newCustomers: uniqueCustomers.size - returningCustomersCount
+        avgTimeBetweenCalls: avgTimeBetweenCallsHours > 0 ? `${avgTimeBetweenCallsHours}h` : "N/A"
       });
     };
 
@@ -509,39 +488,6 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
     fetchWeeklyData();
   }, [selectedOrganization?.id, selectedTimeFilter, customDateRange]);
 
-  // Fetch customer segment data
-  useEffect(() => {
-    if (!selectedOrganization?.id) return;
-
-    const fetchCustomerSegmentData = async () => {
-      const { startDate, endDate } = getDateRange();
-      
-      const { data: calls } = await supabase
-        .from('call_transcriptions')
-        .select('customer, created_at')
-        .eq('organization_id', selectedOrganization.id)
-        .gte('created_at', startDate.toISOString())
-        .lte('created_at', endDate.toISOString());
-
-      if (calls) {
-        const customerCalls: Record<string, number> = {};
-        calls.forEach(call => {
-          const customerKey = call.customer || `cliente_${Math.floor(Math.random() * 50)}`;
-          customerCalls[customerKey] = (customerCalls[customerKey] || 0) + 1;
-        });
-
-        const newCustomers = Object.values(customerCalls).filter(count => count === 1).length;
-        const returningCustomers = Object.keys(customerCalls).length - newCustomers;
-
-        setCustomerSegmentData([
-          { name: 'Novos Clientes', value: newCustomers, fill: 'hsl(var(--primary))' },
-          { name: 'Clientes Recorrentes', value: returningCustomers, fill: 'hsl(var(--accent))' }
-        ]);
-      }
-    };
-
-    fetchCustomerSegmentData();
-  }, [selectedOrganization?.id, selectedTimeFilter, customDateRange]);
 
   // Colors for pie chart
   const COLORS = [
@@ -698,46 +644,6 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
     }
   ];
 
-  const qualityStats = [
-    {
-      title: "Tempo de Resolução",
-      value: dashboardData.avgResolutionTime,
-      change: "Média de atendimento",
-      icon: Clock,
-      iconBg: "bg-indigo-100",
-      iconColor: "text-indigo-600"
-    }
-  ];
-
-  const operationalStats = [
-    {
-      title: "Taxa de Conversão",
-      value: dashboardData.conversionRate,
-      change: "Objetivos alcançados",
-      icon: Target,
-      iconBg: "bg-green-100",
-      iconColor: "text-green-600"
-    }
-  ];
-
-  const customerStats = [
-    {
-      title: "Clientes Recorrentes",
-      value: dashboardData.returningCustomers,
-      change: "Taxa de fidelização",
-      icon: UserCheck,
-      iconBg: "bg-green-100",
-      iconColor: "text-green-600"
-    },
-    {
-      title: "Novos Clientes",
-      value: dashboardData.newCustomers.toString(),
-      change: "Primeira interação",
-      icon: Users,
-      iconBg: "bg-blue-100",
-      iconColor: "text-blue-600"
-    }
-  ];
 
   // Generate description for the time period
   const getTimeFilterDescription = () => {
@@ -1100,103 +1006,6 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
         </div>
       </div>
 
-      {/* Qualidade e Satisfação */}
-      <div className="mt-8 space-y-6">
-        <h2 className="text-2xl font-bold">Qualidade e Satisfação</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {qualityStats.map((stat, index) => (
-            <Card key={index} className="p-4">
-              <CardContent className="p-0">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
-                    <p className="text-2xl font-bold">{stat.value}</p>
-                    <p className="text-sm text-muted-foreground">{stat.change}</p>
-                  </div>
-                  <div className={cn("p-2 rounded-full", stat.iconBg)}>
-                    <stat.icon className={cn("h-6 w-6", stat.iconColor)} />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-
-      {/* Métricas Operacionais */}
-      <div className="mt-8 space-y-6">
-        <h2 className="text-2xl font-bold">Métricas Operacionais</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {operationalStats.map((stat, index) => (
-            <Card key={index} className="p-4">
-              <CardContent className="p-0">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
-                    <p className="text-2xl font-bold">{stat.value}</p>
-                    <p className="text-sm text-muted-foreground">{stat.change}</p>
-                  </div>
-                  <div className={cn("p-2 rounded-full", stat.iconBg)}>
-                    <stat.icon className={cn("h-6 w-6", stat.iconColor)} />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-
-      {/* Análise de Clientes */}
-      <div className="mt-8 space-y-6">
-        <h2 className="text-2xl font-bold">Análise de Clientes</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {customerStats.map((stat, index) => (
-            <Card key={index} className="p-4">
-              <CardContent className="p-0">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
-                    <p className="text-2xl font-bold">{stat.value}</p>
-                    <p className="text-sm text-muted-foreground">{stat.change}</p>
-                  </div>
-                  <div className={cn("p-2 rounded-full", stat.iconBg)}>
-                    <stat.icon className={cn("h-6 w-6", stat.iconColor)} />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Segmentação de Clientes */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Segmentação de Clientes</CardTitle>
-            <CardDescription>Novos vs Recorrentes</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={customerSegmentData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {customerSegmentData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.fill} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   );
 }
