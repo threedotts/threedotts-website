@@ -315,67 +315,189 @@ export default function Billing() {
     creditData.currentCredits <= billingSettings.lowCreditThreshold : false;
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Faturamento e Uso</h1>
-          <p className="text-muted-foreground">Gerencie seus créditos e preferências de cobrança</p>
-        </div>
-        <div className="flex gap-2">
-          <Button onClick={() => handleTopUp('mpesa')} className="gap-2">
-            <Plus className="h-4 w-4" />
-            Recarregar
-          </Button>
-        </div>
+    <div className="container mx-auto p-6 space-y-8">
+      <div className="text-center space-y-2">
+        <h1 className="text-4xl font-bold">Planos e Faturamento</h1>
+        <p className="text-muted-foreground text-lg">Escolha o plano ideal para suas necessidades</p>
       </div>
 
-      {isLowCredit && (
-        <Alert>
-          <AlertTriangle className="h-4 w-4" />
-          <AlertDescription>
-            Seu saldo de créditos está baixo ({creditData?.currentCredits} créditos restantes). 
-            Considere fazer uma recarga para evitar interrupção do serviço.
-          </AlertDescription>
-        </Alert>
-      )}
-
+      {/* Planos */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Créditos Atuais</CardTitle>
-            <Wallet className="h-4 w-4 text-muted-foreground" />
+        {/* Plano Basic */}
+        <Card className="relative border-2 hover:border-primary/20 transition-all duration-200">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-xl">Basic</CardTitle>
+              <Badge variant="secondary">Mais Popular</Badge>
+            </div>
+            <CardDescription>Para equipes pequenas que estão começando</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{creditData?.currentCredits || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              Disponíveis para uso
-            </p>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <div className="text-3xl font-bold">$200<span className="text-base font-normal text-muted-foreground">/mês</span></div>
+              <div className="flex items-center gap-2">
+                <input type="radio" name="credits-basic" className="w-3 h-3" />
+                <span className="text-sm">800 créditos/mês</span>
+              </div>
+            </div>
+            <ul className="space-y-2 text-sm">
+              <li className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                800 créditos mensais
+              </li>
+              <li className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                5 créditos diários (até 150/mês)
+              </li>
+              <li className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                Projetos privados
+              </li>
+              <li className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                Funções e permissões de usuário
+              </li>
+            </ul>
+            <Button className="w-full" variant="default">
+              Upgrade
+            </Button>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Usado</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+        {/* Plano Pro */}
+        <Card className="relative border-2 border-primary shadow-lg transform scale-105">
+          <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+            <Badge className="bg-primary text-primary-foreground">Recomendado</Badge>
+          </div>
+          <CardHeader>
+            <CardTitle className="text-xl">Pro</CardTitle>
+            <CardDescription>Controles avançados e recursos poderosos para departamentos em crescimento</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{creditData?.totalUsed || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              Uso total
-            </p>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <div className="text-3xl font-bold">$400<span className="text-base font-normal text-muted-foreground">/mês</span></div>
+              <div className="flex items-center gap-2">
+                <input type="radio" name="credits-pro" className="w-3 h-3" />
+                <span className="text-sm">800 créditos/mês</span>
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground">Tudo no Basic, além de:</p>
+            <ul className="space-y-2 text-sm">
+              <li className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                800 créditos mensais
+              </li>
+              <li className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                5 créditos diários (até 150/mês)
+              </li>
+              <li className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                SSO
+              </li>
+              <li className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                Projetos Pessoais
+              </li>
+            </ul>
+            <Button className="w-full" variant="default">
+              Upgrade
+            </Button>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Taxa de Uso</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+        {/* Plano Enterprise */}
+        <Card className="relative border-2 hover:border-primary/20 transition-all duration-200">
+          <CardHeader>
+            <CardTitle className="text-xl">Enterprise</CardTitle>
+            <CardDescription>Construído para grandes organizações que precisam de flexibilidade, escala e governança</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{usagePercentage.toFixed(1)}%</div>
-            <Progress value={usagePercentage} className="mt-2" />
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <div className="text-2xl font-bold">Faturamento flexível</div>
+              <div className="text-sm text-muted-foreground">Planos personalizados</div>
+            </div>
+            <p className="text-sm text-muted-foreground">Tudo no Business, além de:</p>
+            <ul className="space-y-2 text-sm">
+              <li className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                Suporte dedicado
+              </li>
+              <li className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                Serviços de integração
+              </li>
+              <li className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                Integrações personalizadas
+              </li>
+              <li className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                Controle de acesso baseado em grupo
+              </li>
+              <li className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                Sistemas de design personalizado
+              </li>
+            </ul>
+            <Button className="w-full" variant="outline">
+              Agendar Demo
+            </Button>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Estatísticas Atuais */}
+      <div className="bg-muted/20 rounded-lg p-6">
+        <h2 className="text-xl font-semibold mb-4">Uso Atual</h2>
+        {isLowCredit && (
+          <Alert className="mb-4">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              Seu saldo de créditos está baixo ({creditData?.currentCredits} créditos restantes). 
+              Considere fazer uma recarga para evitar interrupção do serviço.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Créditos Atuais</CardTitle>
+              <Wallet className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{creditData?.currentCredits || 0}</div>
+              <p className="text-xs text-muted-foreground">
+                Disponíveis para uso
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Usado</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{creditData?.totalUsed || 0}</div>
+              <p className="text-xs text-muted-foreground">
+                Uso total
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Taxa de Uso</CardTitle>
+              <Clock className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{usagePercentage.toFixed(1)}%</div>
+              <Progress value={usagePercentage} className="mt-2" />
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       <Tabs defaultValue="topup" className="space-y-4">
