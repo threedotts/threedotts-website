@@ -40,10 +40,10 @@ export function CreditsMeter({ organizationId, isCollapsed }: CreditsMeterProps)
     return (
       <button
         onClick={() => navigate('/dashboard/billing')}
-        className={`w-full p-3 rounded-lg transition-all duration-200 flex items-center justify-center ${
+        className={`w-full p-3 rounded-lg transition-all duration-200 flex items-center justify-center bg-white border border-border ${
           isActive 
-            ? 'bg-primary text-primary-foreground' 
-            : 'hover:bg-muted text-muted-foreground hover:text-foreground'
+            ? 'border-primary shadow-sm' 
+            : 'hover:border-primary/30'
         }`}
       >
         <div className="relative w-6 h-6">
@@ -68,10 +68,10 @@ export function CreditsMeter({ organizationId, isCollapsed }: CreditsMeterProps)
   return (
     <button
       onClick={() => navigate('/dashboard/billing')}
-      className={`w-full p-3 rounded-lg transition-all duration-200 flex items-center gap-3 ${
+      className={`w-full p-3 rounded-lg transition-all duration-200 flex items-center gap-3 bg-white border border-border ${
         isActive 
-          ? 'bg-primary text-primary-foreground' 
-          : 'hover:bg-muted text-muted-foreground hover:text-foreground'
+          ? 'border-primary shadow-sm' 
+          : 'hover:border-primary/30'
       }`}
     >
       <div className="relative w-8 h-8 flex-shrink-0">
@@ -92,11 +92,11 @@ export function CreditsMeter({ organizationId, isCollapsed }: CreditsMeterProps)
       
       <div className="flex-1 text-left min-w-0">
         <div className="flex items-center gap-2">
-          <span className={`text-sm font-medium ${isActive ? 'text-primary-foreground' : 'text-foreground'}`}>
-            Créditos
+          <span className="text-sm font-medium text-foreground">
+            Taxa de uso
           </span>
         </div>
-        <p className={`text-xs ${isActive ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
+        <p className="text-xs text-muted-foreground">
           {credits !== null ? `${credits.toLocaleString()} disponíveis` : 'Carregando...'}
         </p>
       </div>
