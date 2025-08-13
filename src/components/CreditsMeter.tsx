@@ -40,35 +40,28 @@ export function CreditsMeter({ organizationId, isCollapsed }: CreditsMeterProps)
     return (
       <button
         onClick={() => navigate('/dashboard/billing')}
-        className={`w-full p-3 rounded-xl transition-all duration-200 flex items-center justify-center group ${
+        className={`w-full p-2 rounded-lg transition-all duration-200 flex items-center justify-center relative ${
           isActive 
-            ? 'bg-primary/10 text-primary border-2 border-primary/20 shadow-lg' 
-            : 'hover:bg-muted/60 border-2 border-transparent'
+            ? 'bg-primary text-primary-foreground shadow-md' 
+            : 'hover:bg-muted/60 text-muted-foreground hover:text-foreground'
         }`}
       >
-        <div className="relative w-10 h-10">
-          <div className={`absolute inset-0 rounded-full ${isActive ? 'bg-primary/5' : ''}`} />
-          <svg className="w-10 h-10 transform -rotate-90" viewBox="0 0 36 36">
-            <path
-              className="text-muted/40 stroke-current"
-              fill="none"
-              strokeWidth="2.5"
-              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+        <div className="relative w-8 h-8 flex items-center justify-center">
+          <div className={`w-6 h-6 rounded-full border-2 ${
+            isActive ? 'border-primary-foreground' : 'border-current'
+          } transition-colors duration-200`}>
+            <div 
+              className={`w-full h-full rounded-full transition-all duration-300 ${
+                percentage > 60 ? 'bg-green-500' : percentage > 30 ? 'bg-yellow-500' : 'bg-red-500'
+              }`}
+              style={{ 
+                clipPath: `polygon(0 ${100 - percentage}%, 100% ${100 - percentage}%, 100% 100%, 0% 100%)` 
+              }}
             />
-            <path
-              className={`${getColorClass()} stroke-current transition-all duration-300`}
-              fill="none"
-              strokeWidth="2.5"
-              strokeDasharray={`${percentage}, 100`}
-              strokeLinecap="round"
-              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-            />
-          </svg>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className={`text-xs font-bold ${getColorClass()}`}>
-              {Math.round(percentage)}%
-            </span>
           </div>
+          {isActive && (
+            <div className="absolute -top-1 -right-1 w-2 h-2 bg-primary-foreground rounded-full" />
+          )}
         </div>
       </button>
     );
@@ -77,54 +70,47 @@ export function CreditsMeter({ organizationId, isCollapsed }: CreditsMeterProps)
   return (
     <button
       onClick={() => navigate('/dashboard/billing')}
-      className={`w-full p-4 rounded-xl transition-all duration-200 group relative overflow-hidden ${
+      className={`w-full p-4 rounded-lg transition-all duration-200 group ${
         isActive 
-          ? 'bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border-2 border-primary/20 shadow-lg' 
-          : 'bg-card hover:bg-muted/40 border-2 border-border hover:border-primary/20'
+          ? 'bg-primary text-primary-foreground shadow-md ring-2 ring-primary/20' 
+          : 'bg-card hover:bg-muted/40 border border-border hover:border-primary/30'
       }`}
     >
-      {isActive && (
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent" />
-      )}
-      
-      <div className="relative flex items-center space-x-4">
-        <div className="relative w-14 h-14">
-          <div className={`absolute inset-0 rounded-full ${isActive ? 'bg-primary/10' : 'bg-muted/20'} transition-colors duration-200`} />
-          <svg className="w-14 h-14 transform -rotate-90 relative z-10" viewBox="0 0 36 36">
-            <path
-              className="text-muted/30 stroke-current"
-              fill="none"
-              strokeWidth="2"
-              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-            />
-            <path
-              className={`${getColorClass()} stroke-current transition-all duration-500`}
-              fill="none"
-              strokeWidth="2.5"
-              strokeDasharray={`${percentage}, 100`}
-              strokeLinecap="round"
-              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-            />
-          </svg>
-          <div className="absolute inset-0 flex items-center justify-center z-20">
-            <span className={`text-sm font-bold ${getColorClass()}`}>
-              {Math.round(percentage)}%
-            </span>
+      <div className="flex items-center space-x-3">
+        <div className="relative w-12 h-12 flex-shrink-0">
+          <div className={`w-full h-full rounded-full border-3 ${
+            isActive ? 'border-primary-foreground/30' : 'border-muted'
+          } flex items-center justify-center transition-colors duration-200`}>
+            <div className="relative w-8 h-8 rounded-full overflow-hidden bg-muted/20">
+              <div 
+                className={`absolute bottom-0 left-0 w-full transition-all duration-500 ${
+                  percentage > 60 ? 'bg-green-500' : percentage > 30 ? 'bg-yellow-500' : 'bg-red-500'
+                }`}
+                style={{ height: `${percentage}%` }}
+              />
+            </div>
           </div>
+          {isActive && (
+            <div className="absolute -top-1 -right-1 w-3 h-3 bg-primary-foreground rounded-full" />
+          )}
         </div>
         
-        <div className="flex-1 text-left">
-          <h3 className="font-semibold text-foreground text-sm flex items-center gap-2">
-            Créditos
-            {isActive && <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />}
-          </h3>
-          <p className="text-xs text-muted-foreground">
-            {credits !== null ? `${credits} de ${maxCredits}` : 'Carregando...'}
+        <div className="flex-1 text-left min-w-0">
+          <div className="flex items-center gap-2">
+            <h3 className={`font-medium text-sm ${isActive ? 'text-primary-foreground' : 'text-foreground'}`}>
+              Créditos
+            </h3>
+            {isActive && <div className="w-1.5 h-1.5 bg-primary-foreground rounded-full animate-pulse" />}
+          </div>
+          <p className={`text-xs truncate ${isActive ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
+            {credits !== null ? `${credits.toLocaleString()} disponíveis` : 'Carregando...'}
           </p>
-          <div className="w-full bg-muted/30 rounded-full h-1.5 mt-2">
+          <div className={`w-full rounded-full h-1 mt-2 ${isActive ? 'bg-primary-foreground/20' : 'bg-muted'}`}>
             <div 
-              className={`h-1.5 rounded-full transition-all duration-500 ${
-                percentage > 60 ? 'bg-green-500' : percentage > 30 ? 'bg-yellow-500' : 'bg-red-500'
+              className={`h-1 rounded-full transition-all duration-500 ${
+                isActive 
+                  ? 'bg-primary-foreground' 
+                  : percentage > 60 ? 'bg-green-500' : percentage > 30 ? 'bg-yellow-500' : 'bg-red-500'
               }`}
               style={{ width: `${percentage}%` }}
             />

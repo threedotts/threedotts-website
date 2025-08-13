@@ -58,9 +58,7 @@ export default function Billing() {
   const [loading, setLoading] = useState(true);
   const [topUpAmount, setTopUpAmount] = useState(1000);
   const [userOrganization, setUserOrganization] = useState<any>(null);
-  const [selectedCreditsBasic, setSelectedCreditsBasic] = useState("800");
-  const [selectedCreditsPro, setSelectedCreditsPro] = useState("800");
-  const [selectedCreditsEnterprise, setSelectedCreditsEnterprise] = useState("custom");
+  const [currentPlan, setCurrentPlan] = useState<string | null>(null);
 
   useEffect(() => {
     const getUser = async () => {
@@ -121,6 +119,9 @@ export default function Billing() {
       if (membership?.organizations) {
         setUserOrganization(membership.organizations);
       }
+      
+      // Simulate current plan - in real app, this would come from database
+      setCurrentPlan("Basic"); // Could be "Basic", "Pro", "Enterprise", or null
     } catch (error) {
       console.error('Error:', error);
     }
@@ -284,14 +285,6 @@ export default function Billing() {
     }
   };
 
-  const creditOptions = [
-    { value: "500", label: "500 créditos" },
-    { value: "800", label: "800 créditos" },
-    { value: "1200", label: "1.200 créditos" },
-    { value: "2000", label: "2.000 créditos" },
-    { value: "5000", label: "5.000 créditos" }
-  ];
-
   if (loading) {
     return (
       <div className="container mx-auto p-6">
@@ -330,169 +323,150 @@ export default function Billing() {
     <div className="container mx-auto p-6 space-y-8">
       <div className="text-center space-y-2">
         <h1 className="text-4xl font-bold">Planos e Faturamento</h1>
-        <p className="text-muted-foreground text-lg">Escolha o plano ideal para suas necessidades</p>
+        <p className="text-muted-foreground text-lg">Gerencie seu plano atual e créditos</p>
       </div>
 
-      {/* Planos */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Plano Basic */}
-        <Card className="relative border-2 hover:border-primary/20 transition-all duration-200">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-xl">Basic</CardTitle>
-              <Badge variant="secondary">Mais Popular</Badge>
-            </div>
-            <CardDescription>Para equipes pequenas que estão começando</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+      {/* Plano Atual */}
+      <div className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-lg p-6 border border-primary/20">
+        <h2 className="text-2xl font-semibold mb-4">Plano Atual</h2>
+        {currentPlan ? (
+          <div className="flex items-center justify-between">
             <div className="space-y-2">
-              <div className="text-3xl font-bold">$200<span className="text-base font-normal text-muted-foreground">/mês</span></div>
-              <div className="space-y-2">
-                <Label htmlFor="credits-basic">Créditos inclusos:</Label>
-                <Select value={selectedCreditsBasic} onValueChange={setSelectedCreditsBasic}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione os créditos" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {creditOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="flex items-center gap-3">
+                <Badge variant="default" className="text-lg px-3 py-1">
+                  {currentPlan}
+                </Badge>
+                <span className="text-muted-foreground">ativo</span>
               </div>
+              <p className="text-sm text-muted-foreground">
+                Seu plano atual está ativo e funcionando perfeitamente
+              </p>
             </div>
-            <ul className="space-y-2 text-sm">
-              <li className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-                {selectedCreditsBasic} créditos mensais
-              </li>
-              <li className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-                5 créditos diários (até 150/mês)
-              </li>
-              <li className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-                Projetos privados
-              </li>
-              <li className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-                Funções e permissões de usuário
-              </li>
-            </ul>
-            <Button className="w-full" variant="default">
-              Upgrade
+            <Button variant="outline">
+              Gerenciar Plano
             </Button>
-          </CardContent>
-        </Card>
-
-        {/* Plano Pro */}
-        <Card className="relative border-2 border-primary shadow-lg transform scale-105">
-          <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-            <Badge className="bg-primary text-primary-foreground">Recomendado</Badge>
           </div>
-          <CardHeader>
-            <CardTitle className="text-xl">Pro</CardTitle>
-            <CardDescription>Controles avançados e recursos poderosos para departamentos em crescimento</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <div className="text-3xl font-bold">$400<span className="text-base font-normal text-muted-foreground">/mês</span></div>
-              <div className="space-y-2">
-                <Label htmlFor="credits-pro">Créditos inclusos:</Label>
-                <Select value={selectedCreditsPro} onValueChange={setSelectedCreditsPro}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione os créditos" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {creditOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+        ) : (
+          <div className="text-center py-8">
+            <div className="space-y-3">
+              <AlertTriangle className="h-12 w-12 text-muted-foreground mx-auto" />
+              <h3 className="text-xl font-semibold">Nenhum plano ativo</h3>
+              <p className="text-muted-foreground">
+                Você não possui nenhum plano ativo no momento. Escolha um plano abaixo para começar.
+              </p>
             </div>
-            <ul className="space-y-2 text-sm">
-              <li className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-                {selectedCreditsPro} créditos mensais
-              </li>
-              <li className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-                5 créditos diários (até 150/mês)
-              </li>
-              <li className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-                SSO
-              </li>
-              <li className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-                Projetos Pessoais
-              </li>
-            </ul>
-            <Button className="w-full" variant="default">
-              Upgrade
-            </Button>
-          </CardContent>
-        </Card>
+          </div>
+        )}
+      </div>
 
-        {/* Plano Enterprise */}
-        <Card className="relative border-2 hover:border-primary/20 transition-all duration-200">
-          <CardHeader>
-            <CardTitle className="text-xl">Enterprise</CardTitle>
-            <CardDescription>Construído para grandes organizações que precisam de flexibilidade, escala e governança</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <div className="text-2xl font-bold">Faturamento flexível</div>
-              <div className="space-y-2">
-                <Label htmlFor="credits-enterprise">Créditos inclusos:</Label>
-                <Select value={selectedCreditsEnterprise} onValueChange={setSelectedCreditsEnterprise}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione os créditos" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {creditOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                    <SelectItem value="custom">Plano personalizado</SelectItem>
-                  </SelectContent>
-                </Select>
+      {/* Planos Disponíveis */}
+      <div className="space-y-4">
+        <h2 className="text-2xl font-semibold text-center">Planos Disponíveis</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Plano Basic */}
+          <Card className="relative border-2 hover:border-primary/20 transition-all duration-200">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xl">Basic</CardTitle>
+                <Badge variant="secondary">Mais Popular</Badge>
               </div>
+              <CardDescription>Para equipes pequenas que estão começando</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="text-3xl font-bold">$200<span className="text-base font-normal text-muted-foreground">/mês</span></div>
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                  800 créditos mensais inclusos
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                  5 créditos diários extras
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                  Projetos privados
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                  Funções e permissões de usuário
+                </li>
+              </ul>
+              <Button className="w-full" variant="default">
+                {currentPlan === "Basic" ? "Plano Atual" : "Upgrade"}
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Plano Pro */}
+          <Card className="relative border-2 border-primary shadow-lg transform scale-105">
+            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+              <Badge className="bg-primary text-primary-foreground">Recomendado</Badge>
             </div>
-            <p className="text-sm text-muted-foreground">Tudo no Business, além de:</p>
-            <ul className="space-y-2 text-sm">
-              <li className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-                Suporte dedicado
-              </li>
-              <li className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-                Serviços de integração
-              </li>
-              <li className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-                Integrações personalizadas
-              </li>
-              <li className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-                Controle de acesso baseado em grupo
-              </li>
-              <li className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-                Sistemas de design personalizado
-              </li>
-            </ul>
-            <Button className="w-full" variant="outline">
-              Agendar Demo
-            </Button>
-          </CardContent>
-        </Card>
+            <CardHeader>
+              <CardTitle className="text-xl">Pro</CardTitle>
+              <CardDescription>Controles avançados para departamentos em crescimento</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="text-3xl font-bold">$400<span className="text-base font-normal text-muted-foreground">/mês</span></div>
+              <p className="text-sm text-muted-foreground">Tudo no Basic, além de:</p>
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                  1.500 créditos mensais inclusos
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                  10 créditos diários extras
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                  SSO
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                  Projetos Pessoais
+                </li>
+              </ul>
+              <Button className="w-full" variant="default">
+                {currentPlan === "Pro" ? "Plano Atual" : "Upgrade"}
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Plano Enterprise */}
+          <Card className="relative border-2 hover:border-primary/20 transition-all duration-200">
+            <CardHeader>
+              <CardTitle className="text-xl">Enterprise</CardTitle>
+              <CardDescription>Para grandes organizações que precisam de flexibilidade</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="text-2xl font-bold">Faturamento flexível</div>
+              <p className="text-sm text-muted-foreground">Tudo no Pro, além de:</p>
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                  Créditos ilimitados
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                  Suporte dedicado
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                  Integrações personalizadas
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                  Controle de acesso avançado
+                </li>
+              </ul>
+              <Button className="w-full" variant="outline">
+                {currentPlan === "Enterprise" ? "Plano Atual" : "Agendar Demo"}
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       {/* Estatísticas Atuais */}
