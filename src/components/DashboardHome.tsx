@@ -196,11 +196,16 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
         customerCalls[customerKey].push(callDate);
       });
 
-      const peakHour = Object.keys(hourCounts).reduce((a, b) => hourCounts[Number(a)] > hourCounts[Number(b)] ? a : b, '0');
+      // Only calculate peak hour and most active day if there are calls
+      const peakHour = Object.keys(hourCounts).length > 0 
+        ? Object.keys(hourCounts).reduce((a, b) => hourCounts[Number(a)] > hourCounts[Number(b)] ? a : b, '0')
+        : null;
       const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-      const mostActiveDayOfWeek = Object.keys(dayOfWeekCounts).reduce((a, b) => 
-        dayOfWeekCounts[Number(a)] > dayOfWeekCounts[Number(b)] ? a : b, '0'
-      );
+      const mostActiveDayOfWeek = Object.keys(dayOfWeekCounts).length > 0
+        ? Object.keys(dayOfWeekCounts).reduce((a, b) => 
+            dayOfWeekCounts[Number(a)] > dayOfWeekCounts[Number(b)] ? a : b, '0'
+          )
+        : null;
 
       // Calculate average time between calls
       let totalTimeBetween = 0;
@@ -226,8 +231,8 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
         previousMonthDuration: previousPeriodAvgDuration,
         previousMonthSuccessRate: previousPeriodSuccessRate,
         // Análise Temporal
-        peakHour: `${peakHour}:00h`,
-        mostActiveDayOfWeek: dayNames[Number(mostActiveDayOfWeek)],
+        peakHour: peakHour ? `${peakHour}:00h` : "Sem dados",
+        mostActiveDayOfWeek: mostActiveDayOfWeek ? dayNames[Number(mostActiveDayOfWeek)] : "Sem dados",
         avgTimeBetweenCalls: avgTimeBetweenCallsHours > 0 ? `${avgTimeBetweenCallsHours}h` : "N/A"
       });
     };
