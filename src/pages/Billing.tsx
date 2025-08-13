@@ -220,14 +220,14 @@ export default function Billing() {
 
       setBillingSettings(updatedSettings);
       toast({
-        title: "Settings Updated",
-        description: "Your billing preferences have been saved."
+        title: "Configurações Atualizadas",
+        description: "Suas preferências de cobrança foram salvas."
       });
     } catch (error) {
       console.error('Error updating settings:', error);
       toast({
-        title: "Error",
-        description: "Failed to update settings. Please try again.",
+        title: "Erro",
+        description: "Falha ao atualizar configurações. Tente novamente.",
         variant: "destructive"
       });
     }
@@ -301,7 +301,7 @@ export default function Billing() {
         <Alert>
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
-            Access denied. Only organization owners and admins can view billing information.
+            Acesso negado. Apenas proprietários e administradores da organização podem visualizar informações de cobrança.
           </AlertDescription>
         </Alert>
       </div>
@@ -318,13 +318,13 @@ export default function Billing() {
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Billing & Usage</h1>
-          <p className="text-muted-foreground">Manage your credits and billing preferences</p>
+          <h1 className="text-3xl font-bold">Faturamento e Uso</h1>
+          <p className="text-muted-foreground">Gerencie seus créditos e preferências de cobrança</p>
         </div>
         <div className="flex gap-2">
           <Button onClick={() => handleTopUp('mpesa')} className="gap-2">
             <Plus className="h-4 w-4" />
-            Top Up
+            Recarregar
           </Button>
         </div>
       </div>
@@ -333,8 +333,8 @@ export default function Billing() {
         <Alert>
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
-            Your credit balance is low ({creditData?.currentCredits} credits remaining). 
-            Consider topping up to avoid service interruption.
+            Seu saldo de créditos está baixo ({creditData?.currentCredits} créditos restantes). 
+            Considere fazer uma recarga para evitar interrupção do serviço.
           </AlertDescription>
         </Alert>
       )}
@@ -342,33 +342,33 @@ export default function Billing() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Current Credits</CardTitle>
+            <CardTitle className="text-sm font-medium">Créditos Atuais</CardTitle>
             <Wallet className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{creditData?.currentCredits || 0}</div>
             <p className="text-xs text-muted-foreground">
-              Available for use
+              Disponíveis para uso
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Used</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Usado</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{creditData?.totalUsed || 0}</div>
             <p className="text-xs text-muted-foreground">
-              Lifetime usage
+              Uso total
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Usage Rate</CardTitle>
+            <CardTitle className="text-sm font-medium">Taxa de Uso</CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -380,28 +380,28 @@ export default function Billing() {
 
       <Tabs defaultValue="topup" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="topup">Top Up</TabsTrigger>
-          <TabsTrigger value="history">Billing History</TabsTrigger>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
+          <TabsTrigger value="topup">Recarregar</TabsTrigger>
+          <TabsTrigger value="history">Histórico de Cobrança</TabsTrigger>
+          <TabsTrigger value="settings">Configurações</TabsTrigger>
         </TabsList>
 
         <TabsContent value="topup" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Add Credits</CardTitle>
+              <CardTitle>Adicionar Créditos</CardTitle>
               <CardDescription>
-                Choose your preferred payment method to top up your account
+                Escolha seu método de pagamento preferido para recarregar sua conta
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="amount">Amount (Credits)</Label>
+                <Label htmlFor="amount">Quantidade (Créditos)</Label>
                 <Input
                   id="amount"
                   type="number"
                   value={topUpAmount}
                   onChange={(e) => setTopUpAmount(Number(e.target.value))}
-                  placeholder="Enter credit amount"
+                  placeholder="Digite a quantidade de créditos"
                 />
               </div>
               
@@ -412,7 +412,7 @@ export default function Billing() {
                   variant="outline"
                 >
                   <CreditCard className="h-6 w-6" />
-                  <span>Pay with M-Pesa</span>
+                  <span>Pagar com M-Pesa</span>
                 </Button>
                 
                 <Button 
@@ -421,7 +421,7 @@ export default function Billing() {
                   variant="outline"
                 >
                   <Wallet className="h-6 w-6" />
-                  <span>Bank Transfer</span>
+                  <span>Transferência Bancária</span>
                 </Button>
               </div>
             </CardContent>
@@ -433,14 +433,14 @@ export default function Billing() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <History className="h-5 w-5" />
-                Transaction History
+                Histórico de Transações
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {billingHistory.length === 0 ? (
                   <p className="text-muted-foreground text-center py-8">
-                    No transactions found
+                    Nenhuma transação encontrada
                   </p>
                 ) : (
                   billingHistory.map((transaction) => (
@@ -486,13 +486,13 @@ export default function Billing() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Settings className="h-5 w-5" />
-                Billing Preferences
+                Preferências de Cobrança
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="threshold">Low Credit Warning Threshold</Label>
+                  <Label htmlFor="threshold">Limite de Aviso de Créditos Baixos</Label>
                   <Input
                     id="threshold"
                     type="number"
@@ -502,15 +502,15 @@ export default function Billing() {
                     })}
                   />
                   <p className="text-sm text-muted-foreground mt-1">
-                    Get notified when credits fall below this amount
+                    Seja notificado quando os créditos ficarem abaixo desta quantidade
                   </p>
                 </div>
 
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label>Enable Low Credit Notifications</Label>
+                    <Label>Ativar Notificações de Créditos Baixos</Label>
                     <p className="text-sm text-muted-foreground">
-                      Receive alerts when your credits are running low
+                      Receba alertas quando seus créditos estiverem acabando
                     </p>
                   </div>
                   <Switch
@@ -523,9 +523,9 @@ export default function Billing() {
 
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label>Auto Top-up (Coming Soon)</Label>
+                    <Label>Recarga Automática (Em Breve)</Label>
                     <p className="text-sm text-muted-foreground">
-                      Automatically add credits when balance is low
+                      Adicionar créditos automaticamente quando o saldo estiver baixo
                     </p>
                   </div>
                   <Switch
