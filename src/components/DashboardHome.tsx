@@ -863,7 +863,18 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
                     dataKey="chamadas" 
                     stroke="hsl(var(--primary))" 
                     strokeWidth={3}
-                    dot={{ fill: 'hsl(var(--primary))', strokeWidth: 2, r: 5 }}
+                    dot={{ 
+                      fill: 'hsl(var(--primary))', 
+                      strokeWidth: 2, 
+                      r: 6,
+                      stroke: 'hsl(var(--background))'
+                    }}
+                    activeDot={{ 
+                      r: 8, 
+                      fill: 'hsl(var(--primary))',
+                      stroke: 'hsl(var(--background))',
+                      strokeWidth: 2
+                    }}
                     name="Chamadas"
                   />
                 </LineChart>
@@ -985,7 +996,7 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
                   <XAxis dataKey="hour" />
                   <YAxis />
                   <Tooltip />
-                  <Bar dataKey="chamadas" fill="hsl(var(--primary))" />
+                  <Bar dataKey="chamadas" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
@@ -1004,7 +1015,7 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
                   <XAxis dataKey="day" />
                   <YAxis />
                   <Tooltip />
-                  <Bar dataKey="chamadas" fill="hsl(var(--accent))" />
+                  <Bar dataKey="chamadas" fill="hsl(var(--accent))" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
