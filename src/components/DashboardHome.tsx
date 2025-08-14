@@ -992,10 +992,30 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={hourlyData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="hour" />
-                  <YAxis />
-                  <Tooltip />
+                  <CartesianGrid 
+                    strokeDasharray="3 3" 
+                    stroke="hsl(var(--muted-foreground))"
+                    opacity={0.3}
+                  />
+                  <XAxis 
+                    dataKey="hour" 
+                    axisLine={{ stroke: 'hsl(var(--muted-foreground))' }}
+                    tickLine={{ stroke: 'hsl(var(--muted-foreground))' }}
+                    tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+                  />
+                  <YAxis 
+                    axisLine={{ stroke: 'hsl(var(--muted-foreground))' }}
+                    tickLine={{ stroke: 'hsl(var(--muted-foreground))' }}
+                    tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+                  />
+                  <Tooltip 
+                    contentStyle={{
+                      backgroundColor: 'hsl(var(--background))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px',
+                      color: 'hsl(var(--foreground))'
+                    }}
+                  />
                   <Bar dataKey="chamadas" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
@@ -1011,10 +1031,30 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={weeklyData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="day" />
-                  <YAxis />
-                  <Tooltip />
+                  <CartesianGrid 
+                    strokeDasharray="3 3" 
+                    stroke="hsl(var(--muted-foreground))"
+                    opacity={0.3}
+                  />
+                  <XAxis 
+                    dataKey="day" 
+                    axisLine={{ stroke: 'hsl(var(--muted-foreground))' }}
+                    tickLine={{ stroke: 'hsl(var(--muted-foreground))' }}
+                    tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+                  />
+                  <YAxis 
+                    axisLine={{ stroke: 'hsl(var(--muted-foreground))' }}
+                    tickLine={{ stroke: 'hsl(var(--muted-foreground))' }}
+                    tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+                  />
+                  <Tooltip 
+                    contentStyle={{
+                      backgroundColor: 'hsl(var(--background))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px',
+                      color: 'hsl(var(--foreground))'
+                    }}
+                  />
                   <Bar dataKey="chamadas" fill="hsl(var(--accent))" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
