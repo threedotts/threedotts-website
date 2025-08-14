@@ -1015,6 +1015,7 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
                       borderRadius: '8px',
                       color: 'hsl(var(--foreground))'
                     }}
+                    cursor={{ fill: 'hsl(0 0% 88%)' }}
                   />
                   <Bar 
                     dataKey="chamadas" 
@@ -1058,6 +1059,7 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
                       borderRadius: '8px',
                       color: 'hsl(var(--foreground))'
                     }}
+                    cursor={{ fill: 'hsl(0 0% 88%)' }}
                   />
                   <Bar 
                     dataKey="chamadas" 
