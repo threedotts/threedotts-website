@@ -628,24 +628,24 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
       value: dashboardData.peakHour,
       change: "Maior volume de chamadas",
       icon: Clock,
-      iconBg: "bg-blue-100",
-      iconColor: "text-blue-600"
+      iconBg: "bg-gray-100",
+      iconColor: "text-gray-600"
     },
     {
       title: "Dia Mais Ativo",
       value: dashboardData.mostActiveDayOfWeek,
       change: "Da semana",
       icon: Calendar,
-      iconBg: "bg-purple-100", 
-      iconColor: "text-purple-600"
+      iconBg: "bg-gray-100", 
+      iconColor: "text-gray-600"
     },
     {
       title: "Tempo Entre Chamadas",
       value: dashboardData.avgTimeBetweenCalls,
       change: "Média por cliente",
       icon: Timer,
-      iconBg: "bg-orange-100",
-      iconColor: "text-orange-600"
+      iconBg: "bg-gray-100",
+      iconColor: "text-gray-600"
     }
   ];
 
