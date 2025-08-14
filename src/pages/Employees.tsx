@@ -199,25 +199,6 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
     }
   }, [selectedOrganization]);
 
-  // Separate effect to refresh presence data periodically and when members change
-  useEffect(() => {
-    if (selectedOrganization && members.length > 0) {
-      const memberUserIds = members.map(member => member.user_id);
-      
-      // Initial fetch
-      fetchPresenceData(memberUserIds);
-      
-      // Set up periodic refresh to ensure up-to-date presence data
-      const presenceRefresh = setInterval(() => {
-        fetchPresenceData(memberUserIds);
-      }, 5000); // Refresh every 5 seconds
-      
-      return () => {
-        clearInterval(presenceRefresh);
-      };
-    }
-  }, [selectedOrganization, members, fetchPresenceData]);
-
   const fetchMembers = async () => {
     if (!selectedOrganization) return;
 

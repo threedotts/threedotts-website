@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { DateRange } from "react-day-picker";
-import { ShimmerSkeleton } from "@/components/ui/skeleton";
 
 interface Organization {
   id: string;
@@ -46,7 +45,6 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
   const [members, setMembers] = useState<any[]>([]);
   const [selectedTimeFilter, setSelectedTimeFilter] = useState<string>('mensal');
   const [customDateRange, setCustomDateRange] = useState<DateRange | undefined>();
-  const [presenceLoading, setPresenceLoading] = useState(true);
   
   const { presenceData, fetchPresenceData } = useUserPresence(selectedOrganization?.id);
 
@@ -117,18 +115,7 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
     };
 
     fetchMembers();
-  }, [selectedOrganization?.id]);
-
-  // Set initial loading state
-  useEffect(() => {
-    if (selectedOrganization?.id) {
-      setPresenceLoading(true);
-      const timer = setTimeout(() => {
-        setPresenceLoading(false);
-      }, 1500);
-      return () => clearTimeout(timer);
-    }
-  }, [selectedOrganization?.id]);
+  }, [selectedOrganization?.id, fetchPresenceData]);
 
   // Fetch dashboard statistics
   useEffect(() => {
@@ -616,13 +603,12 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
     },
     {
       title: "Funcionários",
-      value: presenceLoading ? "..." : `${onlineAgents}/${members.length}`,
-      change: presenceLoading ? "Carregando..." : `${onlineAgents} online`,
+      value: `${onlineAgents}/${members.length}`,
+      change: `${onlineAgents} online`,
       icon: Users,
       iconBg: "bg-accent/10",
       iconColor: "text-accent",
-      changeText: presenceLoading ? "" : "de " + members.length + " total",
-      isLoading: presenceLoading
+      changeText: "de " + members.length + " total"
     },
     {
       title: "Duração Média das Chamadas",
@@ -792,21 +778,12 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
                         {stat.title}
                       </p>
                     </div>
-                    {(stat as any).isLoading ? (
-                      <div className="space-y-2">
-                        <ShimmerSkeleton className="h-9 w-20" />
-                        <ShimmerSkeleton className="h-4 w-32" />
-                      </div>
-                    ) : (
-                      <>
-                        <p className="text-3xl font-bold text-foreground mb-2">
-                          {stat.value}
-                        </p>
-                        <p className={`text-sm font-medium ${stat.iconColor}`}>
-                          {stat.change} {stat.changeText}
-                        </p>
-                      </>
-                    )}
+                    <p className="text-3xl font-bold text-foreground mb-2">
+                      {stat.value}
+                    </p>
+                    <p className={`text-sm font-medium ${stat.iconColor}`}>
+                      {stat.change} {stat.changeText}
+                    </p>
                   </div>
                 </div>
               </CardContent>
