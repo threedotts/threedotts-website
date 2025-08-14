@@ -896,6 +896,7 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
                       outerRadius={120}
                       paddingAngle={2}
                       dataKey="value"
+                      cornerRadius={8}
                     >
                       {evaluationData.map((entry, index) => (
                         <Cell 
