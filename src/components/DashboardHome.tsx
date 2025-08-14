@@ -104,8 +104,6 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
     if (!selectedOrganization?.id) return;
 
     const fetchMembers = async () => {
-      setPresenceLoading(true); // Start loading presence data
-      
       const { data } = await supabase
         .from('organization_members')
         .select('user_id, email')
@@ -115,16 +113,22 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
       if (data) {
         setMembers(data);
         fetchPresenceData(data.map(m => m.user_id));
-        
-        // Set a timeout to stop loading after initial fetch
-        setTimeout(() => {
-          setPresenceLoading(false);
-        }, 2000); // 2 seconds should be enough for initial presence data
       }
     };
 
     fetchMembers();
-  }, [selectedOrganization?.id, fetchPresenceData]);
+  }, [selectedOrganization?.id]);
+
+  // Set initial loading state
+  useEffect(() => {
+    if (selectedOrganization?.id) {
+      setPresenceLoading(true);
+      const timer = setTimeout(() => {
+        setPresenceLoading(false);
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [selectedOrganization?.id]);
 
   // Fetch dashboard statistics
   useEffect(() => {
