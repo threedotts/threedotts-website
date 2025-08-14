@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -153,6 +153,7 @@ export type Database = {
           evaluation_result: string | null
           id: string
           messages: Json | null
+          organization_id: string | null
           received_audio: boolean
           received_metadata: boolean
           summary: string | null
@@ -166,6 +167,7 @@ export type Database = {
           evaluation_result?: string | null
           id?: string
           messages?: Json | null
+          organization_id?: string | null
           received_audio?: boolean
           received_metadata?: boolean
           summary?: string | null
@@ -179,6 +181,7 @@ export type Database = {
           evaluation_result?: string | null
           id?: string
           messages?: Json | null
+          organization_id?: string | null
           received_audio?: boolean
           received_metadata?: boolean
           summary?: string | null
@@ -560,9 +563,9 @@ export type Database = {
     Functions: {
       add_credits: {
         Args: {
-          org_id: string
-          credits_to_add: number
           cost_amount?: number
+          credits_to_add: number
+          org_id: string
           payment_method?: string
           payment_ref?: string
         }
@@ -570,10 +573,10 @@ export type Database = {
       }
       consume_credits: {
         Args: {
-          org_id: string
-          credits_to_consume: number
           call_id?: string
+          credits_to_consume: number
           duration_minutes?: number
+          org_id: string
         }
         Returns: boolean
       }
