@@ -66,7 +66,7 @@ serve(async (req) => {
     console.log('Processing M-Pesa payment:', { amount, customerMSISDN, organizationId });
 
     // Generate unique reference for this transaction
-    const transactionReference = `TXN_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const transactionReference = `TXN_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
     
     // Call your external M-Pesa API
     const mpesaApiUrl = 'https://mpesa-sdk.onrender.com/pagar';
