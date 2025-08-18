@@ -27,6 +27,22 @@ serve(async (req) => {
     const { amount, customerMSISDN, organizationId } = requestBody;
     console.log('Parsed values:', { amount, customerMSISDN, organizationId });
 
+    // Validate required fields
+    if (!amount || !customerMSISDN || !organizationId) {
+      console.error('Missing required fields:', { amount: !!amount, customerMSISDN: !!customerMSISDN, organizationId: !!organizationId });
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Missing required fields: amount, customerMSISDN, and organizationId are required',
+          received: { amount, customerMSISDN, organizationId }
+        }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
     console.log('Processing M-Pesa payment:', { amount, customerMSISDN, organizationId });
 
     // Generate unique reference for this transaction
@@ -144,7 +160,6 @@ serve(async (req) => {
         JSON.stringify({ 
           success: true, 
           transactionReference,
-          thirdPartyReference,
           creditsAdded: credits,
           mpesaResponse: mpesaResult
         }),
