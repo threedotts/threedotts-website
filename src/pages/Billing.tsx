@@ -301,7 +301,38 @@ export default function Billing() {
           fetchMinuteData();
           fetchBillingHistory();
         } else {
-          throw new Error(data.error || 'Falha no pagamento');
+          // Handle specific M-Pesa error codes
+          const errorDetails = data.details;
+          let userMessage = 'Falha no pagamento';
+          
+          if (errorDetails?.body?.output_ResponseCode) {
+            switch (errorDetails.body.output_ResponseCode) {
+              case 'INS-10':
+                userMessage = 'Transação duplicada. Aguarde alguns minutos antes de tentar novamente.';
+                break;
+              case 'INS-17':
+                userMessage = 'Referência de transação inválida. Tente novamente.';
+                break;
+              case 'INS-9':
+                userMessage = 'Tempo limite excedido. Verifique sua conexão e tente novamente.';
+                break;
+              case 'INS-6':
+                userMessage = 'Saldo insuficiente em sua conta M-Pesa.';
+                break;
+              case 'INS-1':
+                userMessage = 'Número de telefone inválido. Verifique o número e tente novamente.';
+                break;
+              default:
+                userMessage = errorDetails.body.output_ResponseDesc || 'Erro no processamento do pagamento M-Pesa';
+            }
+          }
+          
+          toast({
+            title: "Erro no Pagamento M-Pesa",
+            description: userMessage,
+            variant: "destructive"
+          });
+          return;
         }
       } else {
         // Handle bank transfer
