@@ -16,21 +16,22 @@ import {
   TrendingUp,
   Settings,
   Plus,
-  History
+  History,
+  Phone
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-interface CreditData {
-  currentCredits: number;
+interface MinuteData {
+  currentMinutes: number;
   totalPurchased: number;
   totalUsed: number;
   lastTopUp: string | null;
 }
 
 interface BillingSettings {
-  lowCreditThreshold: number;
+  lowMinuteThreshold: number;
   enableNotifications: boolean;
   autoTopUpEnabled: boolean;
   autoTopUpAmount: number;
@@ -48,18 +49,32 @@ interface BillingHistoryItem {
   createdAt: string;
 }
 
+// Constantes para preços
+const PRICE_PER_MINUTE = 23; // 23 MTS por minuto
+
+// Pacotes pré-definidos
+const MINUTE_PACKAGES = [
+  { minutes: 1000, price: 1000 * PRICE_PER_MINUTE },
+  { minutes: 2500, price: 2500 * PRICE_PER_MINUTE },
+  { minutes: 5000, price: 5000 * PRICE_PER_MINUTE },
+  { minutes: 7500, price: 7500 * PRICE_PER_MINUTE },
+  { minutes: 10000, price: 10000 * PRICE_PER_MINUTE }
+];
+
 export default function Billing() {
   const { toast } = useToast();
   const [user, setUser] = useState<User | null>(null);
-  const [creditData, setCreditData] = useState<CreditData | null>(null);
+  const [minuteData, setMinuteData] = useState<MinuteData | null>(null);
   const [billingSettings, setBillingSettings] = useState<BillingSettings | null>(null);
   const [billingHistory, setBillingHistory] = useState<BillingHistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [topUpAmount, setTopUpAmount] = useState(1000);
+  const [selectedPackage, setSelectedPackage] = useState<number>(1000);
+  const [customMinutes, setCustomMinutes] = useState(1000);
   const [userOrganization, setUserOrganization] = useState<any>(null);
   const [currentPlan, setCurrentPlan] = useState<string | null>(null);
   const [mpesaPhone, setMpesaPhone] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [useCustomAmount, setUseCustomAmount] = useState(false);
 
   useEffect(() => {
     const getUser = async () => {
@@ -83,7 +98,7 @@ export default function Billing() {
 
   useEffect(() => {
     if (userOrganization) {
-      fetchCreditData();
+      fetchMinuteData();
       fetchBillingSettings();
       fetchBillingHistory();
     }
@@ -91,19 +106,16 @@ export default function Billing() {
 
   const fetchUserOrganization = async () => {
     try {
-      // First check if user owns any organization
       const { data: ownedOrgs, error: ownedError } = await supabase
         .from('organizations')
         .select('*')
         .eq('user_id', user?.id);
 
       if (ownedOrgs && ownedOrgs.length > 0) {
-        // Use the first organization owned by the user
         setUserOrganization(ownedOrgs[0]);
         return;
       }
 
-      // If not owner, check if user is a member with admin role
       const { data: membership, error: memberError } = await supabase
         .from('organization_members')
         .select('organization_id, role, organizations(*)')
@@ -121,14 +133,13 @@ export default function Billing() {
         setUserOrganization(membership.organizations);
       }
       
-      // Simulate current plan - in real app, this would come from database
-      setCurrentPlan(null); // Could be "Basic", "Pro", "Enterprise", or null
+      setCurrentPlan(null);
     } catch (error) {
       console.error('Error:', error);
     }
   };
 
-  const fetchCreditData = async () => {
+  const fetchMinuteData = async () => {
     if (!userOrganization) return;
 
     try {
@@ -140,14 +151,14 @@ export default function Billing() {
 
       if (error) throw error;
 
-      setCreditData({
-        currentCredits: data?.current_credits || 0,
+      setMinuteData({
+        currentMinutes: data?.current_credits || 0,
         totalPurchased: data?.total_credits_purchased || 0,
         totalUsed: data?.total_credits_used || 0,
         lastTopUp: data?.last_top_up_at || null
       });
     } catch (error) {
-      console.error('Error fetching credit data:', error);
+      console.error('Error fetching minute data:', error);
     }
   };
 
@@ -164,7 +175,7 @@ export default function Billing() {
       if (error) throw error;
 
       setBillingSettings({
-        lowCreditThreshold: data?.low_credit_warning_threshold || 100,
+        lowMinuteThreshold: data?.low_credit_warning_threshold || 100,
         enableNotifications: data?.enable_low_credit_notifications || true,
         autoTopUpEnabled: data?.auto_top_up_enabled || false,
         autoTopUpAmount: data?.auto_top_up_amount || 1000,
@@ -215,7 +226,7 @@ export default function Billing() {
         .from('billing_settings')
         .upsert({
           organization_id: userOrganization.id,
-          low_credit_warning_threshold: updatedSettings.lowCreditThreshold,
+          low_credit_warning_threshold: updatedSettings.lowMinuteThreshold,
           enable_low_credit_notifications: updatedSettings.enableNotifications,
           auto_top_up_enabled: updatedSettings.autoTopUpEnabled,
           auto_top_up_amount: updatedSettings.autoTopUpAmount,
@@ -239,11 +250,17 @@ export default function Billing() {
     }
   };
 
+  const getSelectedMinutes = () => useCustomAmount ? customMinutes : selectedPackage;
+  const getTotalPrice = () => getSelectedMinutes() * PRICE_PER_MINUTE;
+
   const handleTopUp = async (method: 'mpesa' | 'bank_transfer') => {
-    if (!userOrganization || topUpAmount <= 0) {
+    const minutes = getSelectedMinutes();
+    const totalPrice = getTotalPrice();
+    
+    if (!userOrganization || minutes <= 0) {
       toast({
         title: "Erro",
-        description: "Valor inválido para recarga",
+        description: "Quantidade inválida de minutos",
         variant: "destructive"
       });
       return;
@@ -252,7 +269,6 @@ export default function Billing() {
     setIsProcessing(true);
     try {
       if (method === 'mpesa') {
-        // Handle M-Pesa payment
         if (!mpesaPhone) {
           toast({
             title: "Número Obrigatório",
@@ -265,7 +281,7 @@ export default function Billing() {
 
         const { data, error } = await supabase.functions.invoke('process-mpesa-payment', {
           body: {
-            amount: topUpAmount.toString(),
+            amount: totalPrice.toString(),
             customerMSISDN: mpesaPhone,
             organizationId: userOrganization.id
           }
@@ -276,23 +292,22 @@ export default function Billing() {
         if (data.success) {
           toast({
             title: "Pagamento Bem-sucedido",
-            description: `${data.creditsAdded} créditos foram adicionados à sua conta.`,
+            description: `${minutes} minutos foram adicionados à sua conta.`,
           });
           
-          setTopUpAmount(1000);
           setMpesaPhone('');
           
           // Refresh data after successful payment
-          fetchCreditData();
+          fetchMinuteData();
           fetchBillingHistory();
         } else {
           throw new Error(data.error || 'Falha no pagamento');
         }
       } else {
-        // Handle bank transfer (existing logic)
+        // Handle bank transfer
         const { data, error } = await supabase.functions.invoke('process-top-up', {
           body: {
-            amount: topUpAmount,
+            amount: minutes,
             paymentMethod: method,
             phoneNumber: '',
             accountDetails: method === 'bank_transfer' ? '' : undefined
@@ -307,11 +322,6 @@ export default function Billing() {
             description: `Referência: ${data.paymentReference}`,
           });
           
-          // Show payment instructions in a dialog or alert
-          console.log('Payment instructions:', data.paymentInstructions);
-          console.log('Next steps:', data.nextSteps);
-          
-          // Refresh billing history
           fetchBillingHistory();
         }
       }
@@ -355,51 +365,39 @@ export default function Billing() {
     );
   }
 
-  const usagePercentage = creditData ? 
-    (creditData.totalUsed / Math.max(creditData.totalPurchased, 1)) * 100 : 0;
+  const usagePercentage = minuteData ? 
+    (minuteData.totalUsed / Math.max(minuteData.totalPurchased, 1)) * 100 : 0;
 
-  const isLowCredit = creditData && billingSettings ? 
-    creditData.currentCredits <= billingSettings.lowCreditThreshold : false;
+  const isLowMinutes = minuteData && billingSettings ? 
+    minuteData.currentMinutes <= billingSettings.lowMinuteThreshold : false;
 
   return (
     <div className="container mx-auto p-6 space-y-8">
-      {/* Plano Atual - Simples */}
-      <div className="flex items-center justify-between p-4 rounded-lg border bg-card">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Plano atual:</span>
-            {currentPlan ? (
-              <>
-                <Badge variant="default" className="font-medium">
-                  {currentPlan}
-                </Badge>
-                <div className="flex items-center gap-1">
-                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-                  <span className="text-xs text-green-600">Ativo</span>
-                </div>
-              </>
-            ) : (
-              <Badge variant="outline" className="text-muted-foreground">
-                Nenhum plano
-              </Badge>
-            )}
+      {/* Tarifas */}
+      <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Phone className="h-5 w-5" />
+            Tarifas das Chamadas
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center">
+            <div className="text-3xl font-bold text-blue-600">23 MTS/MIN</div>
+            <div className="text-sm text-muted-foreground">(0.35 USD/MIN)</div>
+            <div className="text-xs text-muted-foreground mt-2">Base TOP UP</div>
           </div>
-        </div>
-        {currentPlan && (
-          <Button variant="outline" size="sm">
-            Gerenciar
-          </Button>
-        )}
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Estatísticas Atuais */}
       <Card className="p-6">
-        <h2 className="text-xl font-semibold mb-4">Uso de Créditos</h2>
-        {isLowCredit && (
+        <h2 className="text-xl font-semibold mb-4">Minutos de Chamada</h2>
+        {isLowMinutes && (
           <Alert className="mb-4">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
-              Seu saldo de créditos está baixo ({creditData?.currentCredits} créditos restantes). 
+              Seu saldo de minutos está baixo ({minuteData?.currentMinutes} minutos restantes). 
               Considere fazer uma recarga para evitar interrupção do serviço.
             </AlertDescription>
           </Alert>
@@ -408,11 +406,11 @@ export default function Billing() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Créditos Atuais</CardTitle>
-              <Wallet className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">Minutos Atuais</CardTitle>
+              <Clock className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{creditData?.currentCredits || 0}</div>
+              <div className="text-2xl font-bold">{minuteData?.currentMinutes || 0}</div>
               <p className="text-xs text-muted-foreground">
                 Disponíveis para uso
               </p>
@@ -425,9 +423,9 @@ export default function Billing() {
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{creditData?.totalUsed || 0}</div>
+              <div className="text-2xl font-bold">{minuteData?.totalUsed || 0}</div>
               <p className="text-xs text-muted-foreground">
-                Uso total
+                Minutos consumidos
               </p>
             </CardContent>
           </Card>
@@ -447,31 +445,89 @@ export default function Billing() {
 
       <Tabs defaultValue="topup" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="topup">Recarregar</TabsTrigger>
-          <TabsTrigger value="history">Histórico de Cobrança</TabsTrigger>
+          <TabsTrigger value="topup">Recarregar Minutos</TabsTrigger>
+          <TabsTrigger value="history">Histórico</TabsTrigger>
           <TabsTrigger value="settings">Configurações</TabsTrigger>
         </TabsList>
 
         <TabsContent value="topup" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Adicionar Créditos</CardTitle>
+              <CardTitle>Pacotes de Minutos</CardTitle>
               <CardDescription>
-                Escolha seu método de pagamento preferido para recarregar sua conta
+                Escolha um pacote ou quantidade personalizada
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
+              {/* Pacotes pré-definidos */}
               <div>
-                <Label htmlFor="amount">Quantidade (Créditos)</Label>
-                <Input
-                  id="amount"
-                  type="number"
-                  value={topUpAmount}
-                  onChange={(e) => setTopUpAmount(Number(e.target.value))}
-                  placeholder="Digite a quantidade de créditos"
-                />
+                <Label className="text-base font-medium">Pacotes Disponíveis</Label>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-3">
+                  {MINUTE_PACKAGES.map((pkg, index) => (
+                    <Button
+                      key={index}
+                      variant={selectedPackage === pkg.minutes && !useCustomAmount ? "default" : "outline"}
+                      className="h-auto p-4 flex flex-col gap-2"
+                      onClick={() => {
+                        setSelectedPackage(pkg.minutes);
+                        setUseCustomAmount(false);
+                      }}
+                    >
+                      <div className="font-bold">Pacote {index + 1}</div>
+                      <div className="text-lg font-semibold">{pkg.minutes.toLocaleString()} Min</div>
+                      <div className="text-sm text-muted-foreground">
+                        {pkg.price.toLocaleString()} MTS
+                      </div>
+                    </Button>
+                  ))}
+                  <Button
+                    variant={useCustomAmount ? "default" : "outline"}
+                    className="h-auto p-4 flex flex-col gap-2"
+                    onClick={() => setUseCustomAmount(true)}
+                  >
+                    <div className="font-bold">Personalizado</div>
+                    <div className="text-lg font-semibold">Escolher</div>
+                    <div className="text-sm text-muted-foreground">montante</div>
+                  </Button>
+                </div>
               </div>
 
+              {/* Quantidade personalizada */}
+              {useCustomAmount && (
+                <div>
+                  <Label htmlFor="custom-minutes">Quantidade de Minutos</Label>
+                  <Input
+                    id="custom-minutes"
+                    type="number"
+                    value={customMinutes}
+                    onChange={(e) => setCustomMinutes(Number(e.target.value))}
+                    placeholder="Digite a quantidade de minutos"
+                    min="1"
+                  />
+                </div>
+              )}
+
+              {/* Resumo do pagamento */}
+              <Card className="bg-muted/50">
+                <CardContent className="pt-6">
+                  <div className="flex justify-between items-center">
+                    <span>Minutos selecionados:</span>
+                    <span className="font-bold">{getSelectedMinutes().toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between items-center mt-2">
+                    <span>Preço por minuto:</span>
+                    <span>{PRICE_PER_MINUTE} MTS</span>
+                  </div>
+                  <div className="border-t pt-2 mt-2">
+                    <div className="flex justify-between items-center text-lg font-bold">
+                      <span>Total a pagar:</span>
+                      <span className="text-primary">{getTotalPrice().toLocaleString()} MTS</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Número M-Pesa */}
               <div>
                 <Label htmlFor="mpesa-phone">Número de Telefone M-Pesa</Label>
                 <Input
@@ -483,25 +539,30 @@ export default function Billing() {
                 />
               </div>
               
+              {/* Botões de pagamento */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Button 
                   onClick={() => handleTopUp('mpesa')} 
                   className="gap-2 h-20 flex-col"
-                  variant="outline"
-                  disabled={!topUpAmount || !mpesaPhone || isProcessing}
+                  variant="default"
+                  disabled={!getSelectedMinutes() || !mpesaPhone || isProcessing}
+                  size="lg"
                 >
                   <CreditCard className="h-6 w-6" />
                   <span>{isProcessing ? "Processando..." : "Pagar com M-Pesa"}</span>
+                  <span className="text-sm">{getTotalPrice().toLocaleString()} MTS</span>
                 </Button>
                 
                 <Button 
                   onClick={() => handleTopUp('bank_transfer')} 
                   className="gap-2 h-20 flex-col"
                   variant="outline"
-                  disabled={!topUpAmount || isProcessing}
+                  disabled={!getSelectedMinutes() || isProcessing}
+                  size="lg"
                 >
                   <Wallet className="h-6 w-6" />
                   <span>{isProcessing ? "Processando..." : "Transferência Bancária"}</span>
+                  <span className="text-sm">{getTotalPrice().toLocaleString()} MTS</span>
                 </Button>
               </div>
             </CardContent>
@@ -542,11 +603,11 @@ export default function Billing() {
                         <p className={`font-bold ${
                           transaction.type === 'top_up' ? 'text-green-600' : 'text-red-600'
                         }`}>
-                          {transaction.type === 'top_up' ? '+' : ''}{transaction.amount} credits
+                          {transaction.type === 'top_up' ? '+' : ''}{transaction.amount} minutos
                         </p>
                         {transaction.cost && (
                           <p className="text-sm text-muted-foreground">
-                            KES {transaction.cost}
+                            {transaction.cost} MTS
                           </p>
                         )}
                         <Badge variant={transaction.status === 'completed' ? 'default' : 'secondary'}>
@@ -572,25 +633,25 @@ export default function Billing() {
             <CardContent className="space-y-6">
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="threshold">Limite de Aviso de Créditos Baixos</Label>
+                  <Label htmlFor="threshold">Limite de Aviso de Minutos Baixos</Label>
                   <Input
                     id="threshold"
                     type="number"
-                    value={billingSettings?.lowCreditThreshold || 100}
+                    value={billingSettings?.lowMinuteThreshold || 100}
                     onChange={(e) => updateBillingSettings({ 
-                      lowCreditThreshold: Number(e.target.value) 
+                      lowMinuteThreshold: Number(e.target.value) 
                     })}
                   />
                   <p className="text-sm text-muted-foreground mt-1">
-                    Seja notificado quando os créditos ficarem abaixo desta quantidade
+                    Seja notificado quando os minutos ficarem abaixo desta quantidade
                   </p>
                 </div>
 
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label>Ativar Notificações de Créditos Baixos</Label>
+                    <Label>Ativar Notificações de Minutos Baixos</Label>
                     <p className="text-sm text-muted-foreground">
-                      Receba alertas quando seus créditos estiverem acabando
+                      Receba alertas quando seus minutos estiverem acabando
                     </p>
                   </div>
                   <Switch
@@ -605,7 +666,7 @@ export default function Billing() {
                   <div>
                     <Label>Recarga Automática (Em Breve)</Label>
                     <p className="text-sm text-muted-foreground">
-                      Adicionar créditos automaticamente quando o saldo estiver baixo
+                      Adicionar minutos automaticamente quando o saldo estiver baixo
                     </p>
                   </div>
                   <Switch
@@ -618,7 +679,6 @@ export default function Billing() {
           </Card>
         </TabsContent>
       </Tabs>
-
     </div>
   );
 }
