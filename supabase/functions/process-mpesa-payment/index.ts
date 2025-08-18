@@ -18,8 +18,28 @@ serve(async (req) => {
   }
 
   try {
+    console.log('M-Pesa function started');
+    
     // Parse request body
-    const { amount, customerMSISDN, organizationId }: MpesaPaymentRequest = await req.json();
+    const requestBody = await req.json();
+    console.log('Request body received:', requestBody);
+    
+    const { amount, customerMSISDN, organizationId }: MpesaPaymentRequest = requestBody;
+    console.log('Parsed values:', { amount, customerMSISDN, organizationId });
+
+    if (!amount || !customerMSISDN || !organizationId) {
+      console.error('Missing required parameters:', { amount, customerMSISDN, organizationId });
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Missing required parameters: amount, customerMSISDN, organizationId' 
+        }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
 
     console.log('Processing M-Pesa payment:', { amount, customerMSISDN, organizationId });
 
@@ -51,7 +71,7 @@ serve(async (req) => {
     const apiPort = '18352';
     const apiPath = '/ipg/v1x/c2bPayment/singleStage/';
     
-    const requestBody = {
+    const mpesaRequestBody = {
       input_TransactionReference: transactionReference,
       input_CustomerMSISDN: customerMSISDN,
       input_Amount: amount,
@@ -59,7 +79,7 @@ serve(async (req) => {
       input_ServiceProviderCode: serviceProviderCode
     };
 
-    console.log('M-Pesa API request body:', requestBody);
+    console.log('M-Pesa API request body:', mpesaRequestBody);
     console.log('Using API endpoint:', `https://${apiHost}:${apiPort}${apiPath}`);
 
     // Make request to M-Pesa API using the correct endpoint format
@@ -71,7 +91,7 @@ serve(async (req) => {
         // Based on Python SDK - no Bearer token, just API key as header
         'X-API-Key': apiKey
       },
-      body: JSON.stringify(requestBody)
+      body: JSON.stringify(mpesaRequestBody)
     });
 
     console.log('M-Pesa API response status:', mpesaResponse.status);
