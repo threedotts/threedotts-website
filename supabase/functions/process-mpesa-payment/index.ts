@@ -35,21 +35,21 @@ serve(async (req) => {
     // Call your external M-Pesa API
     const mpesaApiUrl = 'https://mpesa-sdk.onrender.com/pagar';
     
-    const requestBody = {
+    const mpesaRequestBody = {
       amount: amount,
       valor: customerMSISDN,
       referencia: transactionReference
     };
 
     console.log('Calling external M-Pesa API:', mpesaApiUrl);
-    console.log('Request body:', requestBody);
+    console.log('Request body:', mpesaRequestBody);
 
     const mpesaResponse = await fetch(mpesaApiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(requestBody)
+      body: JSON.stringify(mpesaRequestBody)
     });
 
     console.log('M-Pesa API response status:', mpesaResponse.status);
