@@ -289,16 +289,31 @@ export default function Billing() {
 
         if (error) {
           console.error('Edge function error:', error);
-          // Try to parse the error response for M-Pesa specific errors
+          
+          // For FunctionsHttpError, we need to try to get the response body
           if (error.message && error.message.includes('non-2xx status code')) {
-            // This is likely our M-Pesa error response, try to get the details
-            const errorResponse = error.context?.body;
-            if (errorResponse) {
-              const errorDetails = errorResponse.details;
-              let userMessage = 'Falha no pagamento';
+            // Try to get the error response body directly
+            try {
+              // The error might contain the response in different ways
+              let errorData = null;
               
-              if (errorDetails?.body?.output_ResponseCode) {
-                switch (errorDetails.body.output_ResponseCode) {
+              // Check various possible locations for the error data
+              if (error.context) {
+                errorData = error.context;
+              } else if (error.body) {
+                errorData = error.body;
+              } else if (error.details) {
+                errorData = error.details;
+              }
+              
+              console.log('Error data structure:', errorData);
+              
+              // If we have error data, try to extract M-Pesa specific info
+              if (errorData && errorData.details && errorData.details.body && errorData.details.body.output_ResponseCode) {
+                const responseCode = errorData.details.body.output_ResponseCode;
+                let userMessage = 'Falha no pagamento';
+                
+                switch (responseCode) {
                   case 'INS-5':
                     userMessage = 'Transação cancelada pelo cliente.';
                     break;
@@ -345,13 +360,29 @@ export default function Billing() {
                     userMessage = 'Número MSISDN inválido. Verifique o número de telefone.';
                     break;
                   default:
-                    userMessage = 'Erro no processamento do pagamento. Tente novamente ou contacte o suporte.';
+                    userMessage = `Erro no processamento do pagamento (${responseCode}). Tente novamente ou contacte o suporte.`;
                 }
+                
+                toast({
+                  title: "Erro no Pagamento M-Pesa",
+                  description: userMessage,
+                  variant: "destructive"
+                });
+                return;
+              } else {
+                // If we can't parse the specific error, show a generic M-Pesa error
+                toast({
+                  title: "Erro no Pagamento M-Pesa",
+                  description: "Erro no processamento do pagamento. Verifique seus dados e tente novamente.",
+                  variant: "destructive"
+                });
+                return;
               }
-              
+            } catch (parseError) {
+              console.error('Error parsing M-Pesa error response:', parseError);
               toast({
                 title: "Erro no Pagamento M-Pesa",
-                description: userMessage,
+                description: "Erro no processamento do pagamento. Tente novamente.",
                 variant: "destructive"
               });
               return;
