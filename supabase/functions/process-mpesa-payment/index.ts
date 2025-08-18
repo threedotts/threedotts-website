@@ -50,12 +50,33 @@ serve(async (req) => {
     const transactionReference = Deno.env.get('MPESA_TRANSACTION_REFERENCE');
     const thirdPartyReference = Deno.env.get('MPESA_THIRD_PARTY_REFERENCE');
 
+    console.log('Secret values check:', {
+      hasApiKey: !!apiKey,
+      hasPublicKey: !!publicKey,
+      hasServiceProviderCode: !!serviceProviderCode,
+      hasTransactionReference: !!transactionReference,
+      hasThirdPartyReference: !!thirdPartyReference
+    });
+
     if (!apiKey || !publicKey || !serviceProviderCode || !transactionReference || !thirdPartyReference) {
-      console.error('Missing M-Pesa configuration');
+      console.error('Missing M-Pesa configuration:', {
+        apiKey: !!apiKey,
+        publicKey: !!publicKey,
+        serviceProviderCode: !!serviceProviderCode,
+        transactionReference: !!transactionReference,
+        thirdPartyReference: !!thirdPartyReference
+      });
       return new Response(
         JSON.stringify({ 
           success: false, 
-          error: 'M-Pesa configuration not found' 
+          error: 'M-Pesa configuration not found',
+          missing: {
+            apiKey: !apiKey,
+            publicKey: !publicKey,
+            serviceProviderCode: !serviceProviderCode,
+            transactionReference: !transactionReference,
+            thirdPartyReference: !thirdPartyReference
+          }
         }),
         { 
           status: 500, 
