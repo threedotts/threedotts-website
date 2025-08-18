@@ -30,7 +30,7 @@ serve(async (req) => {
     // Get environment variables
     const bearerToken = Deno.env.get('MPESA_BEARER_TOKEN');
     const serviceProviderCode = Deno.env.get('MPESA_SERVICE_PROVIDER_CODE');
-    const apiHost = Deno.env.get('MPESA_API_HOST') || 'api.sandbox.vm.co.mz';
+    const apiHost = 'api.sandbox.vm.co.mz'; // Use sandbox endpoint
 
     if (!bearerToken || !serviceProviderCode) {
       console.error('Missing M-Pesa configuration');
@@ -68,8 +68,34 @@ serve(async (req) => {
       body: JSON.stringify(mpesaPayload)
     });
 
-    const mpesaResult = await mpesaResponse.json();
-    console.log('M-Pesa API response:', mpesaResult);
+    console.log('M-Pesa API response status:', mpesaResponse.status);
+    console.log('M-Pesa API response headers:', Object.fromEntries(mpesaResponse.headers.entries()));
+
+    const responseText = await mpesaResponse.text();
+    console.log('M-Pesa API raw response:', responseText);
+
+    let mpesaResult;
+    try {
+      mpesaResult = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error('Failed to parse M-Pesa response as JSON:', parseError);
+      console.error('Response text:', responseText);
+      
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'M-Pesa API returned invalid response format',
+          details: { 
+            status: mpesaResponse.status,
+            responseText: responseText.substring(0, 500) // First 500 chars for debugging
+          }
+        }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
 
     if (!mpesaResponse.ok) {
       console.error('M-Pesa API error:', mpesaResult);
