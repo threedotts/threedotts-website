@@ -72,9 +72,9 @@ serve(async (req) => {
     const mpesaApiUrl = 'https://mpesa-sdk.onrender.com/pagar';
     
     const mpesaRequestBody = {
+      msisdn: customerMSISDN,
       amount: amount,
-      valor: customerMSISDN,
-      referencia: transactionReference
+      transaction_reference: transactionReference
     };
 
     console.log('Calling external M-Pesa API:', mpesaApiUrl);
