@@ -27,92 +27,32 @@ serve(async (req) => {
     const { amount, customerMSISDN, organizationId } = requestBody;
     console.log('Parsed values:', { amount, customerMSISDN, organizationId });
 
-    // Test - just return success for now to check if function works
-    return new Response(
-      JSON.stringify({ 
-        success: true, 
-        message: 'Function is working',
-        received: { amount, customerMSISDN, organizationId }
-      }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
-    );
-
     console.log('Processing M-Pesa payment:', { amount, customerMSISDN, organizationId });
 
-    // Get all environment variables from secrets
-    const apiKey = Deno.env.get('MPESA_API_KEY');
-    const publicKey = Deno.env.get('MPESA_PUBLIC_KEY');
-    const serviceProviderCode = Deno.env.get('MPESA_SERVICE_PROVIDER_CODE');
-    const transactionReference = Deno.env.get('MPESA_TRANSACTION_REFERENCE');
-    const thirdPartyReference = Deno.env.get('MPESA_THIRD_PARTY_REFERENCE');
-
-    console.log('Secret values check:', {
-      hasApiKey: !!apiKey,
-      hasPublicKey: !!publicKey,
-      hasServiceProviderCode: !!serviceProviderCode,
-      hasTransactionReference: !!transactionReference,
-      hasThirdPartyReference: !!thirdPartyReference
-    });
-
-    if (!apiKey || !publicKey || !serviceProviderCode || !transactionReference || !thirdPartyReference) {
-      console.error('Missing M-Pesa configuration:', {
-        apiKey: !!apiKey,
-        publicKey: !!publicKey,
-        serviceProviderCode: !!serviceProviderCode,
-        transactionReference: !!transactionReference,
-        thirdPartyReference: !!thirdPartyReference
-      });
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'M-Pesa configuration not found',
-          missing: {
-            apiKey: !apiKey,
-            publicKey: !publicKey,
-            serviceProviderCode: !serviceProviderCode,
-            transactionReference: !transactionReference,
-            thirdPartyReference: !thirdPartyReference
-          }
-        }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
-    }
-
-    // Prepare M-Pesa API request using the correct format from Python SDK
-    const apiHost = 'api.sandbox.vm.co.mz';
-    const apiPort = '18352';
-    const apiPath = '/ipg/v1x/c2bPayment/singleStage/';
+    // Generate unique reference for this transaction
+    const transactionReference = `TXN_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     
-    const mpesaRequestBody = {
-      input_TransactionReference: transactionReference,
-      input_CustomerMSISDN: customerMSISDN,
-      input_Amount: amount,
-      input_ThirdPartyReference: thirdPartyReference,
-      input_ServiceProviderCode: serviceProviderCode
+    // Call your external M-Pesa API
+    const mpesaApiUrl = 'https://mpesa-sdk.onrender.com/pagar';
+    
+    const requestBody = {
+      amount: amount,
+      valor: customerMSISDN,
+      referencia: transactionReference
     };
 
-    console.log('M-Pesa API request body:', mpesaRequestBody);
-    console.log('Using API endpoint:', `https://${apiHost}:${apiPort}${apiPath}`);
+    console.log('Calling external M-Pesa API:', mpesaApiUrl);
+    console.log('Request body:', requestBody);
 
-    // Make request to M-Pesa API using the correct endpoint format
-    const mpesaResponse = await fetch(`https://${apiHost}:${apiPort}${apiPath}`, {
+    const mpesaResponse = await fetch(mpesaApiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Origin': '*',
-        // Based on Python SDK - no Bearer token, just API key as header
-        'X-API-Key': apiKey
       },
-      body: JSON.stringify(mpesaRequestBody)
+      body: JSON.stringify(requestBody)
     });
 
     console.log('M-Pesa API response status:', mpesaResponse.status);
-    console.log('M-Pesa API response headers:', Object.fromEntries(mpesaResponse.headers.entries()));
 
     const responseText = await mpesaResponse.text();
     console.log('M-Pesa API raw response:', responseText);
@@ -130,7 +70,7 @@ serve(async (req) => {
           error: 'M-Pesa API returned invalid response format',
           details: { 
             status: mpesaResponse.status,
-            responseText: responseText.substring(0, 500) // First 500 chars for debugging
+            responseText: responseText.substring(0, 500)
           }
         }),
         { 
@@ -155,10 +95,10 @@ serve(async (req) => {
       );
     }
 
-    // Check if payment was successful
-    const isSuccess = mpesaResult.output_ResponseCode === 'INS-0' || 
-                     mpesaResult.output_ResponseCode === '0' ||
-                     mpesaResult.output_ResponseDesc?.toLowerCase().includes('success');
+    // Check if payment was successful (adjust based on your API response format)
+    const isSuccess = mpesaResult.success === true || 
+                     mpesaResult.status === 'success' ||
+                     mpesaResult.code === '200';
 
     if (isSuccess) {
       console.log('Payment successful, adding credits to organization:', organizationId);
