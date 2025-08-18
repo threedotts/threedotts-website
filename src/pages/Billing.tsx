@@ -358,6 +358,7 @@ export default function Billing() {
                     description: userMessage,
                     variant: "destructive"
                   });
+                  setIsProcessing(false);
                   return;
                 } else {
                   // If we can't parse the specific error, show a generic M-Pesa error
@@ -366,6 +367,7 @@ export default function Billing() {
                     description: "Erro no processamento do pagamento. Verifique seus dados e tente novamente.",
                     variant: "destructive"
                   });
+                  setIsProcessing(false);
                   return;
                 }
               }
@@ -376,6 +378,7 @@ export default function Billing() {
                 description: "Erro no processamento do pagamento. Tente novamente.",
                 variant: "destructive"
               });
+              setIsProcessing(false);
               return;
             }
           }
