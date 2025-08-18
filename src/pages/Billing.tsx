@@ -58,6 +58,8 @@ export default function Billing() {
   const [topUpAmount, setTopUpAmount] = useState(1000);
   const [userOrganization, setUserOrganization] = useState<any>(null);
   const [currentPlan, setCurrentPlan] = useState<string | null>(null);
+  const [mpesaPhone, setMpesaPhone] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     const getUser = async () => {
@@ -247,40 +249,81 @@ export default function Billing() {
       return;
     }
 
+    setIsProcessing(true);
     try {
-      const { data, error } = await supabase.functions.invoke('process-top-up', {
-        body: {
-          amount: topUpAmount,
-          paymentMethod: method,
-          phoneNumber: method === 'mpesa' ? '' : undefined,
-          accountDetails: method === 'bank_transfer' ? '' : undefined
+      if (method === 'mpesa') {
+        // Handle M-Pesa payment
+        if (!mpesaPhone) {
+          toast({
+            title: "Número Obrigatório",
+            description: "Por favor, insira seu número de telefone M-Pesa.",
+            variant: "destructive",
+          });
+          setIsProcessing(false);
+          return;
         }
-      });
 
-      if (error) {
-        throw error;
-      }
-
-      if (data.success) {
-        toast({
-          title: "Recarga Iniciada",
-          description: `Referência: ${data.paymentReference}`,
+        const { data, error } = await supabase.functions.invoke('process-mpesa-payment', {
+          body: {
+            amount: topUpAmount.toString(),
+            customerMSISDN: mpesaPhone,
+            organizationId: userOrganization.id
+          }
         });
-        
-        // Show payment instructions in a dialog or alert
-        console.log('Payment instructions:', data.paymentInstructions);
-        console.log('Next steps:', data.nextSteps);
-        
-        // Refresh billing history
-        fetchBillingHistory();
+
+        if (error) throw error;
+
+        if (data.success) {
+          toast({
+            title: "Pagamento Bem-sucedido",
+            description: `${data.creditsAdded} créditos foram adicionados à sua conta.`,
+          });
+          
+          setTopUpAmount(1000);
+          setMpesaPhone('');
+          
+          // Refresh data after successful payment
+          fetchCreditData();
+          fetchBillingHistory();
+        } else {
+          throw new Error(data.error || 'Falha no pagamento');
+        }
+      } else {
+        // Handle bank transfer (existing logic)
+        const { data, error } = await supabase.functions.invoke('process-top-up', {
+          body: {
+            amount: topUpAmount,
+            paymentMethod: method,
+            phoneNumber: '',
+            accountDetails: method === 'bank_transfer' ? '' : undefined
+          }
+        });
+
+        if (error) throw error;
+
+        if (data.success) {
+          toast({
+            title: "Recarga Iniciada",
+            description: `Referência: ${data.paymentReference}`,
+          });
+          
+          // Show payment instructions in a dialog or alert
+          console.log('Payment instructions:', data.paymentInstructions);
+          console.log('Next steps:', data.nextSteps);
+          
+          // Refresh billing history
+          fetchBillingHistory();
+        }
       }
     } catch (error) {
       console.error('Top-up error:', error);
       toast({
         title: "Erro",
-        description: "Falha ao iniciar recarga. Tente novamente.",
+        description: error.message || "Falha ao processar pagamento. Tente novamente.",
         variant: "destructive"
       });
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -428,24 +471,37 @@ export default function Billing() {
                   placeholder="Digite a quantidade de créditos"
                 />
               </div>
+
+              <div>
+                <Label htmlFor="mpesa-phone">Número de Telefone M-Pesa</Label>
+                <Input
+                  id="mpesa-phone"
+                  type="tel"
+                  placeholder="258843330333"
+                  value={mpesaPhone}
+                  onChange={(e) => setMpesaPhone(e.target.value)}
+                />
+              </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Button 
                   onClick={() => handleTopUp('mpesa')} 
                   className="gap-2 h-20 flex-col"
                   variant="outline"
+                  disabled={!topUpAmount || !mpesaPhone || isProcessing}
                 >
                   <CreditCard className="h-6 w-6" />
-                  <span>Pagar com M-Pesa</span>
+                  <span>{isProcessing ? "Processando..." : "Pagar com M-Pesa"}</span>
                 </Button>
                 
                 <Button 
                   onClick={() => handleTopUp('bank_transfer')} 
                   className="gap-2 h-20 flex-col"
                   variant="outline"
+                  disabled={!topUpAmount || isProcessing}
                 >
                   <Wallet className="h-6 w-6" />
-                  <span>Transferência Bancária</span>
+                  <span>{isProcessing ? "Processando..." : "Transferência Bancária"}</span>
                 </Button>
               </div>
             </CardContent>
