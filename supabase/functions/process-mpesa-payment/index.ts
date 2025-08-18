@@ -131,10 +131,9 @@ serve(async (req) => {
       );
     }
 
-    // Check if payment was successful (adjust based on your API response format)
-    const isSuccess = mpesaResult.success === true || 
-                     mpesaResult.status === 'success' ||
-                     mpesaResult.code === '200';
+    // Check if payment was successful based on M-Pesa response format
+    const isSuccess = mpesaResult.output_ResponseCode === 'INS-0' ||
+                     mpesaResult.output_ResponseDesc === 'Request processed successfully';
 
     if (isSuccess) {
       console.log('Payment successful, adding credits to organization:', organizationId);
