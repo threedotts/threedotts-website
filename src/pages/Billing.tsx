@@ -548,32 +548,63 @@ export default function Billing() {
               <div>
                 <Label className="text-base font-medium">Pacotes Disponíveis</Label>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-3">
-                  {MINUTE_PACKAGES.map((pkg, index) => (
-                    <Button
-                      key={index}
-                      variant={selectedPackage === pkg.minutes && !useCustomAmount ? "default" : "outline"}
-                      className="h-auto p-4 flex flex-col gap-2"
-                      onClick={() => {
-                        setSelectedPackage(pkg.minutes);
-                        setUseCustomAmount(false);
-                      }}
-                    >
-                      <div className="font-bold">Pacote {index + 1}</div>
-                      <div className="text-lg font-semibold">{pkg.minutes.toLocaleString()} Min</div>
-                      <div className="text-sm text-muted-foreground">
-                        {pkg.price.toLocaleString()} MTS
+                  {MINUTE_PACKAGES.map((pkg, index) => {
+                    const isSelected = selectedPackage === pkg.minutes && !useCustomAmount;
+                    return (
+                      <div
+                        key={index}
+                        className={`relative cursor-pointer rounded-lg border-2 p-4 transition-all duration-200 hover:shadow-md ${
+                          isSelected 
+                            ? 'border-primary bg-primary/5 shadow-lg ring-2 ring-primary/20' 
+                            : 'border-border bg-card hover:border-primary/50'
+                        }`}
+                        onClick={() => {
+                          setSelectedPackage(pkg.minutes);
+                          setUseCustomAmount(false);
+                        }}
+                      >
+                        {isSelected && (
+                          <div className="absolute -top-2 -right-2 h-4 w-4 rounded-full bg-primary flex items-center justify-center">
+                            <div className="h-2 w-2 rounded-full bg-primary-foreground" />
+                          </div>
+                        )}
+                        <div className="flex flex-col gap-2 text-center">
+                          <div className={`font-bold ${isSelected ? 'text-primary' : 'text-foreground'}`}>
+                            Pacote {index + 1}
+                          </div>
+                          <div className={`text-lg font-semibold ${isSelected ? 'text-primary' : 'text-foreground'}`}>
+                            {pkg.minutes.toLocaleString()} Min
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            {pkg.price.toLocaleString()} MTS
+                          </div>
+                        </div>
                       </div>
-                    </Button>
-                  ))}
-                  <Button
-                    variant={useCustomAmount ? "default" : "outline"}
-                    className="h-auto p-4 flex flex-col gap-2"
+                    );
+                  })}
+                  <div
+                    className={`relative cursor-pointer rounded-lg border-2 p-4 transition-all duration-200 hover:shadow-md ${
+                      useCustomAmount 
+                        ? 'border-primary bg-primary/5 shadow-lg ring-2 ring-primary/20' 
+                        : 'border-border bg-card hover:border-primary/50'
+                    }`}
                     onClick={() => setUseCustomAmount(true)}
                   >
-                    <div className="font-bold">Personalizado</div>
-                    <div className="text-lg font-semibold">Escolher</div>
-                    <div className="text-sm text-muted-foreground">montante</div>
-                  </Button>
+                    {useCustomAmount && (
+                      <div className="absolute -top-2 -right-2 h-4 w-4 rounded-full bg-primary flex items-center justify-center">
+                        <div className="h-2 w-2 rounded-full bg-primary-foreground" />
+                      </div>
+                    )}
+                    <div className="flex flex-col gap-2 text-center">
+                      <div className={`font-bold ${useCustomAmount ? 'text-primary' : 'text-foreground'}`}>
+                        Personalizado
+                      </div>
+                      <div className={`text-lg font-semibold ${useCustomAmount ? 'text-primary' : 'text-foreground'}`}>
+                        Escolher
+                      </div>
+                      <div className="text-sm text-muted-foreground">montante</div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
