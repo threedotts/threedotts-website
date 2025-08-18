@@ -104,18 +104,6 @@ export default function Billing() {
     }
   }, [userOrganization]);
 
-  // Add a periodic refresh to catch external updates
-  useEffect(() => {
-    if (!userOrganization) return;
-
-    const interval = setInterval(() => {
-      fetchMinuteData();
-      fetchBillingHistory();
-    }, 30000); // Refresh every 30 seconds
-
-    return () => clearInterval(interval);
-  }, [userOrganization]);
-
   const fetchUserOrganization = async () => {
     try {
       const { data: ownedOrgs, error: ownedError } = await supabase
@@ -299,14 +287,9 @@ export default function Billing() {
           }
         });
 
-        if (error) {
-          console.error('Supabase function error:', error);
-          throw error;
-        }
+        if (error) throw error;
 
-        console.log('M-Pesa payment response:', data);
-
-        if (data?.success) {
+        if (data.success) {
           toast({
             title: "Pagamento Bem-sucedido",
             description: `${minutes} minutos foram adicionados à sua conta.`,
@@ -315,25 +298,10 @@ export default function Billing() {
           setMpesaPhone('');
           
           // Refresh data after successful payment
-          await Promise.all([
-            fetchMinuteData(),
-            fetchBillingHistory()
-          ]);
+          fetchMinuteData();
+          fetchBillingHistory();
         } else {
-          // Show specific error message from M-Pesa response
-          const errorMessage = data?.details?.body?.output_ResponseDesc || data?.error || 'Falha no pagamento';
-          
-          toast({
-            title: "Falha no Pagamento",
-            description: `Erro: ${errorMessage}`,
-            variant: "destructive"
-          });
-          
-          // Still refresh data in case there was a partial success
-          await Promise.all([
-            fetchMinuteData(),
-            fetchBillingHistory()
-          ]);
+          throw new Error(data.error || 'Falha no pagamento');
         }
       } else {
         // Handle bank transfer
@@ -354,7 +322,7 @@ export default function Billing() {
             description: `Referência: ${data.paymentReference}`,
           });
           
-          await fetchBillingHistory();
+          fetchBillingHistory();
         }
       }
     } catch (error) {
