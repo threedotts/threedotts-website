@@ -43,16 +43,14 @@ serve(async (req) => {
 
     console.log('Processing M-Pesa payment:', { amount, customerMSISDN, organizationId });
 
-    // Generate unique transaction references
-    const transactionReference = `TXN${Date.now()}${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
-    const thirdPartyReference = Math.random().toString(36).substr(2, 6).toUpperCase();
-
-    // Get environment variables
+    // Get all environment variables from secrets
     const apiKey = Deno.env.get('MPESA_API_KEY');
     const publicKey = Deno.env.get('MPESA_PUBLIC_KEY');
     const serviceProviderCode = Deno.env.get('MPESA_SERVICE_PROVIDER_CODE');
+    const transactionReference = Deno.env.get('MPESA_TRANSACTION_REFERENCE');
+    const thirdPartyReference = Deno.env.get('MPESA_THIRD_PARTY_REFERENCE');
 
-    if (!apiKey || !publicKey || !serviceProviderCode) {
+    if (!apiKey || !publicKey || !serviceProviderCode || !transactionReference || !thirdPartyReference) {
       console.error('Missing M-Pesa configuration');
       return new Response(
         JSON.stringify({ 
