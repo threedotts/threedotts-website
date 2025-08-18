@@ -47,13 +47,13 @@ serve(async (req) => {
     const { amount, customerMSISDN, organizationId } = requestBody;
     console.log('Parsed values:', { amount, customerMSISDN, organizationId });
 
-    // TESTE TEMPORÁRIO - retornar sucesso imediatamente
+    // TEMPORARY TEST - return success immediately
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: 'Função está funcionando!',
+        message: 'Function is working!',
         received: { amount, customerMSISDN, organizationId },
-        method: 'POST confirmado'
+        method: 'POST confirmed'
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
