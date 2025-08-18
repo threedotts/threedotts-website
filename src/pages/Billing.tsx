@@ -292,91 +292,82 @@ export default function Billing() {
           
           // For FunctionsHttpError, we need to try to get the response body
           if (error.message && error.message.includes('non-2xx status code')) {
-            // Try to get the error response body directly
             try {
-              // The error might contain the response in different ways
-              let errorData = null;
-              
-              // Check various possible locations for the error data
-              if (error.context) {
-                errorData = error.context;
-              } else if (error.body) {
-                errorData = error.body;
-              } else if (error.details) {
-                errorData = error.details;
-              }
-              
-              console.log('Error data structure:', errorData);
-              
-              // If we have error data, try to extract M-Pesa specific info
-              if (errorData && errorData.details && errorData.details.body && errorData.details.body.output_ResponseCode) {
-                const responseCode = errorData.details.body.output_ResponseCode;
-                let userMessage = 'Falha no pagamento';
+              // The error.context is a Response object, we need to read its body
+              if (error.context && typeof error.context.json === 'function') {
+                const errorResponse = await error.context.json();
+                console.log('Parsed error response:', errorResponse);
                 
-                switch (responseCode) {
-                  case 'INS-5':
-                    userMessage = 'Transação cancelada pelo cliente.';
-                    break;
-                  case 'INS-6':
-                    userMessage = 'Transação falhou. Tente novamente.';
-                    break;
-                  case 'INS-9':
-                    userMessage = 'Tempo limite excedido. Verifique sua conexão e tente novamente.';
-                    break;
-                  case 'INS-10':
-                    userMessage = 'Transação duplicada. Aguarde alguns minutos antes de tentar novamente.';
-                    break;
-                  case 'INS-15':
-                    userMessage = 'Valor inválido. Verifique o montante e tente novamente.';
-                    break;
-                  case 'INS-16':
-                    userMessage = 'Serviço temporariamente sobrecarregado. Tente novamente em alguns minutos.';
-                    break;
-                  case 'INS-17':
-                    userMessage = 'Referência de transação inválida. Tente novamente.';
-                    break;
-                  case 'INS-20':
-                    userMessage = 'Informações incompletas. Verifique os dados e tente novamente.';
-                    break;
-                  case 'INS-21':
-                    userMessage = 'Dados inválidos. Verifique as informações inseridas.';
-                    break;
-                  case 'INS-23':
-                    userMessage = 'Erro desconhecido. Contacte o suporte M-Pesa.';
-                    break;
-                  case 'INS-995':
-                    userMessage = 'Problema com o perfil do cliente. Contacte o suporte M-Pesa.';
-                    break;
-                  case 'INS-996':
-                    userMessage = 'Conta do cliente não está ativa. Contacte o suporte M-Pesa.';
-                    break;
-                  case 'INS-2002':
-                    userMessage = 'Número de telefone inválido. Verifique o número e tente novamente.';
-                    break;
-                  case 'INS-2006':
-                    userMessage = 'Saldo insuficiente em sua conta M-Pesa.';
-                    break;
-                  case 'INS-2051':
-                    userMessage = 'Número MSISDN inválido. Verifique o número de telefone.';
-                    break;
-                  default:
-                    userMessage = `Erro no processamento do pagamento (${responseCode}). Tente novamente ou contacte o suporte.`;
+                // Extract M-Pesa error details
+                if (errorResponse && errorResponse.details && errorResponse.details.body && errorResponse.details.body.output_ResponseCode) {
+                  const responseCode = errorResponse.details.body.output_ResponseCode;
+                  let userMessage = 'Falha no pagamento';
+                  
+                  switch (responseCode) {
+                    case 'INS-5':
+                      userMessage = 'Transação cancelada pelo cliente.';
+                      break;
+                    case 'INS-6':
+                      userMessage = 'Transação falhou. Tente novamente.';
+                      break;
+                    case 'INS-9':
+                      userMessage = 'Tempo limite excedido. Verifique sua conexão e tente novamente.';
+                      break;
+                    case 'INS-10':
+                      userMessage = 'Transação duplicada. Aguarde alguns minutos antes de tentar novamente.';
+                      break;
+                    case 'INS-15':
+                      userMessage = 'Valor inválido. Verifique o montante e tente novamente.';
+                      break;
+                    case 'INS-16':
+                      userMessage = 'Serviço temporariamente sobrecarregado. Tente novamente em alguns minutos.';
+                      break;
+                    case 'INS-17':
+                      userMessage = 'Referência de transação inválida. Tente novamente.';
+                      break;
+                    case 'INS-20':
+                      userMessage = 'Informações incompletas. Verifique os dados e tente novamente.';
+                      break;
+                    case 'INS-21':
+                      userMessage = 'Dados inválidos. Verifique as informações inseridas.';
+                      break;
+                    case 'INS-23':
+                      userMessage = 'Erro desconhecido. Contacte o suporte M-Pesa.';
+                      break;
+                    case 'INS-995':
+                      userMessage = 'Problema com o perfil do cliente. Contacte o suporte M-Pesa.';
+                      break;
+                    case 'INS-996':
+                      userMessage = 'Conta do cliente não está ativa. Contacte o suporte M-Pesa.';
+                      break;
+                    case 'INS-2002':
+                      userMessage = 'Número de telefone inválido. Verifique o número e tente novamente.';
+                      break;
+                    case 'INS-2006':
+                      userMessage = 'Saldo insuficiente em sua conta M-Pesa.';
+                      break;
+                    case 'INS-2051':
+                      userMessage = 'Número MSISDN inválido. Verifique o número de telefone.';
+                      break;
+                    default:
+                      userMessage = `Erro no processamento do pagamento (${responseCode}). Tente novamente ou contacte o suporte.`;
+                  }
+                  
+                  toast({
+                    title: "Erro no Pagamento M-Pesa",
+                    description: userMessage,
+                    variant: "destructive"
+                  });
+                  return;
+                } else {
+                  // If we can't parse the specific error, show a generic M-Pesa error
+                  toast({
+                    title: "Erro no Pagamento M-Pesa",
+                    description: "Erro no processamento do pagamento. Verifique seus dados e tente novamente.",
+                    variant: "destructive"
+                  });
+                  return;
                 }
-                
-                toast({
-                  title: "Erro no Pagamento M-Pesa",
-                  description: userMessage,
-                  variant: "destructive"
-                });
-                return;
-              } else {
-                // If we can't parse the specific error, show a generic M-Pesa error
-                toast({
-                  title: "Erro no Pagamento M-Pesa",
-                  description: "Erro no processamento do pagamento. Verifique seus dados e tente novamente.",
-                  variant: "destructive"
-                });
-                return;
               }
             } catch (parseError) {
               console.error('Error parsing M-Pesa error response:', parseError);
