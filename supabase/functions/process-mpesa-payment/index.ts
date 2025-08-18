@@ -24,22 +24,20 @@ serve(async (req) => {
     const requestBody = await req.json();
     console.log('Request body received:', requestBody);
     
-    const { amount, customerMSISDN, organizationId }: MpesaPaymentRequest = requestBody;
+    const { amount, customerMSISDN, organizationId } = requestBody;
     console.log('Parsed values:', { amount, customerMSISDN, organizationId });
 
-    if (!amount || !customerMSISDN || !organizationId) {
-      console.error('Missing required parameters:', { amount, customerMSISDN, organizationId });
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Missing required parameters: amount, customerMSISDN, organizationId' 
-        }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
-    }
+    // Test - just return success for now to check if function works
+    return new Response(
+      JSON.stringify({ 
+        success: true, 
+        message: 'Function is working',
+        received: { amount, customerMSISDN, organizationId }
+      }),
+      { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      }
+    );
 
     console.log('Processing M-Pesa payment:', { amount, customerMSISDN, organizationId });
 
