@@ -132,8 +132,8 @@ serve(async (req) => {
     }
 
     // Check if payment was successful based on M-Pesa response format
-    const isSuccess = mpesaResult.output_ResponseCode === 'INS-0' ||
-                     mpesaResult.output_ResponseDesc === 'Request processed successfully';
+    const isSuccess = mpesaResult.body?.output_ResponseCode === 'INS-0' ||
+                     mpesaResult.body?.output_ResponseDesc === 'Request processed successfully';
 
     if (isSuccess) {
       console.log('Payment successful, adding credits to organization:', organizationId);
