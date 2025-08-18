@@ -65,8 +65,8 @@ serve(async (req) => {
 
     console.log('Processing M-Pesa payment:', { amount, customerMSISDN, organizationId });
 
-    // Get transaction reference from secrets
-    const transactionReference = Deno.env.get('MPESA_TRANSACTION_REFERENCE') ?? '';
+    // Use hardcoded transaction reference
+    const transactionReference = 'T12344C';
     
     // Call your external M-Pesa API
     const mpesaApiUrl = 'https://mpesa-sdk.onrender.com/pagar';
