@@ -287,7 +287,78 @@ export default function Billing() {
           }
         });
 
-        if (error) throw error;
+        if (error) {
+          console.error('Edge function error:', error);
+          // Try to parse the error response for M-Pesa specific errors
+          if (error.message && error.message.includes('non-2xx status code')) {
+            // This is likely our M-Pesa error response, try to get the details
+            const errorResponse = error.context?.body;
+            if (errorResponse) {
+              const errorDetails = errorResponse.details;
+              let userMessage = 'Falha no pagamento';
+              
+              if (errorDetails?.body?.output_ResponseCode) {
+                switch (errorDetails.body.output_ResponseCode) {
+                  case 'INS-5':
+                    userMessage = 'Transação cancelada pelo cliente.';
+                    break;
+                  case 'INS-6':
+                    userMessage = 'Transação falhou. Tente novamente.';
+                    break;
+                  case 'INS-9':
+                    userMessage = 'Tempo limite excedido. Verifique sua conexão e tente novamente.';
+                    break;
+                  case 'INS-10':
+                    userMessage = 'Transação duplicada. Aguarde alguns minutos antes de tentar novamente.';
+                    break;
+                  case 'INS-15':
+                    userMessage = 'Valor inválido. Verifique o montante e tente novamente.';
+                    break;
+                  case 'INS-16':
+                    userMessage = 'Serviço temporariamente sobrecarregado. Tente novamente em alguns minutos.';
+                    break;
+                  case 'INS-17':
+                    userMessage = 'Referência de transação inválida. Tente novamente.';
+                    break;
+                  case 'INS-20':
+                    userMessage = 'Informações incompletas. Verifique os dados e tente novamente.';
+                    break;
+                  case 'INS-21':
+                    userMessage = 'Dados inválidos. Verifique as informações inseridas.';
+                    break;
+                  case 'INS-23':
+                    userMessage = 'Erro desconhecido. Contacte o suporte M-Pesa.';
+                    break;
+                  case 'INS-995':
+                    userMessage = 'Problema com o perfil do cliente. Contacte o suporte M-Pesa.';
+                    break;
+                  case 'INS-996':
+                    userMessage = 'Conta do cliente não está ativa. Contacte o suporte M-Pesa.';
+                    break;
+                  case 'INS-2002':
+                    userMessage = 'Número de telefone inválido. Verifique o número e tente novamente.';
+                    break;
+                  case 'INS-2006':
+                    userMessage = 'Saldo insuficiente em sua conta M-Pesa.';
+                    break;
+                  case 'INS-2051':
+                    userMessage = 'Número MSISDN inválido. Verifique o número de telefone.';
+                    break;
+                  default:
+                    userMessage = 'Erro no processamento do pagamento. Tente novamente ou contacte o suporte.';
+                }
+              }
+              
+              toast({
+                title: "Erro no Pagamento M-Pesa",
+                description: userMessage,
+                variant: "destructive"
+              });
+              return;
+            }
+          }
+          throw error;
+        }
 
         if (data.success) {
           toast({
@@ -301,66 +372,10 @@ export default function Billing() {
           fetchMinuteData();
           fetchBillingHistory();
         } else {
-          // Handle specific M-Pesa error codes - only user-relevant ones
-          const errorDetails = data.details;
-          let userMessage = 'Falha no pagamento';
-          
-          if (errorDetails?.body?.output_ResponseCode) {
-            switch (errorDetails.body.output_ResponseCode) {
-              case 'INS-5':
-                userMessage = 'Transação cancelada pelo cliente.';
-                break;
-              case 'INS-6':
-                userMessage = 'Transação falhou. Tente novamente.';
-                break;
-              case 'INS-9':
-                userMessage = 'Tempo limite excedido. Verifique sua conexão e tente novamente.';
-                break;
-              case 'INS-10':
-                userMessage = 'Transação duplicada. Aguarde alguns minutos antes de tentar novamente.';
-                break;
-              case 'INS-15':
-                userMessage = 'Valor inválido. Verifique o montante e tente novamente.';
-                break;
-              case 'INS-16':
-                userMessage = 'Serviço temporariamente sobrecarregado. Tente novamente em alguns minutos.';
-                break;
-              case 'INS-17':
-                userMessage = 'Referência de transação inválida. Tente novamente.';
-                break;
-              case 'INS-20':
-                userMessage = 'Informações incompletas. Verifique os dados e tente novamente.';
-                break;
-              case 'INS-21':
-                userMessage = 'Dados inválidos. Verifique as informações inseridas.';
-                break;
-              case 'INS-23':
-                userMessage = 'Erro desconhecido. Contacte o suporte M-Pesa.';
-                break;
-              case 'INS-995':
-                userMessage = 'Problema com o perfil do cliente. Contacte o suporte M-Pesa.';
-                break;
-              case 'INS-996':
-                userMessage = 'Conta do cliente não está ativa. Contacte o suporte M-Pesa.';
-                break;
-              case 'INS-2002':
-                userMessage = 'Número de telefone inválido. Verifique o número e tente novamente.';
-                break;
-              case 'INS-2006':
-                userMessage = 'Saldo insuficiente em sua conta M-Pesa.';
-                break;
-              case 'INS-2051':
-                userMessage = 'Número MSISDN inválido. Verifique o número de telefone.';
-                break;
-              default:
-                // For technical errors (INS-1, INS-2, INS-4, etc.), show generic message
-                userMessage = 'Erro no processamento do pagamento. Tente novamente ou contacte o suporte.';
-            }
-          }
-          
+          // Fallback for any non-success response that wasn't caught as an error
           toast({
             title: "Erro no Pagamento M-Pesa",
-            description: userMessage,
+            description: "Erro no processamento do pagamento. Tente novamente ou contacte o suporte.",
             variant: "destructive"
           });
           return;
