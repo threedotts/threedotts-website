@@ -373,23 +373,6 @@ export default function Billing() {
 
   return (
     <div className="container mx-auto p-6 space-y-8">
-      {/* Tarifas */}
-      <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Phone className="h-5 w-5" />
-            Tarifas das Chamadas
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-blue-600">23 MTS/MIN</div>
-            <div className="text-sm text-muted-foreground">(0.35 USD/MIN)</div>
-            <div className="text-xs text-muted-foreground mt-2">Base TOP UP</div>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Estatísticas Atuais */}
       <Card className="p-6">
         <h2 className="text-xl font-semibold mb-4">Minutos de Chamada</h2>
