@@ -104,6 +104,18 @@ export default function Billing() {
     }
   }, [userOrganization]);
 
+  // Add a periodic refresh to catch external updates
+  useEffect(() => {
+    if (!userOrganization) return;
+
+    const interval = setInterval(() => {
+      fetchMinuteData();
+      fetchBillingHistory();
+    }, 30000); // Refresh every 30 seconds
+
+    return () => clearInterval(interval);
+  }, [userOrganization]);
+
   const fetchUserOrganization = async () => {
     try {
       const { data: ownedOrgs, error: ownedError } = await supabase
@@ -298,8 +310,10 @@ export default function Billing() {
           setMpesaPhone('');
           
           // Refresh data after successful payment
-          fetchMinuteData();
-          fetchBillingHistory();
+          await Promise.all([
+            fetchMinuteData(),
+            fetchBillingHistory()
+          ]);
         } else {
           throw new Error(data.error || 'Falha no pagamento');
         }
