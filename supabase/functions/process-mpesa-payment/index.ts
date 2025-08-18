@@ -12,17 +12,37 @@ interface MpesaPaymentRequest {
 }
 
 serve(async (req) => {
+  console.log('=== M-Pesa Payment Function Started ===');
+  console.log('Request method:', req.method);
+  console.log('Request URL:', req.url);
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
+    console.log('Handling CORS preflight request');
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    console.log('M-Pesa function started');
+    console.log('Processing request...');
     
-    // Parse request body
-    const requestBody = await req.json();
-    console.log('Request body received:', requestBody);
+    let requestBody;
+    try {
+      requestBody = await req.json();
+      console.log('✅ Request body parsed successfully:', requestBody);
+    } catch (parseError) {
+      console.error('❌ Failed to parse request body:', parseError);
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Invalid JSON in request body',
+          details: parseError.message 
+        }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
     
     const { amount, customerMSISDN, organizationId } = requestBody;
     console.log('Parsed values:', { amount, customerMSISDN, organizationId });
