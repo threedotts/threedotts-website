@@ -68,8 +68,8 @@ serve(async (req) => {
       headers: {
         'Content-Type': 'application/json',
         'Origin': '*',
-        // Use API key authentication as shown in Python SDK
-        'Authorization': `Bearer ${apiKey}`
+        // Based on Python SDK - no Bearer token, just API key as header
+        'X-API-Key': apiKey
       },
       body: JSON.stringify(requestBody)
     });
