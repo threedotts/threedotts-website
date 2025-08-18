@@ -47,6 +47,19 @@ serve(async (req) => {
     const { amount, customerMSISDN, organizationId } = requestBody;
     console.log('Parsed values:', { amount, customerMSISDN, organizationId });
 
+    // TESTE TEMPORÁRIO - retornar sucesso imediatamente
+    return new Response(
+      JSON.stringify({ 
+        success: true, 
+        message: 'Função está funcionando!',
+        received: { amount, customerMSISDN, organizationId },
+        method: 'POST confirmado'
+      }),
+      { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      }
+    );
+
     // Validate required fields
     if (!amount || !customerMSISDN || !organizationId) {
       console.error('Missing required fields:', { amount: !!amount, customerMSISDN: !!customerMSISDN, organizationId: !!organizationId });
