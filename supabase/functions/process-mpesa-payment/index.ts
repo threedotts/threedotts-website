@@ -28,11 +28,11 @@ serve(async (req) => {
     const thirdPartyReference = Math.random().toString(36).substr(2, 6).toUpperCase();
 
     // Get environment variables
-    const bearerToken = Deno.env.get('MPESA_BEARER_TOKEN');
+    const apiKey = Deno.env.get('MPESA_API_KEY');
+    const publicKey = Deno.env.get('MPESA_PUBLIC_KEY');
     const serviceProviderCode = Deno.env.get('MPESA_SERVICE_PROVIDER_CODE');
-    const apiHost = 'api.sandbox.vm.co.mz'; // Use sandbox endpoint
 
-    if (!bearerToken || !serviceProviderCode) {
+    if (!apiKey || !publicKey || !serviceProviderCode) {
       console.error('Missing M-Pesa configuration');
       return new Response(
         JSON.stringify({ 
@@ -46,8 +46,12 @@ serve(async (req) => {
       );
     }
 
-    // Prepare M-Pesa API request
-    const mpesaPayload = {
+    // Prepare M-Pesa API request using the correct format from Python SDK
+    const apiHost = 'api.sandbox.vm.co.mz';
+    const apiPort = '18352';
+    const apiPath = '/ipg/v1x/c2bPayment/singleStage/';
+    
+    const requestBody = {
       input_TransactionReference: transactionReference,
       input_CustomerMSISDN: customerMSISDN,
       input_Amount: amount,
@@ -55,17 +59,19 @@ serve(async (req) => {
       input_ServiceProviderCode: serviceProviderCode
     };
 
-    console.log('M-Pesa API payload:', mpesaPayload);
+    console.log('M-Pesa API request body:', requestBody);
+    console.log('Using API endpoint:', `https://${apiHost}:${apiPort}${apiPath}`);
 
-    // Make request to M-Pesa API
-    const mpesaResponse = await fetch(`https://${apiHost}/ipg/v1x/c2bPayment/singleStage/`, {
+    // Make request to M-Pesa API using the correct endpoint format
+    const mpesaResponse = await fetch(`https://${apiHost}:${apiPort}${apiPath}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${bearerToken}`,
-        'Origin': 'developer.mpesa.vm.co.mz'
+        'Origin': '*',
+        // Use API key authentication as shown in Python SDK
+        'Authorization': `Bearer ${apiKey}`
       },
-      body: JSON.stringify(mpesaPayload)
+      body: JSON.stringify(requestBody)
     });
 
     console.log('M-Pesa API response status:', mpesaResponse.status);
