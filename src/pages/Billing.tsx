@@ -299,9 +299,14 @@ export default function Billing() {
           }
         });
 
-        if (error) throw error;
+        if (error) {
+          console.error('Supabase function error:', error);
+          throw error;
+        }
 
-        if (data.success) {
+        console.log('M-Pesa payment response:', data);
+
+        if (data?.success) {
           toast({
             title: "Pagamento Bem-sucedido",
             description: `${minutes} minutos foram adicionados à sua conta.`,
@@ -315,7 +320,20 @@ export default function Billing() {
             fetchBillingHistory()
           ]);
         } else {
-          throw new Error(data.error || 'Falha no pagamento');
+          // Show specific error message from M-Pesa response
+          const errorMessage = data?.details?.body?.output_ResponseDesc || data?.error || 'Falha no pagamento';
+          
+          toast({
+            title: "Falha no Pagamento",
+            description: `Erro: ${errorMessage}`,
+            variant: "destructive"
+          });
+          
+          // Still refresh data in case there was a partial success
+          await Promise.all([
+            fetchMinuteData(),
+            fetchBillingHistory()
+          ]);
         }
       } else {
         // Handle bank transfer
@@ -336,7 +354,7 @@ export default function Billing() {
             description: `Referência: ${data.paymentReference}`,
           });
           
-          fetchBillingHistory();
+          await fetchBillingHistory();
         }
       }
     } catch (error) {
