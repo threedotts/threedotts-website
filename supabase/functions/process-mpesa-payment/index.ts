@@ -136,51 +136,54 @@ serve(async (req) => {
                      mpesaResult.body?.output_ResponseDesc === 'Request processed successfully';
 
     if (isSuccess) {
-      console.log('Payment successful, adding credits to organization:', organizationId);
+      console.log('Payment successful, will add credits to organization:', organizationId);
       
       // Calculate credits (assuming 1 MZN = 1 credit for now)
       const credits = parseInt(amount);
       
-      // Initialize Supabase client with service role
-      const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
-      const supabaseServiceRole = createClient(
-        Deno.env.get('SUPABASE_URL') ?? '',
-        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-      );
+      // Start background task to add credits - don't block the response
+      const addCreditsTask = async () => {
+        try {
+          console.log('Background task: Adding credits to organization:', organizationId);
+          
+          // Initialize Supabase client with service role
+          const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+          const supabaseServiceRole = createClient(
+            Deno.env.get('SUPABASE_URL') ?? '',
+            Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+          );
 
-      // Add credits using the database function
-      const { data: creditResult, error: creditError } = await supabaseServiceRole
-        .rpc('add_credits', {
-          org_id: organizationId,
-          credits_to_add: credits,
-          cost_amount: parseFloat(amount),
-          payment_method: 'mpesa',
-          payment_ref: transactionReference
-        });
+          // Add credits using the database function
+          const { data: creditResult, error: creditError } = await supabaseServiceRole
+            .rpc('add_credits', {
+              org_id: organizationId,
+              credits_to_add: credits,
+              cost_amount: parseFloat(amount),
+              payment_method: 'mpesa',
+              payment_ref: transactionReference
+            });
 
-      if (creditError) {
-        console.error('Error adding credits:', creditError);
-        return new Response(
-          JSON.stringify({ 
-            success: false, 
-            error: 'Failed to add credits',
-            details: creditError 
-          }),
-          { 
-            status: 500, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          if (creditError) {
+            console.error('Background task error - Failed to add credits:', creditError);
+          } else {
+            console.log('Background task completed - Credits added successfully:', creditResult);
           }
-        );
-      }
+        } catch (error) {
+          console.error('Background task error:', error);
+        }
+      };
 
-      console.log('Credits added successfully:', creditResult);
+      // Start the background task without waiting for it
+      EdgeRuntime.waitUntil(addCreditsTask());
 
+      // Return immediate success response
       return new Response(
         JSON.stringify({ 
           success: true, 
           transactionReference,
           creditsAdded: credits,
-          mpesaResponse: mpesaResult
+          mpesaResponse: mpesaResult,
+          message: 'Payment processed successfully, credits will be added shortly'
         }),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
