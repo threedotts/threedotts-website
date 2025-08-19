@@ -442,14 +442,84 @@ export default function Billing() {
 
   if (loading) {
     return (
-      <div className="p-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-muted rounded w-1/4"></div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="p-6 space-y-8">
+        {/* Main Card Shimmer */}
+        <Card className="p-6 animate-fade-in">
+          <div className="animate-pulse space-y-4">
+            {/* Title shimmer */}
+            <div className="h-7 bg-muted/60 rounded w-48"></div>
+            
+            {/* Stats grid shimmer */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
+              {[1, 2, 3].map((i) => (
+                <Card key={i} className="animate-scale-in" style={{ animationDelay: `${i * 100}ms` }}>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <div className="h-4 bg-muted/60 rounded w-24"></div>
+                    <div className="h-4 w-4 bg-muted/60 rounded"></div>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    <div className="h-8 bg-muted/60 rounded w-16"></div>
+                    <div className="h-3 bg-muted/40 rounded w-32"></div>
+                    {i === 3 && <div className="h-2 bg-muted/40 rounded w-full mt-2"></div>}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </Card>
+
+        {/* Tabs shimmer */}
+        <div className="space-y-4 animate-fade-in" style={{ animationDelay: '300ms' }}>
+          {/* Tab list shimmer */}
+          <div className="flex space-x-1 bg-muted/30 p-1 rounded-lg w-fit">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-32 bg-muted rounded"></div>
+              <div key={i} className="h-9 bg-muted/60 rounded px-4 w-32"></div>
             ))}
           </div>
+
+          {/* Tab content shimmer */}
+          <Card className="animate-scale-in" style={{ animationDelay: '400ms' }}>
+            <CardHeader>
+              <div className="space-y-2">
+                <div className="h-6 bg-muted/60 rounded w-40"></div>
+                <div className="h-4 bg-muted/40 rounded w-64"></div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Package grid shimmer */}
+              <div className="space-y-3">
+                <div className="h-5 bg-muted/60 rounded w-36"></div>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {[1, 2, 3, 4, 5, 6].map((i) => (
+                    <div 
+                      key={i} 
+                      className="h-24 bg-muted/40 rounded-lg animate-pulse" 
+                      style={{ animationDelay: `${500 + i * 50}ms` }}
+                    ></div>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Payment section shimmer */}
+              <div className="space-y-4 pt-6 border-t">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-3">
+                    <div className="h-5 bg-muted/60 rounded w-32"></div>
+                    <div className="h-10 bg-muted/40 rounded"></div>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="h-5 bg-muted/60 rounded w-28"></div>
+                    <div className="h-16 bg-muted/40 rounded"></div>
+                  </div>
+                </div>
+                
+                <div className="flex gap-3 pt-4">
+                  <div className="h-11 bg-primary/20 rounded flex-1"></div>
+                  <div className="h-11 bg-muted/40 rounded flex-1"></div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );
