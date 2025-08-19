@@ -7,6 +7,7 @@ const corsHeaders = {
 
 interface MpesaPaymentRequest {
   amount: string;
+  minutes: number;
   customerMSISDN: string;
   organizationId: string;
 }
@@ -44,17 +45,17 @@ serve(async (req) => {
       );
     }
     
-    const { amount, customerMSISDN, organizationId } = requestBody;
-    console.log('Parsed values:', { amount, customerMSISDN, organizationId });
+    const { amount, minutes, customerMSISDN, organizationId } = requestBody;
+    console.log('Parsed values:', { amount, minutes, customerMSISDN, organizationId });
 
     console.log('✅ About to validate required fields...');
-    if (!amount || !customerMSISDN || !organizationId) {
-      console.error('Missing required fields:', { amount: !!amount, customerMSISDN: !!customerMSISDN, organizationId: !!organizationId });
+    if (!amount || !minutes || !customerMSISDN || !organizationId) {
+      console.error('Missing required fields:', { amount: !!amount, minutes: !!minutes, customerMSISDN: !!customerMSISDN, organizationId: !!organizationId });
       return new Response(
         JSON.stringify({ 
           success: false, 
-          error: 'Missing required fields: amount, customerMSISDN, and organizationId are required',
-          received: { amount, customerMSISDN, organizationId }
+          error: 'Missing required fields: amount, minutes, customerMSISDN, and organizationId are required',
+          received: { amount, minutes, customerMSISDN, organizationId }
         }),
         { 
           status: 400, 
@@ -138,8 +139,8 @@ serve(async (req) => {
     if (isSuccess) {
       console.log('Payment successful, will add credits to organization:', organizationId);
       
-      // Calculate credits (assuming 1 MZN = 1 credit for now)
-      const credits = parseInt(amount);
+      // Use the minutes from the request instead of parsing the amount
+      const credits = minutes;
       
       // Start background task to add credits - don't block the response
       const addCreditsTask = async () => {

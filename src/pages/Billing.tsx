@@ -282,6 +282,7 @@ export default function Billing() {
         const { data, error } = await supabase.functions.invoke('process-mpesa-payment', {
           body: {
             amount: totalPrice.toString(),
+            minutes: minutes,
             customerMSISDN: mpesaPhone,
             organizationId: userOrganization.id
           }
