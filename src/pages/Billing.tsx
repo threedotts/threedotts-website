@@ -690,8 +690,13 @@ export default function Billing() {
                     value={customMinutes}
                     onChange={(e) => {
                       const value = e.target.value.replace(/[^\d]/g, '');
-                      const numValue = value === '' ? 0 : Number(value);
-                      setCustomMinutes(numValue >= 1000 ? numValue : 1000);
+                      setCustomMinutes(value === '' ? 0 : Number(value));
+                    }}
+                    onBlur={(e) => {
+                      const value = Number(e.target.value);
+                      if (value < 1000) {
+                        setCustomMinutes(1000);
+                      }
                     }}
                     placeholder="Mínimo: 1000 minutos"
                     min="1000"
