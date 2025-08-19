@@ -686,9 +686,13 @@ export default function Billing() {
                   <Label htmlFor="custom-minutes">Quantidade de Minutos</Label>
                   <Input
                     id="custom-minutes"
-                    type="number"
+                    type="text"
                     value={customMinutes}
-                    onChange={(e) => setCustomMinutes(Math.max(1000, Number(e.target.value)))}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/[^\d]/g, '');
+                      const numValue = value === '' ? 0 : Number(value);
+                      setCustomMinutes(numValue >= 1000 ? numValue : 1000);
+                    }}
                     placeholder="Mínimo: 1000 minutos"
                     min="1000"
                   />
