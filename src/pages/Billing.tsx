@@ -73,6 +73,7 @@ export default function Billing() {
   const [selectedPackage, setSelectedPackage] = useState<number>(1000);
   const [customMinutes, setCustomMinutes] = useState(1000);
   const [customMinutesError, setCustomMinutesError] = useState<string | null>(null);
+  const [mpesaPhoneError, setMpesaPhoneError] = useState<string | null>(null);
   const [userOrganization, setUserOrganization] = useState<any>(null);
   const [currentPlan, setCurrentPlan] = useState<string | null>(null);
   const [mpesaPhone, setMpesaPhone] = useState('');
@@ -278,6 +279,26 @@ export default function Billing() {
     // Validar e atualizar erro em tempo real
     const validationError = validateCustomMinutes(numValue);
     updateCustomMinutesError(validationError);
+  };
+
+  // Função para verificar se todos os campos estão válidos
+  const areFieldsValid = () => {
+    const selectedMinutes = getSelectedMinutes();
+    
+    // Verificar se tem quantidade válida de minutos
+    if (!selectedMinutes || selectedMinutes <= 0) return false;
+    
+    // Se usar quantidade personalizada, verificar se não tem erro
+    if (useCustomAmount && customMinutesError) return false;
+    
+    // Se usar quantidade personalizada, verificar se o valor é válido
+    if (useCustomAmount && selectedMinutes < 1000) return false;
+    
+    // Para M-Pesa, verificar se tem telefone válido (sem erro)
+    if (mpesaPhoneError) return false;
+    if (!mpesaPhone || mpesaPhone.length !== 12) return false;
+    
+    return true;
   };
 
   const getSelectedMinutes = () => useCustomAmount ? customMinutes : selectedPackage;
@@ -757,6 +778,7 @@ export default function Billing() {
                 <PhoneInput
                   value={mpesaPhone}
                   onChange={setMpesaPhone}
+                  onError={setMpesaPhoneError}
                   placeholder="258123456789"
                   className="mt-1"
                 />
@@ -768,7 +790,7 @@ export default function Billing() {
                   onClick={() => handleTopUp('mpesa')} 
                   className="gap-2 h-20 flex-col"
                   variant="default"
-                  disabled={!getSelectedMinutes() || !mpesaPhone || isProcessing}
+                  disabled={isProcessing || !areFieldsValid()}
                   size="lg"
                 >
                   <CreditCard className="h-6 w-6" />
@@ -780,7 +802,7 @@ export default function Billing() {
                   onClick={() => handleTopUp('bank_transfer')} 
                   className="gap-2 h-20 flex-col"
                   variant="outline"
-                  disabled={!getSelectedMinutes() || isProcessing}
+                  disabled={isProcessing || !areFieldsValid()}
                   size="lg"
                 >
                   <Wallet className="h-6 w-6" />
