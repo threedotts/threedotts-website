@@ -47,6 +47,28 @@ export function CreditsMeter({ organizationId, isCollapsed }: CreditsMeterProps)
 
     if (organizationId) {
       fetchCreditData();
+
+      // Set up real-time subscription for credit changes
+      const channel = supabase
+        .channel('user_credits_changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'user_credits',
+            filter: `organization_id=eq.${organizationId}`
+          },
+          (payload) => {
+            console.log('Credit data changed:', payload);
+            fetchCreditData(); // Refetch data when changes occur
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
     }
   }, [organizationId]);
 
