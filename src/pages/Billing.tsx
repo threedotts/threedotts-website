@@ -688,9 +688,9 @@ export default function Billing() {
                     id="custom-minutes"
                     type="number"
                     value={customMinutes}
-                    onChange={(e) => setCustomMinutes(Number(e.target.value))}
-                    placeholder="Digite a quantidade de minutos"
-                    min="1"
+                    onChange={(e) => setCustomMinutes(Math.max(1000, Number(e.target.value)))}
+                    placeholder="Mínimo: 1000 minutos"
+                    min="1000"
                   />
                 </div>
               )}
