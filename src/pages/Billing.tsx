@@ -63,7 +63,11 @@ const MINUTE_PACKAGES = [
   { minutes: 10000, price: 10000 * PRICE_PER_MINUTE }
 ];
 
-export default function Billing() {
+interface BillingProps {
+  selectedOrganization: any;
+}
+
+export default function Billing({ selectedOrganization }: BillingProps) {
   const { toast } = useToast();
   const [user, setUser] = useState<User | null>(null);
   const [minuteData, setMinuteData] = useState<MinuteData | null>(null);
@@ -74,7 +78,6 @@ export default function Billing() {
   const [customMinutes, setCustomMinutes] = useState(1000);
   const [customMinutesError, setCustomMinutesError] = useState<string | null>(null);
   const [mpesaPhoneError, setMpesaPhoneError] = useState<string | null>(null);
-  const [userOrganization, setUserOrganization] = useState<any>(null);
   const [currentPlan, setCurrentPlan] = useState<string | null>(null);
   const [mpesaPhone, setMpesaPhone] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -95,62 +98,21 @@ export default function Billing() {
   }, []);
 
   useEffect(() => {
-    if (user) {
-      fetchUserOrganization();
-    }
-  }, [user]);
-
-  useEffect(() => {
-    if (userOrganization) {
+    if (selectedOrganization) {
       fetchMinuteData();
       fetchBillingSettings();
       fetchBillingHistory();
     }
-  }, [userOrganization]);
-
-  const fetchUserOrganization = async () => {
-    try {
-      const { data: ownedOrgs, error: ownedError } = await supabase
-        .from('organizations')
-        .select('*')
-        .eq('user_id', user?.id);
-
-      if (ownedOrgs && ownedOrgs.length > 0) {
-        setUserOrganization(ownedOrgs[0]);
-        return;
-      }
-
-      const { data: membership, error: memberError } = await supabase
-        .from('organization_members')
-        .select('organization_id, role, organizations(*)')
-        .eq('user_id', user?.id)
-        .eq('status', 'active')
-        .in('role', ['admin'])
-        .maybeSingle();
-
-      if (memberError) {
-        console.error('Error fetching organization:', memberError);
-        return;
-      }
-
-      if (membership?.organizations) {
-        setUserOrganization(membership.organizations);
-      }
-      
-      setCurrentPlan(null);
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
+  }, [selectedOrganization]);
 
   const fetchMinuteData = async () => {
-    if (!userOrganization) return;
+    if (!selectedOrganization) return;
 
     try {
       const { data, error } = await supabase
         .from('user_credits')
         .select('*')
-        .eq('organization_id', userOrganization.id)
+        .eq('organization_id', selectedOrganization.id)
         .maybeSingle();
 
       if (error) throw error;
@@ -167,13 +129,13 @@ export default function Billing() {
   };
 
   const fetchBillingSettings = async () => {
-    if (!userOrganization) return;
+    if (!selectedOrganization) return;
 
     try {
       const { data, error } = await supabase
         .from('billing_settings')
         .select('*')
-        .eq('organization_id', userOrganization.id)
+        .eq('organization_id', selectedOrganization.id)
         .maybeSingle();
 
       if (error) throw error;
@@ -193,13 +155,13 @@ export default function Billing() {
   };
 
   const fetchBillingHistory = async () => {
-    if (!userOrganization) return;
+    if (!selectedOrganization) return;
 
     try {
       const { data, error } = await supabase
         .from('billing_history')
         .select('*')
-        .eq('organization_id', userOrganization.id)
+        .eq('organization_id', selectedOrganization.id)
         .order('created_at', { ascending: false })
         .limit(50);
 
@@ -221,7 +183,7 @@ export default function Billing() {
   };
 
   const updateBillingSettings = async (newSettings: Partial<BillingSettings>) => {
-    if (!userOrganization || !billingSettings) return;
+    if (!selectedOrganization || !billingSettings) return;
 
     try {
       const updatedSettings = { ...billingSettings, ...newSettings };
@@ -229,7 +191,7 @@ export default function Billing() {
       const { error } = await supabase
         .from('billing_settings')
         .upsert({
-          organization_id: userOrganization.id,
+          organization_id: selectedOrganization.id,
           low_credit_warning_threshold: updatedSettings.lowMinuteThreshold,
           enable_low_credit_notifications: updatedSettings.enableNotifications,
           auto_top_up_enabled: updatedSettings.autoTopUpEnabled,
@@ -308,7 +270,7 @@ export default function Billing() {
     const minutes = getSelectedMinutes();
     const totalPrice = getTotalPrice();
     
-    if (!userOrganization || minutes <= 0) {
+    if (!selectedOrganization || minutes <= 0) {
       toast({
         title: "Erro",
         description: "Quantidade inválida de minutos",
@@ -335,7 +297,7 @@ export default function Billing() {
             amount: totalPrice.toString(),
             minutes: minutes,
             customerMSISDN: mpesaPhone,
-            organizationId: userOrganization.id
+            organizationId: selectedOrganization.id
           }
         });
 
@@ -576,7 +538,7 @@ export default function Billing() {
     );
   }
 
-  if (!userOrganization) {
+  if (!selectedOrganization) {
     return (
       <div className="p-6">
         <Alert>

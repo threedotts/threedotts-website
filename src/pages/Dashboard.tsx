@@ -337,7 +337,7 @@ const Dashboard = () => {
               <Route path="/call-history" element={<CallHistory key={`history-${reloadKey}`} selectedOrganization={selectedOrg} />} />
               <Route path="/settings" element={<Settings key={`settings-${reloadKey}`} selectedOrganization={selectedOrg} onOrganizationUpdate={setSelectedOrg} />} />
               <Route path="/employees" element={<Employees key={`employees-${reloadKey}`} selectedOrganization={selectedOrg} />} />
-              <Route path="/billing" element={<Billing key={`billing-${reloadKey}`} />} />
+              <Route path="/billing" element={<Billing key={`billing-${reloadKey}`} selectedOrganization={selectedOrg} />} />
             </Routes>
           </main>
         </div>
