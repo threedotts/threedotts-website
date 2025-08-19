@@ -92,11 +92,6 @@ const menuItems: MenuItem[] = [
     url: "/dashboard/settings", 
     icon: Settings,
   },
-  { 
-    title: "Cobrança", 
-    url: "/dashboard/billing", 
-    icon: DollarSign,
-  },
 ];
 
 interface AppSidebarProps {
