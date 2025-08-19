@@ -47,10 +47,31 @@ export default function PhoneInput({ value, onChange, placeholder, className, er
     onError?.(errorMsg);
   };
 
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Permitir apenas números e teclas de controle
+    const allowedKeys = ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight'];
+    
+    if (allowedKeys.includes(e.key)) {
+      return;
+    }
+    
+    // Bloquear se não for número
+    if (!/^\d$/.test(e.key)) {
+      e.preventDefault();
+      return;
+    }
+    
+    // Bloquear se já tiver 12 dígitos
+    const currentLength = value.length;
+    if (currentLength >= TOTAL_DIGITS) {
+      e.preventDefault();
+    }
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target.value;
     
-    // Permitir apenas números
+    // Garantir que só aceita números
     const cleaned = input.replace(/[^\d]/g, '');
     
     // Limitar ao máximo de 12 dígitos
@@ -74,9 +95,13 @@ export default function PhoneInput({ value, onChange, placeholder, className, er
     <div className="relative">
       <Input
         type="tel"
+        inputMode="numeric"
+        pattern="[0-9]*"
         value={value}
         onChange={handleChange}
+        onKeyDown={handleKeyPress}
         placeholder={placeholder || "258123456789"}
+        maxLength={TOTAL_DIGITS}
         className={cn(
           currentError ? "border-destructive focus:border-destructive focus-visible:ring-0" : "",
           className
