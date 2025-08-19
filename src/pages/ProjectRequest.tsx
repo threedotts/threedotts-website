@@ -20,7 +20,7 @@ const serviceSchema = z.object({
   fullName: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
   companyName: z.string().min(2, "Nome da empresa deve ter pelo menos 2 caracteres"),
   email: z.string().email("Email deve ser válido"),
-  phone: z.string().regex(/^\+\d{1,4}\d{6,15}$/, "Telefone deve começar com + seguido do código do país e ter formato válido").min(10, "Telefone deve ter pelo menos 10 caracteres"),
+  phone: z.string().regex(/^258\d{9}$/, "Telefone deve começar com 258 e ter exatamente 12 dígitos").length(12, "Telefone deve ter exatamente 12 dígitos"),
   companyDomain: z.string().optional(),
   // Seção 2: Serviços selecionados
   selectedServices: z.array(z.string()).min(1, "Seleccione pelo menos um serviço"),
@@ -366,11 +366,11 @@ export default function ProjectRequest() {
               }) => <FormItem>
                       <FormLabel>Telefone *</FormLabel>
                       <FormControl>
-                        <PhoneInput 
-                          value={field.value || ""} 
-                          onChange={field.onChange}
-                          placeholder="+351 123 456 789"
-                        />
+                         <PhoneInput 
+                           value={field.value || ""} 
+                           onChange={field.onChange}
+                           placeholder="258123456789"
+                         />
                       </FormControl>
                       <FormMessage />
                     </FormItem>} />
