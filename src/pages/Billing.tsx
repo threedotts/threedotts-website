@@ -789,11 +789,10 @@ export default function Billing() {
                 <Button 
                   onClick={() => handleTopUp('mpesa')} 
                   className="gap-2 h-20 flex-col"
-                  variant="default"
+                  variant="outline"
                   disabled={isProcessing || !areFieldsValid()}
                   size="lg"
                 >
-                  <CreditCard className="h-6 w-6" />
                   <span>{isProcessing ? "Processando..." : "Pagar com M-Pesa"}</span>
                   <span className="text-sm">{getTotalPrice().toLocaleString()} MTS</span>
                 </Button>
@@ -805,7 +804,6 @@ export default function Billing() {
                   disabled={isProcessing || !areFieldsValid()}
                   size="lg"
                 >
-                  <Wallet className="h-6 w-6" />
                   <span>{isProcessing ? "Processando..." : "Transferência Bancária"}</span>
                   <span className="text-sm">{getTotalPrice().toLocaleString()} MTS</span>
                 </Button>
