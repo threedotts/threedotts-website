@@ -22,6 +22,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { cn } from "@/lib/utils";
 import PhoneInput from "@/components/PhoneInput";
 
 interface MinuteData {
@@ -71,6 +72,7 @@ export default function Billing() {
   const [loading, setLoading] = useState(true);
   const [selectedPackage, setSelectedPackage] = useState<number>(1000);
   const [customMinutes, setCustomMinutes] = useState(1000);
+  const [customMinutesError, setCustomMinutesError] = useState<string | null>(null);
   const [userOrganization, setUserOrganization] = useState<any>(null);
   const [currentPlan, setCurrentPlan] = useState<string | null>(null);
   const [mpesaPhone, setMpesaPhone] = useState('');
@@ -249,6 +251,33 @@ export default function Billing() {
         variant: "destructive"
       });
     }
+  };
+
+  const validateCustomMinutes = (minutes: number) => {
+    if (minutes === 0) {
+      return null; // Permitir campo vazio durante digitação
+    }
+    
+    if (minutes < 1000) {
+      return "Quantidade mínima é 1000 minutos";
+    }
+    
+    return null;
+  };
+
+  const updateCustomMinutesError = (errorMsg: string | null) => {
+    setCustomMinutesError(errorMsg);
+  };
+
+  const handleCustomMinutesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/[^\d]/g, '');
+    const numValue = value === '' ? 0 : Number(value);
+    
+    setCustomMinutes(numValue);
+    
+    // Validar e atualizar erro em tempo real
+    const validationError = validateCustomMinutes(numValue);
+    updateCustomMinutesError(validationError);
   };
 
   const getSelectedMinutes = () => useCustomAmount ? customMinutes : selectedPackage;
@@ -684,23 +713,21 @@ export default function Billing() {
               {useCustomAmount && (
                 <div>
                   <Label htmlFor="custom-minutes">Quantidade de Minutos</Label>
-                  <Input
-                    id="custom-minutes"
-                    type="text"
-                    value={customMinutes}
-                    onChange={(e) => {
-                      const value = e.target.value.replace(/[^\d]/g, '');
-                      setCustomMinutes(value === '' ? 0 : Number(value));
-                    }}
-                    onBlur={(e) => {
-                      const value = Number(e.target.value);
-                      if (value < 1000) {
-                        setCustomMinutes(1000);
-                      }
-                    }}
-                    placeholder="Mínimo: 1000 minutos"
-                    min="1000"
-                  />
+                  <div className="relative">
+                    <Input
+                      id="custom-minutes"
+                      type="text"
+                      value={customMinutes === 0 ? '' : customMinutes}
+                      onChange={handleCustomMinutesChange}
+                      placeholder="Mínimo: 1000 minutos"
+                      className={cn(
+                        customMinutesError ? "border-destructive focus:border-destructive focus-visible:ring-0" : ""
+                      )}
+                    />
+                    {customMinutesError && (
+                      <p className="text-sm text-destructive mt-1">{customMinutesError}</p>
+                    )}
+                  </div>
                 </div>
               )}
 
