@@ -285,7 +285,7 @@ const Dashboard = () => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gradient-hero">
-        <AppSidebar user={user} profile={profile} />
+        <AppSidebar user={user} profile={profile} selectedOrganization={selectedOrg} />
 
         <div className="flex-1 flex flex-col">
           {/* Header */}

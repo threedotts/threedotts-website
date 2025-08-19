@@ -92,14 +92,20 @@ const menuItems: MenuItem[] = [
     url: "/dashboard/settings", 
     icon: Settings,
   },
+  { 
+    title: "Cobrança", 
+    url: "/dashboard/billing", 
+    icon: DollarSign,
+  },
 ];
 
 interface AppSidebarProps {
   user: any;
   profile: any;
+  selectedOrganization?: any;
 }
 
-export function AppSidebar({ user, profile }: AppSidebarProps) {
+export function AppSidebar({ user, profile, selectedOrganization }: AppSidebarProps) {
   const { state } = useSidebar();
   const location = useLocation();
   const navigate = useNavigate();
@@ -221,11 +227,12 @@ export function AppSidebar({ user, profile }: AppSidebarProps) {
           </SidebarMenu>
           
           {/* Credits Meter Card - only for admin/owner */}
-          {organizationId && ['owner', 'admin'].includes(userRole || '') && (
+          {selectedOrganization && ['owner', 'admin'].includes(userRole || '') && (
             <div className="mt-6">
               <CreditsMeter 
-                organizationId={organizationId} 
-                isCollapsed={state === 'collapsed'} 
+                organizationId={selectedOrganization.id} 
+                isCollapsed={state === 'collapsed'}
+                key={`credits-${selectedOrganization.id}`} 
               />
             </div>
           )}
