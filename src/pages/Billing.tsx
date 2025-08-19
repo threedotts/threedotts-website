@@ -442,7 +442,7 @@ export default function Billing() {
 
   if (loading) {
     return (
-      <div className="container mx-auto p-6">
+      <div className="p-6">
         <div className="animate-pulse space-y-4">
           <div className="h-8 bg-muted rounded w-1/4"></div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -457,7 +457,7 @@ export default function Billing() {
 
   if (!userOrganization) {
     return (
-      <div className="container mx-auto p-6">
+      <div className="p-6">
         <Alert>
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
@@ -475,7 +475,7 @@ export default function Billing() {
     minuteData.currentMinutes <= billingSettings.lowMinuteThreshold : false;
 
   return (
-    <div className="container mx-auto p-6 space-y-8">
+    <div className="p-6 space-y-8">
       {/* Estatísticas Atuais */}
       <Card className="p-6">
         <h2 className="text-xl font-semibold mb-4">Minutos de Chamada</h2>
