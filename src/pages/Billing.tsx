@@ -815,7 +815,7 @@ export default function Billing({ selectedOrganization }: BillingProps) {
                             {transaction.cost} MTS
                           </p>
                         )}
-                        <Badge variant={transaction.status === 'completed' ? 'default' : 'secondary'}>
+                        <Badge variant={transaction.status === 'completed' ? 'outline' : 'secondary'}>
                           {transaction.status}
                         </Badge>
                       </div>
