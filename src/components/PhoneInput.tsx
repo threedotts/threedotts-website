@@ -48,19 +48,15 @@ export default function PhoneInput({ value, onChange, placeholder, className, er
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    console.log('Key pressed:', e.key);
-    
     // Permitir apenas números e teclas de controle
     const allowedKeys = ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight'];
     
     if (allowedKeys.includes(e.key)) {
-      console.log('Allowed control key:', e.key);
       return;
     }
     
     // Bloquear se não for número
     if (!/^\d$/.test(e.key)) {
-      console.log('Blocked non-numeric key:', e.key);
       e.preventDefault();
       return;
     }
@@ -68,33 +64,23 @@ export default function PhoneInput({ value, onChange, placeholder, className, er
     // Bloquear se já tiver 12 dígitos
     const currentLength = value.length;
     if (currentLength >= TOTAL_DIGITS) {
-      console.log('Blocked - already has 12 digits:', currentLength);
       e.preventDefault();
-    } else {
-      console.log('Numeric key allowed, current length:', currentLength);
     }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target.value;
-    console.log('handleChange - input received:', input);
     
     // Garantir que só aceita números
     const cleaned = input.replace(/[^\d]/g, '');
-    console.log('handleChange - cleaned:', cleaned);
     
     // Limitar ao máximo de 12 dígitos
-    if (cleaned.length > TOTAL_DIGITS) {
-      console.log('handleChange - blocked, too many digits:', cleaned.length);
-      return;
-    }
+    if (cleaned.length > TOTAL_DIGITS) return;
     
     onChange(cleaned);
-    console.log('handleChange - final value set:', cleaned);
     
     // Validar e atualizar erro
     const validationError = validatePhone(cleaned);
-    console.log('handleChange - validation error:', validationError);
     updateError(validationError);
   };
 

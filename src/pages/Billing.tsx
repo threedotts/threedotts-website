@@ -22,6 +22,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import PhoneInput from "@/components/PhoneInput";
 
 interface MinuteData {
   currentMinutes: number;
@@ -717,12 +718,11 @@ export default function Billing() {
               {/* Número M-Pesa */}
               <div>
                 <Label htmlFor="mpesa-phone">Número de Telefone M-Pesa</Label>
-                <Input
-                  id="mpesa-phone"
-                  type="tel"
-                  placeholder="258843330333"
+                <PhoneInput
                   value={mpesaPhone}
-                  onChange={(e) => setMpesaPhone(e.target.value)}
+                  onChange={setMpesaPhone}
+                  placeholder="258123456789"
+                  className="mt-1"
                 />
               </div>
               
