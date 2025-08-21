@@ -124,8 +124,6 @@ export const useUserPresence = (currentOrganizationId?: string) => {
           table: 'user_presence'
         },
         async (payload) => {
-          console.log('Presence change detected:', payload);
-          
           if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
             const presence = payload.new as UserPresence;
             

@@ -80,13 +80,15 @@ serve(async (req) => {
             allConversations = allConversations.concat(data.conversations)
           }
 
-          // Check if we need to continue pagination
+          // Update pagination variables BEFORE checking conditions
           hasMore = data.has_more === true
-          cursor = data.next_cursor || ''
           
-          if (hasMore && !cursor) {
-            console.warn(`Agent ${agentId}: has_more is true but no next_cursor provided`)
-            break
+          if (hasMore) {
+            cursor = data.next_cursor || ''
+            if (!cursor) {
+              console.warn(`Agent ${agentId}: has_more is true but no next_cursor provided, stopping pagination`)
+              hasMore = false
+            }
           }
         }
 
