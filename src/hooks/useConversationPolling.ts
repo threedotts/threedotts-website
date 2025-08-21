@@ -49,6 +49,30 @@ export const useConversationPolling = ({
           console.error(`Error for agent ${result.agentId}:`, result.error);
         } else {
           console.log(`Conversations for agent ${result.agentId}:`, result.data);
+          
+          // Count done conversations by agent name for browser console
+          const doneByAgent: { [agentName: string]: number } = {};
+          
+          if (result.data && Array.isArray(result.data)) {
+            result.data.forEach((conversation: any) => {
+              if (conversation.status === 'done') {
+                const agentName = conversation.agent_name || 'Unknown Agent';
+                doneByAgent[agentName] = (doneByAgent[agentName] || 0) + 1;
+              }
+            });
+          }
+          
+          // Log the done counts in browser console
+          const agentNames = new Set(result.data?.map((conv: any) => conv.agent_name || 'Unknown Agent') || []);
+          agentNames.forEach((agentName: string) => {
+            const count = doneByAgent[agentName] || 0;
+            console.log(`${agentName}: ${count}`);
+          });
+          
+          // If no conversations at all, show 0
+          if (!result.data || result.data.length === 0) {
+            console.log(`Agent ${result.agentId}: 0`);
+          }
         }
       });
 
