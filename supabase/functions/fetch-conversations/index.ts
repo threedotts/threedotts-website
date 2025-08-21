@@ -24,6 +24,23 @@ serve(async (req) => {
       )
     }
 
+    // Filter out empty, null, or invalid agent IDs
+    const validAgentIds = agentIds.filter(id => 
+      id && typeof id === 'string' && id.trim() !== ''
+    )
+
+    console.log('Original agentIds:', agentIds)
+    console.log('Valid agentIds after filtering:', validAgentIds)
+
+    // If no valid agent IDs, return empty results
+    if (validAgentIds.length === 0) {
+      console.log('No valid agent IDs provided, returning empty results')
+      return new Response(
+        JSON.stringify({ results: [] }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
     const apiKey = Deno.env.get('ELEVENLABS_API_KEY')
     if (!apiKey) {
       return new Response(
@@ -32,10 +49,10 @@ serve(async (req) => {
       )
     }
 
-    console.log('Fetching conversations for agents:', agentIds)
+    console.log('Fetching conversations for valid agents:', validAgentIds)
 
-    // Fetch conversations for each agent with pagination
-    const conversationPromises = agentIds.map(async (agentId: string) => {
+    // Fetch conversations for each valid agent with pagination
+    const conversationPromises = validAgentIds.map(async (agentId: string) => {
       try {
         let allConversations: any[] = []
         let cursor = ''
