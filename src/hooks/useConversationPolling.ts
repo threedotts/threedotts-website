@@ -53,24 +53,22 @@ export const useConversationPolling = ({
           // Count done conversations by agent name for browser console
           const doneByAgent: { [agentName: string]: number } = {};
           
-          if (result.data && Array.isArray(result.data)) {
+          if (result.data && Array.isArray(result.data) && result.data.length > 0) {
             result.data.forEach((conversation: any) => {
               if (conversation.status === 'done') {
                 const agentName = conversation.agent_name || 'Unknown Agent';
                 doneByAgent[agentName] = (doneByAgent[agentName] || 0) + 1;
               }
             });
-          }
-          
-          // Log the done counts in browser console
-          const agentNames = new Set(result.data?.map((conv: any) => conv.agent_name || 'Unknown Agent') || []);
-          agentNames.forEach((agentName: string) => {
-            const count = doneByAgent[agentName] || 0;
-            console.log(`${agentName}: ${count}`);
-          });
-          
-          // If no conversations at all, show 0
-          if (!result.data || result.data.length === 0) {
+            
+            // Log the done counts in browser console
+            const agentNames = new Set(result.data.map((conv: any) => conv.agent_name || 'Unknown Agent'));
+            agentNames.forEach((agentName: string) => {
+              const count = doneByAgent[agentName] || 0;
+              console.log(`${agentName}: ${count}`);
+            });
+          } else {
+            // If no conversations or invalid data, show 0 for the agent
             console.log(`Agent ${result.agentId}: 0`);
           }
         }
