@@ -105,23 +105,23 @@ serve(async (req) => {
 
         console.log(`Total conversations fetched for agent ${agentId}: ${allConversations.length}`)
         
-        // Count in-progress conversations by agent name
-        const inProgressByAgent: { [agentName: string]: number } = {}
+        // Count done conversations by agent name
+        const doneByAgent: { [agentName: string]: number } = {}
         
         allConversations.forEach(conversation => {
-          if (conversation.status === 'in-progress') {
+          if (conversation.status === 'done') {
             const agentName = conversation.agent_name || 'Unknown Agent'
-            inProgressByAgent[agentName] = (inProgressByAgent[agentName] || 0) + 1
+            doneByAgent[agentName] = (doneByAgent[agentName] || 0) + 1
           }
         })
         
-        // Log the in-progress counts
-        Object.entries(inProgressByAgent).forEach(([agentName, count]) => {
+        // Log the done counts
+        Object.entries(doneByAgent).forEach(([agentName, count]) => {
           console.log(`${agentName}: ${count}`)
         })
         
-        if (Object.keys(inProgressByAgent).length === 0) {
-          console.log(`No in-progress conversations found for agent ${agentId}`)
+        if (Object.keys(doneByAgent).length === 0) {
+          console.log(`No done conversations found for agent ${agentId}`)
         }
         
         return { 
