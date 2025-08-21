@@ -52,13 +52,14 @@ export const useConversationPolling = ({
           
           // Count done conversations by agent name for browser console
           const doneByAgent: { [agentName: string]: number } = {};
+          const conversations = result.data?.conversations;
           
-          if (result.data && Array.isArray(result.data) && result.data.length > 0) {
+          if (conversations && Array.isArray(conversations) && conversations.length > 0) {
             // Get all unique agent names from conversations
-            const allAgentNames = new Set(result.data.map((conv: any) => conv.agent_name || 'Unknown Agent'));
+            const allAgentNames = new Set(conversations.map((conv: any) => conv.agent_name || 'Unknown Agent'));
             
             // Count done conversations for each agent
-            result.data.forEach((conversation: any) => {
+            conversations.forEach((conversation: any) => {
               if (conversation.status === 'done') {
                 const agentName = conversation.agent_name || 'Unknown Agent';
                 doneByAgent[agentName] = (doneByAgent[agentName] || 0) + 1;
