@@ -52,32 +52,40 @@ export const useConversationPolling = ({
   };
 
   useEffect(() => {
+    // Clear any existing interval first
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+
     if (!enabled || !selectedOrganization?.agent_id?.length) {
-      // Clear existing interval if conditions not met
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
       return;
     }
+
+    // Convert agent_id array to string for stable comparison
+    const agentIdString = JSON.stringify(selectedOrganization.agent_id.sort());
+    const orgId = selectedOrganization.id;
+
+    console.log(`Setting up conversation polling for org ${orgId} with agents:`, selectedOrganization.agent_id);
 
     // Initial fetch
     fetchConversations();
 
     // Set up polling every 15 seconds
-    intervalRef.current = setInterval(fetchConversations, 15000);
-
-    console.log('Started conversation polling every 15 seconds for organization:', selectedOrganization.id);
+    intervalRef.current = setInterval(() => {
+      console.log(`Polling conversations for org ${orgId}`);
+      fetchConversations();
+    }, 15000);
 
     // Cleanup function
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
-        console.log('Stopped conversation polling for organization:', selectedOrganization.id);
+        console.log('Stopped conversation polling for organization:', orgId);
       }
     };
-  }, [selectedOrganization?.id, selectedOrganization?.agent_id, enabled]);
+  }, [enabled, selectedOrganization?.id, JSON.stringify(selectedOrganization?.agent_id?.sort())]);
 
   // Cleanup on unmount
   useEffect(() => {
