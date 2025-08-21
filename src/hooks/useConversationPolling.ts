@@ -117,11 +117,11 @@ export const useConversationPolling = ({
     // Initial fetch
     fetchConversations();
 
-    // Set up polling every 15 seconds
+    // Set up polling every 45 seconds
     intervalRef.current = setInterval(() => {
       console.log(`Polling conversations for org ${orgId}`);
       fetchConversations();
-    }, 15000);
+    }, 45000);
 
     // Cleanup function
     return () => {

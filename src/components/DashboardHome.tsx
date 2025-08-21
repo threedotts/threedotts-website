@@ -2,6 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Users, Phone, TrendingUp, Clock, Target, DollarSign, Timer, UserCheck, MapPin, Calendar, BarChart3, PhoneCall } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, AreaChart, Area } from 'recharts';
 import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useUserPresence } from '@/hooks/useUserPresence';
 import { useConversationPolling } from '@/hooks/useConversationPolling';
@@ -47,6 +48,7 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
   const [selectedTimeFilter, setSelectedTimeFilter] = useState<string>('mensal');
   const [customDateRange, setCustomDateRange] = useState<DateRange | undefined>();
   const [agentIds, setAgentIds] = useState<string[]>([]);
+  const location = useLocation();
   
   const { presenceData, fetchPresenceData } = useUserPresence(selectedOrganization?.id);
   const { activeCallsByAgent, isLoading: pollingLoading } = useConversationPolling({
@@ -54,7 +56,7 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
       id: selectedOrganization.id, 
       agent_id: agentIds
     } : undefined,
-    enabled: !!selectedOrganization && agentIds.length > 0
+    enabled: !!selectedOrganization && agentIds.length > 0 && location.pathname === '/dashboard'
   });
 
   // Calculate total active calls from all agents
