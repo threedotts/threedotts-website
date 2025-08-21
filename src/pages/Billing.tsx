@@ -217,9 +217,9 @@ export default function Billing({ selectedOrganization }: BillingProps) {
     const value = e.target.value;
     setTempThreshold(value);
     
-    // Only update settings if value is a valid number
+    // Only update settings if value is a valid number >= 100
     const numValue = parseInt(value);
-    if (!isNaN(numValue) && numValue >= 0) {
+    if (!isNaN(numValue) && numValue >= 100) {
       updateTempBillingSettings({ lowMinuteThreshold: numValue });
     } else if (value === '') {
       // Allow empty field but don't update settings yet
@@ -230,12 +230,12 @@ export default function Billing({ selectedOrganization }: BillingProps) {
   const handleSaveSettings = async () => {
     if (!tempBillingSettings) return;
     
-    // Validate threshold before saving
+    // Validate threshold before saving - minimum is 100
     const thresholdNum = parseInt(tempThreshold);
-    if (tempThreshold === '' || isNaN(thresholdNum) || thresholdNum < 0) {
+    if (tempThreshold === '' || isNaN(thresholdNum) || thresholdNum < 100) {
       toast({
         title: "Erro de Validação",
-        description: "O limite de aviso deve ser um número válido maior ou igual a 0.",
+        description: "O limite de aviso deve ser no mínimo 100 minutos.",
         variant: "destructive"
       });
       return;
@@ -987,12 +987,13 @@ export default function Billing({ selectedOrganization }: BillingProps) {
                   <Input
                     id="threshold"
                     type="number"
+                    min="100"
                     value={tempThreshold}
                     onChange={handleThresholdChange}
-                    placeholder="Digite um valor (ex: 100)"
+                    placeholder="Digite um valor (mínimo: 100)"
                   />
                   <p className="text-sm text-muted-foreground mt-1">
-                    Seja notificado quando os minutos ficarem abaixo desta quantidade
+                    Seja notificado quando os minutos ficarem abaixo desta quantidade (mínimo: 100)
                   </p>
                 </div>
 
