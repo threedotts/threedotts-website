@@ -59,6 +59,7 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
     enabled: !!selectedOrganization && agentIds.length > 0 && location.pathname === '/dashboard'
   });
 
+  console.log('Polling enabled:', !!selectedOrganization && agentIds.length > 0 && location.pathname === '/dashboard');
   console.log('Active calls by agent for org', selectedOrganization?.name, ':', activeCallsByAgent);
   console.log('Agent IDs for polling:', agentIds);
 
@@ -128,9 +129,19 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
         .eq('id', selectedOrganization.id)
         .single();
 
-      if (orgData?.agent_id && Array.isArray(orgData.agent_id)) {
-        console.log('Found agent IDs for org', selectedOrganization.id, ':', orgData.agent_id);
-        setAgentIds(orgData.agent_id);
+      if (orgData?.agent_id && Array.isArray(orgData.agent_id) && orgData.agent_id.length > 0) {
+        // Filter out empty or invalid agent IDs
+        const validAgentIds = orgData.agent_id.filter(id => 
+          id && typeof id === 'string' && id.trim() !== ''
+        );
+        
+        if (validAgentIds.length > 0) {
+          console.log('Found valid agent IDs for org', selectedOrganization.id, ':', validAgentIds);
+          setAgentIds(validAgentIds);
+        } else {
+          console.log('No valid agent IDs found for organization:', selectedOrganization.id);
+          setAgentIds([]);
+        }
       } else {
         console.log('No agent IDs found for organization:', selectedOrganization.id);
         setAgentIds([]);
