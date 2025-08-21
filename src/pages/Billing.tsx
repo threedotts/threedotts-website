@@ -91,6 +91,8 @@ export default function Billing({ selectedOrganization }: BillingProps) {
   const [useCustomAmount, setUseCustomAmount] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  const [tempBillingSettings, setTempBillingSettings] = useState<BillingSettings | null>(null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   useEffect(() => {
     const getUser = async () => {
@@ -156,6 +158,16 @@ export default function Billing({ selectedOrganization }: BillingProps) {
         autoTopUpAmount: data?.auto_top_up_amount || 1000,
         autoTopUpThreshold: data?.auto_top_up_threshold || 50
       });
+      
+      // Initialize temp settings with the same values
+      setTempBillingSettings({
+        lowMinuteThreshold: data?.low_credit_warning_threshold || 100,
+        enableNotifications: data?.enable_low_credit_notifications || true,
+        autoTopUpEnabled: data?.auto_top_up_enabled || false,
+        autoTopUpAmount: data?.auto_top_up_amount || 1000,
+        autoTopUpThreshold: data?.auto_top_up_threshold || 50
+      });
+      setHasUnsavedChanges(false);
     } catch (error) {
       console.error('Error fetching billing settings:', error);
     } finally {
@@ -189,6 +201,19 @@ export default function Billing({ selectedOrganization }: BillingProps) {
     } catch (error) {
       console.error('Error fetching billing history:', error);
     }
+  };
+
+  const updateTempBillingSettings = (newSettings: Partial<BillingSettings>) => {
+    if (!tempBillingSettings) return;
+    
+    const updatedSettings = { ...tempBillingSettings, ...newSettings };
+    setTempBillingSettings(updatedSettings);
+    setHasUnsavedChanges(true);
+  };
+
+  const handleSaveSettings = async () => {
+    if (!tempBillingSettings) return;
+    await updateBillingSettings(tempBillingSettings);
   };
 
   const updateBillingSettings = async (newSettings: Partial<BillingSettings>) => {
@@ -235,6 +260,8 @@ export default function Billing({ selectedOrganization }: BillingProps) {
       if (result.error) throw result.error;
 
       setBillingSettings(updatedSettings);
+      setTempBillingSettings(updatedSettings);
+      setHasUnsavedChanges(false);
       toast({
         title: "Configurações Atualizadas",
         description: "Suas preferências de cobrança foram salvas."
@@ -926,8 +953,8 @@ export default function Billing({ selectedOrganization }: BillingProps) {
                   <Input
                     id="threshold"
                     type="number"
-                    value={billingSettings?.lowMinuteThreshold || 100}
-                    onChange={(e) => updateBillingSettings({ 
+                    value={tempBillingSettings?.lowMinuteThreshold || 100}
+                    onChange={(e) => updateTempBillingSettings({ 
                       lowMinuteThreshold: Number(e.target.value) 
                     })}
                   />
@@ -944,8 +971,8 @@ export default function Billing({ selectedOrganization }: BillingProps) {
                     </p>
                   </div>
                   <Switch
-                    checked={billingSettings?.enableNotifications || false}
-                    onCheckedChange={(checked) => updateBillingSettings({ 
+                    checked={tempBillingSettings?.enableNotifications || false}
+                    onCheckedChange={(checked) => updateTempBillingSettings({ 
                       enableNotifications: checked 
                     })}
                   />
@@ -962,6 +989,22 @@ export default function Billing({ selectedOrganization }: BillingProps) {
                     checked={false}
                     disabled
                   />
+                </div>
+
+                {/* Save button */}
+                <div className="pt-4 border-t">
+                  <Button 
+                    onClick={handleSaveSettings}
+                    disabled={!hasUnsavedChanges || loading}
+                    className="w-full"
+                  >
+                    {loading ? "Salvando..." : "Salvar Configurações"}
+                  </Button>
+                  {hasUnsavedChanges && (
+                    <p className="text-sm text-amber-600 mt-2 text-center">
+                      Você tem alterações não salvas
+                    </p>
+                  )}
                 </div>
               </div>
             </CardContent>
