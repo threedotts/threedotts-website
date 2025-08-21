@@ -16,9 +16,16 @@ import {
   TrendingUp,
   Settings,
   Plus,
-  History,
   Phone
 } from "lucide-react";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -82,6 +89,8 @@ export default function Billing({ selectedOrganization }: BillingProps) {
   const [mpesaPhone, setMpesaPhone] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [useCustomAmount, setUseCustomAmount] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     const getUser = async () => {
@@ -777,8 +786,7 @@ export default function Billing({ selectedOrganization }: BillingProps) {
         <TabsContent value="history" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <History className="h-5 w-5" />
+              <CardTitle>
                 Histórico de Transações
               </CardTitle>
             </CardHeader>
@@ -789,38 +797,91 @@ export default function Billing({ selectedOrganization }: BillingProps) {
                     Nenhuma transação encontrada
                   </p>
                 ) : (
-                  billingHistory.map((transaction) => (
-                    <div key={transaction.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <div className={`p-2 rounded-full ${
-                          transaction.type === 'top_up' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
-                        }`}>
-                          {transaction.type === 'top_up' ? <Plus className="h-4 w-4" /> : <TrendingUp className="h-4 w-4" />}
+                  <>
+                    {/* Paginated transactions */}
+                    {billingHistory
+                      .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+                      .map((transaction) => (
+                        <div key={transaction.id} className="flex items-center justify-between p-4 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className={`p-2 rounded-full ${
+                              transaction.type === 'top_up' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
+                            }`}>
+                              {transaction.type === 'top_up' ? <Plus className="h-4 w-4" /> : <TrendingUp className="h-4 w-4" />}
+                            </div>
+                            <div>
+                              <p className="font-medium">{transaction.description}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {new Date(transaction.createdAt).toLocaleDateString()}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className={`font-bold ${
+                              transaction.type === 'top_up' ? 'text-green-600' : 'text-red-600'
+                            }`}>
+                              {transaction.type === 'top_up' ? '+' : ''}{transaction.amount} minutos
+                            </p>
+                            {transaction.cost && (
+                              <p className="text-sm text-muted-foreground">
+                                {transaction.cost} MTS
+                              </p>
+                            )}
+                            <Badge variant={transaction.status === 'completed' ? 'outline' : 'secondary'}>
+                              {transaction.status}
+                            </Badge>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-medium">{transaction.description}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {new Date(transaction.createdAt).toLocaleDateString()}
-                          </p>
-                        </div>
+                      ))}
+                    
+                    {/* Pagination controls */}
+                    {billingHistory.length > itemsPerPage && (
+                      <div className="mt-6">
+                        <Pagination>
+                          <PaginationContent>
+                            <PaginationItem>
+                              <PaginationPrevious 
+                                href="#"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  if (currentPage > 1) setCurrentPage(currentPage - 1);
+                                }}
+                                className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+                              />
+                            </PaginationItem>
+                            
+                            {Array.from({ length: Math.ceil(billingHistory.length / itemsPerPage) }, (_, i) => i + 1).map((page) => (
+                              <PaginationItem key={page}>
+                                <PaginationLink
+                                  href="#"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    setCurrentPage(page);
+                                  }}
+                                  isActive={currentPage === page}
+                                >
+                                  {page}
+                                </PaginationLink>
+                              </PaginationItem>
+                            ))}
+                            
+                            <PaginationItem>
+                              <PaginationNext 
+                                href="#"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  if (currentPage < Math.ceil(billingHistory.length / itemsPerPage)) {
+                                    setCurrentPage(currentPage + 1);
+                                  }
+                                }}
+                                className={currentPage === Math.ceil(billingHistory.length / itemsPerPage) ? 'pointer-events-none opacity-50' : ''}
+                              />
+                            </PaginationItem>
+                          </PaginationContent>
+                        </Pagination>
                       </div>
-                      <div className="text-right">
-                        <p className={`font-bold ${
-                          transaction.type === 'top_up' ? 'text-green-600' : 'text-red-600'
-                        }`}>
-                          {transaction.type === 'top_up' ? '+' : ''}{transaction.amount} minutos
-                        </p>
-                        {transaction.cost && (
-                          <p className="text-sm text-muted-foreground">
-                            {transaction.cost} MTS
-                          </p>
-                        )}
-                        <Badge variant={transaction.status === 'completed' ? 'outline' : 'secondary'}>
-                          {transaction.status}
-                        </Badge>
-                      </div>
-                    </div>
-                  ))
+                    )}
+                  </>
                 )}
               </div>
             </CardContent>
