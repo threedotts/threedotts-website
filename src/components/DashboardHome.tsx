@@ -830,8 +830,19 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
           </CardHeader>
           <CardContent>
             {pollingLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <div className="text-muted-foreground">Carregando dados...</div>
+              <div className="space-y-4">
+                {[1, 2, 3].map((index) => (
+                  <div key={index} className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border border-border animate-pulse">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-3 h-3 bg-muted rounded-full"></div>
+                      <div className="h-4 bg-muted rounded w-32"></div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="h-8 bg-muted rounded w-8"></div>
+                      <div className="h-3 bg-muted rounded w-20"></div>
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : (
               <div className="space-y-4">
