@@ -22,6 +22,7 @@ export const useConversationPolling = ({
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const [activeCallsByAgent, setActiveCallsByAgent] = useState<ActiveCallsByAgent>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [isPageVisible, setIsPageVisible] = useState(true);
 
   // Create stable reference for agent IDs to avoid unnecessary re-renders
   const sortedAgentIds = useMemo(() => {
@@ -100,6 +101,33 @@ export const useConversationPolling = ({
     setIsLoading(false);
   };
 
+  // Page Visibility API - pause polling when tab is not active
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      const isVisible = !document.hidden;
+      setIsPageVisible(isVisible);
+      
+      if (isVisible) {
+        console.log('Page became visible - resuming polling');
+        // If page became visible and polling should be enabled, fetch immediately
+        if (enabled && sortedAgentIds.length > 0) {
+          fetchConversations();
+        }
+      } else {
+        console.log('Page became hidden - pausing polling');
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    // Set initial state
+    setIsPageVisible(!document.hidden);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [enabled, sortedAgentIds]);
+
   useEffect(() => {
     // Clear any existing interval first
     if (intervalRef.current) {
@@ -117,10 +145,14 @@ export const useConversationPolling = ({
     // Initial fetch
     fetchConversations();
 
-    // Set up polling every 45 seconds
+    // Set up polling every 45 seconds (only when page is visible)
     intervalRef.current = setInterval(() => {
-      console.log(`Polling conversations for org ${orgId}`);
-      fetchConversations();
+      if (isPageVisible) {
+        console.log(`Polling conversations for org ${orgId}`);
+        fetchConversations();
+      } else {
+        console.log(`Skipping poll - page not visible for org ${orgId}`);
+      }
     }, 45000);
 
     // Cleanup function
@@ -131,7 +163,7 @@ export const useConversationPolling = ({
         console.log('Stopped conversation polling for organization:', orgId);
       }
     };
-  }, [enabled, selectedOrganization?.id, sortedAgentIds]);
+  }, [enabled, selectedOrganization?.id, sortedAgentIds, isPageVisible]);
 
   // Cleanup on unmount
   useEffect(() => {
