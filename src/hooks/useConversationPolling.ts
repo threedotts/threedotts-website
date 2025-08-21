@@ -42,8 +42,14 @@ export const useConversationPolling = ({
     try {
       console.log('Fetching conversations for agents:', sortedAgentIds);
       
+      // Calculate timestamp for 12 hours ago in seconds
+      const twelveHoursAgo = Math.floor((Date.now() - (12 * 60 * 60 * 1000)) / 1000);
+      
       const { data, error } = await supabase.functions.invoke('fetch-conversations', {
-        body: { agentIds: sortedAgentIds }
+        body: { 
+          agentIds: sortedAgentIds,
+          callStartAfterUnix: twelveHoursAgo
+        }
       });
 
       if (error) {

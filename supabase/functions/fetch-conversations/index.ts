@@ -15,7 +15,7 @@ serve(async (req) => {
   }
 
   try {
-    const { agentIds } = await req.json()
+    const { agentIds, callStartAfterUnix } = await req.json()
 
     if (!agentIds || !Array.isArray(agentIds)) {
       return new Response(
@@ -64,7 +64,7 @@ serve(async (req) => {
           url.searchParams.append('page_size', '100')
           url.searchParams.append('summary_mode', 'exclude')
           url.searchParams.append('call_start_before_unix', '0')
-          url.searchParams.append('call_start_after_unix', '0')
+          url.searchParams.append('call_start_after_unix', callStartAfterUnix?.toString() || '0')
           
           if (cursor) {
             url.searchParams.append('cursor', cursor)
