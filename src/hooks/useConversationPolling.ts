@@ -58,15 +58,15 @@ export const useConversationPolling = ({
             // Get all unique agent names from conversations
             const allAgentNames = new Set(conversations.map((conv: any) => conv.agent_name || 'Unknown Agent'));
             
-            // Count done conversations for each agent
+            // Count in-progress conversations for each agent
             conversations.forEach((conversation: any) => {
-              if (conversation.status === 'done') {
+              if (conversation.status === 'in-progress') {
                 const agentName = conversation.agent_name || 'Unknown Agent';
                 doneByAgent[agentName] = (doneByAgent[agentName] || 0) + 1;
               }
             });
             
-            // Log the done counts in browser console for all agents (including 0 counts)
+            // Log the in-progress counts in browser console for all agents (including 0 counts)
             allAgentNames.forEach((agentName: string) => {
               const count = doneByAgent[agentName] || 0;
               console.log(`${agentName}: ${count}`);
