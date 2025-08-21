@@ -53,7 +53,8 @@ serve(async (req) => {
             url.searchParams.append('cursor', cursor)
           }
 
-          console.log(`Fetching conversations for agent ${agentId}, cursor: ${cursor || 'empty'}`)
+          console.log(`[${agentId}] API Call - Using cursor: "${cursor || 'EMPTY'}"`)
+          console.log(`[${agentId}] Full API URL: ${url.toString()}`)
 
           const response = await fetch(url.toString(), {
             method: 'GET',
@@ -69,11 +70,11 @@ serve(async (req) => {
           }
 
           const data = await response.json()
-          console.log(`Page data for agent ${agentId}:`, { 
-            conversations_count: data.conversations?.length || 0, 
-            has_more: data.has_more, 
-            next_cursor: data.next_cursor 
-          })
+          
+          console.log(`[${agentId}] API Response:`)
+          console.log(`  - conversations_count: ${data.conversations?.length || 0}`)
+          console.log(`  - has_more: ${data.has_more}`)
+          console.log(`  - next_cursor: "${data.next_cursor || 'NULL'}"`)
 
           // Add conversations from this page
           if (data.conversations && Array.isArray(data.conversations)) {
@@ -81,14 +82,24 @@ serve(async (req) => {
           }
 
           // Update pagination variables BEFORE checking conditions
+          const previousHasMore = hasMore
           hasMore = data.has_more === true
           
+          console.log(`[${agentId}] Pagination Status:`)
+          console.log(`  - previous hasMore: ${previousHasMore}`)
+          console.log(`  - new hasMore: ${hasMore}`)
+          
           if (hasMore) {
+            const previousCursor = cursor
             cursor = data.next_cursor || ''
+            console.log(`  - cursor updated from "${previousCursor || 'EMPTY'}" to "${cursor || 'EMPTY'}"`)
+            
             if (!cursor) {
-              console.warn(`Agent ${agentId}: has_more is true but no next_cursor provided, stopping pagination`)
+              console.warn(`[${agentId}] PAGINATION ERROR: has_more is true but no next_cursor provided, stopping pagination`)
               hasMore = false
             }
+          } else {
+            console.log(`[${agentId}] Pagination complete - no more pages`)
           }
         }
 
