@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo } from 'react';
+import { useEffect, useRef, useMemo, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface Organization {
@@ -11,11 +11,17 @@ interface UseConversationPollingProps {
   enabled?: boolean;
 }
 
+interface ActiveCallsByAgent {
+  [agentName: string]: number;
+}
+
 export const useConversationPolling = ({ 
   selectedOrganization, 
   enabled = true 
 }: UseConversationPollingProps) => {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [activeCallsByAgent, setActiveCallsByAgent] = useState<ActiveCallsByAgent>({});
+  const [isLoading, setIsLoading] = useState(false);
 
   // Create stable reference for agent IDs to avoid unnecessary re-renders
   const sortedAgentIds = useMemo(() => {
@@ -26,8 +32,11 @@ export const useConversationPolling = ({
   const fetchConversations = async () => {
     if (!sortedAgentIds.length) {
       console.log('No agent IDs found for organization:', selectedOrganization?.id);
+      setActiveCallsByAgent({});
       return;
     }
+
+    setIsLoading(true);
 
     try {
       console.log('Fetching conversations for agents:', sortedAgentIds);
@@ -38,11 +47,15 @@ export const useConversationPolling = ({
 
       if (error) {
         console.error('Error calling fetch-conversations function:', error);
+        setIsLoading(false);
         return;
       }
 
       console.log('Conversation polling results:', data);
       
+      // Aggregate active calls by agent
+      const activeCalls: ActiveCallsByAgent = {};
+
       // Log each agent's conversations separately for better visibility
       data.results?.forEach((result: any) => {
         if (result.error) {
@@ -50,8 +63,6 @@ export const useConversationPolling = ({
         } else {
           console.log(`Conversations for agent ${result.agentId}:`, result.data);
           
-          // Count done conversations by agent name for browser console
-          const doneByAgent: { [agentName: string]: number } = {};
           const conversations = result.data?.conversations;
           
           if (conversations && Array.isArray(conversations) && conversations.length > 0) {
@@ -59,16 +70,18 @@ export const useConversationPolling = ({
             const allAgentNames = new Set(conversations.map((conv: any) => conv.agent_name || 'Unknown Agent'));
             
             // Count in-progress conversations for each agent
+            const inProgressByAgent: { [agentName: string]: number } = {};
             conversations.forEach((conversation: any) => {
               if (conversation.status === 'in-progress') {
                 const agentName = conversation.agent_name || 'Unknown Agent';
-                doneByAgent[agentName] = (doneByAgent[agentName] || 0) + 1;
+                inProgressByAgent[agentName] = (inProgressByAgent[agentName] || 0) + 1;
               }
             });
             
-            // Log the in-progress counts in browser console for all agents (including 0 counts)
+            // Update active calls state and log
             allAgentNames.forEach((agentName: string) => {
-              const count = doneByAgent[agentName] || 0;
+              const count = inProgressByAgent[agentName] || 0;
+              activeCalls[agentName] = count;
               console.log(`${agentName}: ${count}`);
             });
           } else {
@@ -78,9 +91,13 @@ export const useConversationPolling = ({
         }
       });
 
+      setActiveCallsByAgent(activeCalls);
+
     } catch (error) {
       console.error('Error fetching conversations:', error);
     }
+
+    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -125,4 +142,9 @@ export const useConversationPolling = ({
       }
     };
   }, []);
+
+  return {
+    activeCallsByAgent,
+    isLoading
+  };
 };

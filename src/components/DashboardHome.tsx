@@ -1,9 +1,10 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Phone, TrendingUp, Clock, Target, DollarSign, Timer, UserCheck, MapPin, Calendar, BarChart3 } from "lucide-react";
+import { Users, Phone, TrendingUp, Clock, Target, DollarSign, Timer, UserCheck, MapPin, Calendar, BarChart3, PhoneCall } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, AreaChart, Area } from 'recharts';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useUserPresence } from '@/hooks/useUserPresence';
+import { useConversationPolling } from '@/hooks/useConversationPolling';
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
@@ -45,8 +46,16 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
   const [members, setMembers] = useState<any[]>([]);
   const [selectedTimeFilter, setSelectedTimeFilter] = useState<string>('mensal');
   const [customDateRange, setCustomDateRange] = useState<DateRange | undefined>();
+  const [agentIds, setAgentIds] = useState<string[]>([]);
   
   const { presenceData, fetchPresenceData } = useUserPresence(selectedOrganization?.id);
+  const { activeCallsByAgent, isLoading: pollingLoading } = useConversationPolling({
+    selectedOrganization: selectedOrganization && agentIds.length > 0 ? { 
+      id: selectedOrganization.id, 
+      agent_id: agentIds
+    } : undefined,
+    enabled: !!selectedOrganization && agentIds.length > 0
+  });
 
   // Time filter options
   const timeFilters = [
@@ -96,6 +105,19 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
 
     return { startDate, endDate };
   };
+
+  // Fetch organization agent_ids
+  useEffect(() => {
+    if (!selectedOrganization?.id) return;
+
+    const fetchAgentIds = async () => {
+      // Aqui você pode buscar os agent_ids da organização
+      // Por enquanto vou usar o agent_id que já temos no console
+      setAgentIds(['agent_01k02ete3tfjgrq97y8a7v541y']);
+    };
+
+    fetchAgentIds();
+  }, [selectedOrganization?.id]);
 
   // Fetch organization members
   useEffect(() => {
@@ -790,6 +812,53 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
             </Card>
           );
         })}
+      </div>
+
+      {/* Active Calls by Agent Section */}
+      <div className="mt-8">
+        <Card className="bg-gradient-card border-border shadow-elegant">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-foreground">
+              <PhoneCall className="h-5 w-5" />
+              Chamadas Ativas por Agente
+            </CardTitle>
+            <CardDescription>
+              Monitoramento em tempo real das chamadas em andamento
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {pollingLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="text-muted-foreground">Carregando dados...</div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {Object.keys(activeCallsByAgent).length > 0 ? (
+                  Object.entries(activeCallsByAgent).map(([agentName, count]) => (
+                    <div key={agentName} className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border border-border">
+                      <div className="flex items-center space-x-3">
+                        <div className={`w-3 h-3 ${count > 0 ? 'bg-green-500 animate-pulse' : 'bg-muted-foreground'} rounded-full`}></div>
+                        <span className="text-foreground font-medium">{agentName}</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <span className={`text-2xl font-bold ${count > 0 ? 'text-green-600' : 'text-muted-foreground'}`}>
+                          {count}
+                        </span>
+                        <span className="text-sm text-muted-foreground">
+                          {count === 1 ? 'chamada ativa' : 'chamadas ativas'}
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center text-muted-foreground py-8">
+                    Nenhum agente com dados disponíveis
+                  </div>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       {/* Main Dashboard Content */}
