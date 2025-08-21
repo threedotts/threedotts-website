@@ -59,6 +59,9 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
     enabled: !!selectedOrganization && agentIds.length > 0 && location.pathname === '/dashboard'
   });
 
+  console.log('Active calls by agent for org', selectedOrganization?.name, ':', activeCallsByAgent);
+  console.log('Agent IDs for polling:', agentIds);
+
   // Calculate total active calls from all agents
   const totalActiveCalls = Object.values(activeCallsByAgent).reduce((total, count) => total + count, 0);
 
@@ -847,8 +850,14 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
               Monitoramento em tempo real das chamadas em andamento
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            {pollingLoading ? (
+           <CardContent>
+            {agentIds.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <PhoneCall className="mx-auto h-12 w-12 opacity-50 mb-4" />
+                <p className="text-lg font-medium mb-2">Nenhum agente configurado</p>
+                <p className="text-sm">Configure agentes AI para esta organização para ver chamadas ativas</p>
+              </div>
+            ) : pollingLoading ? (
               <div className="space-y-4">
                 {[1, 2, 3].map((index) => (
                   <div key={index} className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border border-border animate-pulse">
@@ -884,7 +893,9 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
                   ))
                 ) : (
                   <div className="text-center text-muted-foreground py-8">
-                    Nenhum agente com dados disponíveis
+                    <Phone className="mx-auto h-12 w-12 opacity-50 mb-4" />
+                    <p className="text-lg font-medium mb-2">Nenhuma chamada ativa</p>
+                    <p className="text-sm">Todas as chamadas foram concluídas</p>
                   </div>
                 )}
               </div>

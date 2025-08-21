@@ -136,6 +136,9 @@ export const useConversationPolling = ({
     }
 
     if (!enabled || !sortedAgentIds.length) {
+      console.log('Conversation polling disabled:', { enabled, agentCount: sortedAgentIds.length });
+      // Clear active calls when disabled
+      setActiveCallsByAgent({});
       return;
     }
 
