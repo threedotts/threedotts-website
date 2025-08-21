@@ -815,11 +815,10 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
       </div>
 
       {/* Active Calls by Agent Section */}
-      <div className="mt-8">
+      <div className="mt-8 mb-8">
         <Card className="bg-gradient-card border-border shadow-elegant">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-foreground">
-              <PhoneCall className="h-5 w-5" />
+            <CardTitle className="text-foreground">
               Chamadas Ativas por Agente
             </CardTitle>
             <CardDescription>
