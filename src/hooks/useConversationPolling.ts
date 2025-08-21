@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface Organization {
@@ -17,17 +17,23 @@ export const useConversationPolling = ({
 }: UseConversationPollingProps) => {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Create stable reference for agent IDs to avoid unnecessary re-renders
+  const sortedAgentIds = useMemo(() => {
+    if (!selectedOrganization?.agent_id?.length) return [];
+    return [...selectedOrganization.agent_id].sort();
+  }, [selectedOrganization?.agent_id]);
+
   const fetchConversations = async () => {
-    if (!selectedOrganization?.agent_id || selectedOrganization.agent_id.length === 0) {
+    if (!sortedAgentIds.length) {
       console.log('No agent IDs found for organization:', selectedOrganization?.id);
       return;
     }
 
     try {
-      console.log('Fetching conversations for agents:', selectedOrganization.agent_id);
+      console.log('Fetching conversations for agents:', sortedAgentIds);
       
       const { data, error } = await supabase.functions.invoke('fetch-conversations', {
-        body: { agentIds: selectedOrganization.agent_id }
+        body: { agentIds: sortedAgentIds }
       });
 
       if (error) {
@@ -58,15 +64,12 @@ export const useConversationPolling = ({
       intervalRef.current = null;
     }
 
-    if (!enabled || !selectedOrganization?.agent_id?.length) {
+    if (!enabled || !sortedAgentIds.length) {
       return;
     }
 
-    // Convert agent_id array to string for stable comparison
-    const agentIdString = JSON.stringify(selectedOrganization.agent_id.sort());
-    const orgId = selectedOrganization.id;
-
-    console.log(`Setting up conversation polling for org ${orgId} with agents:`, selectedOrganization.agent_id);
+    const orgId = selectedOrganization?.id;
+    console.log(`Setting up conversation polling for org ${orgId} with agents:`, sortedAgentIds);
 
     // Initial fetch
     fetchConversations();
@@ -85,7 +88,7 @@ export const useConversationPolling = ({
         console.log('Stopped conversation polling for organization:', orgId);
       }
     };
-  }, [enabled, selectedOrganization?.id, JSON.stringify(selectedOrganization?.agent_id?.sort())]);
+  }, [enabled, selectedOrganization?.id, sortedAgentIds]);
 
   // Cleanup on unmount
   useEffect(() => {
