@@ -59,10 +59,6 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
     enabled: !!selectedOrganization && agentIds.length > 0 && location.pathname === '/dashboard'
   });
 
-  console.log('Polling enabled:', !!selectedOrganization && agentIds.length > 0 && location.pathname === '/dashboard');
-  console.log('Active calls by agent for org', selectedOrganization?.name, ':', activeCallsByAgent);
-  console.log('Agent IDs for polling:', agentIds);
-
   // Calculate total active calls from all agents
   const totalActiveCalls = Object.values(activeCallsByAgent).reduce((total, count) => total + count, 0);
 

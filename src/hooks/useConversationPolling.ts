@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo, useState } from 'react';
+import { useEffect, useRef, useMemo, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface Organization {
@@ -30,7 +30,7 @@ export const useConversationPolling = ({
     return [...selectedOrganization.agent_id].sort();
   }, [selectedOrganization?.agent_id]);
 
-  const fetchConversations = async () => {
+  const fetchConversations = useCallback(async () => {
     if (!sortedAgentIds.length) {
       console.log('No agent IDs found for organization:', selectedOrganization?.id);
       setActiveCallsByAgent({});
@@ -105,7 +105,7 @@ export const useConversationPolling = ({
     }
 
     setIsLoading(false);
-  };
+  }, [sortedAgentIds, selectedOrganization?.id]);
 
   // Page Visibility API - pause polling when tab is not active
   useEffect(() => {
@@ -115,10 +115,6 @@ export const useConversationPolling = ({
       
       if (isVisible) {
         console.log('Page became visible - resuming polling');
-        // If page became visible and polling should be enabled, fetch immediately
-        if (enabled && sortedAgentIds.length > 0) {
-          fetchConversations();
-        }
       } else {
         console.log('Page became hidden - pausing polling');
       }
@@ -132,7 +128,7 @@ export const useConversationPolling = ({
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [enabled, sortedAgentIds]);
+  }, []);
 
   useEffect(() => {
     // Clear any existing interval first
@@ -156,7 +152,7 @@ export const useConversationPolling = ({
 
     // Set up polling every 45 seconds (only when page is visible)
     intervalRef.current = setInterval(() => {
-      if (isPageVisible) {
+      if (!document.hidden) {
         console.log(`Polling conversations for org ${orgId}`);
         fetchConversations();
       } else {
@@ -172,7 +168,7 @@ export const useConversationPolling = ({
         console.log('Stopped conversation polling for organization:', orgId);
       }
     };
-  }, [enabled, selectedOrganization?.id, sortedAgentIds, isPageVisible]);
+  }, [enabled, selectedOrganization?.id, sortedAgentIds]);
 
   // Cleanup on unmount
   useEffect(() => {
