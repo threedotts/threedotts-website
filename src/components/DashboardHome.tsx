@@ -57,6 +57,9 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
     enabled: !!selectedOrganization && agentIds.length > 0
   });
 
+  // Calculate total active calls from all agents
+  const totalActiveCalls = Object.values(activeCallsByAgent).reduce((total, count) => total + count, 0);
+
   // Time filter options
   const timeFilters = [
     { value: 'diario', label: 'Diário' },
@@ -875,7 +878,7 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
                 <div className="w-3 h-3 bg-primary rounded-full animate-pulse"></div>
                 <span className="text-foreground font-medium">Chamadas Ativas</span>
               </div>
-              <span className="text-2xl font-bold text-primary">8</span>
+              <span className="text-2xl font-bold text-primary">{totalActiveCalls}</span>
             </div>
             <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
               <div className="flex items-center space-x-3">
