@@ -34,33 +34,71 @@ serve(async (req) => {
 
     console.log('Fetching conversations for agents:', agentIds)
 
-    // Fetch conversations for each agent
+    // Fetch conversations for each agent with pagination
     const conversationPromises = agentIds.map(async (agentId: string) => {
       try {
-        const url = new URL('https://api.elevenlabs.io/v1/convai/conversations')
-        url.searchParams.append('agent_id', agentId)
-        url.searchParams.append('page_size', '100')
-        url.searchParams.append('summary_mode', 'exclude')
-        url.searchParams.append('call_start_before_unix', '0')
-        url.searchParams.append('call_start_after_unix', '0')
+        let allConversations: any[] = []
+        let cursor = ''
+        let hasMore = true
 
-        const response = await fetch(url.toString(), {
-          method: 'GET',
-          headers: {
-            'xi-api-key': apiKey,
-            'Content-Type': 'application/json',
-          },
-        })
+        while (hasMore) {
+          const url = new URL('https://api.elevenlabs.io/v1/convai/conversations')
+          url.searchParams.append('agent_id', agentId)
+          url.searchParams.append('page_size', '100')
+          url.searchParams.append('summary_mode', 'exclude')
+          url.searchParams.append('call_start_before_unix', '0')
+          url.searchParams.append('call_start_after_unix', '0')
+          
+          if (cursor) {
+            url.searchParams.append('cursor', cursor)
+          }
 
-        if (!response.ok) {
-          console.error(`Error fetching conversations for agent ${agentId}:`, response.status, await response.text())
-          return { agentId, error: `HTTP ${response.status}` }
+          console.log(`Fetching conversations for agent ${agentId}, cursor: ${cursor || 'empty'}`)
+
+          const response = await fetch(url.toString(), {
+            method: 'GET',
+            headers: {
+              'xi-api-key': apiKey,
+              'Content-Type': 'application/json',
+            },
+          })
+
+          if (!response.ok) {
+            console.error(`Error fetching conversations for agent ${agentId}:`, response.status, await response.text())
+            return { agentId, error: `HTTP ${response.status}` }
+          }
+
+          const data = await response.json()
+          console.log(`Page data for agent ${agentId}:`, { 
+            conversations_count: data.conversations?.length || 0, 
+            has_more: data.has_more, 
+            next_cursor: data.next_cursor 
+          })
+
+          // Add conversations from this page
+          if (data.conversations && Array.isArray(data.conversations)) {
+            allConversations = allConversations.concat(data.conversations)
+          }
+
+          // Check if we need to continue pagination
+          hasMore = data.has_more === true
+          cursor = data.next_cursor || ''
+          
+          if (hasMore && !cursor) {
+            console.warn(`Agent ${agentId}: has_more is true but no next_cursor provided`)
+            break
+          }
         }
 
-        const data = await response.json()
-        console.log(`Conversations for agent ${agentId}:`, data)
+        console.log(`Total conversations fetched for agent ${agentId}: ${allConversations.length}`)
         
-        return { agentId, data }
+        return { 
+          agentId, 
+          data: { 
+            conversations: allConversations,
+            total_count: allConversations.length
+          } 
+        }
       } catch (error) {
         console.error(`Error fetching conversations for agent ${agentId}:`, error)
         return { agentId, error: error.message }
