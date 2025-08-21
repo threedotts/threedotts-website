@@ -197,18 +197,42 @@ export default function Billing({ selectedOrganization }: BillingProps) {
     try {
       const updatedSettings = { ...billingSettings, ...newSettings };
       
-      const { error } = await supabase
+      // First try to get existing record
+      const { data: existingData } = await supabase
         .from('billing_settings')
-        .upsert({
-          organization_id: selectedOrganization.id,
-          low_credit_warning_threshold: updatedSettings.lowMinuteThreshold,
-          enable_low_credit_notifications: updatedSettings.enableNotifications,
-          auto_top_up_enabled: updatedSettings.autoTopUpEnabled,
-          auto_top_up_amount: updatedSettings.autoTopUpAmount,
-          auto_top_up_threshold: updatedSettings.autoTopUpThreshold
-        });
+        .select('id')
+        .eq('organization_id', selectedOrganization.id)
+        .maybeSingle();
 
-      if (error) throw error;
+      let result;
+      if (existingData) {
+        // Update existing record
+        result = await supabase
+          .from('billing_settings')
+          .update({
+            low_credit_warning_threshold: updatedSettings.lowMinuteThreshold,
+            enable_low_credit_notifications: updatedSettings.enableNotifications,
+            auto_top_up_enabled: updatedSettings.autoTopUpEnabled,
+            auto_top_up_amount: updatedSettings.autoTopUpAmount,
+            auto_top_up_threshold: updatedSettings.autoTopUpThreshold,
+            updated_at: new Date().toISOString()
+          })
+          .eq('organization_id', selectedOrganization.id);
+      } else {
+        // Insert new record
+        result = await supabase
+          .from('billing_settings')
+          .insert({
+            organization_id: selectedOrganization.id,
+            low_credit_warning_threshold: updatedSettings.lowMinuteThreshold,
+            enable_low_credit_notifications: updatedSettings.enableNotifications,
+            auto_top_up_enabled: updatedSettings.autoTopUpEnabled,
+            auto_top_up_amount: updatedSettings.autoTopUpAmount,
+            auto_top_up_threshold: updatedSettings.autoTopUpThreshold
+          });
+      }
+
+      if (result.error) throw result.error;
 
       setBillingSettings(updatedSettings);
       toast({
@@ -891,8 +915,7 @@ export default function Billing({ selectedOrganization }: BillingProps) {
         <TabsContent value="settings" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
+              <CardTitle>
                 Preferências de Cobrança
               </CardTitle>
             </CardHeader>
