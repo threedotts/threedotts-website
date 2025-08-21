@@ -93,6 +93,7 @@ export default function Billing({ selectedOrganization }: BillingProps) {
   const itemsPerPage = 10;
   const [tempBillingSettings, setTempBillingSettings] = useState<BillingSettings | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [tempThreshold, setTempThreshold] = useState<string>('');
 
   useEffect(() => {
     const getUser = async () => {
@@ -167,6 +168,7 @@ export default function Billing({ selectedOrganization }: BillingProps) {
         autoTopUpAmount: data?.auto_top_up_amount || 1000,
         autoTopUpThreshold: data?.auto_top_up_threshold || 50
       });
+      setTempThreshold((data?.low_credit_warning_threshold || 100).toString());
       setHasUnsavedChanges(false);
     } catch (error) {
       console.error('Error fetching billing settings:', error);
@@ -211,9 +213,40 @@ export default function Billing({ selectedOrganization }: BillingProps) {
     setHasUnsavedChanges(true);
   };
 
+  const handleThresholdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setTempThreshold(value);
+    
+    // Only update settings if value is a valid number
+    const numValue = parseInt(value);
+    if (!isNaN(numValue) && numValue >= 0) {
+      updateTempBillingSettings({ lowMinuteThreshold: numValue });
+    } else if (value === '') {
+      // Allow empty field but don't update settings yet
+      setHasUnsavedChanges(true);
+    }
+  };
+
   const handleSaveSettings = async () => {
     if (!tempBillingSettings) return;
-    await updateBillingSettings(tempBillingSettings);
+    
+    // Validate threshold before saving
+    const thresholdNum = parseInt(tempThreshold);
+    if (tempThreshold === '' || isNaN(thresholdNum) || thresholdNum < 0) {
+      toast({
+        title: "Erro de Validação",
+        description: "O limite de aviso deve ser um número válido maior ou igual a 0.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    const settingsToSave = {
+      ...tempBillingSettings,
+      lowMinuteThreshold: thresholdNum
+    };
+    
+    await updateBillingSettings(settingsToSave);
   };
 
   const updateBillingSettings = async (newSettings: Partial<BillingSettings>) => {
@@ -261,6 +294,7 @@ export default function Billing({ selectedOrganization }: BillingProps) {
 
       setBillingSettings(updatedSettings);
       setTempBillingSettings(updatedSettings);
+      setTempThreshold(updatedSettings.lowMinuteThreshold.toString());
       setHasUnsavedChanges(false);
       toast({
         title: "Configurações Atualizadas",
@@ -953,10 +987,9 @@ export default function Billing({ selectedOrganization }: BillingProps) {
                   <Input
                     id="threshold"
                     type="number"
-                    value={tempBillingSettings?.lowMinuteThreshold || 100}
-                    onChange={(e) => updateTempBillingSettings({ 
-                      lowMinuteThreshold: Number(e.target.value) 
-                    })}
+                    value={tempThreshold}
+                    onChange={handleThresholdChange}
+                    placeholder="Digite um valor (ex: 100)"
                   />
                   <p className="text-sm text-muted-foreground mt-1">
                     Seja notificado quando os minutos ficarem abaixo desta quantidade
