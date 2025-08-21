@@ -114,11 +114,24 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
   // Fetch organization agent_ids
   useEffect(() => {
     if (!selectedOrganization?.id) return;
+    
+    console.log('Fetching agent IDs for organization:', selectedOrganization.name, selectedOrganization.id);
 
     const fetchAgentIds = async () => {
-      // Aqui você pode buscar os agent_ids da organização
-      // Por enquanto vou usar o agent_id que já temos no console
-      setAgentIds(['agent_01k02ete3tfjgrq97y8a7v541y']);
+      // Get agent_ids from the organization table
+      const { data: orgData } = await supabase
+        .from('organizations')
+        .select('agent_id')
+        .eq('id', selectedOrganization.id)
+        .single();
+
+      if (orgData?.agent_id && Array.isArray(orgData.agent_id)) {
+        console.log('Found agent IDs for org', selectedOrganization.id, ':', orgData.agent_id);
+        setAgentIds(orgData.agent_id);
+      } else {
+        console.log('No agent IDs found for organization:', selectedOrganization.id);
+        setAgentIds([]);
+      }
     };
 
     fetchAgentIds();
@@ -147,6 +160,8 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
   // Fetch dashboard statistics
   useEffect(() => {
     if (!selectedOrganization?.id) return;
+    
+    console.log('Fetching dashboard data for organization:', selectedOrganization.name, selectedOrganization.id);
 
     const fetchDashboardData = async () => {
       const { startDate, endDate } = getDateRange();
@@ -158,6 +173,8 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
         .eq('organization_id', selectedOrganization.id)
         .gte('created_at', startDate.toISOString())
         .lte('created_at', endDate.toISOString());
+
+      console.log('Current calls for org', selectedOrganization.id, ':', currentCalls?.length || 0, 'calls');
 
       // Get previous period for comparison (same duration, shifted back)
       const periodDuration = endDate.getTime() - startDate.getTime();
