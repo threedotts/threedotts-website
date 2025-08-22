@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import CustomElevenLabsWidget from './CustomElevenLabsWidget';
-import ElevenLabsSDKTest from './ElevenLabsSDKTest';
+import ElevenLabsConversationalAI from './ElevenLabsConversationalAI';
 
 const CustomWidgetDemo: React.FC = () => {
   const { toast } = useToast();
@@ -46,14 +46,14 @@ const CustomWidgetDemo: React.FC = () => {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Widget ElevenLabs Personalizado</CardTitle>
+          <CardTitle>ElevenLabs Conversational AI</CardTitle>
           <p className="text-sm text-muted-foreground">
             Configure seu agente de IA conversacional usando WebSockets
           </p>
         </CardHeader>
         
         <CardContent className="space-y-4">
-          <ElevenLabsSDKTest />
+          <ElevenLabsConversationalAI />
           
           <div className="mt-8">
             <div className="space-y-2">
