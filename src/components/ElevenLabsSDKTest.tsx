@@ -37,49 +37,63 @@ export const ElevenLabsSDKTest = () => {
   const playAudioQueue = async () => {
     console.log('🎵 playAudioQueue chamado. isPlaying:', isPlayingRef.current, 'fila:', audioQueueRef.current.length, 'audioContext:', !!audioContextRef.current);
     
-    if (isPlayingRef.current || audioQueueRef.current.length === 0 || !audioContextRef.current) {
-      console.log('🎵 Saindo do playAudioQueue - condições não atendidas');
+    if (audioQueueRef.current.length === 0 || !audioContextRef.current) {
+      console.log('🎵 Saindo do playAudioQueue - fila vazia ou sem AudioContext');
+      return;
+    }
+
+    // If already playing, don't start another queue processing
+    if (isPlayingRef.current) {
+      console.log('🎵 Já está tocando, não iniciando nova reprodução');
       return;
     }
 
     console.log('🎵 Iniciando reprodução da fila de áudio...');
     isPlayingRef.current = true;
     
-    while (audioQueueRef.current.length > 0) {
-      const audioItem = audioQueueRef.current.shift()!;
-      console.log('🎵 Reproduzindo áudio:', audioItem.contextId, 'duração:', audioItem.buffer.duration);
-      
-      try {
-        // Ensure AudioContext is not suspended
-        if (audioContextRef.current.state === 'suspended') {
-          console.log('🔓 Resumindo AudioContext antes da reprodução...');
-          await audioContextRef.current.resume();
+    try {
+      while (audioQueueRef.current.length > 0) {
+        const audioItem = audioQueueRef.current.shift()!;
+        console.log('🎵 Reproduzindo áudio:', audioItem.contextId, 'duração:', audioItem.buffer.duration);
+        
+        try {
+          // Ensure AudioContext is not suspended
+          if (audioContextRef.current.state === 'suspended') {
+            console.log('🔓 Resumindo AudioContext antes da reprodução...');
+            await audioContextRef.current.resume();
+          }
+          
+          const source = audioContextRef.current.createBufferSource();
+          source.buffer = audioItem.buffer;
+          source.connect(audioContextRef.current.destination);
+          
+          console.log('🎵 Iniciando reprodução do áudio...');
+          
+          await new Promise<void>((resolve, reject) => {
+            source.onended = () => {
+              console.log('🎵 Áudio terminou de tocar');
+              resolve();
+            };
+            
+            try {
+              source.start(0);
+            } catch (error) {
+              console.error('❌ Erro ao iniciar áudio:', error);
+              reject(error);
+            }
+          });
+          
+          console.log('✅ Áudio reproduzido com sucesso!');
+          addMessage(`🔊 Áudio reproduzido (contexto: ${audioItem.contextId})`);
+        } catch (error) {
+          console.error('❌ Erro ao reproduzir áudio:', error);
+          addMessage(`❌ Erro na reprodução: ${error.message}`);
         }
-        
-        const source = audioContextRef.current.createBufferSource();
-        source.buffer = audioItem.buffer;
-        source.connect(audioContextRef.current.destination);
-        
-        console.log('🎵 Iniciando reprodução do áudio...');
-        
-        await new Promise<void>((resolve) => {
-          source.onended = () => {
-            console.log('🎵 Áudio terminou de tocar');
-            resolve();
-          };
-          source.start(0);
-        });
-        
-        console.log('✅ Áudio reproduzido com sucesso!');
-        addMessage(`🔊 Áudio reproduzido (contexto: ${audioItem.contextId})`);
-      } catch (error) {
-        console.error('❌ Erro ao reproduzir áudio:', error);
-        addMessage(`❌ Erro na reprodução: ${error.message}`);
       }
+    } finally {
+      console.log('🎵 Fila de áudio finalizada, resetando estado');
+      isPlayingRef.current = false;
     }
-    
-    console.log('🎵 Fila de áudio finalizada');
-    isPlayingRef.current = false;
   };
 
   const connectWebSocket = async () => {
