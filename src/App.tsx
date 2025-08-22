@@ -19,8 +19,8 @@ declare global {
 }
 
 // Configuration for third-party integrations
-const ELEVENLABS_AGENT_ID = "agent_01k02ete3tfjgrq97y8a7v541y";
-const CHAT_WIDGET_ENABLED = true; // ElevenLabs chat widget enabled
+const AGENT_ID = "agent_01k02ete3tfjgrq97y8a7v541y";
+const CHAT_WIDGET_ENABLED = true; // ThreeDots embedded convai widget enabled
 import Index from "./pages/Index";
 import ServiceDetails from "./pages/ServiceDetails";
 import ProjectRequest from "./pages/ProjectRequest";
@@ -36,70 +36,15 @@ import CustomWidgetDemo from "./components/CustomWidgetDemo";
 import { ChatWidgetErrorBoundary } from "./components/ChatWidgetErrorBoundary";
 import { SecurityHeaders } from "./components/SecurityHeaders";
 import { OrganizationMemberListener } from "./components/OrganizationMemberListener";
+import ThreeDotsEmbeddedConvai from "./components/ThreeDotsEmbeddedConvai";
 
 const queryClient = new QueryClient();
 
-// Widget component that uses React Router navigation
-const ElevenLabsWidget = () => {
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    // Set up ElevenLabs widget client tools
-    if (CHAT_WIDGET_ENABLED && ELEVENLABS_AGENT_ID) {
-      const handleWidgetCall = (event: CustomEvent) => {
-        event.detail.config.clientTools = {
-          redirectToExternalURL: ({ url }: { url: string }) => {
-            console.log('redirectToExternalURL called with url:', url);
-            
-            // Check if it's a hash fragment (like /#contact or #contact)
-            if (url.includes('#')) {
-              // Extract the ID after the hash
-              const hashIndex = url.indexOf('#');
-              const elementId = url.substring(hashIndex + 1);
-              const element = document.getElementById(elementId);
-              
-              console.log('Looking for element with ID:', elementId, 'Found:', element);
-              
-              if (element) {
-                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              } else {
-                console.warn('Element not found:', elementId);
-              }
-            } else {
-              // Navigate using React Router for regular paths
-              navigate(url);
-            }
-          },
-        };
-      };
-
-      // Wait for widget to be available and add event listener
-      const addEventListenerWhenReady = () => {
-        const widget = document.querySelector('elevenlabs-convai');
-        if (widget) {
-          widget.addEventListener('elevenlabs-convai:call', handleWidgetCall as EventListener);
-        } else {
-          // Retry after a short delay if widget is not ready
-          setTimeout(addEventListenerWhenReady, 100);
-        }
-      };
-
-      addEventListenerWhenReady();
-
-      return () => {
-        const widget = document.querySelector('elevenlabs-convai');
-        if (widget) {
-          widget.removeEventListener('elevenlabs-convai:call', handleWidgetCall as EventListener);
-        }
-      };
-    }
-  }, [navigate]);
-
-  return CHAT_WIDGET_ENABLED && ELEVENLABS_AGENT_ID ? (
+// ThreeDots embedded convai widget component
+const ThreeDotsWidget = () => {
+  return CHAT_WIDGET_ENABLED ? (
     <ChatWidgetErrorBoundary>
-      <div className="elevenlabs-chat-wrapper">
-        <elevenlabs-convai agent-id={ELEVENLABS_AGENT_ID}></elevenlabs-convai>
-      </div>
+      <ThreeDotsEmbeddedConvai agentId={AGENT_ID} />
     </ChatWidgetErrorBoundary>
   ) : null;
 };
@@ -152,8 +97,8 @@ const App = () => {
             <Route path="*" element={<NotFound />} />
           </Routes>
           
-          {/* Widget component with navigation support */}
-          <ElevenLabsWidget />
+          {/* ThreeDots embedded convai widget */}
+          <ThreeDotsWidget />
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
