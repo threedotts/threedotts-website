@@ -42,15 +42,25 @@ const ThreeDotsEmbeddedConvai: React.FC<ThreeDotsEmbeddedConvaiProps> = ({
               Ligar
             </Button>
           ) : (
-            /* Mute Button when connected */
-            <Button
-              onClick={actions.toggleMute}
-              variant={state.isMuted ? "destructive" : "secondary"}
-              className="rounded-full px-4 py-2 font-medium text-sm"
-              size="sm"
-            >
-              {state.isMuted ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-            </Button>
+            /* Connected state - Mute and End Call buttons */
+            <div className="flex gap-2">
+              <Button
+                onClick={actions.toggleMute}
+                variant={state.isMuted ? "destructive" : "secondary"}
+                className="rounded-full px-3 py-2 text-sm"
+                size="sm"
+              >
+                {state.isMuted ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+              </Button>
+              <Button
+                onClick={actions.handleDisconnect}
+                variant="destructive"
+                className="rounded-full px-3 py-2 text-sm"
+                size="sm"
+              >
+                Encerrar
+              </Button>
+            </div>
           )}
         </div>
       </div>
