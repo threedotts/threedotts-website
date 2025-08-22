@@ -19,8 +19,8 @@ interface ElevenLabsMessage {
 export const ElevenLabsSDKTest = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [voiceId, setVoiceId] = useState("9BWtsMINqrJLrRacOk9x"); // Aria voice
-  const [testMessage, setTestMessage] = useState("Hello! This is a test of the ElevenLabs multi-context WebSocket API.");
+  const [voiceId, setVoiceId] = useState("9BWtsMINqrJLrRacOk9x"); // Aria voice (default)
+  const [testMessage, setTestMessage] = useState("This is a simple test message for ElevenLabs text to speech synthesis.");
   const [messages, setMessages] = useState<string[]>([]);
   
   const wsRef = useRef<WebSocket | null>(null);
@@ -348,7 +348,7 @@ export const ElevenLabsSDKTest = () => {
             <Label htmlFor="voice-id">Voice ID</Label>
             <Input
               id="voice-id"
-              placeholder="Voice ID (ex: 9BWtsMINqrJLrRacOk9x)"
+              placeholder="Voice ID (ex: 9BWtsMINqrJLrRacOk9x para Aria)"
               value={voiceId}
               onChange={(e) => setVoiceId(e.target.value)}
               disabled={isConnected}
