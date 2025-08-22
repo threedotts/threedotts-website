@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Phone, X } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Phone, X, Send, ChevronDown } from 'lucide-react';
 import CustomElevenLabsWidget from './CustomElevenLabsWidget';
 
 interface ThreeDotsEmbeddedConvaiProps {
@@ -12,59 +13,141 @@ const ThreeDotsEmbeddedConvai: React.FC<ThreeDotsEmbeddedConvaiProps> = ({
   agentId = 'agent_01k02ete3tfjgrq97y8a7v541y',
   className = ''
 }) => {
-  const [showWidget, setShowWidget] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
+  const [message, setMessage] = useState('');
 
-  const handleCallClick = () => {
-    setShowWidget(true);
+  const handleToggle = () => {
+    setIsExpanded(!isExpanded);
   };
 
-  const handleCloseWidget = () => {
-    setShowWidget(false);
+  const handleConnect = () => {
+    setIsConnected(true);
+    // Here you would integrate with your voice service
   };
 
-  if (showWidget) {
-    return (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-        <div className="relative">
-          <Button
-            onClick={handleCloseWidget}
-            variant="ghost"
-            size="icon"
-            className="absolute -top-2 -right-2 z-10 bg-background border border-border shadow-md hover:bg-muted"
-          >
-            <X className="h-4 w-4" />
-          </Button>
-          <CustomElevenLabsWidget
-            agentId={agentId}
-            onClose={handleCloseWidget}
-            className="bg-background shadow-xl"
-          />
-        </div>
-      </div>
-    );
-  }
+  const handleDisconnect = () => {
+    setIsConnected(false);
+  };
+
+  const handleSendMessage = () => {
+    if (message.trim()) {
+      // Handle message sending
+      console.log('Sending message:', message);
+      setMessage('');
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSendMessage();
+    }
+  };
 
   return (
     <div className={`fixed bottom-6 right-6 z-40 ${className}`}>
-      {/* Main pill container */}
-      <div className="bg-background border border-border rounded-full shadow-lg pl-2 pr-4 py-2 flex items-center gap-3">
-        {/* Avatar image */}
-        <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-slate-400 to-slate-600 flex items-center justify-center">
-          <img 
-            src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face&auto=format" 
-            alt="Avatar"
-            className="w-full h-full object-cover"
-          />
-        </div>
+      <div className={`bg-background border border-border shadow-lg transition-all duration-300 ease-out ${
+        isExpanded 
+          ? 'rounded-2xl p-6 w-80 animate-scale-in' 
+          : 'rounded-full pl-2 pr-4 py-2 animate-scale-in hover-scale'
+      }`}>
         
-        {/* Call Button */}
-        <Button
-          onClick={handleCallClick}
-          className="bg-foreground text-background hover:bg-foreground/90 rounded-full px-4 py-2 font-medium text-sm"
-        >
-          <Phone className="w-4 h-4 mr-1" />
-          Ligar
-        </Button>
+        {!isExpanded ? (
+          // Collapsed state - pill format
+          <div className="flex items-center gap-3">
+            {/* Avatar image */}
+            <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-slate-400 to-slate-600 flex items-center justify-center">
+              <img 
+                src="https://images.unsplash.com/photo-1494790108755-2616b612e602?w=40&h=40&fit=crop&crop=face&auto=format" 
+                alt="AI Assistant"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            
+            {/* Call Button */}
+            <Button
+              onClick={handleToggle}
+              className="bg-foreground text-background hover:bg-foreground/90 rounded-full px-4 py-2 font-medium text-sm transition-all duration-200"
+            >
+              <Phone className="w-4 h-4 mr-1" />
+              Ligar
+            </Button>
+          </div>
+        ) : (
+          // Expanded state
+          <div className="animate-fade-in">
+            {/* Header with avatar and controls */}
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                {/* Large avatar */}
+                <div className="w-16 h-16 rounded-full overflow-hidden bg-gradient-to-br from-slate-400 to-slate-600 flex items-center justify-center">
+                  <img 
+                    src="https://images.unsplash.com/photo-1494790108755-2616b612e602?w=64&h=64&fit=crop&crop=face&auto=format" 
+                    alt="AI Assistant"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                
+                <div>
+                  <h3 className="font-semibold text-foreground">AI Assistant</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {isConnected ? 'Conectado' : 'Disponível'}
+                  </p>
+                </div>
+              </div>
+              
+              {/* Minimize button */}
+              <Button
+                onClick={handleToggle}
+                variant="ghost"
+                size="icon"
+                className="rounded-full hover:bg-muted transition-colors duration-200"
+              >
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* Call controls */}
+            <div className="flex gap-2 mb-4">
+              {!isConnected ? (
+                <Button
+                  onClick={handleConnect}
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white rounded-full py-2 transition-colors duration-200"
+                >
+                  <Phone className="w-4 h-4 mr-2" />
+                  Conectar
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleDisconnect}
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white rounded-full py-2 transition-colors duration-200"
+                >
+                  <Phone className="w-4 h-4 mr-2" />
+                  Desconectar
+                </Button>
+              )}
+            </div>
+
+            {/* Message input */}
+            <div className="flex gap-2">
+              <Input
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Enviar mensagem"
+                className="flex-1 rounded-full border-muted-foreground/20 focus:border-primary transition-colors duration-200"
+              />
+              <Button
+                onClick={handleSendMessage}
+                size="icon"
+                className="rounded-full bg-primary hover:bg-primary/90 transition-colors duration-200"
+                disabled={!message.trim()}
+              >
+                <Send className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
       
       {/* Powered by text - outside and below container */}
