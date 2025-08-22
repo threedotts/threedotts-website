@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -9,7 +9,7 @@ const ElevenLabsSDKTest: React.FC = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [messages, setMessages] = useState<string[]>([]);
   const [status, setStatus] = useState<'disconnected' | 'connecting' | 'connected'>('disconnected');
-  const [conversation, setConversation] = useState<any>(null);
+  const wsRef = useRef<WebSocket | null>(null);
 
   const addMessage = (msg: string) => {
     const timestamp = new Date().toLocaleTimeString();
@@ -21,63 +21,57 @@ const ElevenLabsSDKTest: React.FC = () => {
 
     try {
       setStatus('connecting');
-      addMessage('🚀 Starting conversation with ElevenLabs SDK...');
-
-      // Request microphone permission first
-      addMessage('🎤 Requesting microphone permission...');
-      await navigator.mediaDevices.getUserMedia({ audio: true });
-      addMessage('✅ Microphone permission granted');
-
-      // Dynamically import the ElevenLabs client
-      addMessage('📦 Loading ElevenLabs SDK...');
-      const { Conversation } = await import('@elevenlabs/client');
-      addMessage('✅ ElevenLabs SDK loaded');
-
-      // Start the conversation using the official SDK
-      addMessage('🔗 Connecting to ElevenLabs agent...');
-      const conv = await Conversation.startSession({
-        agentId: 'agent_01k02ete3tfjgrq97y8a7v541y', // Your agent ID
-        onConnect: () => {
-          addMessage('✅ Connected to ElevenLabs!');
-          setIsConnected(true);
-          setStatus('connected');
-          toast({
-            title: "Success!",
-            description: "Connected to ElevenLabs Conversational AI using official SDK",
-          });
-        },
-        onDisconnect: () => {
-          addMessage('❌ Disconnected from ElevenLabs');
-          setIsConnected(false);
-          setStatus('disconnected');
-        },
-        onError: (error: any) => {
-          addMessage(`❌ Error: ${error.message || error}`);
-          console.error('ElevenLabs SDK Error:', error);
-          setStatus('disconnected');
-          toast({
-            title: "Connection Error",
-            description: error.message || "Failed to connect using SDK",
-            variant: "destructive",
-          });
-        },
-        onModeChange: (mode: any) => {
-          addMessage(`🔄 Mode changed to: ${mode.mode}`);
-          console.log('Mode change:', mode);
-        },
-        onMessage: (message: any) => {
-          addMessage(`📨 Message: ${JSON.stringify(message).substring(0, 100)}...`);
-          console.log('SDK Message:', message);
+      addMessage('🚀 Connecting via edge function proxy...');
+      
+      // Connect to our edge function proxy
+      const wsUrl = `wss://dkqzzypemdewomxrjftv.supabase.co/functions/v1/elevenlabs-websocket?agent_id=agent_01k02ete3tfjgrq97y8a7v541y`;
+      console.log('🔗 Connecting to edge function:', wsUrl);
+      
+      wsRef.current = new WebSocket(wsUrl);
+      
+      wsRef.current.onopen = () => {
+        setStatus('connected');
+        setIsConnected(true);
+        addMessage('✅ Connected via edge function proxy!');
+        toast({
+          title: "Success!",
+          description: "Connected to ElevenLabs via edge function proxy",
+        });
+      };
+      
+      wsRef.current.onmessage = (event) => {
+        try {
+          const message = JSON.parse(event.data);
+          console.log('📨 Received:', message);
+          addMessage(`📨 ${message.type || 'Message'}: ${JSON.stringify(message).substring(0, 100)}...`);
+        } catch (error) {
+          console.log('📨 Received raw:', event.data);
+          addMessage(`📨 Raw: ${event.data.substring(0, 100)}...`);
         }
-      });
-
-      setConversation(conv);
-      addMessage('🎯 Conversation session created');
-
+      };
+      
+      wsRef.current.onclose = (event) => {
+        setStatus('disconnected');
+        setIsConnected(false);
+        addMessage(`❌ Connection closed: ${event.code} ${event.reason}`);
+        console.log('❌ WebSocket closed:', event);
+      };
+      
+      wsRef.current.onerror = (error) => {
+        setStatus('disconnected');
+        addMessage(`❌ WebSocket error occurred`);
+        console.error('❌ WebSocket error:', error);
+        toast({
+          title: "Connection Error",
+          description: "Failed to connect via edge function",
+          variant: "destructive",
+        });
+      };
+      
     } catch (error: any) {
-      console.error('Failed to start conversation:', error);
-      addMessage(`❌ Failed to start: ${error.message || error}`);
       setStatus('disconnected');
+      addMessage(`❌ Failed to connect: ${error.message}`);
+      console.error('Connection error:', error);
       toast({
         title: "Connection Failed",
         description: error.message || "Could not start conversation",
@@ -86,32 +80,32 @@ const ElevenLabsSDKTest: React.FC = () => {
     }
   }, [isConnected, toast]);
 
-  const stopConversation = useCallback(async () => {
-    if (conversation) {
-      try {
-        addMessage('🛑 Stopping conversation...');
-        await conversation.endSession();
-        setConversation(null);
-        addMessage('✅ Conversation ended');
-      } catch (error: any) {
-        addMessage(`❌ Error stopping: ${error.message || error}`);
-        console.error('Error stopping conversation:', error);
-      }
+  const stopConversation = useCallback(() => {
+    if (wsRef.current) {
+      wsRef.current.close();
+      wsRef.current = null;
+      addMessage('🛑 Connection closed');
+      setIsConnected(false);
+      setStatus('disconnected');
     }
-  }, [conversation]);
+  }, []);
 
   const sendTestMessage = useCallback(() => {
-    if (conversation) {
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
       try {
-        // Send a contextual message or trigger speaking
-        addMessage('📤 Sending test interaction...');
-        // The SDK handles audio automatically, so we just log this action
-        console.log('Test interaction triggered');
+        const testMessage = {
+          type: "contextual_update",
+          text: "Hello, this is a test message from the client!"
+        };
+        wsRef.current.send(JSON.stringify(testMessage));
+        addMessage('📤 Sent test message to agent');
       } catch (error: any) {
         addMessage(`❌ Error sending: ${error.message || error}`);
       }
+    } else {
+      addMessage('❌ WebSocket not connected');
     }
-  }, [conversation]);
+  }, []);
 
   const clearMessages = () => {
     setMessages([]);
@@ -131,17 +125,17 @@ const ElevenLabsSDKTest: React.FC = () => {
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (conversation) {
-        conversation.endSession().catch(console.error);
+      if (wsRef.current) {
+        wsRef.current.close();
       }
     };
-  }, [conversation]);
+  }, []);
 
   return (
     <Card className="w-full max-w-4xl mx-auto">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>ElevenLabs Official SDK Test</CardTitle>
+          <CardTitle>ElevenLabs Edge Function Proxy Test</CardTitle>
           <div className="flex items-center gap-2">
             <div className={`w-2 h-2 rounded-full ${getStatusColor()}`} />
             <Badge variant="outline" className="text-xs">
@@ -159,7 +153,7 @@ const ElevenLabsSDKTest: React.FC = () => {
               disabled={status === 'connecting'}
               className="bg-blue-600 hover:bg-blue-700"
             >
-              {status === 'connecting' ? 'Connecting...' : 'Start Conversation (SDK)'}
+              {status === 'connecting' ? 'Connecting...' : 'Start Conversation (Proxy)'}
             </Button>
           ) : (
             <>
@@ -178,7 +172,7 @@ const ElevenLabsSDKTest: React.FC = () => {
 
         <div className="bg-muted p-4 rounded max-h-80 overflow-y-auto">
           <div className="flex justify-between items-center mb-2">
-            <div className="text-sm font-medium">SDK Connection Log:</div>
+            <div className="text-sm font-medium">Edge Function Proxy Log:</div>
             <div className="text-xs text-muted-foreground">
               {messages.length} messages
             </div>
@@ -197,10 +191,10 @@ const ElevenLabsSDKTest: React.FC = () => {
         </div>
 
         <div className="text-xs text-muted-foreground space-y-1">
-          <p><strong>Method:</strong> Official @elevenlabs/client SDK</p>
+          <p><strong>Method:</strong> Supabase Edge Function Proxy</p>
           <p><strong>Agent ID:</strong> agent_01k02ete3tfjgrq97y8a7v541y</p>
-          <p><strong>Advantages:</strong> Handles WebSocket connection, authentication, and audio automatically</p>
-          <p>This uses the official ElevenLabs SDK which should handle all connection complexities.</p>
+          <p><strong>Advantages:</strong> Bypasses CSP restrictions by proxying through our edge function</p>
+          <p>This connects to ElevenLabs via our Supabase edge function proxy, avoiding CSP issues.</p>
         </div>
       </CardContent>
     </Card>
