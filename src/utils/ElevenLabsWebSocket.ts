@@ -4,8 +4,9 @@ export class AudioRecorder {
   private processor: ScriptProcessorNode | null = null;
   private source: MediaStreamAudioSourceNode | null = null;
   private isRecording = false;
+  private isMuted = false; // New: track mute state
 
-  constructor(private onAudioData: (audioData: ArrayBuffer) => void) {}
+  constructor(private onAudioData: (audioData: ArrayBuffer) => void, private onMuteChange?: (muted: boolean) => void) {}
 
   async start() {
     if (this.isRecording) return;
@@ -42,7 +43,10 @@ export class AudioRecorder {
           pcmData[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
         }
         
-        this.onAudioData(pcmData.buffer);
+        // Only send audio data if not muted
+        if (!this.isMuted) {
+          this.onAudioData(pcmData.buffer);
+        }
       };
       
       this.source.connect(this.processor);
@@ -80,6 +84,18 @@ export class AudioRecorder {
 
   isActive() {
     return this.isRecording;
+  }
+
+  setMuted(muted: boolean) {
+    this.isMuted = muted;
+    console.log(muted ? '🔇 Microphone muted' : '🎤 Microphone unmuted');
+    if (this.onMuteChange) {
+      this.onMuteChange(muted);
+    }
+  }
+
+  isMicMuted() {
+    return this.isMuted;
   }
 }
 
@@ -183,6 +199,7 @@ export class ElevenLabsWebSocket {
   private audioRecorder: AudioRecorder | null = null;
   private audioPlayer: AudioPlayer | null = null;
   private isConnected = false;
+  private isMuted = false; // New: track mute state
   private agentId: string;
 
   constructor(
@@ -227,7 +244,7 @@ export class ElevenLabsWebSocket {
         });
       };
 
-      this.ws.onmessage = (event) => {
+      this.ws.onmessage = async (event) => {
         try {
           const message = JSON.parse(event.data);
           console.log('📨 Received:', message.type);
@@ -237,6 +254,9 @@ export class ElevenLabsWebSocket {
             console.log('✅ Conversation initiated successfully');
             this.isConnected = true;
             this.onConnectionChange(true);
+            
+            // Auto-start recording when connection is established
+            await this.startRecording();
           }
           
           this.handleMessage(message);
@@ -410,5 +430,24 @@ export class ElevenLabsWebSocket {
 
   getConnectionStatus() {
     return this.isConnected;
+  }
+
+  setMuted(muted: boolean) {
+    this.isMuted = muted;
+    if (this.audioRecorder) {
+      this.audioRecorder.setMuted(muted);
+    }
+    
+    if (!muted) {
+      // Send user_activity when unmuting to interrupt agent if speaking
+      this.send({
+        type: "user_activity"
+      });
+      console.log('📢 Sent user_activity event on unmute');
+    }
+  }
+
+  getMuteStatus() {
+    return this.isMuted;
   }
 }

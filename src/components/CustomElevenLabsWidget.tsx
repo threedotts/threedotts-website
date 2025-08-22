@@ -22,7 +22,7 @@ const CustomElevenLabsWidget: React.FC<CustomElevenLabsWidgetProps> = ({
 }) => {
   const { toast } = useToast();
   const [isConnected, setIsConnected] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
+  const [isMuted, setIsMuted] = useState(false); // Changed from isRecording to isMuted
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [textMessage, setTextMessage] = useState('');
   const [messages, setMessages] = useState<ElevenLabsMessage[]>([]);
@@ -65,7 +65,7 @@ const CustomElevenLabsWidget: React.FC<CustomElevenLabsWidgetProps> = ({
         description: "Conexão estabelecida com o agente de IA",
       });
     } else {
-      setIsRecording(false);
+      setIsMuted(false);
       setIsSpeaking(false);
     }
   };
@@ -111,7 +111,7 @@ const CustomElevenLabsWidget: React.FC<CustomElevenLabsWidgetProps> = ({
     setMessages([]);
   };
 
-  const toggleRecording = async () => {
+  const toggleMute = () => {
     if (!elevenLabsRef.current || !isConnected) {
       toast({
         title: "Não Conectado",
@@ -121,22 +121,9 @@ const CustomElevenLabsWidget: React.FC<CustomElevenLabsWidgetProps> = ({
       return;
     }
 
-    try {
-      if (isRecording) {
-        elevenLabsRef.current.stopRecording();
-        setIsRecording(false);
-      } else {
-        await elevenLabsRef.current.startRecording();
-        setIsRecording(true);
-      }
-    } catch (error) {
-      console.error('Error toggling recording:', error);
-      toast({
-        title: "Erro de Microfone",
-        description: "Não foi possível acessar o microfone. Verifique as permissões.",
-        variant: "destructive",
-      });
-    }
+    const newMuteState = !isMuted;
+    elevenLabsRef.current.setMuted(newMuteState);
+    setIsMuted(newMuteState);
   };
 
   const sendTextMessage = () => {
@@ -220,12 +207,12 @@ const CustomElevenLabsWidget: React.FC<CustomElevenLabsWidgetProps> = ({
           <div className="space-y-3">
             <div className="flex items-center justify-center gap-4">
               <Button
-                onClick={toggleRecording}
-                variant={isRecording ? "destructive" : "default"}
+                onClick={toggleMute}
+                variant={isMuted ? "destructive" : "default"}
                 size="lg"
                 className="h-12 w-12 rounded-full"
               >
-                {isRecording ? (
+                {isMuted ? (
                   <MicOff className="w-5 h-5" />
                 ) : (
                   <Mic className="w-5 h-5" />
@@ -260,10 +247,10 @@ const CustomElevenLabsWidget: React.FC<CustomElevenLabsWidgetProps> = ({
 
             {/* Status Indicators */}
             <div className="flex justify-center gap-4 text-xs text-muted-foreground">
-              {isRecording && (
+             {!isMuted && (
                 <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-                  <span>Gravando</span>
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                  <span>Microfone Ativo</span>
                 </div>
               )}
               {isSpeaking && (
