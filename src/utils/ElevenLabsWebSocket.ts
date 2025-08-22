@@ -173,7 +173,7 @@ export class ElevenLabsWebSocket {
     }
 
     try {
-      console.log('Connecting to ElevenLabs WebSocket...');
+      console.log('Connecting to ElevenLabs WebSocket via Edge Function...');
       
       // Initialize audio components
       this.audioPlayer = new AudioPlayer();
@@ -181,20 +181,17 @@ export class ElevenLabsWebSocket {
         this.sendAudioChunk(audioData);
       });
 
-      // Connect to WebSocket
-      const wsUrl = `wss://api.elevenlabs.io/v1/convai/conversation?agent_id=${this.agentId}`;
+      // Connect to our Supabase Edge Function WebSocket proxy
+      const wsUrl = `wss://dkqzzypemdewomxrjftv.supabase.co/functions/v1/elevenlabs-websocket?agent_id=${this.agentId}`;
       this.ws = new WebSocket(wsUrl);
 
       this.ws.onopen = () => {
-        console.log('WebSocket connected');
+        console.log('WebSocket connected to Edge Function proxy');
         this.isConnected = true;
         this.onConnectionChange(true);
         
-        // Send authentication
-        this.send({
-          type: 'conversation_initiation_client_data',
-          api_key: this.apiKey
-        });
+        // The Edge Function will handle authentication automatically
+        console.log('WebSocket proxy connection established');
       };
 
       this.ws.onmessage = (event) => {

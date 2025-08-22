@@ -3,20 +3,18 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { Mic, MicOff, Send, Phone, PhoneOff, Volume2 } from 'lucide-react';
 import { ElevenLabsWebSocket, ElevenLabsMessage } from '@/utils/ElevenLabsWebSocket';
 
 interface CustomElevenLabsWidgetProps {
   agentId: string;
-  apiKey: string;
   onClose?: () => void;
   className?: string;
 }
 
 const CustomElevenLabsWidget: React.FC<CustomElevenLabsWidgetProps> = ({
   agentId,
-  apiKey,
   onClose,
   className = ''
 }) => {
@@ -90,7 +88,7 @@ const CustomElevenLabsWidget: React.FC<CustomElevenLabsWidgetProps> = ({
       
       elevenLabsRef.current = new ElevenLabsWebSocket(
         agentId,
-        apiKey,
+        '', // API key handled by Edge Function
         handleMessage,
         handleConnectionChange,
         handleError

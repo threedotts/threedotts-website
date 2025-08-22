@@ -3,29 +3,19 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import CustomElevenLabsWidget from './CustomElevenLabsWidget';
 
 const CustomWidgetDemo: React.FC = () => {
   const { toast } = useToast();
   const [showWidget, setShowWidget] = useState(false);
   const [agentId, setAgentId] = useState('agent_01k02ete3tfjgrq97y8a7v541y'); // Default from your network requests
-  const [apiKey, setApiKey] = useState('');
 
   const handleStartDemo = () => {
     if (!agentId.trim()) {
       toast({
         title: "Agent ID Obrigatório",
         description: "Por favor, insira um Agent ID válido",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!apiKey.trim()) {
-      toast({
-        title: "API Key Obrigatória",
-        description: "Por favor, insira sua chave da API ElevenLabs",
         variant: "destructive",
       });
       return;
@@ -43,7 +33,6 @@ const CustomWidgetDemo: React.FC = () => {
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
         <CustomElevenLabsWidget
           agentId={agentId}
-          apiKey={apiKey}
           onClose={handleCloseWidget}
           className="bg-background shadow-xl"
         />
@@ -75,17 +64,10 @@ const CustomWidgetDemo: React.FC = () => {
             </p>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="apiKey">API Key</Label>
-            <Input
-              id="apiKey"
-              type="password"
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              placeholder="sk-xxxxxxxxx"
-            />
-            <p className="text-xs text-muted-foreground">
-              Sua chave privada da API ElevenLabs
+          <div className="bg-green-50 border border-green-200 p-3 rounded text-sm">
+            <p className="text-green-800 font-medium">✓ API Key Configurada</p>
+            <p className="text-green-600 text-xs mt-1">
+              A chave da API ElevenLabs está configurada no servidor por segurança
             </p>
           </div>
 
