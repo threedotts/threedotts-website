@@ -45,7 +45,7 @@ const ThreeDotsEmbeddedConvai: React.FC<ThreeDotsEmbeddedConvaiProps> = ({
             </Button>
           ) : (
             /* Connected state - End Call and Mute buttons */
-            <div className="flex gap-2 animate-fade-in">
+            <div className="flex gap-2 animate-scale-in">
               <Button
                 onClick={actions.handleDisconnect}
                 variant="destructive"
