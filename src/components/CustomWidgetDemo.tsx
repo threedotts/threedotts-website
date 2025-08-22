@@ -5,8 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import CustomElevenLabsWidget from './CustomElevenLabsWidget';
-import WebSocketTest from './WebSocketTest';
-import SimpleElevenLabsTest from './SimpleElevenLabsTest';
 import ElevenLabsSDKTest from './ElevenLabsSDKTest';
 
 const CustomWidgetDemo: React.FC = () => {
@@ -56,14 +54,6 @@ const CustomWidgetDemo: React.FC = () => {
         
         <CardContent className="space-y-4">
           <ElevenLabsSDKTest />
-          
-          <div className="mt-8">
-            <SimpleElevenLabsTest />
-          </div>
-          
-          <div className="mt-8">
-            <WebSocketTest />
-          </div>
           
           <div className="mt-8">
             <div className="space-y-2">
