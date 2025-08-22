@@ -144,6 +144,37 @@ export class AudioPlayer {
 
 export interface ElevenLabsMessage {
   type: string;
+  // Conversation initiation
+  conversation_initiation_metadata?: any;
+  
+  // User transcript
+  user_transcription_event?: {
+    user_transcript: string;
+  };
+  
+  // Agent response
+  agent_response_event?: {
+    agent_response: string;
+  };
+  
+  // Audio response
+  audio_event?: {
+    audio_base_64: string;
+    event_id: number;
+  };
+  
+  // Interruption
+  interruption_event?: {
+    reason: string;
+  };
+  
+  // Ping/Pong
+  ping_event?: {
+    event_id: number;
+    ping_ms?: number;
+  };
+  
+  // Legacy fields for backward compatibility
   [key: string]: any;
 }
 
@@ -153,17 +184,15 @@ export class ElevenLabsWebSocket {
   private audioPlayer: AudioPlayer | null = null;
   private isConnected = false;
   private agentId: string;
-  private apiKey: string;
 
   constructor(
     agentId: string,
-    apiKey: string,
+    apiKey: string, // Not used for public agents
     private onMessage: (message: ElevenLabsMessage) => void,
     private onConnectionChange: (connected: boolean) => void,
     private onError: (error: string) => void
   ) {
     this.agentId = agentId;
-    this.apiKey = apiKey;
   }
 
   async connect() {
@@ -173,7 +202,7 @@ export class ElevenLabsWebSocket {
     }
 
     try {
-      console.log('🚀 Connecting to ElevenLabs Conversational AI WebSocket...');
+      console.log('🚀 Connecting to ElevenLabs Conversational AI...');
       console.log('Agent ID:', this.agentId);
       
       // Initialize audio components
@@ -182,32 +211,28 @@ export class ElevenLabsWebSocket {
         this.sendAudioChunk(audioData);
       });
 
-      // Connect to ElevenLabs Conversational AI WebSocket (correct endpoint from docs)
+      // Connect using the exact URL format from documentation
       const wsUrl = `wss://api.elevenlabs.io/v1/convai/conversation?agent_id=${this.agentId}`;
-      console.log('🔗 Connecting to ElevenLabs ConvAI:', wsUrl);
+      console.log('🔗 Connecting to:', wsUrl);
       
       this.ws = new WebSocket(wsUrl);
 
       this.ws.onopen = () => {
-        console.log('✅ Connected to ElevenLabs ConvAI WebSocket');
+        console.log('✅ WebSocket opened, sending conversation initiation...');
         
-        // Send "Conversation Initiation Client Data" as per docs
-        const initMessage = {
-          type: 'conversation_initiation_client_data',
-          // Include API key in the initiation message (similar to TTS pattern)
-          xi_api_key: this.apiKey || 'YOUR_API_KEY_HERE' // Fallback for testing
-        };
-        
-        console.log('📤 Sending conversation initiation:', initMessage);
-        this.send(initMessage);
+        // Send conversation initiation as per documentation
+        // For public agents, no API key is needed
+        this.send({
+          type: "conversation_initiation_client_data"
+        });
       };
 
       this.ws.onmessage = (event) => {
         try {
           const message = JSON.parse(event.data);
-          console.log('📨 Received from ElevenLabs ConvAI:', message.type);
+          console.log('📨 Received:', message.type);
           
-          // Set connected when we get conversation_initiation_metadata
+          // Handle connection confirmation
           if (message.type === 'conversation_initiation_metadata' && !this.isConnected) {
             console.log('✅ Conversation initiated successfully');
             this.isConnected = true;
@@ -217,78 +242,81 @@ export class ElevenLabsWebSocket {
           this.handleMessage(message);
           this.onMessage(message);
         } catch (error) {
-          console.error('❌ Error parsing ConvAI message:', error, event.data);
+          console.error('❌ Error parsing message:', error, event.data);
         }
       };
 
       this.ws.onclose = (event) => {
-        console.log('❌ ElevenLabs ConvAI WebSocket closed:', event.code, event.reason);
-        console.log('Close details:', {
-          code: event.code,
-          reason: event.reason,
-          wasClean: event.wasClean
-        });
+        console.log('❌ WebSocket closed:', event.code, event.reason);
         this.isConnected = false;
         this.onConnectionChange(false);
       };
 
       this.ws.onerror = (error) => {
-        console.error('❌ ElevenLabs ConvAI WebSocket error:', error);
-        console.log('WebSocket state:', this.ws?.readyState);
-        this.onError('Connection error occurred');
+        console.error('❌ WebSocket error:', error);
+        this.onError('WebSocket connection failed');
       };
 
     } catch (error) {
-      console.error('❌ Error in connect method:', error);
+      console.error('❌ Connection error:', error);
       this.onError(`Connection failed: ${error}`);
     }
   }
 
   private handleMessage(message: ElevenLabsMessage) {
-    console.log('🔄 Handling message type:', message.type);
+    console.log('🔄 Handling message:', message.type);
     
     switch (message.type) {
       case 'conversation_initiation_metadata':
-        console.log('✅ Conversation initiated successfully');
-        console.log('Metadata:', message);
+        console.log('✅ Conversation metadata:', message);
         break;
         
-      case 'audio_response':
-        console.log('🎵 Received audio response (length:', message.audio_response?.length, ')');
-        if (message.audio_response && this.audioPlayer) {
+      case 'user_transcript':
+        if (message.user_transcription_event?.user_transcript) {
+          console.log('📝 User said:', message.user_transcription_event.user_transcript);
+        }
+        break;
+        
+      case 'agent_response':
+        if (message.agent_response_event?.agent_response) {
+          console.log('🤖 Agent response:', message.agent_response_event.agent_response);
+        }
+        break;
+        
+      case 'audio':
+        if (message.audio_event?.audio_base_64 && this.audioPlayer) {
+          console.log('🎵 Playing audio chunk');
           try {
             // Convert base64 to ArrayBuffer
-            const binaryString = atob(message.audio_response);
+            const binaryString = atob(message.audio_event.audio_base_64);
             const bytes = new Uint8Array(binaryString.length);
             for (let i = 0; i < binaryString.length; i++) {
               bytes[i] = binaryString.charCodeAt(i);
             }
             this.audioPlayer.addAudioChunk(bytes.buffer);
-            console.log('✅ Audio chunk added to player');
           } catch (error) {
             console.error('❌ Error processing audio:', error);
           }
         }
         break;
         
-      case 'user_transcript':
-        console.log('📝 User transcript:', message.user_transcript);
-        break;
-        
-      case 'agent_response':
-        console.log('🤖 Agent response:', message.agent_response);
-        break;
-        
       case 'interruption':
-        console.log('🛑 Interruption detected');
+        console.log('🛑 Conversation interrupted:', message.interruption_event?.reason);
         break;
         
       case 'ping':
-        console.log('🏓 Received ping, sending pong');
-        this.send({
-          type: 'pong',
-          event_id: message.event_id
-        });
+        console.log('🏓 Ping received, sending pong');
+        const pingEvent = message.ping_event;
+        if (pingEvent) {
+          // Send pong response as per documentation
+          const delay = pingEvent.ping_ms || 0;
+          setTimeout(() => {
+            this.send({
+              type: "pong",
+              event_id: pingEvent.event_id,
+            });
+          }, delay);
+        }
         break;
         
       default:
@@ -298,14 +326,17 @@ export class ElevenLabsWebSocket {
 
   private send(message: any) {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      console.log('📤 Sending:', message.type);
       this.ws.send(JSON.stringify(message));
+    } else {
+      console.warn('⚠️ WebSocket not ready, cannot send:', message.type);
     }
   }
 
   private sendAudioChunk(audioData: ArrayBuffer) {
     if (!this.isConnected) return;
     
-    // Convert ArrayBuffer to base64
+    // Convert ArrayBuffer to base64 as required by the API
     const uint8Array = new Uint8Array(audioData);
     let binaryString = '';
     for (let i = 0; i < uint8Array.length; i++) {
@@ -313,9 +344,9 @@ export class ElevenLabsWebSocket {
     }
     const base64Audio = btoa(binaryString);
     
+    // Send using the correct message format from documentation
     this.send({
-      type: 'user_audio_chunk',
-      chunk: base64Audio
+      user_audio_chunk: base64Audio
     });
   }
 
@@ -332,14 +363,15 @@ export class ElevenLabsWebSocket {
   }
 
   sendTextMessage(text: string) {
+    // Send contextual update as per documentation
     this.send({
-      type: 'user_message',
-      message: text
+      type: "contextual_update",
+      text: text
     });
   }
 
   disconnect() {
-    console.log('Disconnecting from ElevenLabs...');
+    console.log('🔌 Disconnecting...');
     
     if (this.audioRecorder) {
       this.audioRecorder.stop();
