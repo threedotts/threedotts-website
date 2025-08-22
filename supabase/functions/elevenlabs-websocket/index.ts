@@ -6,7 +6,7 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  console.log('=== ElevenLabs WebSocket Proxy Started ===');
+  console.log('=== ElevenLabs Multi-Context WebSocket Proxy Started ===');
   console.log('Method:', req.method);
   console.log('URL:', req.url);
   
@@ -30,12 +30,14 @@ serve(async (req) => {
 
   try {
     const url = new URL(req.url);
-    const agentId = url.searchParams.get('agent_id');
-    console.log('Agent ID from params:', agentId);
+    const voiceId = url.searchParams.get('voice_id');
+    const modelId = url.searchParams.get('model_id') || 'eleven_flash_v2_5';
+    console.log('Voice ID from params:', voiceId);
+    console.log('Model ID from params:', modelId);
     
-    if (!agentId) {
-      console.log('Missing agent_id parameter');
-      return new Response("Missing agent_id parameter", { 
+    if (!voiceId) {
+      console.log('Missing voice_id parameter');
+      return new Response("Missing voice_id parameter", { 
         status: 400,
         headers: corsHeaders 
       });
@@ -60,7 +62,7 @@ serve(async (req) => {
     
     // Handle client connection
     socket.onopen = () => {
-      console.log('Client WebSocket connected, initiating ElevenLabs connection...');
+      console.log('Client WebSocket connected, initiating ElevenLabs multi-context connection...');
       
       // Clear any existing timeout
       if (connectionTimeout) {
@@ -77,41 +79,40 @@ serve(async (req) => {
       }, 10000); // 10 second timeout
       
       try {
-        const elevenLabsUrl = `wss://api.elevenlabs.io/v1/convai/conversation?agent_id=${agentId}`;
-        console.log('Connecting to ElevenLabs:', elevenLabsUrl);
+        const elevenLabsUrl = `wss://api.elevenlabs.io/v1/text-to-speech/${voiceId}/multi-stream-input?model_id=${modelId}`;
+        console.log('Connecting to ElevenLabs Multi-Context API:', elevenLabsUrl);
         
-        elevenLabsWs = new WebSocket(elevenLabsUrl);
+        // Create WebSocket with proper headers for authentication
+        elevenLabsWs = new WebSocket(elevenLabsUrl, [], {
+          headers: {
+            'xi-api-key': elevenLabsApiKey
+          }
+        });
         
         elevenLabsWs.onopen = () => {
-          console.log('✅ ElevenLabs WebSocket connected successfully');
+          console.log('✅ ElevenLabs Multi-Context WebSocket connected successfully');
           clearTimeout(connectionTimeout);
-          
-          // Send initial message with API key
-          const initMessage = {
-            type: 'conversation_initiation_client_data',
-            conversation_config_override: {
-              agent: {
-                prompt: {
-                  prompt: "You are a helpful AI assistant."
-                }
-              }
-            }
-          };
-          
-          console.log('Sending init message:', JSON.stringify(initMessage));
-          elevenLabsWs.send(JSON.stringify(initMessage));
           
           // Notify client that connection is ready
           if (socket.readyState === WebSocket.OPEN) {
             socket.send(JSON.stringify({
               type: 'connection_ready',
-              message: 'Connected to ElevenLabs successfully'
+              message: 'Connected to ElevenLabs Multi-Context API successfully'
             }));
           }
         };
 
         elevenLabsWs.onmessage = (event) => {
-          console.log('📨 Message from ElevenLabs:', typeof event.data, event.data.substring(0, 100) + '...');
+          console.log('📨 Message from ElevenLabs:', typeof event.data);
+          try {
+            const data = JSON.parse(event.data);
+            console.log('📨 Parsed message:', data.contextId ? `Context: ${data.contextId}` : 'No context', 
+                       data.audio ? 'Has audio' : 'No audio', 
+                       data.is_final ? 'Final' : 'Not final');
+          } catch (e) {
+            console.log('📨 Raw message length:', event.data.length);
+          }
+          
           if (socket.readyState === WebSocket.OPEN) {
             socket.send(event.data);
           }

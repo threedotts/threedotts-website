@@ -8,17 +8,18 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 
 interface ElevenLabsMessage {
+  type?: string;
   contextId?: string;
   audio?: string;
   is_final?: boolean;
   error?: string;
+  message?: string;
 }
 
 export const ElevenLabsSDKTest = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [voiceId, setVoiceId] = useState("9BWtsMINqrJLrRacOk9x"); // Aria voice
-  const [apiKey, setApiKey] = useState("");
   const [testMessage, setTestMessage] = useState("Hello! This is a test of the ElevenLabs multi-context WebSocket API.");
   const [messages, setMessages] = useState<string[]>([]);
   
@@ -64,15 +65,6 @@ export const ElevenLabsSDKTest = () => {
   };
 
   const connectWebSocket = async () => {
-    if (!apiKey) {
-      toast({
-        title: "Erro",
-        description: "Por favor, insira sua API Key da ElevenLabs",
-        variant: "destructive",
-      });
-      return;
-    }
-
     if (!voiceId) {
       toast({
         title: "Erro",
@@ -83,27 +75,18 @@ export const ElevenLabsSDKTest = () => {
     }
 
     setIsLoading(true);
-    addMessage('🔌 Conectando ao ElevenLabs Multi-Context WebSocket...');
+    addMessage('🔌 Conectando via Supabase Edge Function...');
 
     try {
-      const modelId = "eleven_flash_v2_5";
-      const wsUrl = `wss://api.elevenlabs.io/v1/text-to-speech/${voiceId}/multi-stream-input?model_id=${modelId}`;
+      const wsUrl = `wss://dkqzzypemdewomxrjftv.supabase.co/functions/v1/elevenlabs-websocket?voice_id=${voiceId}&model_id=eleven_flash_v2_5`;
 
-      console.log('🔌 Conectando ao WebSocket:', wsUrl);
+      console.log('🔌 Conectando ao WebSocket via Supabase:', wsUrl);
 
       const ws = new WebSocket(wsUrl);
 
-      // Set API key in first message after connection
       ws.onopen = () => {
         console.log('✅ WebSocket conectado');
-        addMessage('✅ WebSocket conectado com sucesso');
-        
-        // Send API key authentication
-        const authMessage = JSON.stringify({
-          "xi-api-key": apiKey
-        });
-        ws.send(authMessage);
-        
+        addMessage('✅ WebSocket conectado via Supabase');
         setIsConnected(true);
         setIsLoading(false);
         wsRef.current = ws;
@@ -115,7 +98,7 @@ export const ElevenLabsSDKTest = () => {
         
         toast({
           title: "Sucesso",
-          description: "Conectado ao ElevenLabs Multi-Context WebSocket!",
+          description: "Conectado ao ElevenLabs via Supabase!",
           variant: "default",
         });
       };
@@ -124,6 +107,11 @@ export const ElevenLabsSDKTest = () => {
         try {
           const data: ElevenLabsMessage = JSON.parse(event.data);
           console.log('📨 Mensagem recebida:', data);
+
+          if (data.type === 'connection_ready') {
+            addMessage(`✅ ${data.message}`);
+            return;
+          }
 
           if (data.audio && audioContextRef.current) {
             addMessage(`📨 Áudio recebido (contexto: ${data.contextId || 'unknown'})`);
@@ -181,7 +169,7 @@ export const ElevenLabsSDKTest = () => {
         setIsLoading(false);
         toast({
           title: "Erro de Conexão",
-          description: "Erro na conexão WebSocket",
+          description: "Erro na conexão WebSocket via Supabase",
           variant: "destructive",
         });
       };
@@ -346,7 +334,7 @@ export const ElevenLabsSDKTest = () => {
           <div>
             <CardTitle>ElevenLabs Multi-Context WebSocket</CardTitle>
             <CardDescription>
-              Widget customizado usando a API WebSocket direta da ElevenLabs
+              Widget customizado usando Supabase Edge Function como proxy para ElevenLabs
             </CardDescription>
           </div>
           {getStatusBadge()}
@@ -355,18 +343,7 @@ export const ElevenLabsSDKTest = () => {
       
       <CardContent className="space-y-6">
         {/* Configuration */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="api-key">API Key da ElevenLabs</Label>
-            <Input
-              id="api-key"
-              type="password"
-              placeholder="Insira sua API key..."
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              disabled={isConnected}
-            />
-          </div>
+        <div className="grid grid-cols-1 gap-4">
           <div className="space-y-2">
             <Label htmlFor="voice-id">Voice ID</Label>
             <Input
@@ -457,10 +434,11 @@ export const ElevenLabsSDKTest = () => {
 
         {/* Info */}
         <div className="text-xs text-muted-foreground space-y-1 border-t pt-4">
-          <p><strong>Método:</strong> ElevenLabs Multi-Context WebSocket API</p>
-          <p><strong>Endpoint:</strong> wss://api.elevenlabs.io/v1/text-to-speech/{voiceId}/multi-stream-input</p>
+          <p><strong>Método:</strong> Supabase Edge Function Proxy para ElevenLabs Multi-Context WebSocket</p>
+          <p><strong>Endpoint:</strong> wss://dkqzzypemdewomxrjftv.supabase.co/functions/v1/elevenlabs-websocket</p>
           <p><strong>Modelo:</strong> eleven_flash_v2_5</p>
           <p><strong>Recursos:</strong> Múltiplos contextos, controle de interrupções, flush manual</p>
+          <p><strong>Vantagem:</strong> Resolve problemas de CSP, API key segura no servidor</p>
         </div>
       </CardContent>
     </Card>
