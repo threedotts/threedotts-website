@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSessionTimeout } from "@/hooks/useSessionTimeout";
-import { ConvaiProvider } from "@/hooks/useGlobalConvaiState";
+import { ConvaiProvider } from "@/hooks/useGlobalConvaiState.tsx";
 
 // Declare custom element for TypeScript
 declare global {
