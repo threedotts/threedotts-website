@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import CustomElevenLabsWidget from './CustomElevenLabsWidget';
 import WebSocketTest from './WebSocketTest';
 import SimpleElevenLabsTest from './SimpleElevenLabsTest';
+import ElevenLabsSDKTest from './ElevenLabsSDKTest';
 
 const CustomWidgetDemo: React.FC = () => {
   const { toast } = useToast();
@@ -54,7 +55,11 @@ const CustomWidgetDemo: React.FC = () => {
         </CardHeader>
         
         <CardContent className="space-y-4">
-          <SimpleElevenLabsTest />
+          <ElevenLabsSDKTest />
+          
+          <div className="mt-8">
+            <SimpleElevenLabsTest />
+          </div>
           
           <div className="mt-8">
             <WebSocketTest />
