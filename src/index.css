@@ -167,11 +167,4 @@ All colors MUST be HSL.
     animation: fade-in 0.3s ease-out;
   }
 
-  .hover-scale {
-    transition: transform 0.2s ease-out;
-  }
-
-  .hover-scale:hover {
-    transform: scale(1.05);
-  }
 }
