@@ -32,6 +32,7 @@ import Billing from "./pages/Billing";
 import CreateOrganization from "./pages/CreateOrganization";
 import NotFound from "./pages/NotFound";
 import AcceptInvitation from "./pages/AcceptInvitation";
+import CustomWidgetDemo from "./components/CustomWidgetDemo";
 import { ChatWidgetErrorBoundary } from "./components/ChatWidgetErrorBoundary";
 import { SecurityHeaders } from "./components/SecurityHeaders";
 import { OrganizationMemberListener } from "./components/OrganizationMemberListener";
@@ -145,6 +146,7 @@ const App = () => {
             <Route path="/profile" element={<Profile />} />
             <Route path="/service/:serviceId" element={<ServiceDetails />} />
             <Route path="/scheduling" element={<Scheduling />} />
+            <Route path="/custom-widget-demo" element={<CustomWidgetDemo />} />
             <Route path="/accept-invitation/:token" element={<AcceptInvitation />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
