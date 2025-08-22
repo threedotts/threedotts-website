@@ -20,7 +20,7 @@ export const ElevenLabsSDKTest = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [voiceId, setVoiceId] = useState("9BWtsMINqrJLrRacOk9x"); // Aria voice (default)
-  const [testMessage, setTestMessage] = useState("This is a simple test message for ElevenLabs text to speech synthesis.");
+  const [testMessage, setTestMessage] = useState("This is a simple test. It should generate audio. Let's see if it works properly now.");
   const [messages, setMessages] = useState<string[]>([]);
   
   const wsRef = useRef<WebSocket | null>(null);
@@ -204,19 +204,48 @@ export const ElevenLabsSDKTest = () => {
       return;
     }
 
-    // Simplified message format for testing
-    const message = {
-      text: testMessage.trim(),
-      context_id: contextIdRef.current
-    };
+    // Split text into smaller chunks for better audio quality
+    const text = testMessage.trim();
+    const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+    
+    console.log('📤 Enviando texto em', sentences.length, 'chunks');
+    addMessage(`📤 Enviando texto em ${sentences.length} chunks`);
 
-    console.log('📤 Enviando mensagem simplificada:', message);
-    addMessage(`📤 Enviando texto: "${testMessage.substring(0, 50)}..."`);
-    wsRef.current.send(JSON.stringify(message));
+    // Send each sentence as a separate chunk
+    sentences.forEach((sentence, index) => {
+      const isLast = index === sentences.length - 1;
+      const chunk = sentence.trim();
+      
+      if (chunk) {
+        const message = {
+          text: chunk + (sentence.includes('.') || sentence.includes('!') || sentence.includes('?') ? '' : '.'),
+          context_id: contextIdRef.current
+        };
+
+        console.log(`📤 Enviando chunk ${index + 1}/${sentences.length}:`, chunk.substring(0, 30) + '...');
+        wsRef.current.send(JSON.stringify(message));
+        
+        // Add small delay between chunks
+        if (!isLast) {
+          setTimeout(() => {}, 100);
+        }
+      }
+    });
+
+    // Send flush command after all text chunks
+    setTimeout(() => {
+      const flushMessage = {
+        context_id: contextIdRef.current,
+        flush: true
+      };
+      console.log('🔄 Enviando flush para finalizar geração');
+      wsRef.current.send(JSON.stringify(flushMessage));
+      addMessage('🔄 Flush enviado para finalizar geração');
+    }, 200);
     
     toast({
       title: "Mensagem Enviada",
-      description: "Texto enviado para síntese de voz",
+      description: `Texto enviado em ${sentences.length} chunks + flush`,
       variant: "default",
     });
   };
