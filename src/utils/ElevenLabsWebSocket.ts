@@ -302,6 +302,17 @@ export class ElevenLabsWebSocket {
         
       case 'interruption':
         console.log('🛑 Conversation interrupted:', message.interruption_event?.reason);
+        // Stop current audio playback when interrupted
+        if (this.audioPlayer) {
+          this.audioPlayer.stop();
+          this.audioPlayer = new AudioPlayer(); // Reinitialize for new audio
+        }
+        break;
+        
+      case 'agent_response_correction':
+        if (message.agent_response_correction_event) {
+          console.log('🔄 Agent response corrected:', message.agent_response_correction_event.corrected_agent_response);
+        }
         break;
         
       case 'ping':
