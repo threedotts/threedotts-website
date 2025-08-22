@@ -21,7 +21,9 @@ const ThreeDotsEmbeddedConvai: React.FC<ThreeDotsEmbeddedConvaiProps> = ({
 
   return (
     <div className={`fixed bottom-6 right-6 z-[9999] ${className}`} style={{ zIndex: 9999 }}>
-      <div className="bg-background/95 backdrop-blur-md border border-primary/10 shadow-lg transition-all duration-200 rounded-full pl-2 pr-4 py-2">
+      <div className={`bg-background/95 backdrop-blur-md border shadow-lg transition-all duration-300 ease-in-out rounded-full pl-2 pr-4 py-2 ${
+        state.isConnected ? 'border-primary/30 shadow-primary/20' : 'border-primary/10'
+      }`}>
         <div className="flex items-center gap-3">
           {/* Avatar image */}
           <div className="w-10 h-10 rounded-full overflow-hidden bg-muted flex items-center justify-center">
@@ -43,7 +45,7 @@ const ThreeDotsEmbeddedConvai: React.FC<ThreeDotsEmbeddedConvaiProps> = ({
             </Button>
           ) : (
             /* Connected state - End Call and Mute buttons */
-            <div className="flex gap-2">
+            <div className="flex gap-2 animate-fade-in">
               <Button
                 onClick={actions.handleDisconnect}
                 variant="destructive"
