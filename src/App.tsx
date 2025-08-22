@@ -96,10 +96,10 @@ const App = () => {
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
-          
-          {/* ThreeDots embedded convai widget */}
-          <ThreeDotsWidget />
         </BrowserRouter>
+        
+        {/* ThreeDots embedded convai widget - outside router for global persistence */}
+        <ThreeDotsWidget />
       </TooltipProvider>
     </QueryClientProvider>
   );

@@ -107,18 +107,21 @@ const ThreeDotsEmbeddedConvai: React.FC<ThreeDotsEmbeddedConvaiProps> = ({
     }
   };
 
-  // Cleanup on unmount
+  // Cleanup on unmount - but prevent unmounting during navigation
   useEffect(() => {
     return () => {
-      if (webSocketRef.current) {
+      // Only disconnect if we're truly unmounting, not just navigating
+      const isNavigating = window.performance && window.performance.navigation && window.performance.navigation.type === 1;
+      if (!isNavigating && webSocketRef.current) {
+        console.log('Component unmounting - disconnecting WebSocket');
         webSocketRef.current.disconnect();
       }
     };
   }, []);
 
   return (
-    <div className={`fixed bottom-6 right-6 z-40 ${className}`}>
-      <div className={`bg-background border border-border shadow-lg transition-all duration-300 ease-out ${
+    <div className={`fixed bottom-6 right-6 z-[9999] ${className}`} style={{ zIndex: 9999 }}>
+      <div className={`bg-background border border-border shadow-2xl transition-all duration-300 ease-out ${
         isExpanded 
           ? 'rounded-2xl p-6 w-80 animate-scale-in' 
           : 'rounded-full pl-2 pr-4 py-2 animate-scale-in hover-scale'
