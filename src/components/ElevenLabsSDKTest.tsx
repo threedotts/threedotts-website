@@ -35,25 +35,42 @@ export const ElevenLabsSDKTest = () => {
   };
 
   const playAudioQueue = async () => {
+    console.log('🎵 playAudioQueue chamado. isPlaying:', isPlayingRef.current, 'fila:', audioQueueRef.current.length, 'audioContext:', !!audioContextRef.current);
+    
     if (isPlayingRef.current || audioQueueRef.current.length === 0 || !audioContextRef.current) {
+      console.log('🎵 Saindo do playAudioQueue - condições não atendidas');
       return;
     }
 
+    console.log('🎵 Iniciando reprodução da fila de áudio...');
     isPlayingRef.current = true;
     
     while (audioQueueRef.current.length > 0) {
       const audioItem = audioQueueRef.current.shift()!;
+      console.log('🎵 Reproduzindo áudio:', audioItem.contextId, 'duração:', audioItem.buffer.duration);
       
       try {
+        // Ensure AudioContext is not suspended
+        if (audioContextRef.current.state === 'suspended') {
+          console.log('🔓 Resumindo AudioContext antes da reprodução...');
+          await audioContextRef.current.resume();
+        }
+        
         const source = audioContextRef.current.createBufferSource();
         source.buffer = audioItem.buffer;
         source.connect(audioContextRef.current.destination);
         
+        console.log('🎵 Iniciando reprodução do áudio...');
+        
         await new Promise<void>((resolve) => {
-          source.onended = () => resolve();
+          source.onended = () => {
+            console.log('🎵 Áudio terminou de tocar');
+            resolve();
+          };
           source.start(0);
         });
         
+        console.log('✅ Áudio reproduzido com sucesso!');
         addMessage(`🔊 Áudio reproduzido (contexto: ${audioItem.contextId})`);
       } catch (error) {
         console.error('❌ Erro ao reproduzir áudio:', error);
@@ -61,6 +78,7 @@ export const ElevenLabsSDKTest = () => {
       }
     }
     
+    console.log('🎵 Fila de áudio finalizada');
     isPlayingRef.current = false;
   };
 
@@ -84,7 +102,7 @@ export const ElevenLabsSDKTest = () => {
 
       const ws = new WebSocket(wsUrl);
 
-      ws.onopen = () => {
+      ws.onopen = async () => {
         console.log('✅ WebSocket conectado');
         addMessage('✅ WebSocket conectado via Supabase');
         setIsConnected(true);
@@ -93,7 +111,20 @@ export const ElevenLabsSDKTest = () => {
         
         // Initialize audio context
         if (!audioContextRef.current) {
+          console.log('🎵 Criando novo AudioContext...');
           audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+          console.log('🎵 AudioContext criado, estado:', audioContextRef.current.state);
+          
+          // Resume AudioContext if suspended (required for Chrome)
+          if (audioContextRef.current.state === 'suspended') {
+            console.log('🔓 Resumindo AudioContext...');
+            try {
+              await audioContextRef.current.resume();
+              console.log('✅ AudioContext resumido, novo estado:', audioContextRef.current.state);
+            } catch (error) {
+              console.error('❌ Erro ao resumir AudioContext:', error);
+            }
+          }
         }
         
         toast({
@@ -114,7 +145,14 @@ export const ElevenLabsSDKTest = () => {
           }
 
           if (data.audio && audioContextRef.current) {
-            addMessage(`📨 Áudio recebido (contexto: ${data.contextId || 'unknown'})`);
+            console.log('🎵 Processando áudio recebido, tamanho:', data.audio.length);
+            addMessage(`📨 Áudio recebido (contexto: ${data.contextId || 'unknown'}), tamanho: ${data.audio.length}`);
+            
+            // Ensure AudioContext is not suspended
+            if (audioContextRef.current.state === 'suspended') {
+              console.log('🔓 Resumindo AudioContext suspenso...');
+              await audioContextRef.current.resume();
+            }
             
             // Decode base64 audio data
             const binaryString = atob(data.audio);
@@ -125,14 +163,21 @@ export const ElevenLabsSDKTest = () => {
               uint8Array[i] = binaryString.charCodeAt(i);
             }
 
+            console.log('🎵 Buffer criado, tamanho:', arrayBuffer.byteLength, 'bytes');
+
             try {
+              console.log('🎵 Tentando decodificar áudio...');
               const audioBuffer = await audioContextRef.current.decodeAudioData(arrayBuffer);
+              console.log('✅ Áudio decodificado com sucesso! Duração:', audioBuffer.duration, 'segundos');
               
               // Add to queue
               audioQueueRef.current.push({
                 buffer: audioBuffer,
                 contextId: data.contextId || 'unknown'
               });
+              
+              console.log('🎵 Áudio adicionado à fila. Total na fila:', audioQueueRef.current.length);
+              addMessage(`🎵 Áudio decodificado e adicionado à fila (${audioBuffer.duration.toFixed(2)}s)`);
               
               // Start playing if not already playing
               playAudioQueue();
@@ -141,6 +186,9 @@ export const ElevenLabsSDKTest = () => {
               console.error('❌ Erro ao decodificar áudio:', audioError);
               addMessage(`❌ Erro ao decodificar áudio: ${audioError.message}`);
             }
+          } else if (data.audio && !audioContextRef.current) {
+            console.error('❌ AudioContext não inicializado!');
+            addMessage(`❌ AudioContext não inicializado!`);
           }
 
           if (data.is_final) {
