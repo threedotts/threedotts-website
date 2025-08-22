@@ -68,7 +68,7 @@ const ThreeDotsEmbeddedConvai: React.FC<ThreeDotsEmbeddedConvaiProps> = ({
       </div>
       
       {/* Powered by text - outside and below container */}
-      <p className="text-[10px] text-muted-foreground text-center mt-3">
+      <p className="text-[10px] text-muted-foreground text-center mt-2">
         Powered by threedotts AI
       </p>
     </div>
