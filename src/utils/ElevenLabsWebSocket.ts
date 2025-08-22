@@ -173,7 +173,7 @@ export class ElevenLabsWebSocket {
     }
 
     try {
-      console.log('🚀 Starting connection to ElevenLabs WebSocket via Edge Function...');
+      console.log('🚀 Connecting directly to ElevenLabs WebSocket...');
       console.log('Agent ID:', this.agentId);
       
       // Initialize audio components
@@ -182,39 +182,48 @@ export class ElevenLabsWebSocket {
         this.sendAudioChunk(audioData);
       });
 
-      // Connect to our Supabase Edge Function WebSocket proxy
-      const wsUrl = `wss://dkqzzypemdewomxrjftv.functions.supabase.co/elevenlabs-websocket?agent_id=${this.agentId}`;
-      console.log('🔗 Connecting to WebSocket URL:', wsUrl);
+      // Connect directly to ElevenLabs (same URL that works in their panel)
+      const wsUrl = `wss://api.elevenlabs.io/v1/convai/conversation?agent_id=${this.agentId}`;
+      console.log('🔗 Connecting directly to ElevenLabs:', wsUrl);
       
       this.ws = new WebSocket(wsUrl);
 
       this.ws.onopen = () => {
-        console.log('✅ WebSocket connected to Edge Function proxy');
-        // Don't set isConnected yet, wait for confirmation from ElevenLabs
+        console.log('✅ Connected directly to ElevenLabs WebSocket');
+        this.isConnected = true;
+        this.onConnectionChange(true);
+        
+        // Send conversation initiation - this might be required
+        const initMessage = {
+          type: 'conversation_initiation_client_data',
+          conversation_config_override: {
+            agent: {
+              prompt: {
+                prompt: "You are a helpful AI assistant."
+              }
+            }
+          }
+        };
+        
+        console.log('📤 Sending init message:', initMessage);
+        this.send(initMessage);
       };
 
       this.ws.onmessage = (event) => {
         try {
           const message = JSON.parse(event.data);
-          console.log('📨 Received message:', message.type, message);
-          
-          // Set connected status when we get confirmation
-          if (message.type === 'connection_ready' && !this.isConnected) {
-            console.log('✅ Connection ready confirmed by ElevenLabs');
-            this.isConnected = true;
-            this.onConnectionChange(true);
-          }
+          console.log('📨 Received from ElevenLabs:', message.type, message);
           
           this.handleMessage(message);
           this.onMessage(message);
         } catch (error) {
-          console.error('❌ Error parsing WebSocket message:', error, event.data);
+          console.error('❌ Error parsing message:', error, event.data);
         }
       };
 
       this.ws.onclose = (event) => {
-        console.log('❌ WebSocket closed:', event.code, event.reason);
-        console.log('Close event details:', {
+        console.log('❌ ElevenLabs WebSocket closed:', event.code, event.reason);
+        console.log('Close details:', {
           code: event.code,
           reason: event.reason,
           wasClean: event.wasClean
@@ -224,9 +233,8 @@ export class ElevenLabsWebSocket {
       };
 
       this.ws.onerror = (error) => {
-        console.error('❌ WebSocket error occurred:', error);
-        console.log('WebSocket state when error occurred:', this.ws?.readyState);
-        console.log('WebSocket ready states: CONNECTING=0, OPEN=1, CLOSING=2, CLOSED=3');
+        console.error('❌ ElevenLabs WebSocket error:', error);
+        console.log('WebSocket state:', this.ws?.readyState);
         this.onError('Connection error occurred');
       };
 
@@ -237,27 +245,29 @@ export class ElevenLabsWebSocket {
   }
 
   private handleMessage(message: ElevenLabsMessage) {
-    console.log('Handling message type:', message.type);
+    console.log('🔄 Handling message type:', message.type);
     
     switch (message.type) {
-      case 'connection_ready':
-        console.log('✅ Connection ready:', message.message);
-        break;
-        
       case 'conversation_initiation_metadata':
         console.log('✅ Conversation initiated successfully');
+        console.log('Metadata:', message);
         break;
         
       case 'audio_response':
-        console.log('🎵 Received audio response');
+        console.log('🎵 Received audio response (length:', message.audio_response?.length, ')');
         if (message.audio_response && this.audioPlayer) {
-          // Convert base64 to ArrayBuffer
-          const binaryString = atob(message.audio_response);
-          const bytes = new Uint8Array(binaryString.length);
-          for (let i = 0; i < binaryString.length; i++) {
-            bytes[i] = binaryString.charCodeAt(i);
+          try {
+            // Convert base64 to ArrayBuffer
+            const binaryString = atob(message.audio_response);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+              bytes[i] = binaryString.charCodeAt(i);
+            }
+            this.audioPlayer.addAudioChunk(bytes.buffer);
+            console.log('✅ Audio chunk added to player');
+          } catch (error) {
+            console.error('❌ Error processing audio:', error);
           }
-          this.audioPlayer.addAudioChunk(bytes.buffer);
         }
         break;
         
@@ -269,9 +279,12 @@ export class ElevenLabsWebSocket {
         console.log('🤖 Agent response:', message.agent_response);
         break;
         
+      case 'interruption':
+        console.log('🛑 Interruption detected');
+        break;
+        
       case 'ping':
         console.log('🏓 Received ping, sending pong');
-        // Respond to ping with pong
         this.send({
           type: 'pong',
           event_id: message.event_id
