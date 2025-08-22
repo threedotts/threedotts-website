@@ -173,7 +173,8 @@ export class ElevenLabsWebSocket {
     }
 
     try {
-      console.log('Connecting to ElevenLabs WebSocket via Edge Function...');
+      console.log('🚀 Starting connection to ElevenLabs WebSocket via Edge Function...');
+      console.log('Agent ID:', this.agentId);
       
       // Initialize audio components
       this.audioPlayer = new AudioPlayer();
@@ -183,43 +184,54 @@ export class ElevenLabsWebSocket {
 
       // Connect to our Supabase Edge Function WebSocket proxy
       const wsUrl = `wss://dkqzzypemdewomxrjftv.functions.supabase.co/elevenlabs-websocket?agent_id=${this.agentId}`;
-      console.log('Connecting to WebSocket URL:', wsUrl);
+      console.log('🔗 Connecting to WebSocket URL:', wsUrl);
+      
       this.ws = new WebSocket(wsUrl);
 
       this.ws.onopen = () => {
-        console.log('WebSocket connected to Edge Function proxy');
-        this.isConnected = true;
-        this.onConnectionChange(true);
-        
-        // The Edge Function will handle authentication automatically
-        console.log('WebSocket proxy connection established');
+        console.log('✅ WebSocket connected to Edge Function proxy');
+        // Don't set isConnected yet, wait for confirmation from ElevenLabs
       };
 
       this.ws.onmessage = (event) => {
         try {
           const message = JSON.parse(event.data);
-          console.log('Received message:', message.type, message);
+          console.log('📨 Received message:', message.type, message);
+          
+          // Set connected status when we get confirmation
+          if (message.type === 'connection_ready' && !this.isConnected) {
+            console.log('✅ Connection ready confirmed by ElevenLabs');
+            this.isConnected = true;
+            this.onConnectionChange(true);
+          }
           
           this.handleMessage(message);
           this.onMessage(message);
         } catch (error) {
-          console.error('Error parsing WebSocket message:', error);
+          console.error('❌ Error parsing WebSocket message:', error, event.data);
         }
       };
 
       this.ws.onclose = (event) => {
-        console.log('WebSocket closed:', event.code, event.reason);
+        console.log('❌ WebSocket closed:', event.code, event.reason);
+        console.log('Close event details:', {
+          code: event.code,
+          reason: event.reason,
+          wasClean: event.wasClean
+        });
         this.isConnected = false;
         this.onConnectionChange(false);
       };
 
       this.ws.onerror = (error) => {
-        console.error('WebSocket error:', error);
+        console.error('❌ WebSocket error occurred:', error);
+        console.log('WebSocket state when error occurred:', this.ws?.readyState);
+        console.log('WebSocket ready states: CONNECTING=0, OPEN=1, CLOSING=2, CLOSED=3');
         this.onError('Connection error occurred');
       };
 
     } catch (error) {
-      console.error('Error connecting to ElevenLabs:', error);
+      console.error('❌ Error in connect method:', error);
       this.onError(`Connection failed: ${error}`);
     }
   }
