@@ -211,8 +211,8 @@ export class ElevenLabsWebSocket {
         this.sendAudioChunk(audioData);
       });
 
-      // Connect using the exact URL format from documentation
-      const wsUrl = `wss://api.elevenlabs.io/v1/convai/conversation?agent_id=${this.agentId}`;
+      // Connect using the US endpoint (allowed by CSP)
+      const wsUrl = `wss://api.us.elevenlabs.io/v1/convai/conversation?agent_id=${this.agentId}`;
       console.log('🔗 Connecting to:', wsUrl);
       
       this.ws = new WebSocket(wsUrl);

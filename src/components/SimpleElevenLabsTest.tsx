@@ -19,9 +19,9 @@ const SimpleElevenLabsTest: React.FC = () => {
     setStatus('connecting');
     setMessages(prev => [...prev, '🔄 Connecting directly to ElevenLabs...']);
 
-    // Direct connection to ElevenLabs - same URL that works in their panel
+    // Direct connection to ElevenLabs - using US endpoint (allowed by CSP)
     const agentId = 'agent_01k02ete3tfjgrq97y8a7v541y';
-    const wsUrl = `wss://api.elevenlabs.io/v1/convai/conversation?agent_id=${agentId}`;
+    const wsUrl = `wss://api.us.elevenlabs.io/v1/convai/conversation?agent_id=${agentId}`;
     
     console.log('🚀 Attempting direct connection to ElevenLabs');
     console.log('🔗 URL:', wsUrl);
@@ -237,12 +237,12 @@ const SimpleElevenLabsTest: React.FC = () => {
           )}
         </div>
 
-        <div className="text-xs text-muted-foreground space-y-1">
-          <p><strong>Direct URL:</strong> wss://api.elevenlabs.io/v1/convai/conversation?agent_id=agent_01k02ete3tfjgrq97y8a7v541y</p>
-          <p><strong>Protocol:</strong> {window.location.protocol}</p>
-          <p><strong>Browser:</strong> {navigator.userAgent.split(' ').pop()}</p>
-          <p>This test bypasses all proxies and connects directly to ElevenLabs API.</p>
-        </div>
+          <div className="text-xs text-muted-foreground space-y-1">
+            <p><strong>Direct URL:</strong> wss://api.us.elevenlabs.io/v1/convai/conversation?agent_id=agent_01k02ete3tfjgrq97y8a7v541y</p>
+            <p><strong>Protocol:</strong> {window.location.protocol}</p>
+            <p><strong>Browser:</strong> {navigator.userAgent.split(' ').pop()}</p>
+            <p>Using the US endpoint which is whitelisted in the Content Security Policy.</p>
+          </div>
       </CardContent>
     </Card>
   );
