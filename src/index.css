@@ -137,41 +137,4 @@ All colors MUST be HSL.
   .chat-widget-error {
     display: none !important;
   }
-
-  /* Animation classes for ThreeDots widget */
-  @keyframes scale-in {
-    from {
-      opacity: 0;
-      transform: scale(0.9);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-
-  @keyframes fade-in {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-
-  .animate-scale-in {
-    animation: scale-in 0.2s ease-out;
-  }
-
-  .animate-fade-in {
-    animation: fade-in 0.3s ease-out;
-  }
-
-  .hover-scale {
-    transition: transform 0.2s ease-out;
-  }
-
-  .hover-scale:hover {
-    transform: scale(1.05);
-  }
 }
