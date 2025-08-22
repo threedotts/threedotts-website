@@ -46,6 +46,7 @@ const ThreeDotsEmbeddedConvai: React.FC<ThreeDotsEmbeddedConvaiProps> = ({
 
   return (
     <div className={`fixed bottom-6 right-6 z-40 ${className}`}>
+      {/* Main pill container */}
       <div className="bg-background border border-border rounded-full shadow-lg pl-2 pr-4 py-2 flex items-center gap-3">
         {/* Avatar placeholder */}
         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-400 to-slate-600 flex items-center justify-center overflow-hidden">
@@ -62,17 +63,12 @@ const ThreeDotsEmbeddedConvai: React.FC<ThreeDotsEmbeddedConvaiProps> = ({
           <Phone className="w-4 h-4 mr-1" />
           Ligar
         </Button>
-        
-        {/* Powered by text - inside container */}
-        <div className="flex flex-col">
-          <p className="text-[10px] text-muted-foreground leading-tight whitespace-nowrap">
-            Powered by ThreeDots
-          </p>
-          <p className="text-[10px] text-muted-foreground leading-tight whitespace-nowrap">
-            Conversational AI
-          </p>
-        </div>
       </div>
+      
+      {/* Powered by text - outside and below container */}
+      <p className="text-[10px] text-muted-foreground text-center mt-1">
+        Powered by threedotts AI
+      </p>
     </div>
   );
 };
