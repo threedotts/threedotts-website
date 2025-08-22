@@ -9,12 +9,14 @@ import { ElevenLabsWebSocket, ElevenLabsMessage } from '@/utils/ElevenLabsWebSoc
 
 interface CustomElevenLabsWidgetProps {
   agentId: string;
+  apiKey?: string; // Optional for testing
   onClose?: () => void;
   className?: string;
 }
 
 const CustomElevenLabsWidget: React.FC<CustomElevenLabsWidgetProps> = ({
   agentId,
+  apiKey,
   onClose,
   className = ''
 }) => {
@@ -88,7 +90,7 @@ const CustomElevenLabsWidget: React.FC<CustomElevenLabsWidgetProps> = ({
       
       elevenLabsRef.current = new ElevenLabsWebSocket(
         agentId,
-        '', // API key handled by Edge Function
+        apiKey || '', // Pass API key if provided
         handleMessage,
         handleConnectionChange,
         handleError

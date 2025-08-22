@@ -173,7 +173,7 @@ export class ElevenLabsWebSocket {
     }
 
     try {
-      console.log('🚀 Connecting directly to ElevenLabs WebSocket...');
+      console.log('🚀 Connecting to ElevenLabs Conversational AI WebSocket...');
       console.log('Agent ID:', this.agentId);
       
       // Initialize audio components
@@ -182,47 +182,47 @@ export class ElevenLabsWebSocket {
         this.sendAudioChunk(audioData);
       });
 
-      // Connect directly to ElevenLabs (same URL that works in their panel)
+      // Connect to ElevenLabs Conversational AI WebSocket (correct endpoint from docs)
       const wsUrl = `wss://api.elevenlabs.io/v1/convai/conversation?agent_id=${this.agentId}`;
-      console.log('🔗 Connecting directly to ElevenLabs:', wsUrl);
+      console.log('🔗 Connecting to ElevenLabs ConvAI:', wsUrl);
       
       this.ws = new WebSocket(wsUrl);
 
       this.ws.onopen = () => {
-        console.log('✅ Connected directly to ElevenLabs WebSocket');
-        this.isConnected = true;
-        this.onConnectionChange(true);
+        console.log('✅ Connected to ElevenLabs ConvAI WebSocket');
         
-        // Send conversation initiation - this might be required
+        // Send "Conversation Initiation Client Data" as per docs
         const initMessage = {
           type: 'conversation_initiation_client_data',
-          conversation_config_override: {
-            agent: {
-              prompt: {
-                prompt: "You are a helpful AI assistant."
-              }
-            }
-          }
+          // Include API key in the initiation message (similar to TTS pattern)
+          xi_api_key: this.apiKey || 'YOUR_API_KEY_HERE' // Fallback for testing
         };
         
-        console.log('📤 Sending init message:', initMessage);
+        console.log('📤 Sending conversation initiation:', initMessage);
         this.send(initMessage);
       };
 
       this.ws.onmessage = (event) => {
         try {
           const message = JSON.parse(event.data);
-          console.log('📨 Received from ElevenLabs:', message.type, message);
+          console.log('📨 Received from ElevenLabs ConvAI:', message.type);
+          
+          // Set connected when we get conversation_initiation_metadata
+          if (message.type === 'conversation_initiation_metadata' && !this.isConnected) {
+            console.log('✅ Conversation initiated successfully');
+            this.isConnected = true;
+            this.onConnectionChange(true);
+          }
           
           this.handleMessage(message);
           this.onMessage(message);
         } catch (error) {
-          console.error('❌ Error parsing message:', error, event.data);
+          console.error('❌ Error parsing ConvAI message:', error, event.data);
         }
       };
 
       this.ws.onclose = (event) => {
-        console.log('❌ ElevenLabs WebSocket closed:', event.code, event.reason);
+        console.log('❌ ElevenLabs ConvAI WebSocket closed:', event.code, event.reason);
         console.log('Close details:', {
           code: event.code,
           reason: event.reason,
@@ -233,7 +233,7 @@ export class ElevenLabsWebSocket {
       };
 
       this.ws.onerror = (error) => {
-        console.error('❌ ElevenLabs WebSocket error:', error);
+        console.error('❌ ElevenLabs ConvAI WebSocket error:', error);
         console.log('WebSocket state:', this.ws?.readyState);
         this.onError('Connection error occurred');
       };

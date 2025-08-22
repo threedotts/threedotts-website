@@ -34,6 +34,7 @@ const CustomWidgetDemo: React.FC = () => {
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
         <CustomElevenLabsWidget
           agentId={agentId}
+          apiKey="test_key_for_now" // Temporary for testing
           onClose={handleCloseWidget}
           className="bg-background shadow-xl"
         />
