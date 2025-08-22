@@ -316,7 +316,6 @@ export class ElevenLabsWebSocket {
         break;
         
       case 'ping':
-        console.log('🏓 Ping received, sending pong');
         const pingEvent = message.ping_event;
         if (pingEvent) {
           // Send pong response as per documentation
