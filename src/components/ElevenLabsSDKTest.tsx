@@ -194,6 +194,30 @@ export const ElevenLabsSDKTest = () => {
     }
   };
 
+  const changeVoice = async () => {
+    if (!voiceId.trim()) {
+      toast({
+        title: "Erro",
+        description: "Por favor, insira um Voice ID válido",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (isConnected) {
+      addMessage(`🔄 Mudando para voz: ${voiceId}`);
+      // Disconnect and reconnect with new voice
+      disconnectWebSocket();
+      
+      // Small delay to ensure clean disconnection
+      setTimeout(() => {
+        connectWebSocket();
+      }, 500);
+    } else {
+      connectWebSocket();
+    }
+  };
+
   const sendTestMessage = () => {
     if (!wsRef.current || !testMessage.trim()) {
       toast({
@@ -375,8 +399,38 @@ export const ElevenLabsSDKTest = () => {
               placeholder="Voice ID (ex: 9BWtsMINqrJLrRacOk9x para Aria)"
               value={voiceId}
               onChange={(e) => setVoiceId(e.target.value)}
-              disabled={isConnected}
             />
+          </div>
+        </div>
+
+        {/* Voice Selection Helper */}
+        <div className="bg-muted p-3 rounded-lg">
+          <div className="text-sm font-medium mb-2">Vozes Populares (clique para selecionar):</div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+            <button 
+              className="text-left p-2 hover:bg-background rounded border transition-colors" 
+              onClick={() => setVoiceId("9BWtsMINqrJLrRacOk9x")}
+            >
+              <strong>Aria:</strong><br/>9BWtsMINqrJLrRacOk9x
+            </button>
+            <button 
+              className="text-left p-2 hover:bg-background rounded border transition-colors" 
+              onClick={() => setVoiceId("EXAVITQu4vr4xnSDxMaL")}
+            >
+              <strong>Sarah:</strong><br/>EXAVITQu4vr4xnSDxMaL
+            </button>
+            <button 
+              className="text-left p-2 hover:bg-background rounded border transition-colors" 
+              onClick={() => setVoiceId("TX3LPaxmHKxFdv7VOQHJ")}
+            >
+              <strong>Liam:</strong><br/>TX3LPaxmHKxFdv7VOQHJ
+            </button>
+            <button 
+              className="text-left p-2 hover:bg-background rounded border transition-colors" 
+              onClick={() => setVoiceId("pNInz6obpgDQGcFmaJgB")}
+            >
+              <strong>Adam:</strong><br/>pNInz6obpgDQGcFmaJgB
+            </button>
           </div>
         </div>
 
@@ -396,7 +450,7 @@ export const ElevenLabsSDKTest = () => {
         <div className="flex gap-2 flex-wrap">
           {!isConnected ? (
             <Button 
-              onClick={connectWebSocket} 
+              onClick={changeVoice} 
               disabled={isLoading}
               className="bg-blue-600 hover:bg-blue-700"
             >
@@ -406,6 +460,9 @@ export const ElevenLabsSDKTest = () => {
             <>
               <Button onClick={sendTestMessage} className="bg-green-600 hover:bg-green-700">
                 Enviar Texto
+              </Button>
+              <Button onClick={changeVoice} variant="outline">
+                Mudar Voz
               </Button>
               <Button onClick={flushContext} variant="outline">
                 Flush Contexto
@@ -430,7 +487,8 @@ export const ElevenLabsSDKTest = () => {
         {isConnected && (
           <div className="bg-muted p-3 rounded-lg">
             <div className="text-sm">
-              <strong>Contexto Atual:</strong> {contextIdRef.current}
+              <strong>Contexto Atual:</strong> {contextIdRef.current}<br/>
+              <strong>Voz Ativa:</strong> {voiceId}
             </div>
           </div>
         )}
