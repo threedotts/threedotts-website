@@ -204,18 +204,13 @@ export const ElevenLabsSDKTest = () => {
       return;
     }
 
+    // Simplified message format for testing
     const message = {
       text: testMessage.trim(),
-      context_id: contextIdRef.current,
-      voice_settings: {
-        stability: 0.5,
-        similarity_boost: 0.8,
-        style: 0.0,
-        use_speaker_boost: true
-      }
+      context_id: contextIdRef.current
     };
 
-    console.log('📤 Enviando mensagem:', message);
+    console.log('📤 Enviando mensagem simplificada:', message);
     addMessage(`📤 Enviando texto: "${testMessage.substring(0, 50)}..."`);
     wsRef.current.send(JSON.stringify(message));
     

@@ -89,17 +89,10 @@ serve(async (req) => {
           console.log('✅ ElevenLabs Multi-Context WebSocket connected successfully');
           clearTimeout(connectionTimeout);
           
-          // Send API key as first message (required by ElevenLabs)
-          const authMessage = {
-            xi_api_key: elevenLabsApiKey
-          };
-          console.log('Sending authentication message');
-          elevenLabsWs.send(JSON.stringify(authMessage));
-          
           // Notify client that connection is ready
           if (socket.readyState === WebSocket.OPEN) {
             socket.send(JSON.stringify({
-              type: 'connection_ready',
+              type: 'connection_ready', 
               message: 'Connected to ElevenLabs Multi-Context API successfully'
             }));
           }
@@ -170,12 +163,30 @@ serve(async (req) => {
           hasVoiceSettings: !!clientData.voice_settings,
           textLength: clientData.text ? clientData.text.length : 0
         });
+        
+        // Add API key to every message as per ElevenLabs requirements
+        const messageWithAuth = {
+          ...clientData,
+          xi_api_key: elevenLabsApiKey
+        };
+        
+        console.log('📤 Sending message with auth to ElevenLabs:', JSON.stringify(messageWithAuth));
+        
       } catch (e) {
         console.log('📤 Raw client message length:', event.data.length);
       }
       
       if (elevenLabsWs && elevenLabsWs.readyState === WebSocket.OPEN) {
-        elevenLabsWs.send(event.data);
+        // Send the message with API key included
+        if (clientData) {
+          const messageWithAuth = {
+            ...clientData,
+            xi_api_key: elevenLabsApiKey
+          };
+          elevenLabsWs.send(JSON.stringify(messageWithAuth));
+        } else {
+          elevenLabsWs.send(event.data);
+        }
         console.log('✅ Message forwarded to ElevenLabs');
       } else {
         console.log('❌ ElevenLabs WebSocket not ready, state:', elevenLabsWs?.readyState);
