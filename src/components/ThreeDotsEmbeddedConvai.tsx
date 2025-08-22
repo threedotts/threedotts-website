@@ -46,28 +46,32 @@ const ThreeDotsEmbeddedConvai: React.FC<ThreeDotsEmbeddedConvaiProps> = ({
 
   return (
     <div className={`fixed bottom-6 right-6 z-40 ${className}`}>
-      <div className="bg-background border border-border rounded-2xl shadow-lg p-4 max-w-xs">
-        {/* Avatar and Call Button Row */}
-        <div className="flex items-center gap-3 mb-3">
-          {/* Avatar */}
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-primary-foreground font-semibold text-lg">
-            3D
+      <div className="bg-background border border-border rounded-full shadow-lg pl-2 pr-4 py-2 flex items-center gap-3">
+        {/* Avatar placeholder */}
+        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-400 to-slate-600 flex items-center justify-center overflow-hidden">
+          <div className="w-8 h-8 bg-slate-300 rounded-full flex items-center justify-center">
+            <div className="w-3 h-3 bg-slate-500 rounded-full"></div>
           </div>
-          
-          {/* Call Button */}
-          <Button
-            onClick={handleCallClick}
-            className="flex-1 bg-foreground text-background hover:bg-foreground/90 rounded-full py-2 px-4 font-medium"
-          >
-            <Phone className="w-4 h-4 mr-2" />
-            Ligar
-          </Button>
         </div>
         
-        {/* Powered by text */}
-        <p className="text-xs text-muted-foreground text-center">
-          Powered by ThreeDots Conversational AI
-        </p>
+        {/* Call Button */}
+        <Button
+          onClick={handleCallClick}
+          className="bg-foreground text-background hover:bg-foreground/90 rounded-full px-4 py-2 font-medium text-sm"
+        >
+          <Phone className="w-4 h-4 mr-1" />
+          Ligar
+        </Button>
+        
+        {/* Powered by text - inside container */}
+        <div className="flex flex-col">
+          <p className="text-[10px] text-muted-foreground leading-tight whitespace-nowrap">
+            Powered by ThreeDots
+          </p>
+          <p className="text-[10px] text-muted-foreground leading-tight whitespace-nowrap">
+            Conversational AI
+          </p>
+        </div>
       </div>
     </div>
   );
