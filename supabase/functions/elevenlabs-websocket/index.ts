@@ -107,13 +107,29 @@ serve(async (req) => {
 
         elevenLabsWs.onmessage = (event) => {
           console.log('📨 Message from ElevenLabs:', typeof event.data);
+          let data;
           try {
-            const data = JSON.parse(event.data);
-            console.log('📨 Parsed message:', data.contextId ? `Context: ${data.contextId}` : 'No context', 
-                       data.audio ? 'Has audio' : 'No audio', 
-                       data.is_final ? 'Final' : 'Not final');
+            data = JSON.parse(event.data);
+            console.log('📨 Parsed message from ElevenLabs:', {
+              hasAudio: !!data.audio,
+              contextId: data.contextId,
+              isFinal: data.isFinal,
+              error: data.error,
+              messageType: data.type || 'unknown'
+            });
+            
+            // Log additional details if there's an error or no audio
+            if (data.error) {
+              console.error('❌ ElevenLabs API Error:', data.error, data.message || '');
+            }
+            
+            if (!data.audio && data.isFinal) {
+              console.warn('⚠️ Received final message but no audio data');
+            }
+            
           } catch (e) {
-            console.log('📨 Raw message length:', event.data.length);
+            console.log('📨 Raw message from ElevenLabs (length):', event.data.length);
+            data = event.data;
           }
           
           if (socket.readyState === WebSocket.OPEN) {
@@ -144,11 +160,25 @@ serve(async (req) => {
     };
 
     socket.onmessage = (event) => {
-      console.log('📤 Message from client:', typeof event.data, event.data.substring(0, 100) + '...');
+      console.log('📤 Message from client to ElevenLabs:', typeof event.data);
+      let clientData;
+      try {
+        clientData = JSON.parse(event.data);
+        console.log('📤 Client message details:', {
+          hasText: !!clientData.text,
+          contextId: clientData.context_id,
+          hasVoiceSettings: !!clientData.voice_settings,
+          textLength: clientData.text ? clientData.text.length : 0
+        });
+      } catch (e) {
+        console.log('📤 Raw client message length:', event.data.length);
+      }
+      
       if (elevenLabsWs && elevenLabsWs.readyState === WebSocket.OPEN) {
         elevenLabsWs.send(event.data);
+        console.log('✅ Message forwarded to ElevenLabs');
       } else {
-        console.log('ElevenLabs WebSocket not ready, state:', elevenLabsWs?.readyState);
+        console.log('❌ ElevenLabs WebSocket not ready, state:', elevenLabsWs?.readyState);
       }
     };
 
