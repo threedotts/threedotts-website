@@ -352,6 +352,12 @@ export class ElevenLabsWebSocket {
 
   async startRecording() {
     if (this.audioRecorder && !this.audioRecorder.isActive()) {
+      // Send user_activity event to interrupt agent speech
+      this.send({
+        type: "user_activity"
+      });
+      console.log('📢 Sent user_activity event to interrupt agent');
+      
       await this.audioRecorder.start();
     }
   }
