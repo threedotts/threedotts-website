@@ -82,16 +82,19 @@ serve(async (req) => {
         const elevenLabsUrl = `wss://api.elevenlabs.io/v1/text-to-speech/${voiceId}/multi-stream-input?model_id=${modelId}`;
         console.log('Connecting to ElevenLabs Multi-Context API:', elevenLabsUrl);
         
-        // Create WebSocket with proper headers for authentication
-        elevenLabsWs = new WebSocket(elevenLabsUrl, [], {
-          headers: {
-            'xi-api-key': elevenLabsApiKey
-          }
-        });
+        // Create WebSocket without custom headers (not supported properly)
+        elevenLabsWs = new WebSocket(elevenLabsUrl);
         
         elevenLabsWs.onopen = () => {
           console.log('✅ ElevenLabs Multi-Context WebSocket connected successfully');
           clearTimeout(connectionTimeout);
+          
+          // Send API key as first message (required by ElevenLabs)
+          const authMessage = {
+            xi_api_key: elevenLabsApiKey
+          };
+          console.log('Sending authentication message');
+          elevenLabsWs.send(JSON.stringify(authMessage));
           
           // Notify client that connection is ready
           if (socket.readyState === WebSocket.OPEN) {
