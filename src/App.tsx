@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSessionTimeout } from "@/hooks/useSessionTimeout";
+import { ConvaiProvider } from "@/hooks/useGlobalConvaiState";
 
 // Declare custom element for TypeScript
 declare global {
@@ -44,7 +45,7 @@ const queryClient = new QueryClient();
 const ThreeDotsWidget = () => {
   return CHAT_WIDGET_ENABLED ? (
     <ChatWidgetErrorBoundary>
-      <ThreeDotsEmbeddedConvai agentId={AGENT_ID} />
+      <ThreeDotsEmbeddedConvai />
     </ChatWidgetErrorBoundary>
   ) : null;
 };
@@ -73,34 +74,36 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <SecurityHeaders />
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/project-request" element={<ProjectRequest />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/dashboard/*" element={
-              <OrganizationMemberListener>
-                <Dashboard />
-              </OrganizationMemberListener>
-            } />
-            <Route path="/create-organization" element={<CreateOrganization />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/service/:serviceId" element={<ServiceDetails />} />
-            <Route path="/scheduling" element={<Scheduling />} />
-            <Route path="/custom-widget-demo" element={<CustomWidgetDemo />} />
-            <Route path="/accept-invitation/:token" element={<AcceptInvitation />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-        
-        {/* ThreeDots embedded convai widget - outside router for global persistence */}
-        <ThreeDotsWidget />
-      </TooltipProvider>
+      <ConvaiProvider>
+        <TooltipProvider>
+          <SecurityHeaders />
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/project-request" element={<ProjectRequest />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/dashboard/*" element={
+                <OrganizationMemberListener>
+                  <Dashboard />
+                </OrganizationMemberListener>
+              } />
+              <Route path="/create-organization" element={<CreateOrganization />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/service/:serviceId" element={<ServiceDetails />} />
+              <Route path="/scheduling" element={<Scheduling />} />
+              <Route path="/custom-widget-demo" element={<CustomWidgetDemo />} />
+              <Route path="/accept-invitation/:token" element={<AcceptInvitation />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+          
+          {/* ThreeDots embedded convai widget - global and persistent */}
+          <ThreeDotsWidget />
+        </TooltipProvider>
+      </ConvaiProvider>
     </QueryClientProvider>
   );
 };

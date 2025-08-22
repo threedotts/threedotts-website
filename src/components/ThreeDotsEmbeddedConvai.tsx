@@ -1,133 +1,33 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Phone, X, Send, ChevronDown, Mic, MicOff } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { ElevenLabsWebSocket, ElevenLabsMessage } from '@/utils/ElevenLabsWebSocket';
+import { Phone, Send, ChevronDown, Mic, MicOff } from 'lucide-react';
+import { useGlobalConvaiState } from '@/hooks/useGlobalConvaiState';
 
 interface ThreeDotsEmbeddedConvaiProps {
-  agentId?: string;
   className?: string;
 }
 
 const ThreeDotsEmbeddedConvai: React.FC<ThreeDotsEmbeddedConvaiProps> = ({
-  agentId = 'agent_01k02ete3tfjgrq97y8a7v541y',
   className = ''
 }) => {
-  const { toast } = useToast();
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [isConnected, setIsConnected] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState<ElevenLabsMessage[]>([]);
-  const webSocketRef = useRef<ElevenLabsWebSocket | null>(null);
-
-  const handleMessage = (message: ElevenLabsMessage) => {
-    console.log('🔄 Handling message:', message.type);
-    setMessages(prev => [...prev, message]);
-    
-    if (message.type === 'agent_response' || message.type === 'agent_response_correction') {
-      setIsSpeaking(false);
-    } else if (message.audio_event) {
-      setIsSpeaking(true);
-    }
-  };
-
-  const handleConnectionChange = (connected: boolean) => {
-    setIsConnected(connected);
-    if (connected) {
-      toast({
-        title: "Conectado",
-        description: "Chamada iniciada com sucesso",
-      });
-    } else {
-      toast({
-        title: "Desconectado",
-        description: "Chamada finalizada",
-      });
-      setIsSpeaking(false);
-    }
-  };
-
-  const handleError = (error: string) => {
-    toast({
-      title: "Erro",
-      description: error,
-      variant: "destructive",
-    });
-  };
-
-  const handleToggle = () => {
-    setIsExpanded(!isExpanded);
-  };
-
-  const handleConnect = async () => {
-    try {
-      if (!webSocketRef.current) {
-        webSocketRef.current = new ElevenLabsWebSocket(
-          agentId,
-          '', // apiKey não usado para agentes públicos
-          handleMessage,
-          handleConnectionChange,
-          handleError
-        );
-      }
-      await webSocketRef.current.connect();
-    } catch (error) {
-      console.error('Failed to connect:', error);
-      handleError('Falha ao conectar');
-    }
-  };
-
-  const handleDisconnect = () => {
-    if (webSocketRef.current) {
-      webSocketRef.current.disconnect();
-    }
-  };
-
-  const toggleMute = () => {
-    if (webSocketRef.current) {
-      const newMutedState = !isMuted;
-      webSocketRef.current.setMuted(newMutedState);
-      setIsMuted(newMutedState);
-    }
-  };
-
-  const handleSendMessage = () => {
-    if (message.trim() && webSocketRef.current) {
-      webSocketRef.current.sendTextMessage(message);
-      setMessage('');
-    }
-  };
+  const { state, actions } = useGlobalConvaiState();
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
-      handleSendMessage();
+      actions.sendMessage();
     }
   };
-
-  // Cleanup on unmount - but prevent unmounting during navigation
-  useEffect(() => {
-    return () => {
-      // Only disconnect if we're truly unmounting, not just navigating
-      const isNavigating = window.performance && window.performance.navigation && window.performance.navigation.type === 1;
-      if (!isNavigating && webSocketRef.current) {
-        console.log('Component unmounting - disconnecting WebSocket');
-        webSocketRef.current.disconnect();
-      }
-    };
-  }, []);
 
   return (
     <div className={`fixed bottom-6 right-6 z-[9999] ${className}`} style={{ zIndex: 9999 }}>
       <div className={`bg-background border border-border shadow-2xl transition-all duration-300 ease-out ${
-        isExpanded 
+        state.isExpanded 
           ? 'rounded-2xl p-6 w-80 animate-scale-in' 
           : 'rounded-full pl-2 pr-4 py-2 animate-scale-in hover-scale'
       }`}>
         
-        {!isExpanded ? (
+        {!state.isExpanded ? (
           // Collapsed state - pill format
           <div className="flex items-center gap-3">
             {/* Avatar image */}
@@ -141,7 +41,7 @@ const ThreeDotsEmbeddedConvai: React.FC<ThreeDotsEmbeddedConvaiProps> = ({
             
             {/* Call Button */}
             <Button
-              onClick={handleToggle}
+              onClick={() => actions.setIsExpanded(true)}
               className="bg-foreground text-background hover:bg-foreground/90 rounded-full px-4 py-2 font-medium text-sm transition-all duration-200"
             >
               <Phone className="w-4 h-4 mr-1" />
@@ -166,14 +66,14 @@ const ThreeDotsEmbeddedConvai: React.FC<ThreeDotsEmbeddedConvaiProps> = ({
                 <div>
                   <h3 className="font-semibold text-foreground">AI Assistant</h3>
                   <p className="text-sm text-muted-foreground">
-                    {isConnected ? (isSpeaking ? 'Falando...' : 'Conectado') : 'Disponível'}
+                    {state.isConnected ? (state.isSpeaking ? 'Falando...' : 'Conectado') : 'Disponível'}
                   </p>
                 </div>
               </div>
               
               {/* Minimize button */}
               <Button
-                onClick={handleToggle}
+                onClick={() => actions.setIsExpanded(false)}
                 variant="ghost"
                 size="icon"
                 className="rounded-full hover:bg-muted transition-colors duration-200"
@@ -184,9 +84,9 @@ const ThreeDotsEmbeddedConvai: React.FC<ThreeDotsEmbeddedConvaiProps> = ({
 
             {/* Call controls */}
             <div className="flex gap-2 mb-4">
-              {!isConnected ? (
+              {!state.isConnected ? (
                 <Button
-                  onClick={handleConnect}
+                  onClick={actions.handleConnect}
                   className="flex-1 bg-green-600 hover:bg-green-700 text-white rounded-full py-2 transition-colors duration-200"
                 >
                   <Phone className="w-4 h-4 mr-2" />
@@ -195,19 +95,19 @@ const ThreeDotsEmbeddedConvai: React.FC<ThreeDotsEmbeddedConvaiProps> = ({
               ) : (
                 <>
                   <Button
-                    onClick={handleDisconnect}
+                    onClick={actions.handleDisconnect}
                     className="flex-1 bg-red-600 hover:bg-red-700 text-white rounded-full py-2 transition-colors duration-200"
                   >
                     <Phone className="w-4 h-4 mr-2" />
                     Desconectar
                   </Button>
                   <Button
-                    onClick={toggleMute}
-                    variant={isMuted ? "destructive" : "secondary"}
+                    onClick={actions.toggleMute}
+                    variant={state.isMuted ? "destructive" : "secondary"}
                     size="icon"
                     className="rounded-full transition-colors duration-200"
                   >
-                    {isMuted ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                    {state.isMuted ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
                   </Button>
                 </>
               )}
@@ -216,17 +116,17 @@ const ThreeDotsEmbeddedConvai: React.FC<ThreeDotsEmbeddedConvaiProps> = ({
             {/* Message input */}
             <div className="flex gap-2">
               <Input
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
+                value={state.message}
+                onChange={(e) => actions.setMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Enviar mensagem"
                 className="flex-1 rounded-full border-muted-foreground/20 focus:border-primary transition-colors duration-200"
               />
               <Button
-                onClick={handleSendMessage}
+                onClick={actions.sendMessage}
                 size="icon"
                 className="rounded-full bg-primary hover:bg-primary/90 transition-colors duration-200"
-                disabled={!message.trim()}
+                disabled={!state.message.trim()}
               >
                 <Send className="h-4 w-4" />
               </Button>
