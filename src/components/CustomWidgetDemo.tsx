@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import CustomElevenLabsWidget from './CustomElevenLabsWidget';
-import ElevenLabsConversationalAI from './ElevenLabsConversationalAI';
 
 const CustomWidgetDemo: React.FC = () => {
   const { toast } = useToast();
@@ -53,33 +52,29 @@ const CustomWidgetDemo: React.FC = () => {
         </CardHeader>
         
         <CardContent className="space-y-4">
-          <ElevenLabsConversationalAI />
-          
-          <div className="mt-8">
-            <div className="space-y-2">
-              <Label htmlFor="agentId">Agent ID</Label>
-              <Input
-                id="agentId"
-                value={agentId}
-                onChange={(e) => setAgentId(e.target.value)}
-                placeholder="agent_xxxxxxxxx"
-              />
-              <p className="text-xs text-muted-foreground">
-                Encontre seu Agent ID no painel da ElevenLabs
-              </p>
-            </div>
-
-            <div className="bg-green-50 border border-green-200 p-3 rounded text-sm">
-              <p className="text-green-800 font-medium">✓ API Key Configurada</p>
-              <p className="text-green-600 text-xs mt-1">
-                A chave da API ElevenLabs está configurada no servidor por segurança
-              </p>
-            </div>
-
-            <Button onClick={handleStartDemo} className="w-full">
-              Iniciar Widget ElevenLabs
-            </Button>
+          <div className="space-y-2">
+            <Label htmlFor="agentId">Agent ID</Label>
+            <Input
+              id="agentId"
+              value={agentId}
+              onChange={(e) => setAgentId(e.target.value)}
+              placeholder="agent_xxxxxxxxx"
+            />
+            <p className="text-xs text-muted-foreground">
+              Encontre seu Agent ID no painel da ElevenLabs
+            </p>
           </div>
+
+          <div className="bg-green-50 border border-green-200 p-3 rounded text-sm">
+            <p className="text-green-800 font-medium">✓ API Key Configurada</p>
+            <p className="text-green-600 text-xs mt-1">
+              A chave da API ElevenLabs está configurada no servidor por segurança
+            </p>
+          </div>
+
+          <Button onClick={handleStartDemo} className="w-full">
+            Iniciar Widget ElevenLabs
+          </Button>
 
           <div className="bg-muted p-3 rounded text-xs">
             <h4 className="font-medium mb-2">Funcionalidades:</h4>
