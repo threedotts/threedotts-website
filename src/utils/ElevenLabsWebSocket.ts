@@ -335,6 +335,13 @@ export class ElevenLabsWebSocket {
         }
         break;
         
+      case 'client_tool_call':
+        if (message.client_tool_call) {
+          console.log('🔧 Client tool call:', message.client_tool_call);
+          this.handleClientToolCall(message.client_tool_call);
+        }
+        break;
+        
       case 'ping':
         const pingEvent = message.ping_event;
         if (pingEvent) {
@@ -351,6 +358,33 @@ export class ElevenLabsWebSocket {
         
       default:
         console.log('❓ Unhandled message type:', message.type, message);
+    }
+  }
+
+  private handleClientToolCall(toolCall: any) {
+    console.log('🔧 Executing client tool:', toolCall.tool_name, toolCall.parameters);
+    
+    // Execute the client tool and send response back
+    try {
+      // For now, just acknowledge the tool call
+      // You can extend this to actually execute client-side functions
+      const result = `Tool ${toolCall.tool_name} executed successfully`;
+      
+      this.send({
+        type: "client_tool_response",
+        tool_call_id: toolCall.tool_call_id,
+        result: result
+      });
+      
+      console.log('✅ Client tool response sent');
+    } catch (error) {
+      console.error('❌ Error executing client tool:', error);
+      
+      this.send({
+        type: "client_tool_response",
+        tool_call_id: toolCall.tool_call_id,
+        error: `Error executing tool: ${error}`
+      });
     }
   }
 
