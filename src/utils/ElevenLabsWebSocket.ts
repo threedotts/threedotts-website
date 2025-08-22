@@ -182,7 +182,8 @@ export class ElevenLabsWebSocket {
       });
 
       // Connect to our Supabase Edge Function WebSocket proxy
-      const wsUrl = `wss://dkqzzypemdewomxrjftv.supabase.co/functions/v1/elevenlabs-websocket?agent_id=${this.agentId}`;
+      const wsUrl = `wss://dkqzzypemdewomxrjftv.functions.supabase.co/elevenlabs-websocket?agent_id=${this.agentId}`;
+      console.log('Connecting to WebSocket URL:', wsUrl);
       this.ws = new WebSocket(wsUrl);
 
       this.ws.onopen = () => {
@@ -224,12 +225,19 @@ export class ElevenLabsWebSocket {
   }
 
   private handleMessage(message: ElevenLabsMessage) {
+    console.log('Handling message type:', message.type);
+    
     switch (message.type) {
+      case 'connection_ready':
+        console.log('✅ Connection ready:', message.message);
+        break;
+        
       case 'conversation_initiation_metadata':
-        console.log('Conversation initiated');
+        console.log('✅ Conversation initiated successfully');
         break;
         
       case 'audio_response':
+        console.log('🎵 Received audio response');
         if (message.audio_response && this.audioPlayer) {
           // Convert base64 to ArrayBuffer
           const binaryString = atob(message.audio_response);
@@ -242,14 +250,15 @@ export class ElevenLabsWebSocket {
         break;
         
       case 'user_transcript':
-        console.log('User transcript:', message.user_transcript);
+        console.log('📝 User transcript:', message.user_transcript);
         break;
         
       case 'agent_response':
-        console.log('Agent response:', message.agent_response);
+        console.log('🤖 Agent response:', message.agent_response);
         break;
         
       case 'ping':
+        console.log('🏓 Received ping, sending pong');
         // Respond to ping with pong
         this.send({
           type: 'pong',
@@ -258,7 +267,7 @@ export class ElevenLabsWebSocket {
         break;
         
       default:
-        console.log('Unhandled message type:', message.type);
+        console.log('❓ Unhandled message type:', message.type, message);
     }
   }
 
