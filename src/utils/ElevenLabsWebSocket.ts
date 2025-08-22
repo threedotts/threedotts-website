@@ -364,11 +364,32 @@ export class ElevenLabsWebSocket {
   private handleClientToolCall(toolCall: any) {
     console.log('🔧 Executing client tool:', toolCall.tool_name, toolCall.parameters);
     
-    // Execute the client tool and send response back
     try {
-      // For now, just acknowledge the tool call
-      // You can extend this to actually execute client-side functions
-      const result = `Tool ${toolCall.tool_name} executed successfully`;
+      let result = '';
+      
+      // Execute specific client tools
+      switch (toolCall.tool_name) {
+        case 'redirectToExternalURL':
+          const url = toolCall.parameters?.url;
+          if (url) {
+            console.log('🔗 Redirecting to:', url);
+            // Perform the actual redirect
+            if (url.startsWith('http')) {
+              window.open(url, '_blank');
+              result = `Opened ${url} in new tab`;
+            } else {
+              window.location.href = url;
+              result = `Redirected to ${url}`;
+            }
+          } else {
+            throw new Error('URL parameter is required');
+          }
+          break;
+          
+        default:
+          result = `Tool ${toolCall.tool_name} executed successfully`;
+          console.log('⚠️ Unknown tool, but acknowledged');
+      }
       
       this.send({
         type: "client_tool_response",
@@ -376,7 +397,7 @@ export class ElevenLabsWebSocket {
         result: result
       });
       
-      console.log('✅ Client tool response sent');
+      console.log('✅ Client tool response sent:', result);
     } catch (error) {
       console.error('❌ Error executing client tool:', error);
       
