@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Phone, X, Send, ChevronDown } from 'lucide-react';
-import CustomElevenLabsWidget from './CustomElevenLabsWidget';
+import { Phone, X, Send, ChevronDown, Mic, MicOff } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { ElevenLabsWebSocket, ElevenLabsMessage } from '@/utils/ElevenLabsWebSocket';
 
 interface ThreeDotsEmbeddedConvaiProps {
   agentId?: string;
@@ -13,27 +14,89 @@ const ThreeDotsEmbeddedConvai: React.FC<ThreeDotsEmbeddedConvaiProps> = ({
   agentId = 'agent_01k02ete3tfjgrq97y8a7v541y',
   className = ''
 }) => {
+  const { toast } = useToast();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const [message, setMessage] = useState('');
+  const [messages, setMessages] = useState<ElevenLabsMessage[]>([]);
+  const webSocketRef = useRef<ElevenLabsWebSocket | null>(null);
+
+  const handleMessage = (message: ElevenLabsMessage) => {
+    console.log('🔄 Handling message:', message.type);
+    setMessages(prev => [...prev, message]);
+    
+    if (message.type === 'agent_response' || message.type === 'agent_response_correction') {
+      setIsSpeaking(false);
+    } else if (message.audio_event) {
+      setIsSpeaking(true);
+    }
+  };
+
+  const handleConnectionChange = (connected: boolean) => {
+    setIsConnected(connected);
+    if (connected) {
+      toast({
+        title: "Conectado",
+        description: "Chamada iniciada com sucesso",
+      });
+    } else {
+      toast({
+        title: "Desconectado",
+        description: "Chamada finalizada",
+      });
+      setIsSpeaking(false);
+    }
+  };
+
+  const handleError = (error: string) => {
+    toast({
+      title: "Erro",
+      description: error,
+      variant: "destructive",
+    });
+  };
 
   const handleToggle = () => {
     setIsExpanded(!isExpanded);
   };
 
-  const handleConnect = () => {
-    setIsConnected(true);
-    // Here you would integrate with your voice service
+  const handleConnect = async () => {
+    try {
+      if (!webSocketRef.current) {
+        webSocketRef.current = new ElevenLabsWebSocket(
+          agentId,
+          '', // apiKey não usado para agentes públicos
+          handleMessage,
+          handleConnectionChange,
+          handleError
+        );
+      }
+      await webSocketRef.current.connect();
+    } catch (error) {
+      console.error('Failed to connect:', error);
+      handleError('Falha ao conectar');
+    }
   };
 
   const handleDisconnect = () => {
-    setIsConnected(false);
+    if (webSocketRef.current) {
+      webSocketRef.current.disconnect();
+    }
+  };
+
+  const toggleMute = () => {
+    if (webSocketRef.current) {
+      const newMutedState = !isMuted;
+      webSocketRef.current.setMuted(newMutedState);
+      setIsMuted(newMutedState);
+    }
   };
 
   const handleSendMessage = () => {
-    if (message.trim()) {
-      // Handle message sending
-      console.log('Sending message:', message);
+    if (message.trim() && webSocketRef.current) {
+      webSocketRef.current.sendTextMessage(message);
       setMessage('');
     }
   };
@@ -43,6 +106,15 @@ const ThreeDotsEmbeddedConvai: React.FC<ThreeDotsEmbeddedConvaiProps> = ({
       handleSendMessage();
     }
   };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (webSocketRef.current) {
+        webSocketRef.current.disconnect();
+      }
+    };
+  }, []);
 
   return (
     <div className={`fixed bottom-6 right-6 z-40 ${className}`}>
@@ -91,7 +163,7 @@ const ThreeDotsEmbeddedConvai: React.FC<ThreeDotsEmbeddedConvaiProps> = ({
                 <div>
                   <h3 className="font-semibold text-foreground">AI Assistant</h3>
                   <p className="text-sm text-muted-foreground">
-                    {isConnected ? 'Conectado' : 'Disponível'}
+                    {isConnected ? (isSpeaking ? 'Falando...' : 'Conectado') : 'Disponível'}
                   </p>
                 </div>
               </div>
@@ -118,13 +190,23 @@ const ThreeDotsEmbeddedConvai: React.FC<ThreeDotsEmbeddedConvaiProps> = ({
                   Conectar
                 </Button>
               ) : (
-                <Button
-                  onClick={handleDisconnect}
-                  className="flex-1 bg-red-600 hover:bg-red-700 text-white rounded-full py-2 transition-colors duration-200"
-                >
-                  <Phone className="w-4 h-4 mr-2" />
-                  Desconectar
-                </Button>
+                <>
+                  <Button
+                    onClick={handleDisconnect}
+                    className="flex-1 bg-red-600 hover:bg-red-700 text-white rounded-full py-2 transition-colors duration-200"
+                  >
+                    <Phone className="w-4 h-4 mr-2" />
+                    Desconectar
+                  </Button>
+                  <Button
+                    onClick={toggleMute}
+                    variant={isMuted ? "destructive" : "secondary"}
+                    size="icon"
+                    className="rounded-full transition-colors duration-200"
+                  >
+                    {isMuted ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                  </Button>
+                </>
               )}
             </div>
 
