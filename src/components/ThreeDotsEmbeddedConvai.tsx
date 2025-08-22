@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Phone, Send, ChevronDown, Mic, MicOff } from 'lucide-react';
+import { Phone, Send, Mic, MicOff, PhoneOff } from 'lucide-react';
 import { useGlobalConvaiState } from '@/hooks/useGlobalConvaiState.tsx';
 
 interface ThreeDotsEmbeddedConvaiProps {
@@ -42,23 +42,23 @@ const ThreeDotsEmbeddedConvai: React.FC<ThreeDotsEmbeddedConvaiProps> = ({
               Ligar
             </Button>
           ) : (
-            /* Connected state - Mute and End Call buttons */
+            /* Connected state - End Call and Mute buttons */
             <div className="flex gap-2">
-              <Button
-                onClick={actions.toggleMute}
-                variant={state.isMuted ? "destructive" : "secondary"}
-                className="rounded-full px-3 py-2 text-sm"
-                size="sm"
-              >
-                {state.isMuted ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-              </Button>
               <Button
                 onClick={actions.handleDisconnect}
                 variant="destructive"
-                className="rounded-full px-3 py-2 text-sm"
+                className="rounded-full w-8 h-8 p-0"
                 size="sm"
               >
-                Encerrar
+                <PhoneOff className="h-4 w-4" />
+              </Button>
+              <Button
+                onClick={actions.toggleMute}
+                variant={state.isMuted ? "destructive" : "secondary"}
+                className="rounded-full w-8 h-8 p-0"
+                size="sm"
+              >
+                {state.isMuted ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
               </Button>
             </div>
           )}
