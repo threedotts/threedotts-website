@@ -43,9 +43,9 @@ const serve = async (req: Request): Promise<Response> => {
       }
       
       .threedotts-container {
-        background: hsl(0 0% 100% / 0.95);
+        background: rgba(255, 255, 255, 0.95);
         backdrop-filter: blur(12px);
-        border: 1px solid hsl(0 0% 0% / 0.1);
+        border: 1px solid rgba(0, 0, 0, 0.1);
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         border-radius: 9999px;
@@ -55,39 +55,26 @@ const serve = async (req: Request): Promise<Response> => {
         gap: 12px;
       }
       
-      @media (prefers-color-scheme: dark) {
-        .threedotts-container {
-          background: hsl(0 0% 3.9% / 0.95);
-          border-color: hsl(0 0% 100% / 0.1);
-        }
-      }
-      
       .threedotts-container.connected {
-        border-color: hsl(175 85% 35% / 0.3);
-        box-shadow: 0 10px 15px -3px hsl(175 85% 35% / 0.2), 0 4px 6px -2px hsl(175 85% 35% / 0.1);
+        border-color: rgba(6, 148, 162, 0.3);
+        box-shadow: 0 10px 15px -3px rgba(6, 148, 162, 0.2), 0 4px 6px -2px rgba(6, 148, 162, 0.1);
       }
       
       .threedotts-avatar {
         width: 40px;
         height: 40px;
         border-radius: 50%;
-        background: hsl(0 0% 96%);
+        background: #f1f5f9;
         display: flex;
         align-items: center;
         justify-content: center;
         overflow: hidden;
       }
       
-      @media (prefers-color-scheme: dark) {
-        .threedotts-avatar {
-          background: hsl(0 0% 14.9%);
-        }
-      }
-      
       .threedotts-avatar-inner {
         width: 100%;
         height: 100%;
-        background: hsl(0 0% 45.1% / 0.2);
+        background: rgba(100, 116, 139, 0.2);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -96,65 +83,100 @@ const serve = async (req: Request): Promise<Response> => {
       .threedotts-avatar svg {
         width: 24px;
         height: 24px;
-        color: hsl(0 0% 45.1%);
+        color: #64748b;
+        fill: currentColor;
       }
       
       .threedotts-button {
-        background: linear-gradient(135deg, hsl(175 85% 35%), hsl(165 90% 40%));
-        color: hsl(0 0% 100%);
-        border: none;
-        padding: 8px 16px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        white-space: nowrap;
         border-radius: 9999px;
         font-size: 14px;
         font-weight: 500;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         cursor: pointer;
-        transition: all 0.2s ease;
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        white-space: nowrap;
+        border: none;
+        outline: none;
+        position: relative;
+        background: linear-gradient(135deg, #0694a2, #06b6d4);
+        color: white;
+        box-shadow: 0 10px 30px -10px rgba(6, 148, 162, 0.3);
+        height: 40px;
+        padding: 0 16px;
+        transform: scale(1);
       }
       
       .threedotts-button:hover {
         opacity: 0.9;
+        transform: scale(1.05);
+        box-shadow: 0 0 40px rgba(6, 182, 212, 0.4);
+      }
+      
+      .threedotts-button:focus {
+        outline: 2px solid #0694a2;
+        outline-offset: 2px;
+      }
+      
+      .threedotts-button svg {
+        width: 16px;
+        height: 16px;
+        margin-right: 4px;
       }
       
       .threedotts-button.secondary {
-        background: hsl(175 30% 96%);
-        color: hsl(160 100% 8%);
+        background: #f1f5f9;
+        color: #0f172a;
         width: 32px;
         height: 32px;
         padding: 0;
-        justify-content: center;
+        box-shadow: none;
+      }
+      
+      .threedotts-button.secondary:hover {
+        background: #e2e8f0;
+        transform: scale(1.05);
       }
       
       .threedotts-button.danger {
-        background: hsl(0 84% 60%);
-        color: hsl(0 0% 100%);
+        background: #ef4444;
+        color: white;
         width: 32px;
         height: 32px;
         padding: 0;
-        justify-content: center;
+        box-shadow: none;
+      }
+      
+      .threedotts-button.danger:hover {
+        background: #dc2626;
+        transform: scale(1.05);
       }
       
       .threedotts-button.connecting {
-        background: hsl(0 0% 90%);
-        color: hsl(0 0% 40%);
+        background: #e5e7eb;
+        color: #6b7280;
         padding: 8px 16px;
         font-size: 13px;
         font-weight: 400;
         cursor: default;
+        box-shadow: none;
+      }
+      
+      .threedotts-button.connecting:hover {
+        transform: none;
+        opacity: 1;
       }
       
       .threedotts-controls {
         display: flex;
         gap: 8px;
-        animation: scaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       }
       
       .threedotts-powered {
         font-size: 10px;
-        color: hsl(170 20% 50%);
+        color: #64748b;
         text-align: right;
         margin-top: 8px;
       }
@@ -175,17 +197,22 @@ const serve = async (req: Request): Promise<Response> => {
       }
       
       /* Icons */
-      .icon-phone {
+      .icon-phone,
+      .icon-phone-off,
+      .icon-mic,
+      .icon-mic-off {
         width: 16px;
         height: 16px;
+        flex-shrink: 0;
+      }
+      
+      .icon-phone {
         fill: currentColor;
       }
       
       .icon-phone-off,
       .icon-mic,
       .icon-mic-off {
-        width: 16px;
-        height: 16px;
         fill: none;
         stroke: currentColor;
         stroke-width: 2;
