@@ -41,10 +41,10 @@ const serve = async (req: Request): Promise<Response> => {
       }
       
       .threedotts-container {
-        background: hsl(var(--background) / 0.95);
+        background: hsl(0 0% 100% / 0.95);
         backdrop-filter: blur(12px);
-        border: 1px solid hsl(var(--border));
-        box-shadow: 0 4px 6px -1px hsl(0 0% 0% / 0.1), 0 2px 4px -1px hsl(0 0% 0% / 0.06);
+        border: 1px solid hsl(175 30% 91%);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         border-radius: 9999px;
         padding: 8px 16px 8px 8px;
@@ -54,15 +54,15 @@ const serve = async (req: Request): Promise<Response> => {
       }
       
       .threedotts-container.connected {
-        border-color: hsl(var(--primary) / 0.3);
-        box-shadow: 0 4px 6px -1px hsl(var(--primary) / 0.2);
+        border-color: hsl(175 85% 35% / 0.3);
+        box-shadow: 0 4px 6px -1px hsl(175 85% 35% / 0.2);
       }
       
       .threedotts-avatar {
         width: 40px;
         height: 40px;
         border-radius: 50%;
-        background: hsl(var(--muted));
+        background: hsl(175 30% 96%);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -72,7 +72,7 @@ const serve = async (req: Request): Promise<Response> => {
       .threedotts-avatar-inner {
         width: 100%;
         height: 100%;
-        background: hsl(var(--muted-foreground) / 0.2);
+        background: hsl(170 20% 50% / 0.2);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -81,12 +81,12 @@ const serve = async (req: Request): Promise<Response> => {
       .threedotts-avatar svg {
         width: 24px;
         height: 24px;
-        color: hsl(var(--muted-foreground));
+        color: hsl(170 20% 50%);
       }
       
       .threedotts-button {
-        background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
-        color: hsl(var(--primary-foreground));
+        background: linear-gradient(135deg, hsl(175 85% 35%), hsl(165 90% 40%));
+        color: hsl(0 0% 100%);
         border: none;
         padding: 8px 16px;
         border-radius: 9999px;
@@ -105,8 +105,8 @@ const serve = async (req: Request): Promise<Response> => {
       }
       
       .threedotts-button.secondary {
-        background: hsl(var(--secondary));
-        color: hsl(var(--secondary-foreground));
+        background: hsl(175 30% 96%);
+        color: hsl(160 100% 8%);
         width: 32px;
         height: 32px;
         padding: 0;
@@ -114,8 +114,8 @@ const serve = async (req: Request): Promise<Response> => {
       }
       
       .threedotts-button.danger {
-        background: hsl(var(--destructive));
-        color: hsl(var(--destructive-foreground));
+        background: hsl(0 84% 60%);
+        color: hsl(0 0% 100%);
         width: 32px;
         height: 32px;
         padding: 0;
@@ -130,7 +130,7 @@ const serve = async (req: Request): Promise<Response> => {
       
       .threedotts-powered {
         font-size: 10px;
-        color: hsl(var(--muted-foreground));
+        color: hsl(170 20% 50%);
         text-align: right;
         margin-top: 8px;
       }
