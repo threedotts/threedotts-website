@@ -243,8 +243,25 @@ const serve = async (req: Request): Promise<Response> => {
         return;
       }
 
-      const wsUrl = \`\${config.wsApiUrl}/\${agentId}\`;
-      state.websocket = new WebSocket(wsUrl);
+      console.log('Getting signed URL for agent:', agentId);
+      
+      // Get signed URL from our Supabase edge function
+      const response = await fetch('https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/get-elevenlabs-signed-url', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ agentId })
+      });
+
+      if (!response.ok) {
+        throw new Error(\`Failed to get signed URL: \${response.status}\`);
+      }
+
+      const { signedUrl } = await response.json();
+      console.log('Got signed URL, connecting...');
+
+      state.websocket = new WebSocket(signedUrl);
       
       state.websocket.onopen = () => {
         console.log('Connected to ThreeDotts AI');
