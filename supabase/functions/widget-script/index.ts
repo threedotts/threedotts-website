@@ -254,18 +254,28 @@ const serve = async (req: Request): Promise<Response> => {
         body: JSON.stringify({ agent_id: agentId }) // Use agent_id not agentId
       });
 
+      console.log('Fetch response status:', response.status);
+
       if (!response.ok) {
-        throw new Error(\`Failed to get signed URL: \${response.status}\`);
+        const errorText = await response.text();
+        console.error('Failed to get signed URL:', response.status, errorText);
+        throw new Error(\`Failed to get signed URL: \${response.status} - \${errorText}\`);
       }
 
       const data = await response.json();
+      console.log('Response data:', data);
+      
       const signedUrl = data.signed_url; // Match the response structure
       console.log('Got signed URL, connecting to:', signedUrl);
+
+      if (!signedUrl) {
+        throw new Error('No signed URL received from edge function');
+      }
 
       state.websocket = new WebSocket(signedUrl);
       
       state.websocket.onopen = () => {
-        console.log('Connected to ThreeDotts AI');
+        console.log('Connected to ThreeDotts AI via signed URL');
         state.isConnected = true;
         updateUI();
       };
@@ -277,13 +287,16 @@ const serve = async (req: Request): Promise<Response> => {
       };
       
       state.websocket.onerror = (error) => {
-        console.error('WebSocket error:', error);
+        console.error('WebSocket error details:', error, 'URL was:', signedUrl);
         state.isConnected = false;
         updateUI();
       };
       
     } catch (error) {
-      console.error('Failed to connect:', error);
+      console.error('Failed to connect - full error:', error);
+      state.isConnected = false;
+      updateUI();
+    }
     }
   }
 
@@ -348,7 +361,9 @@ const serve = async (req: Request): Promise<Response> => {
       headers: {
         ...corsHeaders,
         'Content-Type': 'application/javascript',
-        'Cache-Control': 'public, max-age=3600', // Cache for 1 hour
+        'Cache-Control': 'no-cache, no-store, must-revalidate', // Disable caching for debugging
+        'Pragma': 'no-cache',
+        'Expires': '0'
       },
     });
 
