@@ -245,21 +245,22 @@ const serve = async (req: Request): Promise<Response> => {
 
       console.log('Getting signed URL for agent:', agentId);
       
-      // Get signed URL from our Supabase edge function
+      // Get signed URL from Supabase Edge Function (same as working widget)
       const response = await fetch('https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/get-elevenlabs-signed-url', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ agentId })
+        body: JSON.stringify({ agent_id: agentId }) // Use agent_id not agentId
       });
 
       if (!response.ok) {
         throw new Error(\`Failed to get signed URL: \${response.status}\`);
       }
 
-      const { signedUrl } = await response.json();
-      console.log('Got signed URL, connecting...');
+      const data = await response.json();
+      const signedUrl = data.signed_url; // Match the response structure
+      console.log('Got signed URL, connecting to:', signedUrl);
 
       state.websocket = new WebSocket(signedUrl);
       
