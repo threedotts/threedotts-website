@@ -6,15 +6,15 @@ import { toast } from "sonner";
 
 const EmbedDemo = () => {
   const embedCode = `<!-- ThreeDotts AI Widget -->
-<script src="https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script"></script>`;
+<script src="https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?agentId=YOUR_AGENT_ID"></script>`;
 
-  const advancedEmbedCode = `<script src="https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script"></script>
+  const advancedEmbedCode = `<script src="https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?agentId=YOUR_AGENT_ID"></script>
 <script>
-  // Configure the widget after it loads
+  // Optional: Configure the widget after it loads
   window.addEventListener('load', function() {
     if (window.threedottsWidget) {
       window.threedottsWidget.configure({
-        agentId: 'your-agent-id-here'
+        // Additional configuration options can go here
       });
     }
   });
@@ -104,7 +104,7 @@ const EmbedDemo = () => {
             </div>
             <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
               <p className="text-sm text-blue-800 dark:text-blue-200">
-                <strong>Note:</strong> The widget script is hosted on our Supabase edge function, so no hosting required on your end!
+                <strong>Note:</strong> Replace "YOUR_AGENT_ID" with your actual ElevenLabs agent ID. The widget script is hosted on our Supabase edge function, so no hosting required on your end!
               </p>
             </div>
           </CardContent>
