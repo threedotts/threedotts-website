@@ -20,7 +20,9 @@ const serve = async (req: Request): Promise<Response> => {
   // Widget state
   const state = {
     isConnected: false,
+    isConnecting: false,
     isMuted: false,
+    isAgentSpeaking: false,
     websocket: null,
     audioContext: null,
     audioWorklet: null
@@ -196,14 +198,70 @@ const serve = async (req: Request): Promise<Response> => {
     document.body.appendChild(widget);
   }
 
+  // Audio playback function
+  function playAudioData(base64Audio) {
+    if (!state.audioContext) {
+      state.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+
+    try {
+      if (state.audioContext.state === 'suspended') {
+        state.audioContext.resume();
+      }
+
+      const audioData = atob(base64Audio);
+      const arrayBuffer = new ArrayBuffer(audioData.length);
+      const view = new Uint8Array(arrayBuffer);
+      
+      for (let i = 0; i < audioData.length; i++) {
+        view[i] = audioData.charCodeAt(i);
+      }
+
+      state.audioContext.decodeAudioData(arrayBuffer).then(audioBuffer => {
+        const source = state.audioContext.createBufferSource();
+        source.buffer = audioBuffer;
+        source.connect(state.audioContext.destination);
+        
+        source.onended = () => {
+          state.isAgentSpeaking = false;
+          updateUI();
+        };
+        
+        state.isAgentSpeaking = true;
+        updateUI();
+        source.start(0);
+        
+        console.log('🔊 Playing agent response');
+      }).catch(error => {
+        console.error('Error playing audio:', error);
+      });
+    } catch (error) {
+      console.error('Error playing audio:', error);
+    }
+  }
+
   // Update UI based on state
   function updateUI() {
     const buttonsContainer = document.getElementById('threedotts-buttons');
     const container = document.getElementById('threedotts-container');
     if (!buttonsContainer || !container) return;
     
-    if (state.isConnected) {
+    if (state.isConnecting) {
       container.classList.add('connected');
+      buttonsContainer.innerHTML = \`
+        <button class="threedotts-button" disabled>
+          <svg class="icon-loading" viewBox="0 0 24 24" style="animation: spin 1s linear infinite;">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" stroke-dasharray="31.416" stroke-dashoffset="31.416">
+              <animate attributeName="stroke-dasharray" dur="2s" values="0 31.416;15.708 15.708;0 31.416;0 31.416" repeatCount="indefinite"/>
+              <animate attributeName="stroke-dashoffset" dur="2s" values="0;-15.708;-31.416;-31.416" repeatCount="indefinite"/>
+            </circle>
+          </svg>
+          Conectando...
+        </button>
+      \`;
+    } else if (state.isConnected) {
+      container.classList.add('connected');
+      const speakingClass = state.isAgentSpeaking ? ' speaking' : '';
       buttonsContainer.innerHTML = \`
         <div class="threedotts-controls">
           <button class="threedotts-button danger" onclick="window.threedottsWidget.disconnect()">
@@ -213,7 +271,7 @@ const serve = async (req: Request): Promise<Response> => {
               <line x1="2" x2="22" y1="2" y2="22"/>
             </svg>
           </button>
-          <button class="threedotts-button \${state.isMuted ? 'danger' : 'secondary'}" onclick="window.threedottsWidget.toggleMute()">
+          <button class="threedotts-button \${state.isMuted ? 'danger' : 'secondary'}\${speakingClass}" onclick="window.threedottsWidget.toggleMute()">
             \${state.isMuted ? 
               '<svg class="icon-mic-off" viewBox="0 0 24 24"><line x1="2" x2="22" y1="2" y2="22"/><path d="m7 7-.78-.22a1.53 1.53 0 0 0-.12-.03A3 3 0 0 0 3 9v3a9 9 0 0 0 5.69 8.31A3 3 0 0 0 12 17v-6"/><path d="M9 9v4a3 3 0 0 0 5.12 2.12L9 9z"/><path d="M15 9.34V5a3 3 0 0 0-5.94-.6"/></svg>' : 
               '<svg class="icon-mic" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="23"/><line x1="8" x2="16" y1="23" y2="23"/></svg>'
@@ -236,6 +294,8 @@ const serve = async (req: Request): Promise<Response> => {
 
   // WebSocket connection
   async function connectWebSocket() {
+    state.isConnecting = true;
+    updateUI();
     try {
       const agentId = config.agentId || new URLSearchParams(window.location.search).get('agentId');
       if (!agentId) {
@@ -277,24 +337,52 @@ const serve = async (req: Request): Promise<Response> => {
       state.websocket.onopen = () => {
         console.log('Connected to ThreeDotts AI via signed URL');
         state.isConnected = true;
+        state.isConnecting = false;
         updateUI();
+      };
+
+      state.websocket.onmessage = async (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          console.log('📨 Message received:', data);
+
+          // Handle audio stream from agent
+          if (data.audio_event?.type === 'audio_stream' && data.audio_event.audio_base_64) {
+            playAudioData(data.audio_event.audio_base_64);
+          }
+
+          // Handle other message types as needed
+          if (data.user_transcript) {
+            console.log('👤 User transcript:', data.user_transcript);
+          }
+
+          if (data.agent_response_text) {
+            console.log('🤖 Agent response:', data.agent_response_text);
+          }
+
+        } catch (error) {
+          console.error('Error processing message:', error);
+        }
       };
       
       state.websocket.onclose = () => {
         console.log('Disconnected from ThreeDotts AI');
         state.isConnected = false;
+        state.isConnecting = false;
         updateUI();
       };
       
       state.websocket.onerror = (error) => {
         console.error('WebSocket error details:', error, 'URL was:', signedUrl);
         state.isConnected = false;
+        state.isConnecting = false;
         updateUI();
       };
       
     } catch (error) {
       console.error('Failed to connect - full error:', error);
       state.isConnected = false;
+      state.isConnecting = false;
       updateUI();
     }
   }
