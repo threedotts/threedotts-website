@@ -29,25 +29,6 @@ const serve = async (req: Request): Promise<Response> => {
   // Inject CSS styles
   function injectStyles() {
     const styles = \`
-      :root {
-        --widget-primary: #667eea;
-        --widget-primary-hover: #5a67d8;
-        --widget-bg: rgba(255, 255, 255, 0.95);
-        --widget-border: rgba(255, 255, 255, 0.3);
-        --widget-shadow: rgba(0, 0, 0, 0.2);
-        --widget-text: #333;
-        --widget-text-muted: #666;
-      }
-      
-      @media (prefers-color-scheme: dark) {
-        :root {
-          --widget-bg: rgba(26, 32, 44, 0.95);
-          --widget-border: rgba(255, 255, 255, 0.1);
-          --widget-text: #fff;
-          --widget-text-muted: #a0aec0;
-        }
-      }
-      
       #threedotts-widget {
         position: fixed;
         bottom: 24px;
@@ -57,44 +38,65 @@ const serve = async (req: Request): Promise<Response> => {
       }
       
       .threedotts-container {
-        background: var(--widget-bg);
-        backdrop-filter: blur(10px);
-        border: 1px solid var(--widget-border);
-        box-shadow: 0 8px 32px var(--widget-shadow);
+        background: hsl(0 0% 100% / 0.95);
+        backdrop-filter: blur(12px);
+        border: 1px solid hsl(220 13% 91% / 0.1);
+        box-shadow: 0 8px 25px -5px hsl(0 0% 0% / 0.1), 0 8px 10px -6px hsl(0 0% 0% / 0.1);
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         border-radius: 9999px;
         padding: 8px 16px 8px 8px;
         display: flex;
         align-items: center;
         gap: 12px;
-        min-height: 56px;
+      }
+      
+      @media (prefers-color-scheme: dark) {
+        .threedotts-container {
+          background: hsl(224 71.4% 4.1% / 0.95);
+          border: 1px solid hsl(215 27.9% 16.9% / 0.3);
+        }
       }
       
       .threedotts-container.connected {
-        border-color: var(--widget-primary);
-        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.2);
+        border-color: hsl(221.2 83.2% 53.3% / 0.3);
+        box-shadow: 0 8px 25px -5px hsl(221.2 83.2% 53.3% / 0.2), 0 8px 10px -6px hsl(0 0% 0% / 0.1);
       }
       
       .threedotts-avatar {
         width: 40px;
         height: 40px;
         border-radius: 50%;
-        background: rgba(102, 126, 234, 0.2);
+        background: hsl(210 40% 98%);
         display: flex;
         align-items: center;
         justify-content: center;
         overflow: hidden;
       }
       
+      @media (prefers-color-scheme: dark) {
+        .threedotts-avatar {
+          background: hsl(215 27.9% 16.9%);
+        }
+      }
+      
+      .threedotts-avatar-inner {
+        width: 100%;
+        height: 100%;
+        background: hsl(215.4 16.3% 46.9% / 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
       .threedotts-avatar svg {
         width: 24px;
         height: 24px;
-        color: rgba(102, 126, 234, 0.7);
+        color: hsl(215.4 16.3% 46.9%);
       }
       
       .threedotts-button {
-        background: linear-gradient(135deg, var(--widget-primary), #764ba2);
-        color: white;
+        background: linear-gradient(135deg, hsl(221.2 83.2% 53.3%), hsl(262.1 83.3% 57.8%));
+        color: hsl(210 40% 98%);
         border: none;
         padding: 8px 16px;
         border-radius: 9999px;
@@ -113,7 +115,7 @@ const serve = async (req: Request): Promise<Response> => {
       }
       
       .threedotts-button.secondary {
-        background: rgba(115, 115, 115, 1);
+        background: hsl(215.4 16.3% 46.9%);
         width: 32px;
         height: 32px;
         padding: 0;
@@ -121,15 +123,11 @@ const serve = async (req: Request): Promise<Response> => {
       }
       
       .threedotts-button.danger {
-        background: rgba(239, 68, 68, 1);
+        background: hsl(0 84.2% 60.2%);
         width: 32px;
         height: 32px;
         padding: 0;
         justify-content: center;
-      }
-      
-      .threedotts-button.muted {
-        background: rgba(239, 68, 68, 1);
       }
       
       .threedotts-controls {
@@ -140,7 +138,7 @@ const serve = async (req: Request): Promise<Response> => {
       
       .threedotts-powered {
         font-size: 10px;
-        color: var(--widget-text-muted);
+        color: hsl(215.4 16.3% 46.9%);
         text-align: right;
         margin-top: 8px;
       }
@@ -188,9 +186,11 @@ const serve = async (req: Request): Promise<Response> => {
     widget.innerHTML = \`
       <div class="threedotts-container" id="threedotts-container">
         <div class="threedotts-avatar">
-          <svg class="icon-user" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-          </svg>
+          <div class="threedotts-avatar-inner">
+            <svg class="icon-user" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+            </svg>
+          </div>
         </div>
         <div id="threedotts-buttons">
           <button class="threedotts-button" onclick="window.threedottsWidget.connect()">
@@ -224,7 +224,7 @@ const serve = async (req: Request): Promise<Response> => {
               <line x1="2" x2="22" y1="2" y2="22"/>
             </svg>
           </button>
-          <button class="threedotts-button \${state.isMuted ? 'muted' : 'secondary'}" onclick="window.threedottsWidget.toggleMute()">
+          <button class="threedotts-button \${state.isMuted ? 'danger' : 'secondary'}" onclick="window.threedottsWidget.toggleMute()">
             \${state.isMuted ? 
               '<svg class="icon-mic-off" viewBox="0 0 24 24"><line x1="2" x2="22" y1="2" y2="22"/><path d="m7 7-.78-.22a1.53 1.53 0 0 0-.12-.03A3 3 0 0 0 3 9v3a9 9 0 0 0 5.69 8.31A3 3 0 0 0 12 17v-6"/><path d="M9 9v4a3 3 0 0 0 5.12 2.12L9 9z"/><path d="M15 9.34V5a3 3 0 0 0-5.94-.6"/></svg>' : 
               '<svg class="icon-mic" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="23"/><line x1="8" x2="16" y1="23" y2="23"/></svg>'
