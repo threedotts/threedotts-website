@@ -26,7 +26,8 @@ const serve = async (req: Request): Promise<Response> => {
     messages: [],
     websocket: null,
     audioRecorder: null,
-    audioPlayer: null
+    audioPlayer: null,
+    hasAnimated: false
   };
 
   // Inject CSS styles - EXACTLY like ThreeDotsEmbeddedConvai (same colors!)
@@ -590,6 +591,7 @@ const serve = async (req: Request): Promise<Response> => {
     
     if (!state.isConnected) {
       container.classList.remove('connected');
+      state.hasAnimated = false; // Reset animation flag when disconnected
       buttonsContainer.innerHTML = \`
         <button class="threedotts-button" onclick="window.threedottsWidget.connect()">
           <svg class="icon-phone" viewBox="0 0 24 24">
@@ -601,9 +603,11 @@ const serve = async (req: Request): Promise<Response> => {
     } else {
       container.classList.add('connected');
       
-      // Check if controls already exist to avoid re-animation
-      const existingControls = buttonsContainer.querySelector('.threedotts-controls');
-      const animateClass = existingControls ? '' : 'animate-scale-in';
+      // Only animate once when first connecting
+      const animateClass = !state.hasAnimated ? 'animate-scale-in' : '';
+      if (!state.hasAnimated) {
+        state.hasAnimated = true;
+      }
       
       buttonsContainer.innerHTML = \`
         <div class="threedotts-controls \${animateClass}">
