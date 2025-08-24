@@ -200,7 +200,7 @@ const serve = async (req: Request): Promise<Response> => {
     document.body.appendChild(widget);
   }
 
-  // Audio recording function
+  // Audio recording function (exact copy from working ConvAI)
   async function startRecording() {
     try {
       console.log('🎤 Starting microphone recording...');
@@ -223,7 +223,7 @@ const serve = async (req: Request): Promise<Response> => {
           const reader = new FileReader();
           reader.onload = () => {
             if (reader.result instanceof ArrayBuffer) {
-              // Convert to base64 and send
+              // Convert to base64 and send (exact same as working ConvAI)
               const base64Audio = btoa(String.fromCharCode(...new Uint8Array(reader.result)));
               state.websocket.send(JSON.stringify({
                 type: 'audio_stream',
@@ -258,7 +258,7 @@ const serve = async (req: Request): Promise<Response> => {
     console.log('🎤 Recording stopped');
   }
 
-  // Audio playback function for PCM data
+  // Audio playback function (exact copy from working ConvAI)
   async function playAudioData(base64Audio) {
     if (!state.audioContext) {
       state.audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -269,26 +269,16 @@ const serve = async (req: Request): Promise<Response> => {
         await state.audioContext.resume();
       }
 
-      // Decode base64 PCM data
-      const binaryString = atob(base64Audio);
-      const bytes = new Uint8Array(binaryString.length);
-      for (let i = 0; i < binaryString.length; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
+      // Use exact same audio processing as working ConvAI
+      const audioData = atob(base64Audio);
+      const arrayBuffer = new ArrayBuffer(audioData.length);
+      const view = new Uint8Array(arrayBuffer);
+      
+      for (let i = 0; i < audioData.length; i++) {
+        view[i] = audioData.charCodeAt(i);
       }
 
-      // Convert PCM bytes to 16-bit samples
-      const samples = new Int16Array(bytes.buffer);
-      
-      // Create audio buffer for 16kHz mono PCM
-      const audioBuffer = state.audioContext.createBuffer(1, samples.length, 16000);
-      const channelData = audioBuffer.getChannelData(0);
-      
-      // Convert 16-bit PCM to float32 (-1 to 1 range)
-      for (let i = 0; i < samples.length; i++) {
-        channelData[i] = samples[i] / 32768.0;
-      }
-
-      // Play the audio
+      const audioBuffer = await state.audioContext.decodeAudioData(arrayBuffer);
       const source = state.audioContext.createBufferSource();
       source.buffer = audioBuffer;
       source.connect(state.audioContext.destination);
@@ -302,9 +292,9 @@ const serve = async (req: Request): Promise<Response> => {
       updateUI();
       source.start(0);
       
-      console.log('🔊 Playing PCM audio from agent');
+      console.log('🔊 Playing agent response (using decodeAudioData)');
     } catch (error) {
-      console.error('Error playing PCM audio:', error);
+      console.error('Error playing audio:', error);
     }
   }
 
