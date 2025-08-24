@@ -45,8 +45,8 @@ const serve = async (req: Request): Promise<Response> => {
       .threedotts-container {
         background: hsl(0 0% 100% / 0.95);
         backdrop-filter: blur(12px);
-        border: 1px solid hsl(175 30% 91%);
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        border: 1px solid hsl(0 0% 0% / 0.1);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         border-radius: 9999px;
         padding: 8px 16px 8px 8px;
@@ -55,26 +55,39 @@ const serve = async (req: Request): Promise<Response> => {
         gap: 12px;
       }
       
+      @media (prefers-color-scheme: dark) {
+        .threedotts-container {
+          background: hsl(0 0% 3.9% / 0.95);
+          border-color: hsl(0 0% 100% / 0.1);
+        }
+      }
+      
       .threedotts-container.connected {
         border-color: hsl(175 85% 35% / 0.3);
-        box-shadow: 0 4px 6px -1px hsl(175 85% 35% / 0.2);
+        box-shadow: 0 10px 15px -3px hsl(175 85% 35% / 0.2), 0 4px 6px -2px hsl(175 85% 35% / 0.1);
       }
       
       .threedotts-avatar {
         width: 40px;
         height: 40px;
         border-radius: 50%;
-        background: hsl(175 30% 96%);
+        background: hsl(0 0% 96%);
         display: flex;
         align-items: center;
         justify-content: center;
         overflow: hidden;
       }
       
+      @media (prefers-color-scheme: dark) {
+        .threedotts-avatar {
+          background: hsl(0 0% 14.9%);
+        }
+      }
+      
       .threedotts-avatar-inner {
         width: 100%;
         height: 100%;
-        background: hsl(170 20% 50% / 0.2);
+        background: hsl(0 0% 45.1% / 0.2);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -83,7 +96,7 @@ const serve = async (req: Request): Promise<Response> => {
       .threedotts-avatar svg {
         width: 24px;
         height: 24px;
-        color: hsl(170 20% 50%);
+        color: hsl(0 0% 45.1%);
       }
       
       .threedotts-button {
