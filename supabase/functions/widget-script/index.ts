@@ -29,84 +29,120 @@ const serve = async (req: Request): Promise<Response> => {
   // Inject CSS styles
   function injectStyles() {
     const styles = \`
+      :root {
+        --widget-primary: #667eea;
+        --widget-primary-hover: #5a67d8;
+        --widget-bg: rgba(255, 255, 255, 0.95);
+        --widget-border: rgba(255, 255, 255, 0.3);
+        --widget-shadow: rgba(0, 0, 0, 0.2);
+        --widget-text: #333;
+        --widget-text-muted: #666;
+      }
+      
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --widget-bg: rgba(26, 32, 44, 0.95);
+          --widget-border: rgba(255, 255, 255, 0.1);
+          --widget-text: #fff;
+          --widget-text-muted: #a0aec0;
+        }
+      }
+      
       #threedotts-widget {
         position: fixed;
-        bottom: 20px;
-        right: 20px;
-        z-index: 10000;
+        bottom: 24px;
+        right: 24px;
+        z-index: 9999;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       }
       
       .threedotts-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 8px;
-        padding: 16px;
-        background: rgba(255, 255, 255, 0.95);
+        background: var(--widget-bg);
         backdrop-filter: blur(10px);
-        border-radius: 16px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        min-width: 120px;
+        border: 1px solid var(--widget-border);
+        box-shadow: 0 8px 32px var(--widget-shadow);
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 9999px;
+        padding: 8px 16px 8px 8px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-height: 56px;
+      }
+      
+      .threedotts-container.connected {
+        border-color: var(--widget-primary);
+        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.2);
       }
       
       .threedotts-avatar {
-        width: 48px;
-        height: 48px;
+        width: 40px;
+        height: 40px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: rgba(102, 126, 234, 0.2);
         display: flex;
         align-items: center;
         justify-content: center;
-        color: white;
-        font-weight: 600;
-        font-size: 18px;
-        cursor: pointer;
-        transition: transform 0.2s ease;
+        overflow: hidden;
       }
       
-      .threedotts-avatar:hover {
-        transform: scale(1.05);
+      .threedotts-avatar svg {
+        width: 24px;
+        height: 24px;
+        color: rgba(102, 126, 234, 0.7);
       }
       
       .threedotts-button {
-        background: #667eea;
+        background: linear-gradient(135deg, var(--widget-primary), #764ba2);
         color: white;
         border: none;
         padding: 8px 16px;
-        border-radius: 20px;
-        font-size: 12px;
+        border-radius: 9999px;
+        font-size: 14px;
         font-weight: 500;
         cursor: pointer;
         transition: all 0.2s ease;
-        animation: scaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        transform-origin: center;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        white-space: nowrap;
       }
       
       .threedotts-button:hover {
-        background: #5a67d8;
-        transform: translateY(-1px);
+        opacity: 0.9;
+      }
+      
+      .threedotts-button.secondary {
+        background: rgba(115, 115, 115, 1);
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        justify-content: center;
       }
       
       .threedotts-button.danger {
-        background: #e53e3e;
-      }
-      
-      .threedotts-button.danger:hover {
-        background: #c53030;
+        background: rgba(239, 68, 68, 1);
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        justify-content: center;
       }
       
       .threedotts-button.muted {
-        background: #718096;
+        background: rgba(239, 68, 68, 1);
+      }
+      
+      .threedotts-controls {
+        display: flex;
+        gap: 8px;
+        animation: scaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       }
       
       .threedotts-powered {
         font-size: 10px;
-        color: #666;
-        text-align: center;
-        margin-top: 4px;
+        color: var(--widget-text-muted);
+        text-align: right;
+        margin-top: 8px;
       }
       
       @keyframes scaleIn {
@@ -120,22 +156,23 @@ const serve = async (req: Request): Promise<Response> => {
         }
       }
       
-      @media (max-width: 768px) {
-        #threedotts-widget {
-          bottom: 16px;
-          right: 16px;
-        }
+      /* Icons */
+      .icon-phone {
+        width: 16px;
+        height: 16px;
+        fill: currentColor;
       }
       
-      @media (prefers-color-scheme: dark) {
-        .threedotts-container {
-          background: rgba(26, 32, 44, 0.95);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .threedotts-powered {
-          color: #a0aec0;
-        }
+      .icon-phone-off,
+      .icon-mic,
+      .icon-mic-off {
+        width: 16px;
+        height: 16px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
       }
     \`;
     
@@ -149,19 +186,22 @@ const serve = async (req: Request): Promise<Response> => {
     const widget = document.createElement('div');
     widget.id = 'threedotts-widget';
     widget.innerHTML = \`
-      <div class="threedotts-container">
-        <div class="threedotts-avatar" onclick="window.threedottsWidget.toggleConnection()">
-          AI
+      <div class="threedotts-container" id="threedotts-container">
+        <div class="threedotts-avatar">
+          <svg class="icon-user" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+          </svg>
         </div>
         <div id="threedotts-buttons">
-          <button class="threedotts-button" onclick="window.threedottsWidget.toggleConnection()">
-            Call
+          <button class="threedotts-button" onclick="window.threedottsWidget.connect()">
+            <svg class="icon-phone" viewBox="0 0 24 24">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+            </svg>
+            Ligar
           </button>
         </div>
-        <div class="threedotts-powered">
-          Powered by threedotts AI
-        </div>
       </div>
+      <p class="threedotts-powered">Powered by threedotts AI</p>
     \`;
     
     document.body.appendChild(widget);
@@ -170,21 +210,36 @@ const serve = async (req: Request): Promise<Response> => {
   // Update UI based on state
   function updateUI() {
     const buttonsContainer = document.getElementById('threedotts-buttons');
-    if (!buttonsContainer) return;
+    const container = document.getElementById('threedotts-container');
+    if (!buttonsContainer || !container) return;
     
     if (state.isConnected) {
+      container.classList.add('connected');
       buttonsContainer.innerHTML = \`
-        <button class="threedotts-button danger" onclick="window.threedottsWidget.disconnect()">
-          End Call
-        </button>
-        <button class="threedotts-button \${state.isMuted ? 'muted' : ''}" onclick="window.threedottsWidget.toggleMute()">
-          \${state.isMuted ? 'Unmute' : 'Mute'}
-        </button>
+        <div class="threedotts-controls">
+          <button class="threedotts-button danger" onclick="window.threedottsWidget.disconnect()">
+            <svg class="icon-phone-off" viewBox="0 0 24 24">
+              <path d="m10.68 13.31-2.22-2.22a16 16 0 0 1-2.4-5.63A2 2 0 0 1 8.11 3h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L12.09 10.9a16 16 0 0 1-1.41 2.41z"/>
+              <path d="m16.46 12-1.27-1.27a2 2 0 0 1-.45-2.11 12.84 12.84 0 0 0 .7-2.81A2 2 0 0 1 17.39 4h3a2 2 0 0 1 2 1.72 19.79 19.79 0 0 1-.98 4.49z"/>
+              <line x1="2" x2="22" y1="2" y2="22"/>
+            </svg>
+          </button>
+          <button class="threedotts-button \${state.isMuted ? 'muted' : 'secondary'}" onclick="window.threedottsWidget.toggleMute()">
+            \${state.isMuted ? 
+              '<svg class="icon-mic-off" viewBox="0 0 24 24"><line x1="2" x2="22" y1="2" y2="22"/><path d="m7 7-.78-.22a1.53 1.53 0 0 0-.12-.03A3 3 0 0 0 3 9v3a9 9 0 0 0 5.69 8.31A3 3 0 0 0 12 17v-6"/><path d="M9 9v4a3 3 0 0 0 5.12 2.12L9 9z"/><path d="M15 9.34V5a3 3 0 0 0-5.94-.6"/></svg>' : 
+              '<svg class="icon-mic" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="23"/><line x1="8" x2="16" y1="23" y2="23"/></svg>'
+            }
+          </button>
+        </div>
       \`;
     } else {
+      container.classList.remove('connected');
       buttonsContainer.innerHTML = \`
         <button class="threedotts-button" onclick="window.threedottsWidget.connect()">
-          Call
+          <svg class="icon-phone" viewBox="0 0 24 24">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+          </svg>
+          Ligar
         </button>
       \`;
     }
