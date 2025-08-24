@@ -34,8 +34,6 @@ const serve = async (req: Request): Promise<Response> => {
   // Inject CSS styles - EXACTLY like ThreeDotsEmbeddedConvai (same colors!)
   function injectStyles() {
     const styles = \`
-      @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&display=swap');
-      
       #threedotts-widget {
         position: fixed;
         bottom: 24px;
@@ -632,8 +630,7 @@ const serve = async (req: Request): Promise<Response> => {
         <div class="threedotts-controls \${animateClass}">
           <button class="threedotts-button danger" onclick="window.threedottsWidget.disconnect()">
             <svg class="icon-phone-off" viewBox="0 0 24 24">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
+              <path d="M16 2a2 2 0 0 1 2 2v3.24l7.4 1.85a.5.5 0 0 1 .6.49v8.84a.5.5 0 0 1-.6.49L18 17.76V21a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-3.24l-7.4-1.85a.5.5 0 0 1-.6-.49V6.58a.5.5 0 0 1 .6-.49L6 7.24V4a2 2 0 0 1 2-2h8zm-9 15.76L2 16.58V6.58l5 1.18v9.48zM16 4H8v15h8V4z"/>
             </svg>
           </button>
           <button class="threedotts-button secondary \${state.isMuted ? 'danger' : ''}" onclick="window.threedottsWidget.toggleMute()">
@@ -747,6 +744,12 @@ const serve = async (req: Request): Promise<Response> => {
 
   // Initialize widget
   function initWidget() {
+    // Add Google Fonts link to head first
+    const fontLink = document.createElement('link');
+    fontLink.rel = 'stylesheet';
+    fontLink.href = 'https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&display=swap';
+    document.head.appendChild(fontLink);
+    
     injectStyles();
     createWidget();
     updateUI();
