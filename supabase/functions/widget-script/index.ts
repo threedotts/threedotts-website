@@ -258,7 +258,7 @@ const serve = async (req: Request): Promise<Response> => {
     console.log('🎤 Recording stopped');
   }
 
-  // Audio playback function
+  // Audio playback function for PCM data
   async function playAudioData(base64Audio) {
     if (!state.audioContext) {
       state.audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -269,15 +269,26 @@ const serve = async (req: Request): Promise<Response> => {
         await state.audioContext.resume();
       }
 
-      const audioData = atob(base64Audio);
-      const arrayBuffer = new ArrayBuffer(audioData.length);
-      const view = new Uint8Array(arrayBuffer);
-      
-      for (let i = 0; i < audioData.length; i++) {
-        view[i] = audioData.charCodeAt(i);
+      // Decode base64 PCM data
+      const binaryString = atob(base64Audio);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
       }
 
-      const audioBuffer = await state.audioContext.decodeAudioData(arrayBuffer);
+      // Convert PCM bytes to 16-bit samples
+      const samples = new Int16Array(bytes.buffer);
+      
+      // Create audio buffer for 16kHz mono PCM
+      const audioBuffer = state.audioContext.createBuffer(1, samples.length, 16000);
+      const channelData = audioBuffer.getChannelData(0);
+      
+      // Convert 16-bit PCM to float32 (-1 to 1 range)
+      for (let i = 0; i < samples.length; i++) {
+        channelData[i] = samples[i] / 32768.0;
+      }
+
+      // Play the audio
       const source = state.audioContext.createBufferSource();
       source.buffer = audioBuffer;
       source.connect(state.audioContext.destination);
@@ -291,9 +302,9 @@ const serve = async (req: Request): Promise<Response> => {
       updateUI();
       source.start(0);
       
-      console.log('🔊 Playing agent response');
+      console.log('🔊 Playing PCM audio from agent');
     } catch (error) {
-      console.error('Error playing audio:', error);
+      console.error('Error playing PCM audio:', error);
     }
   }
 
