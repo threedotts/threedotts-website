@@ -22,10 +22,12 @@ const serve = async (req: Request): Promise<Response> => {
     isConnected: false,
     isConnecting: false,
     isMuted: false,
+    isRecording: false,
     isAgentSpeaking: false,
     websocket: null,
     audioContext: null,
-    audioWorklet: null
+    mediaRecorder: null,
+    audioStream: null
   };
 
   // Inject CSS styles
@@ -198,15 +200,73 @@ const serve = async (req: Request): Promise<Response> => {
     document.body.appendChild(widget);
   }
 
+  // Audio recording function
+  async function startRecording() {
+    try {
+      console.log('🎤 Starting microphone recording...');
+      
+      state.audioStream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          sampleRate: 16000,
+          channelCount: 1,
+          echoCancellation: true,
+          noiseSuppression: true,
+        }
+      });
+
+      state.mediaRecorder = new MediaRecorder(state.audioStream, {
+        mimeType: 'audio/webm;codecs=opus'
+      });
+
+      state.mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0 && state.websocket?.readyState === WebSocket.OPEN) {
+          const reader = new FileReader();
+          reader.onload = () => {
+            if (reader.result instanceof ArrayBuffer) {
+              // Convert to base64 and send
+              const base64Audio = btoa(String.fromCharCode(...new Uint8Array(reader.result)));
+              state.websocket.send(JSON.stringify({
+                type: 'audio_stream',
+                audio_base_64: base64Audio
+              }));
+            }
+          };
+          reader.readAsArrayBuffer(event.data);
+        }
+      };
+
+      state.mediaRecorder.start(1000); // Capture every second
+      state.isRecording = true;
+      updateUI();
+      console.log('🎤 Recording started - speak now!');
+    } catch (error) {
+      console.error('Error starting recording:', error);
+      alert('Could not access microphone. Please allow microphone access.');
+    }
+  }
+
+  function stopRecording() {
+    if (state.mediaRecorder && state.isRecording) {
+      state.mediaRecorder.stop();
+      state.isRecording = false;
+    }
+    if (state.audioStream) {
+      state.audioStream.getTracks().forEach(track => track.stop());
+      state.audioStream = null;
+    }
+    updateUI();
+    console.log('🎤 Recording stopped');
+  }
+
   // Audio playback function
-  function playAudioData(base64Audio) {
+  async function playAudioData(base64Audio) {
     if (!state.audioContext) {
       state.audioContext = new (window.AudioContext || window.webkitAudioContext)();
     }
 
     try {
       if (state.audioContext.state === 'suspended') {
-        state.audioContext.resume();
+        await state.audioContext.resume();
       }
 
       const audioData = atob(base64Audio);
@@ -217,24 +277,21 @@ const serve = async (req: Request): Promise<Response> => {
         view[i] = audioData.charCodeAt(i);
       }
 
-      state.audioContext.decodeAudioData(arrayBuffer).then(audioBuffer => {
-        const source = state.audioContext.createBufferSource();
-        source.buffer = audioBuffer;
-        source.connect(state.audioContext.destination);
-        
-        source.onended = () => {
-          state.isAgentSpeaking = false;
-          updateUI();
-        };
-        
-        state.isAgentSpeaking = true;
+      const audioBuffer = await state.audioContext.decodeAudioData(arrayBuffer);
+      const source = state.audioContext.createBufferSource();
+      source.buffer = audioBuffer;
+      source.connect(state.audioContext.destination);
+      
+      source.onended = () => {
+        state.isAgentSpeaking = false;
         updateUI();
-        source.start(0);
-        
-        console.log('🔊 Playing agent response');
-      }).catch(error => {
-        console.error('Error playing audio:', error);
-      });
+      };
+      
+      state.isAgentSpeaking = true;
+      updateUI();
+      source.start(0);
+      
+      console.log('🔊 Playing agent response');
     } catch (error) {
       console.error('Error playing audio:', error);
     }
@@ -262,23 +319,49 @@ const serve = async (req: Request): Promise<Response> => {
     } else if (state.isConnected) {
       container.classList.add('connected');
       const speakingClass = state.isAgentSpeaking ? ' speaking' : '';
-      buttonsContainer.innerHTML = \`
-        <div class="threedotts-controls">
-          <button class="threedotts-button danger" onclick="window.threedottsWidget.disconnect()">
-            <svg class="icon-phone-off" viewBox="0 0 24 24">
-              <path d="m10.68 13.31-2.22-2.22a16 16 0 0 1-2.4-5.63A2 2 0 0 1 8.11 3h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L12.09 10.9a16 16 0 0 1-1.41 2.41z"/>
-              <path d="m16.46 12-1.27-1.27a2 2 0 0 1-.45-2.11 12.84 12.84 0 0 0 .7-2.81A2 2 0 0 1 17.39 4h3a2 2 0 0 1 2 1.72 19.79 19.79 0 0 1-.98 4.49z"/>
-              <line x1="2" x2="22" y1="2" y2="22"/>
-            </svg>
-          </button>
-          <button class="threedotts-button \${state.isMuted ? 'danger' : 'secondary'}\${speakingClass}" onclick="window.threedottsWidget.toggleMute()">
-            \${state.isMuted ? 
-              '<svg class="icon-mic-off" viewBox="0 0 24 24"><line x1="2" x2="22" y1="2" y2="22"/><path d="m7 7-.78-.22a1.53 1.53 0 0 0-.12-.03A3 3 0 0 0 3 9v3a9 9 0 0 0 5.69 8.31A3 3 0 0 0 12 17v-6"/><path d="M9 9v4a3 3 0 0 0 5.12 2.12L9 9z"/><path d="M15 9.34V5a3 3 0 0 0-5.94-.6"/></svg>' : 
-              '<svg class="icon-mic" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="23"/><line x1="8" x2="16" y1="23" y2="23"/></svg>'
-            }
-          </button>
-        </div>
-      \`;
+      const recordingClass = state.isRecording ? ' recording' : '';
+      
+      if (!state.isRecording) {
+        buttonsContainer.innerHTML = \`
+          <div class="threedotts-controls">
+            <button class="threedotts-button danger" onclick="window.threedottsWidget.disconnect()">
+              <svg class="icon-phone-off" viewBox="0 0 24 24">
+                <path d="m10.68 13.31-2.22-2.22a16 16 0 0 1-2.4-5.63A2 2 0 0 1 8.11 3h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L12.09 10.9a16 16 0 0 1-1.41 2.41z"/>
+                <path d="m16.46 12-1.27-1.27a2 2 0 0 1-.45-2.11 12.84 12.84 0 0 0 .7-2.81A2 2 0 0 1 17.39 4h3a2 2 0 0 1 2 1.72 19.79 19.79 0 0 1-.98 4.49z"/>
+                <line x1="2" x2="22" y1="2" y2="22"/>
+              </svg>
+            </button>
+            <button class="threedotts-button secondary\${speakingClass}" onclick="window.threedottsWidget.startRecording()">
+              <svg class="icon-mic" viewBox="0 0 24 24">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                <line x1="12" x2="12" y1="19" y2="23"/>
+                <line x1="8" x2="16" y1="23" y2="23"/>
+              </svg>
+            </button>
+          </div>
+        \`;
+      } else {
+        buttonsContainer.innerHTML = \`
+          <div class="threedotts-controls">
+            <button class="threedotts-button danger" onclick="window.threedottsWidget.disconnect()">
+              <svg class="icon-phone-off" viewBox="0 0 24 24">
+                <path d="m10.68 13.31-2.22-2.22a16 16 0 0 1-2.4-5.63A2 2 0 0 1 8.11 3h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L12.09 10.9a16 16 0 0 1-1.41 2.41z"/>
+                <path d="m16.46 12-1.27-1.27a2 2 0 0 1-.45-2.11 12.84 12.84 0 0 0 .7-2.81A2 2 0 0 1 17.39 4h3a2 2 0 0 1 2 1.72 19.79 19.79 0 0 1-.98 4.49z"/>
+                <line x1="2" x2="22" y1="2" y2="22"/>
+              </svg>
+            </button>
+            <button class="threedotts-button danger\${recordingClass}" onclick="window.threedottsWidget.stopRecording()" style="animation: pulse 1s infinite;">
+              <svg class="icon-mic-off" viewBox="0 0 24 24">
+                <line x1="2" x2="22" y1="2" y2="22"/>
+                <path d="m7 7-.78-.22a1.53 1.53 0 0 0-.12-.03A3 3 0 0 0 3 9v3a9 9 0 0 0 5.69 8.31A3 3 0 0 0 12 17v-6"/>
+                <path d="M9 9v4a3 3 0 0 0 5.12 2.12L9 9z"/>
+                <path d="M15 9.34V5a3 3 0 0 0-5.94-.6"/>
+              </svg>
+            </button>
+          </div>
+        \`;
+      }
     } else {
       container.classList.remove('connected');
       buttonsContainer.innerHTML = \`
@@ -344,20 +427,34 @@ const serve = async (req: Request): Promise<Response> => {
       state.websocket.onmessage = async (event) => {
         try {
           const data = JSON.parse(event.data);
-          console.log('📨 Message received:', data);
+          console.log('📨 Message received:', JSON.stringify(data, null, 2));
 
           // Handle audio stream from agent
           if (data.audio_event?.type === 'audio_stream' && data.audio_event.audio_base_64) {
-            playAudioData(data.audio_event.audio_base_64);
+            console.log('🔊 Playing audio from agent');
+            await playAudioData(data.audio_event.audio_base_64);
           }
 
-          // Handle other message types as needed
+          // Handle conversation start
+          if (data.conversation_id) {
+            console.log('🆔 Conversation started:', data.conversation_id);
+          }
+
+          // Handle user transcript
           if (data.user_transcript) {
-            console.log('👤 User transcript:', data.user_transcript);
+            const { text, is_final } = data.user_transcript;
+            console.log(\`👤 User transcript (\${is_final ? 'final' : 'partial'}): \${text}\`);
           }
 
+          // Handle agent response text
           if (data.agent_response_text) {
-            console.log('🤖 Agent response:', data.agent_response_text);
+            const { text, is_final } = data.agent_response_text;
+            console.log(\`🤖 Agent response (\${is_final ? 'final' : 'partial'}): \${text}\`);
+          }
+
+          // Handle other message types
+          if (data.type) {
+            console.log('📝 Message type:', data.type);
           }
 
         } catch (error) {
@@ -389,25 +486,31 @@ const serve = async (req: Request): Promise<Response> => {
 
   // Disconnect WebSocket
   function disconnectWebSocket() {
+    stopRecording(); // Stop recording first
     if (state.websocket) {
       state.websocket.close();
       state.websocket = null;
     }
     state.isConnected = false;
+    state.isConnecting = false;
     updateUI();
   }
 
-  // Toggle mute
+  // Toggle mute (now start/stop recording)
   function toggleMute() {
-    state.isMuted = !state.isMuted;
-    updateUI();
-    console.log(state.isMuted ? 'Muted' : 'Unmuted');
+    if (state.isRecording) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
   }
 
   // Global API
   window.threedottsWidget = {
     connect: connectWebSocket,
     disconnect: disconnectWebSocket,
+    startRecording: startRecording,
+    stopRecording: stopRecording,
     toggleConnection: () => {
       if (state.isConnected) {
         disconnectWebSocket();
