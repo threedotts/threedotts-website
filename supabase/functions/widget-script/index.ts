@@ -40,32 +40,41 @@ const serve = async (req: Request): Promise<Response> => {
       .threedotts-container {
         background: rgba(255, 255, 255, 0.95);
         backdrop-filter: blur(12px);
-        border-radius: 50px;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 9999px;
         padding: 8px 16px 8px 8px;
         display: flex;
         align-items: center;
         gap: 12px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-        border: 1px solid rgba(0, 0, 0, 0.1);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        min-height: 56px;
       }
       
       .threedotts-container.connected {
-        border-color: var(--threedotts-primary-color, #667eea);
-        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.2);
+        border-color: rgba(102, 126, 234, 0.3);
+        box-shadow: 0 4px 6px -1px rgba(102, 126, 234, 0.2), 0 2px 4px -1px rgba(102, 126, 234, 0.1);
       }
       
       .threedotts-avatar {
         width: 40px;
         height: 40px;
         border-radius: 50%;
+        overflow: hidden;
         background: rgba(0, 0, 0, 0.05);
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #666;
         flex-shrink: 0;
+      }
+      
+      .threedotts-avatar-inner {
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.05);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: rgba(0, 0, 0, 0.4);
       }
       
       .threedotts-avatar svg {
@@ -74,11 +83,11 @@ const serve = async (req: Request): Promise<Response> => {
       }
       
       .threedotts-call-button {
-        background: linear-gradient(135deg, var(--threedotts-primary-color, #667eea) 0%, var(--threedotts-secondary-color, #764ba2) 100%);
+        background: linear-gradient(135deg, rgb(102, 126, 234) 0%, rgb(118, 75, 162) 100%);
         color: white;
         border: none;
         padding: 8px 16px;
-        border-radius: 25px;
+        border-radius: 9999px;
         font-size: 14px;
         font-weight: 500;
         cursor: pointer;
@@ -86,11 +95,11 @@ const serve = async (req: Request): Promise<Response> => {
         display: flex;
         align-items: center;
         gap: 4px;
+        opacity: 1;
       }
       
       .threedotts-call-button:hover {
         opacity: 0.9;
-        transform: translateY(-1px);
       }
       
       .threedotts-action-button {
@@ -139,6 +148,7 @@ const serve = async (req: Request): Promise<Response> => {
         display: flex;
         gap: 8px;
         animation: scaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transform-origin: center;
       }
       
       @keyframes scaleIn {
@@ -165,9 +175,9 @@ const serve = async (req: Request): Promise<Response> => {
           border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
-        .threedotts-avatar {
+        .threedotts-avatar-inner {
           background: rgba(255, 255, 255, 0.1);
-          color: #a0aec0;
+          color: rgba(160, 174, 192, 1);
         }
         
         .threedotts-powered {
@@ -188,9 +198,11 @@ const serve = async (req: Request): Promise<Response> => {
     widget.innerHTML = \`
       <div class="threedotts-container">
         <div class="threedotts-avatar">
-          <svg fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-          </svg>
+          <div class="threedotts-avatar-inner">
+            <svg fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+            </svg>
+          </div>
         </div>
         <div id="threedotts-buttons">
           <button class="threedotts-call-button" onclick="window.threedottsWidget.toggleConnection()">
