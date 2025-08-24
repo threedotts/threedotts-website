@@ -3,14 +3,60 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Copy, ExternalLink, Code, Palette, Smartphone, Zap } from 'lucide-react';
 import { toast } from "sonner";
+import { useEffect } from 'react';
 
 const EmbedDemo = () => {
+  // Add embedded widget script to this page for testing
+  useEffect(() => {
+    // Check if script is already loaded
+    if (document.querySelector('script[src*="widget-script"]')) {
+      return;
+    }
+
+    console.log('🔧 Loading widget script for embed demo...');
+    
+    // Create and load widget script
+    const script = document.createElement('script');
+    script.src = 'https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?v=8';
+    script.onload = () => {
+      console.log('✅ Widget script loaded, configuring...');
+      // Configure widget when loaded
+      setTimeout(() => {
+        if ((window as any).threedottsWidget) {
+          (window as any).threedottsWidget.configure({
+            agentId: 'agent_01k02ete3tfjgrq97y8a7v541y'
+          });
+          console.log('✅ Embed demo widget configured!');
+        } else {
+          console.error('❌ Widget not found after loading script');
+        }
+      }, 100);
+    };
+    script.onerror = () => {
+      console.error('❌ Failed to load widget script');
+    };
+    
+    document.head.appendChild(script);
+    
+    return () => {
+      // Cleanup - remove script when component unmounts
+      const existingScript = document.querySelector('script[src*="widget-script"]');
+      if (existingScript) {
+        existingScript.remove();
+      }
+    };
+  }, []);
+
   const embedCode = `<!-- ThreeDotts AI Widget -->
-<script src="https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script"></script>
+<script src="https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?v=8"></script>
 <script>
   // Configure the agent ID
-  window.threedottsWidget && window.threedottsWidget.configure({
-    agentId: 'YOUR_AGENT_ID'
+  window.addEventListener('load', function() {
+    if (window.threedottsWidget) {
+      window.threedottsWidget.configure({
+        agentId: 'YOUR_AGENT_ID'
+      });
+    }
   });
 </script>`;
 

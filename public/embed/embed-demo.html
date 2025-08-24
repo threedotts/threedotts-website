@@ -128,7 +128,21 @@
         <p>For technical support or customization requests, please contact the ThreeDotts team.</p>
     </div>
 
-    <!-- ThreeDotts AI Widget -->
-    <script src="./threedotts-widget.js" data-agent-id="demo-agent-id"></script>
+    <!-- ThreeDotts AI Widget - WORKING VERSION -->
+    <script src="https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?v=7"></script>
+    <script>
+      // Configure the widget with working agent ID
+      window.addEventListener('load', function() {
+        console.log('🔧 Configuring ThreeDotts widget...');
+        if (window.threedottsWidget) {
+          window.threedottsWidget.configure({
+            agentId: 'agent_01k02ete3tfjgrq97y8a7v541y'
+          });
+          console.log('✅ Widget configured successfully');
+        } else {
+          console.error('❌ ThreeDotts widget not found');
+        }
+      });
+    </script>
 </body>
 </html>

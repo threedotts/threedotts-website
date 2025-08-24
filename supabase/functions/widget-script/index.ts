@@ -376,14 +376,23 @@ const serve = async (req: Request): Promise<Response> => {
     }
   }
 
-  // WebSocket connection
+  // WebSocket connection with better logging
   async function connectWebSocket() {
     state.isConnecting = true;
     updateUI();
     try {
       const agentId = config.agentId || new URLSearchParams(window.location.search).get('agentId');
+      console.log('🔍 Looking for agent ID...', {
+        configAgentId: config.agentId,
+        urlAgentId: new URLSearchParams(window.location.search).get('agentId'),
+        finalAgentId: agentId
+      });
+      
       if (!agentId) {
-        console.error('Agent ID is required');
+        console.error('❌ Agent ID is required');
+        alert('Agent ID não configurado. Configure using: window.threedottsWidget.configure({ agentId: "YOUR_AGENT_ID" })');
+        state.isConnecting = false;
+        updateUI();
         return;
       }
 
@@ -521,7 +530,9 @@ const serve = async (req: Request): Promise<Response> => {
     },
     toggleMute: toggleMute,
     configure: (options) => {
+      console.log('🔧 Configuring widget with options:', options);
       Object.assign(config, options);
+      console.log('✅ Widget configuration updated:', config);
     }
   };
 
