@@ -6,15 +6,26 @@ import { toast } from "sonner";
 
 const EmbedDemo = () => {
   const embedCode = `<!-- ThreeDotts AI Widget -->
-<script src="https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?agentId=YOUR_AGENT_ID"></script>`;
-
-  const advancedEmbedCode = `<script src="https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?agentId=YOUR_AGENT_ID"></script>
+<script src="https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script"></script>
 <script>
-  // Optional: Configure the widget after it loads
+  // Configure the agent ID
+  window.threedottsWidget && window.threedottsWidget.configure({
+    agentId: 'YOUR_AGENT_ID'
+  });
+</script>`;
+
+  const advancedEmbedCode = `<!-- Alternative: Use URL parameter -->
+<script src="https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script"></script>
+<!-- Make sure your page URL includes: yoursite.com?agentId=YOUR_AGENT_ID -->
+
+<!-- OR configure via JavaScript -->
+<script src="https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script"></script>
+<script>
+  // Wait for the widget to load, then configure
   window.addEventListener('load', function() {
     if (window.threedottsWidget) {
       window.threedottsWidget.configure({
-        // Additional configuration options can go here
+        agentId: 'YOUR_AGENT_ID'
       });
     }
   });
@@ -104,7 +115,7 @@ const EmbedDemo = () => {
             </div>
             <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
               <p className="text-sm text-blue-800 dark:text-blue-200">
-                <strong>Note:</strong> Replace "YOUR_AGENT_ID" with your actual ElevenLabs agent ID. The widget script is hosted on our Supabase edge function, so no hosting required on your end!
+                <strong>Note:</strong> Replace "YOUR_AGENT_ID" with your actual ElevenLabs agent ID. The agentId can be set via JavaScript configuration or by adding ?agentId=YOUR_AGENT_ID to your page URL.
               </p>
             </div>
           </CardContent>
