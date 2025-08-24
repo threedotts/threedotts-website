@@ -600,8 +600,13 @@ const serve = async (req: Request): Promise<Response> => {
       \`;
     } else {
       container.classList.add('connected');
+      
+      // Check if controls already exist to avoid re-animation
+      const existingControls = buttonsContainer.querySelector('.threedotts-controls');
+      const animateClass = existingControls ? '' : 'animate-scale-in';
+      
       buttonsContainer.innerHTML = \`
-        <div class="threedotts-controls animate-scale-in">
+        <div class="threedotts-controls \${animateClass}">
           <button class="threedotts-button danger" onclick="window.threedottsWidget.disconnect()">
             <svg class="icon-phone-off" viewBox="0 0 24 24">
               <path d="m10.68 13.31-2.22-2.22a16 16 0 0 1-2.4-5.63A2 2 0 0 1 8.11 3h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L12.09 10.9a16 16 0 0 1-1.41 2.41z"/>
