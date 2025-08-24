@@ -9,5 +9,8 @@ verify_jwt = false
 [functions.elevenlabs-websocket]
 verify_jwt = false
 
+[functions.get-elevenlabs-signed-url]
+verify_jwt = false
+
 [functions.widget-script]
 verify_jwt = false
