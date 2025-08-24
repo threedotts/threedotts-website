@@ -17,7 +17,7 @@ const EmbedDemo = () => {
     
     // Create and load widget script
     const script = document.createElement('script');
-    script.src = 'https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?v=8';
+    script.src = 'https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?v=18';
     script.onload = () => {
       console.log('✅ Widget script loaded, configuring...');
       // Configure widget when loaded
@@ -48,7 +48,7 @@ const EmbedDemo = () => {
   }, []);
 
   const embedCode = `<!-- ThreeDotts AI Widget -->
-<script src="https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?v=8"></script>
+<script src="https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?v=18"></script>
 <script>
   // Configure the agent ID
   window.addEventListener('load', function() {
