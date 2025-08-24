@@ -13,23 +13,21 @@ const serve = async (req: Request): Promise<Response> => {
   
   // Configuration
   const config = {
-    wsApiUrl: 'wss://api.elevenlabs.io/v1/convai/conversation',
     agentId: null // Will be set from URL params or config
   };
 
-  // Widget state
+  // Widget state - exactly like useGlobalConvaiState
   const state = {
+    isExpanded: false,
     isConnected: false,
-    isConnecting: false,
     isMuted: false,
-    isRecording: false,
-    isAgentSpeaking: false,
-    websocket: null,
-    audioContext: null,
-    audioRecorder: null     // SimpleAudioRecorder instance
+    isSpeaking: false,
+    message: '',
+    messages: [],
+    websocket: null
   };
 
-  // Inject CSS styles
+  // Inject CSS styles - exactly like ThreeDotsEmbeddedConvai
   function injectStyles() {
     const styles = \`
       #threedotts-widget {
@@ -41,10 +39,10 @@ const serve = async (req: Request): Promise<Response> => {
       }
       
       .threedotts-container {
-        background: hsl(0 0% 100% / 0.95);
+        background: hsl(var(--background, 0 0% 100%) / 0.95);
         backdrop-filter: blur(12px);
-        border: 1px solid hsl(175 30% 91% / 0.1);
-        box-shadow: 0 8px 25px -5px hsl(0 0% 0% / 0.1), 0 8px 10px -6px hsl(0 0% 0% / 0.1);
+        border: 1px solid hsl(var(--border, 220 13% 91%));
+        box-shadow: 0 4px 6px -1px hsl(0 0% 0% / 0.1), 0 2px 4px -1px hsl(0 0% 0% / 0.06);
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         border-radius: 9999px;
         padding: 8px 16px 8px 8px;
@@ -54,15 +52,15 @@ const serve = async (req: Request): Promise<Response> => {
       }
       
       .threedotts-container.connected {
-        border-color: hsl(175 85% 35% / 0.3);
-        box-shadow: 0 8px 25px -5px hsl(175 85% 35% / 0.2), 0 8px 10px -6px hsl(0 0% 0% / 0.1);
+        border-color: hsl(var(--primary, 220 93% 60%) / 0.3);
+        box-shadow: 0 4px 6px -1px hsl(var(--primary, 220 93% 60%) / 0.2);
       }
       
       .threedotts-avatar {
         width: 40px;
         height: 40px;
         border-radius: 50%;
-        background: hsl(175 30% 96%);
+        background: hsl(var(--muted, 220 14% 96%));
         display: flex;
         align-items: center;
         justify-content: center;
@@ -72,7 +70,7 @@ const serve = async (req: Request): Promise<Response> => {
       .threedotts-avatar-inner {
         width: 100%;
         height: 100%;
-        background: hsl(170 20% 50% / 0.2);
+        background: hsl(var(--muted-foreground, 220 8% 46%) / 0.2);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -81,12 +79,12 @@ const serve = async (req: Request): Promise<Response> => {
       .threedotts-avatar svg {
         width: 24px;
         height: 24px;
-        color: hsl(170 20% 50%);
+        color: hsl(var(--muted-foreground, 220 8% 46%));
       }
       
       .threedotts-button {
-        background: linear-gradient(135deg, hsl(175 85% 35%), hsl(165 90% 40%));
-        color: hsl(0 0% 100%);
+        background: linear-gradient(135deg, hsl(var(--primary, 220 93% 60%)), hsl(var(--accent, 220 93% 70%)));
+        color: hsl(var(--primary-foreground, 210 40% 98%));
         border: none;
         padding: 8px 16px;
         border-radius: 9999px;
@@ -105,8 +103,8 @@ const serve = async (req: Request): Promise<Response> => {
       }
       
       .threedotts-button.secondary {
-        background: hsl(175 30% 96%);
-        color: hsl(160 100% 8%);
+        background: hsl(var(--secondary, 220 14% 96%));
+        color: hsl(var(--secondary-foreground, 220 9% 9%));
         width: 32px;
         height: 32px;
         padding: 0;
@@ -114,8 +112,8 @@ const serve = async (req: Request): Promise<Response> => {
       }
       
       .threedotts-button.danger {
-        background: hsl(0 84% 60%);
-        color: hsl(0 0% 100%);
+        background: hsl(var(--destructive, 0 84% 60%));
+        color: hsl(var(--destructive-foreground, 210 40% 98%));
         width: 32px;
         height: 32px;
         padding: 0;
@@ -130,7 +128,7 @@ const serve = async (req: Request): Promise<Response> => {
       
       .threedotts-powered {
         font-size: 10px;
-        color: hsl(170 20% 50%);
+        color: hsl(var(--muted-foreground, 220 8% 46%));
         text-align: right;
         margin-top: 8px;
       }
@@ -144,6 +142,10 @@ const serve = async (req: Request): Promise<Response> => {
           opacity: 1;
           transform: scale(1);
         }
+      }
+      
+      .animate-scale-in {
+        animation: scaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       }
       
       /* Icons */
@@ -171,7 +173,7 @@ const serve = async (req: Request): Promise<Response> => {
     document.head.appendChild(styleSheet);
   }
 
-  // Create widget HTML
+  // Create widget HTML - exactly like ThreeDotsEmbeddedConvai
   function createWidget() {
     const widget = document.createElement('div');
     widget.id = 'threedotts-widget';
@@ -199,7 +201,152 @@ const serve = async (req: Request): Promise<Response> => {
     document.body.appendChild(widget);
   }
 
-  // SimpleAudioRecorder class - EXACT COPY from ConvAI
+  // ElevenLabsWebSocket class - exactly like the main app
+  class ElevenLabsWebSocket {
+    constructor(agentId, apiKey, onMessage, onConnectionChange, onError) {
+      this.agentId = agentId;
+      this.apiKey = apiKey;
+      this.onMessage = onMessage;
+      this.onConnectionChange = onConnectionChange;
+      this.onError = onError;
+      this.websocket = null;
+      this.isMuted = false;
+      this.audioContext = null;
+      this.audioRecorder = null;
+    }
+
+    async connect() {
+      try {
+        console.log('🔌 Connecting to ElevenLabs WebSocket...');
+        
+        // Get signed URL
+        const response = await fetch('https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/get-elevenlabs-signed-url', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ agent_id: this.agentId })
+        });
+
+        if (!response.ok) {
+          throw new Error(\`Failed to get signed URL: \${response.status}\`);
+        }
+
+        const data = await response.json();
+        const signedUrl = data.signed_url;
+
+        this.websocket = new WebSocket(signedUrl);
+        
+        this.websocket.onopen = () => {
+          console.log('✅ Connected to ElevenLabs');
+          this.onConnectionChange(true);
+          this.startAudioRecording();
+        };
+
+        this.websocket.onmessage = async (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            console.log('📨 Received message:', data.type);
+            
+            this.onMessage({
+              type: data.type,
+              audio_event: data.audio_event,
+              user_transcript: data.user_transcript,
+              agent_response_text: data.agent_response_text
+            });
+
+            // Handle audio playback
+            if (data.audio_event?.type === 'audio_stream' && data.audio_event.audio_base_64) {
+              await this.playAudio(data.audio_event.audio_base_64);
+            }
+          } catch (error) {
+            console.error('❌ Error processing message:', error);
+          }
+        };
+
+        this.websocket.onclose = () => {
+          console.log('🔌 Disconnected from ElevenLabs');
+          this.onConnectionChange(false);
+          this.stopAudioRecording();
+        };
+
+        this.websocket.onerror = (error) => {
+          console.error('❌ WebSocket error:', error);
+          this.onError('Connection error');
+        };
+
+      } catch (error) {
+        console.error('❌ Failed to connect:', error);
+        this.onError(error.message);
+      }
+    }
+
+    disconnect() {
+      if (this.websocket) {
+        this.stopAudioRecording();
+        this.websocket.close();
+        this.websocket = null;
+      }
+    }
+
+    async startAudioRecording() {
+      try {
+        if (!this.audioRecorder) {
+          this.audioRecorder = new SimpleAudioRecorder((audioData) => {
+            if (this.websocket && this.websocket.readyState === WebSocket.OPEN && !this.isMuted) {
+              const base64Audio = btoa(String.fromCharCode(...new Uint8Array(audioData)));
+              this.websocket.send(JSON.stringify({
+                type: 'audio_stream',
+                audio_base_64: base64Audio
+              }));
+            }
+          });
+        }
+        await this.audioRecorder.start();
+      } catch (error) {
+        console.error('❌ Failed to start audio recording:', error);
+      }
+    }
+
+    stopAudioRecording() {
+      if (this.audioRecorder) {
+        this.audioRecorder.stop();
+        this.audioRecorder = null;
+      }
+    }
+
+    setMuted(muted) {
+      this.isMuted = muted;
+    }
+
+    async playAudio(base64Audio) {
+      try {
+        if (!this.audioContext) {
+          this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        if (this.audioContext.state === 'suspended') {
+          await this.audioContext.resume();
+        }
+
+        const audioData = atob(base64Audio);
+        const arrayBuffer = new ArrayBuffer(audioData.length);
+        const view = new Uint8Array(arrayBuffer);
+        
+        for (let i = 0; i < audioData.length; i++) {
+          view[i] = audioData.charCodeAt(i);
+        }
+
+        const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+        const source = this.audioContext.createBufferSource();
+        source.buffer = audioBuffer;
+        source.connect(this.audioContext.destination);
+        source.start(0);
+      } catch (error) {
+        console.error('❌ Error playing audio:', error);
+      }
+    }
+  }
+
+  // SimpleAudioRecorder class - exactly like the main app
   class SimpleAudioRecorder {
     constructor(onAudioData) {
       this.onAudioData = onAudioData;
@@ -210,7 +357,6 @@ const serve = async (req: Request): Promise<Response> => {
 
     async start() {
       try {
-        console.log('🎤 SimpleAudioRecorder starting...');
         this.stream = await navigator.mediaDevices.getUserMedia({
           audio: {
             sampleRate: 16000,
@@ -226,11 +372,9 @@ const serve = async (req: Request): Promise<Response> => {
 
         this.mediaRecorder.ondataavailable = (event) => {
           if (event.data.size > 0) {
-            console.log('📦 Audio data available:', event.data.size, 'bytes');
             const reader = new FileReader();
             reader.onload = () => {
               if (reader.result instanceof ArrayBuffer) {
-                console.log('✅ Calling onAudioData with ArrayBuffer');
                 this.onAudioData(reader.result);
               }
             };
@@ -238,9 +382,8 @@ const serve = async (req: Request): Promise<Response> => {
           }
         };
 
-        this.mediaRecorder.start(1000); // Capture every second
+        this.mediaRecorder.start(1000);
         this.isRecording = true;
-        console.log('✅ SimpleAudioRecorder started successfully');
       } catch (error) {
         console.error('❌ Error starting audio recording:', error);
         throw error;
@@ -248,7 +391,6 @@ const serve = async (req: Request): Promise<Response> => {
     }
 
     stop() {
-      console.log('🛑 SimpleAudioRecorder stopping...');
       if (this.mediaRecorder && this.isRecording) {
         this.mediaRecorder.stop();
         this.isRecording = false;
@@ -257,7 +399,6 @@ const serve = async (req: Request): Promise<Response> => {
         this.stream.getTracks().forEach(track => track.stop());
         this.stream = null;
       }
-      console.log('✅ SimpleAudioRecorder stopped');
     }
 
     isActive() {
@@ -265,183 +406,34 @@ const serve = async (req: Request): Promise<Response> => {
     }
   }
 
-  // Audio recording function - EXACT COPY from ConvAI
-  async function startRecording() {
-    try {
-      console.log('🎤 Starting recording with SimpleAudioRecorder...');
-      
-      state.audioRecorder = new SimpleAudioRecorder((audioData) => {
-        if (state.websocket && state.websocket.readyState === WebSocket.OPEN) {
-          console.log('📤 Converting ArrayBuffer to base64...', audioData.byteLength, 'bytes');
-          // Convert to base64 and send - EXACT SAME as ConvAI
-          const base64Audio = btoa(String.fromCharCode(...new Uint8Array(audioData)));
-          console.log('📤 Sending audio_stream message, base64 length:', base64Audio.length);
-          state.websocket.send(JSON.stringify({
-            type: 'audio_stream',
-            audio_base_64: base64Audio
-          }));
-          console.log('✅ Audio chunk sent successfully');
-        } else {
-          console.warn('⚠️ WebSocket not ready, cannot send audio');
-        }
-      });
-
-      await state.audioRecorder.start();
-      state.isRecording = true;
-      updateUI();
-      console.log('🎤 Recording started - speak now!');
-    } catch (error) {
-      console.error('❌ Error starting recording:', error);
-      alert('Could not access microphone. Please allow microphone access.');
-    }
-  }
-
-  function stopRecording() {
-    console.log('🛑 Stopping recording...');
-    if (state.audioRecorder) {
-      state.audioRecorder.stop();
-      state.audioRecorder = null;
-      state.isRecording = false;
-    }
+  // Message handler - exactly like useGlobalConvaiState
+  function handleMessage(message) {
+    console.log('📨 Global message received:', message.type);
+    state.messages.push(message);
+    state.isSpeaking = message.type === 'agent_response' || message.type === 'agent_response_correction' 
+      ? false 
+      : message.audio_event ? true : state.isSpeaking;
     updateUI();
-    console.log('✅ Recording stopped');
   }
 
-  // Audio playback function with detailed debugging
-  async function playAudioData(base64Audio) {
-    console.log('🔊 Attempting to play audio:', {
-      base64Length: base64Audio.length,
-      base64Preview: base64Audio.substring(0, 50) + '...'
-    });
-
-    if (!state.audioContext) {
-      console.log('🔧 Creating new AudioContext...');
-      state.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    }
-
-    try {
-      if (state.audioContext.state === 'suspended') {
-        console.log('🔧 Resuming suspended AudioContext...');
-        await state.audioContext.resume();
-      }
-
-      console.log('🔧 Decoding base64 audio data...');
-      // Use exact same audio processing as working ConvAI
-      const audioData = atob(base64Audio);
-      const arrayBuffer = new ArrayBuffer(audioData.length);
-      const view = new Uint8Array(arrayBuffer);
-      
-      for (let i = 0; i < audioData.length; i++) {
-        view[i] = audioData.charCodeAt(i);
-      }
-
-      console.log('🔧 Audio data decoded:', {
-        originalLength: base64Audio.length,
-        decodedLength: audioData.length,
-        arrayBufferSize: arrayBuffer.byteLength
-      });
-
-      console.log('🔧 Creating audio buffer with decodeAudioData...');
-      const audioBuffer = await state.audioContext.decodeAudioData(arrayBuffer);
-      
-      console.log('✅ Audio buffer created:', {
-        sampleRate: audioBuffer.sampleRate,
-        duration: audioBuffer.duration,
-        numberOfChannels: audioBuffer.numberOfChannels,
-        length: audioBuffer.length
-      });
-
-      const source = state.audioContext.createBufferSource();
-      source.buffer = audioBuffer;
-      source.connect(state.audioContext.destination);
-      
-      source.onended = () => {
-        console.log('🔊 Audio playback ended');
-        state.isAgentSpeaking = false;
-        updateUI();
-      };
-      
-      state.isAgentSpeaking = true;
-      updateUI();
-      source.start(0);
-      
-      console.log('✅ Audio playback started successfully');
-    } catch (error) {
-      console.error('❌ Error playing audio:', error);
-      console.error('Audio error details:', {
-        message: error.message,
-        name: error.name,
-        stack: error.stack
-      });
-    }
+  function handleConnectionChange(connected) {
+    state.isConnected = connected;
+    state.isSpeaking = false;
+    updateUI();
   }
 
-  // Update UI based on state
+  function handleError(error) {
+    console.error('❌ Widget error:', error);
+    alert(\`Erro: \${error}\`);
+  }
+
+  // Update UI based on state - exactly like ThreeDotsEmbeddedConvai
   function updateUI() {
     const buttonsContainer = document.getElementById('threedotts-buttons');
     const container = document.getElementById('threedotts-container');
     if (!buttonsContainer || !container) return;
     
-    if (state.isConnecting) {
-      container.classList.add('connected');
-      buttonsContainer.innerHTML = \`
-        <button class="threedotts-button" disabled>
-          <svg class="icon-loading" viewBox="0 0 24 24" style="animation: spin 1s linear infinite;">
-            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" stroke-dasharray="31.416" stroke-dashoffset="31.416">
-              <animate attributeName="stroke-dasharray" dur="2s" values="0 31.416;15.708 15.708;0 31.416;0 31.416" repeatCount="indefinite"/>
-              <animate attributeName="stroke-dashoffset" dur="2s" values="0;-15.708;-31.416;-31.416" repeatCount="indefinite"/>
-            </circle>
-          </svg>
-          Conectando...
-        </button>
-      \`;
-    } else if (state.isConnected) {
-      container.classList.add('connected');
-      const speakingClass = state.isAgentSpeaking ? ' speaking' : '';
-      const recordingClass = state.isRecording ? ' recording' : '';
-      
-      if (!state.isRecording) {
-        buttonsContainer.innerHTML = \`
-          <div class="threedotts-controls">
-            <button class="threedotts-button danger" onclick="window.threedottsWidget.disconnect()">
-              <svg class="icon-phone-off" viewBox="0 0 24 24">
-                <path d="m10.68 13.31-2.22-2.22a16 16 0 0 1-2.4-5.63A2 2 0 0 1 8.11 3h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L12.09 10.9a16 16 0 0 1-1.41 2.41z"/>
-                <path d="m16.46 12-1.27-1.27a2 2 0 0 1-.45-2.11 12.84 12.84 0 0 0 .7-2.81A2 2 0 0 1 17.39 4h3a2 2 0 0 1 2 1.72 19.79 19.79 0 0 1-.98 4.49z"/>
-                <line x1="2" x2="22" y1="2" y2="22"/>
-              </svg>
-            </button>
-            <button class="threedotts-button secondary\${speakingClass}" onclick="window.threedottsWidget.startRecording()">
-              <svg class="icon-mic" viewBox="0 0 24 24">
-                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-                <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-                <line x1="12" x2="12" y1="19" y2="23"/>
-                <line x1="8" x2="16" y1="23" y2="23"/>
-              </svg>
-            </button>
-          </div>
-        \`;
-      } else {
-        buttonsContainer.innerHTML = \`
-          <div class="threedotts-controls">
-            <button class="threedotts-button danger" onclick="window.threedottsWidget.disconnect()">
-              <svg class="icon-phone-off" viewBox="0 0 24 24">
-                <path d="m10.68 13.31-2.22-2.22a16 16 0 0 1-2.4-5.63A2 2 0 0 1 8.11 3h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L12.09 10.9a16 16 0 0 1-1.41 2.41z"/>
-                <path d="m16.46 12-1.27-1.27a2 2 0 0 1-.45-2.11 12.84 12.84 0 0 0 .7-2.81A2 2 0 0 1 17.39 4h3a2 2 0 0 1 2 1.72 19.79 19.79 0 0 1-.98 4.49z"/>
-                <line x1="2" x2="22" y1="2" y2="22"/>
-              </svg>
-            </button>
-            <button class="threedotts-button danger\${recordingClass}" onclick="window.threedottsWidget.stopRecording()" style="animation: pulse 1s infinite;">
-              <svg class="icon-mic-off" viewBox="0 0 24 24">
-                <line x1="2" x2="22" y1="2" y2="22"/>
-                <path d="m7 7-.78-.22a1.53 1.53 0 0 0-.12-.03A3 3 0 0 0 3 9v3a9 9 0 0 0 5.69 8.31A3 3 0 0 0 12 17v-6"/>
-                <path d="M9 9v4a3 3 0 0 0 5.12 2.12L9 9z"/>
-                <path d="M15 9.34V5a3 3 0 0 0-5.94-.6"/>
-              </svg>
-            </button>
-          </div>
-        \`;
-      }
-    } else {
+    if (!state.isConnected) {
       container.classList.remove('connected');
       buttonsContainer.innerHTML = \`
         <button class="threedotts-button" onclick="window.threedottsWidget.connect()">
@@ -451,162 +443,85 @@ const serve = async (req: Request): Promise<Response> => {
           Ligar
         </button>
       \`;
-    }
-  }
-
-  // WebSocket connection with better logging
-  async function connectWebSocket() {
-    state.isConnecting = true;
-    updateUI();
-    try {
-      const agentId = config.agentId || new URLSearchParams(window.location.search).get('agentId');
-      console.log('🔍 Looking for agent ID...', {
-        configAgentId: config.agentId,
-        urlAgentId: new URLSearchParams(window.location.search).get('agentId'),
-        finalAgentId: agentId
-      });
-      
-      if (!agentId) {
-        console.error('❌ Agent ID is required');
-        alert('Agent ID não configurado. Configure using: window.threedottsWidget.configure({ agentId: "YOUR_AGENT_ID" })');
-        state.isConnecting = false;
-        updateUI();
-        return;
-      }
-
-      console.log('Getting signed URL for agent:', agentId);
-      
-      // Get signed URL from Supabase Edge Function (same as working widget)
-      const response = await fetch('https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/get-elevenlabs-signed-url', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ agent_id: agentId }) // Use agent_id not agentId
-      });
-
-      console.log('Fetch response status:', response.status);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Failed to get signed URL:', response.status, errorText);
-        throw new Error(\`Failed to get signed URL: \${response.status} - \${errorText}\`);
-      }
-
-      const data = await response.json();
-      console.log('Response data:', data);
-      
-      const signedUrl = data.signed_url; // Match the response structure
-      console.log('Got signed URL, connecting to:', signedUrl);
-
-      if (!signedUrl) {
-        throw new Error('No signed URL received from edge function');
-      }
-
-      state.websocket = new WebSocket(signedUrl);
-      
-      state.websocket.onopen = () => {
-        console.log('Connected to ThreeDotts AI via signed URL');
-        state.isConnected = true;
-        state.isConnecting = false;
-        updateUI();
-      };
-
-      state.websocket.onmessage = async (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          console.log('📨 Message received:', JSON.stringify(data, null, 2));
-
-          // Handle audio stream from agent
-          if (data.audio_event?.type === 'audio_stream' && data.audio_event.audio_base_64) {
-            console.log('🔊 Playing audio from agent');
-            await playAudioData(data.audio_event.audio_base_64);
-          }
-
-          // Handle conversation start
-          if (data.conversation_id) {
-            console.log('🆔 Conversation started:', data.conversation_id);
-          }
-
-          // Handle user transcript
-          if (data.user_transcript) {
-            const { text, is_final } = data.user_transcript;
-            console.log(\`👤 User transcript (\${is_final ? 'final' : 'partial'}): \${text}\`);
-          }
-
-          // Handle agent response text
-          if (data.agent_response_text) {
-            const { text, is_final } = data.agent_response_text;
-            console.log(\`🤖 Agent response (\${is_final ? 'final' : 'partial'}): \${text}\`);
-          }
-
-          // Handle other message types
-          if (data.type) {
-            console.log('📝 Message type:', data.type);
-          }
-
-        } catch (error) {
-          console.error('Error processing message:', error);
-        }
-      };
-      
-      state.websocket.onclose = () => {
-        console.log('Disconnected from ThreeDotts AI');
-        state.isConnected = false;
-        state.isConnecting = false;
-        updateUI();
-      };
-      
-      state.websocket.onerror = (error) => {
-        console.error('WebSocket error details:', error, 'URL was:', signedUrl);
-        state.isConnected = false;
-        state.isConnecting = false;
-        updateUI();
-      };
-      
-    } catch (error) {
-      console.error('Failed to connect - full error:', error);
-      state.isConnected = false;
-      state.isConnecting = false;
-      updateUI();
-    }
-  }
-
-  // Disconnect WebSocket
-  function disconnectWebSocket() {
-    stopRecording(); // Stop recording first
-    if (state.websocket) {
-      state.websocket.close();
-      state.websocket = null;
-    }
-    state.isConnected = false;
-    state.isConnecting = false;
-    updateUI();
-  }
-
-  // Toggle mute (now start/stop recording)
-  function toggleMute() {
-    if (state.isRecording) {
-      stopRecording();
     } else {
-      startRecording();
+      container.classList.add('connected');
+      buttonsContainer.innerHTML = \`
+        <div class="threedotts-controls animate-scale-in">
+          <button class="threedotts-button danger" onclick="window.threedottsWidget.disconnect()">
+            <svg class="icon-phone-off" viewBox="0 0 24 24">
+              <path d="m10.68 13.31-2.22-2.22a16 16 0 0 1-2.4-5.63A2 2 0 0 1 8.11 3h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L12.09 10.9a16 16 0 0 1-1.41 2.41z"/>
+              <path d="m16.46 12-1.27-1.27a2 2 0 0 1-.45-2.11 12.84 12.84 0 0 0 .7-2.81A2 2 0 0 1 17.39 4h3a2 2 0 0 1 2 1.72 19.79 19.79 0 0 1-.98 4.49z"/>
+              <line x1="2" x2="22" y1="2" y2="22"/>
+            </svg>
+          </button>
+          <button class="threedotts-button secondary \${state.isMuted ? 'danger' : ''}" onclick="window.threedottsWidget.toggleMute()">
+            \${state.isMuted ? 
+              \`<svg class="icon-mic-off" viewBox="0 0 24 24">
+                <line x1="2" x2="22" y1="2" y2="22"/>
+                <path d="m7 7-.78-.22a1.53 1.53 0 0 0-.12-.03A3 3 0 0 0 3 9v3a9 9 0 0 0 5.69 8.31A3 3 0 0 0 12 17v-6"/>
+                <path d="M9 9v4a3 3 0 0 0 5.12 2.12L9 9z"/>
+                <path d="M15 9.34V5a3 3 0 0 0-5.94-.6"/>
+              </svg>\` : 
+              \`<svg class="icon-mic" viewBox="0 0 24 24">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                <line x1="12" x2="12" y1="19" y2="23"/>
+                <line x1="8" x2="16" y1="23" y2="23"/>
+              </svg>\`}
+          </button>
+        </div>
+      \`;
     }
   }
 
-  // Global API
-  window.threedottsWidget = {
-    connect: connectWebSocket,
-    disconnect: disconnectWebSocket,
-    startRecording: startRecording,
-    stopRecording: stopRecording,
-    toggleConnection: () => {
-      if (state.isConnected) {
-        disconnectWebSocket();
-      } else {
-        connectWebSocket();
+  // Global actions - exactly like useGlobalConvaiState
+  let webSocketInstance = null;
+
+  const actions = {
+    handleConnect: async () => {
+      try {
+        const agentId = config.agentId || new URLSearchParams(window.location.search).get('agentId');
+        
+        if (!agentId) {
+          alert('Agent ID não configurado. Configure usando: window.threedottsWidget.configure({ agentId: "YOUR_AGENT_ID" })');
+          return;
+        }
+
+        if (!webSocketInstance) {
+          webSocketInstance = new ElevenLabsWebSocket(
+            agentId,
+            '',
+            handleMessage,
+            handleConnectionChange,
+            handleError
+          );
+        }
+        await webSocketInstance.connect();
+      } catch (error) {
+        console.error('Failed to connect:', error);
+        handleError('Falha ao conectar');
       }
     },
-    toggleMute: toggleMute,
+    handleDisconnect: () => {
+      if (webSocketInstance) {
+        webSocketInstance.disconnect();
+      }
+    },
+    toggleMute: () => {
+      if (webSocketInstance) {
+        const newMutedState = !state.isMuted;
+        webSocketInstance.setMuted(newMutedState);
+        state.isMuted = newMutedState;
+        updateUI();
+      }
+    }
+  };
+
+  // Global API - exactly like the component interface
+  window.threedottsWidget = {
+    connect: actions.handleConnect,
+    disconnect: actions.handleDisconnect,
+    toggleMute: actions.toggleMute,
     configure: (options) => {
       console.log('🔧 Configuring widget with options:', options);
       Object.assign(config, options);
