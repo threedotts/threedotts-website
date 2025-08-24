@@ -297,7 +297,6 @@ const serve = async (req: Request): Promise<Response> => {
       state.isConnected = false;
       updateUI();
     }
-    }
   }
 
   // Disconnect WebSocket
