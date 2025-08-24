@@ -20,6 +20,7 @@ const serve = async (req: Request): Promise<Response> => {
   const state = {
     isExpanded: false,
     isConnected: false,
+    isConnecting: false,
     isMuted: false,
     isSpeaking: false,
     message: '',
@@ -33,12 +34,14 @@ const serve = async (req: Request): Promise<Response> => {
   // Inject CSS styles - EXACTLY like ThreeDotsEmbeddedConvai (same colors!)
   function injectStyles() {
     const styles = \`
+      @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&display=swap');
+      
       #threedotts-widget {
         position: fixed;
         bottom: 24px;
         right: 24px;
         z-index: 9999;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-family: 'Comfortaa', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       }
       
       .threedotts-container {
@@ -121,6 +124,15 @@ const serve = async (req: Request): Promise<Response> => {
         height: 32px;
         padding: 0;
         justify-content: center;
+      }
+      
+      .threedotts-button.connecting {
+        background: hsl(0 0% 90%);
+        color: hsl(0 0% 40%);
+        padding: 8px 16px;
+        font-size: 13px;
+        font-weight: 400;
+        cursor: default;
       }
       
       .threedotts-controls {
@@ -589,7 +601,7 @@ const serve = async (req: Request): Promise<Response> => {
     const container = document.getElementById('threedotts-container');
     if (!buttonsContainer || !container) return;
     
-    if (!state.isConnected) {
+    if (!state.isConnected && !state.isConnecting) {
       container.classList.remove('connected');
       state.hasAnimated = false; // Reset animation flag when disconnected
       buttonsContainer.innerHTML = \`
@@ -598,6 +610,13 @@ const serve = async (req: Request): Promise<Response> => {
             <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
           </svg>
           Ligar
+        </button>
+      \`;
+    } else if (state.isConnecting) {
+      container.classList.remove('connected');
+      buttonsContainer.innerHTML = \`
+        <button class="threedotts-button connecting">
+          Conectando...
         </button>
       \`;
     } else {
@@ -613,9 +632,8 @@ const serve = async (req: Request): Promise<Response> => {
         <div class="threedotts-controls \${animateClass}">
           <button class="threedotts-button danger" onclick="window.threedottsWidget.disconnect()">
             <svg class="icon-phone-off" viewBox="0 0 24 24">
-              <path d="m10.68 13.31-2.22-2.22a16 16 0 0 1-2.4-5.63A2 2 0 0 1 8.11 3h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L12.09 10.9a16 16 0 0 1-1.41 2.41z"/>
-              <path d="m16.46 12-1.27-1.27a2 2 0 0 1-.45-2.11 12.84 12.84 0 0 0 .7-2.81A2 2 0 0 1 17.39 4h3a2 2 0 0 1 2 1.72 19.79 19.79 0 0 1-.98 4.49z"/>
-              <line x1="2" x2="22" y1="2" y2="22"/>
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
           </button>
           <button class="threedotts-button secondary \${state.isMuted ? 'danger' : ''}" onclick="window.threedottsWidget.toggleMute()">
@@ -657,6 +675,7 @@ const serve = async (req: Request): Promise<Response> => {
 
   function handleConnectionChange(connected) {
     state.isConnected = connected;
+    state.isConnecting = false;
     state.isSpeaking = false;
     updateUI();
   }
@@ -679,6 +698,10 @@ const serve = async (req: Request): Promise<Response> => {
           return;
         }
 
+        // Show connecting state
+        state.isConnecting = true;
+        updateUI();
+
         if (!webSocketInstance) {
           webSocketInstance = new ElevenLabsWebSocket(
             agentId,
@@ -691,6 +714,7 @@ const serve = async (req: Request): Promise<Response> => {
         await webSocketInstance.connect();
       } catch (error) {
         console.error('Failed to connect:', error);
+        state.isConnecting = false;
         handleError('Falha ao conectar');
       }
     },
