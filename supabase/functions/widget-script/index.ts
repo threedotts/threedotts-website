@@ -226,9 +226,21 @@ const serve = async (req: Request): Promise<Response> => {
       const processor = state.audioContext.createScriptProcessor(1024, 1, 1);
       
       processor.onaudioprocess = (e) => {
-        if (!state.isRecording || !state.websocket || state.websocket.readyState !== WebSocket.OPEN) return;
+        if (!state.isRecording || !state.websocket || state.websocket.readyState !== WebSocket.OPEN) {
+          console.log('❌ Cannot send audio:', {
+            isRecording: state.isRecording,
+            hasWebSocket: !!state.websocket,
+            wsReadyState: state.websocket?.readyState
+          });
+          return;
+        }
         
         const inputData = e.inputBuffer.getChannelData(0);
+        console.log('🎤 Processing audio chunk:', {
+          dataLength: inputData.length,
+          sampleRate: e.inputBuffer.sampleRate,
+          firstSample: inputData[0]
+        });
         
         // Convert Float32Array to ArrayBuffer exactly like ConvAI
         const arrayBuffer = new ArrayBuffer(inputData.length * 4);
@@ -237,10 +249,17 @@ const serve = async (req: Request): Promise<Response> => {
         
         // Convert to base64 and send exactly like ConvAI
         const base64Audio = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+        console.log('📤 Sending audio chunk:', {
+          base64Length: base64Audio.length,
+          base64Preview: base64Audio.substring(0, 50) + '...'
+        });
+        
         state.websocket.send(JSON.stringify({
           type: 'audio_stream',
           audio_base_64: base64Audio
         }));
+        
+        console.log('✅ Audio chunk sent successfully');
       };
       
       source.connect(processor);
@@ -280,17 +299,25 @@ const serve = async (req: Request): Promise<Response> => {
     console.log('🎤 Recording stopped');
   }
 
-  // Audio playback function (exact copy from working ConvAI)
+  // Audio playback function with detailed debugging
   async function playAudioData(base64Audio) {
+    console.log('🔊 Attempting to play audio:', {
+      base64Length: base64Audio.length,
+      base64Preview: base64Audio.substring(0, 50) + '...'
+    });
+
     if (!state.audioContext) {
+      console.log('🔧 Creating new AudioContext...');
       state.audioContext = new (window.AudioContext || window.webkitAudioContext)();
     }
 
     try {
       if (state.audioContext.state === 'suspended') {
+        console.log('🔧 Resuming suspended AudioContext...');
         await state.audioContext.resume();
       }
 
+      console.log('🔧 Decoding base64 audio data...');
       // Use exact same audio processing as working ConvAI
       const audioData = atob(base64Audio);
       const arrayBuffer = new ArrayBuffer(audioData.length);
@@ -300,12 +327,28 @@ const serve = async (req: Request): Promise<Response> => {
         view[i] = audioData.charCodeAt(i);
       }
 
+      console.log('🔧 Audio data decoded:', {
+        originalLength: base64Audio.length,
+        decodedLength: audioData.length,
+        arrayBufferSize: arrayBuffer.byteLength
+      });
+
+      console.log('🔧 Creating audio buffer with decodeAudioData...');
       const audioBuffer = await state.audioContext.decodeAudioData(arrayBuffer);
+      
+      console.log('✅ Audio buffer created:', {
+        sampleRate: audioBuffer.sampleRate,
+        duration: audioBuffer.duration,
+        numberOfChannels: audioBuffer.numberOfChannels,
+        length: audioBuffer.length
+      });
+
       const source = state.audioContext.createBufferSource();
       source.buffer = audioBuffer;
       source.connect(state.audioContext.destination);
       
       source.onended = () => {
+        console.log('🔊 Audio playback ended');
         state.isAgentSpeaking = false;
         updateUI();
       };
@@ -314,9 +357,14 @@ const serve = async (req: Request): Promise<Response> => {
       updateUI();
       source.start(0);
       
-      console.log('🔊 Playing agent response (using decodeAudioData)');
+      console.log('✅ Audio playback started successfully');
     } catch (error) {
-      console.error('Error playing audio:', error);
+      console.error('❌ Error playing audio:', error);
+      console.error('Audio error details:', {
+        message: error.message,
+        name: error.name,
+        stack: error.stack
+      });
     }
   }
 
