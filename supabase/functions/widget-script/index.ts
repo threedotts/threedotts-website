@@ -40,7 +40,7 @@ const serve = async (req: Request): Promise<Response> => {
       .threedotts-container {
         background: hsl(0 0% 100% / 0.95);
         backdrop-filter: blur(12px);
-        border: 1px solid hsl(220 13% 91% / 0.1);
+        border: 1px solid hsl(175 30% 91% / 0.1);
         box-shadow: 0 8px 25px -5px hsl(0 0% 0% / 0.1), 0 8px 10px -6px hsl(0 0% 0% / 0.1);
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         border-radius: 9999px;
@@ -52,21 +52,28 @@ const serve = async (req: Request): Promise<Response> => {
       
       @media (prefers-color-scheme: dark) {
         .threedotts-container {
-          background: hsl(224 71.4% 4.1% / 0.95);
-          border: 1px solid hsl(215 27.9% 16.9% / 0.3);
+          background: hsl(160 50% 3% / 0.95);
+          border: 1px solid hsl(160 30% 15% / 0.1);
         }
       }
       
       .threedotts-container.connected {
-        border-color: hsl(221.2 83.2% 53.3% / 0.3);
-        box-shadow: 0 8px 25px -5px hsl(221.2 83.2% 53.3% / 0.2), 0 8px 10px -6px hsl(0 0% 0% / 0.1);
+        border-color: hsl(175 85% 35% / 0.3);
+        box-shadow: 0 8px 25px -5px hsl(175 85% 35% / 0.2), 0 8px 10px -6px hsl(0 0% 0% / 0.1);
+      }
+      
+      @media (prefers-color-scheme: dark) {
+        .threedotts-container.connected {
+          border-color: hsl(175 75% 55% / 0.3);
+          box-shadow: 0 8px 25px -5px hsl(175 75% 55% / 0.2), 0 8px 10px -6px hsl(0 0% 0% / 0.1);
+        }
       }
       
       .threedotts-avatar {
         width: 40px;
         height: 40px;
         border-radius: 50%;
-        background: hsl(210 40% 98%);
+        background: hsl(175 30% 96%);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -75,28 +82,40 @@ const serve = async (req: Request): Promise<Response> => {
       
       @media (prefers-color-scheme: dark) {
         .threedotts-avatar {
-          background: hsl(215 27.9% 16.9%);
+          background: hsl(160 30% 15%);
         }
       }
       
       .threedotts-avatar-inner {
         width: 100%;
         height: 100%;
-        background: hsl(215.4 16.3% 46.9% / 0.2);
+        background: hsl(170 20% 50% / 0.2);
         display: flex;
         align-items: center;
         justify-content: center;
       }
       
+      @media (prefers-color-scheme: dark) {
+        .threedotts-avatar-inner {
+          background: hsl(170 20% 65% / 0.2);
+        }
+      }
+      
       .threedotts-avatar svg {
         width: 24px;
         height: 24px;
-        color: hsl(215.4 16.3% 46.9%);
+        color: hsl(170 20% 50%);
+      }
+      
+      @media (prefers-color-scheme: dark) {
+        .threedotts-avatar svg {
+          color: hsl(170 20% 65%);
+        }
       }
       
       .threedotts-button {
-        background: linear-gradient(135deg, hsl(221.2 83.2% 53.3%), hsl(262.1 83.3% 57.8%));
-        color: hsl(210 40% 98%);
+        background: linear-gradient(135deg, hsl(175 85% 35%), hsl(165 90% 40%));
+        color: hsl(0 0% 100%);
         border: none;
         padding: 8px 16px;
         border-radius: 9999px;
@@ -110,24 +129,47 @@ const serve = async (req: Request): Promise<Response> => {
         white-space: nowrap;
       }
       
+      @media (prefers-color-scheme: dark) {
+        .threedotts-button {
+          background: linear-gradient(135deg, hsl(175 75% 55%), hsl(165 80% 55%));
+          color: hsl(160 50% 8%);
+        }
+      }
+      
       .threedotts-button:hover {
         opacity: 0.9;
       }
       
       .threedotts-button.secondary {
-        background: hsl(215.4 16.3% 46.9%);
+        background: hsl(175 30% 96%);
+        color: hsl(160 100% 8%);
         width: 32px;
         height: 32px;
         padding: 0;
         justify-content: center;
       }
       
+      @media (prefers-color-scheme: dark) {
+        .threedotts-button.secondary {
+          background: hsl(160 30% 15%);
+          color: hsl(175 30% 95%);
+        }
+      }
+      
       .threedotts-button.danger {
-        background: hsl(0 84.2% 60.2%);
+        background: hsl(0 84% 60%);
+        color: hsl(0 0% 100%);
         width: 32px;
         height: 32px;
         padding: 0;
         justify-content: center;
+      }
+      
+      @media (prefers-color-scheme: dark) {
+        .threedotts-button.danger {
+          background: hsl(0 63% 31%);
+          color: hsl(175 30% 95%);
+        }
       }
       
       .threedotts-controls {
@@ -138,9 +180,15 @@ const serve = async (req: Request): Promise<Response> => {
       
       .threedotts-powered {
         font-size: 10px;
-        color: hsl(215.4 16.3% 46.9%);
+        color: hsl(170 20% 50%);
         text-align: right;
         margin-top: 8px;
+      }
+      
+      @media (prefers-color-scheme: dark) {
+        .threedotts-powered {
+          color: hsl(170 20% 65%);
+        }
       }
       
       @keyframes scaleIn {
