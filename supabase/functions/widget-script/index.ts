@@ -26,10 +26,7 @@ const serve = async (req: Request): Promise<Response> => {
     isAgentSpeaking: false,
     websocket: null,
     audioContext: null,
-    mediaRecorder: null,
-    audioStream: null,
-    audioSource: null,      // For ScriptProcessor
-    audioProcessor: null    // For ScriptProcessor
+    audioRecorder: null     // SimpleAudioRecorder instance
   };
 
   // Inject CSS styles
@@ -202,101 +199,112 @@ const serve = async (req: Request): Promise<Response> => {
     document.body.appendChild(widget);
   }
 
-  // Audio recording function (CORRECTED - using exact ConvAI implementation)
+  // SimpleAudioRecorder class - EXACT COPY from ConvAI
+  class SimpleAudioRecorder {
+    constructor(onAudioData) {
+      this.onAudioData = onAudioData;
+      this.stream = null;
+      this.mediaRecorder = null;
+      this.isRecording = false;
+    }
+
+    async start() {
+      try {
+        console.log('🎤 SimpleAudioRecorder starting...');
+        this.stream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            sampleRate: 16000,
+            channelCount: 1,
+            echoCancellation: true,
+            noiseSuppression: true,
+          }
+        });
+
+        this.mediaRecorder = new MediaRecorder(this.stream, {
+          mimeType: 'audio/webm;codecs=opus'
+        });
+
+        this.mediaRecorder.ondataavailable = (event) => {
+          if (event.data.size > 0) {
+            console.log('📦 Audio data available:', event.data.size, 'bytes');
+            const reader = new FileReader();
+            reader.onload = () => {
+              if (reader.result instanceof ArrayBuffer) {
+                console.log('✅ Calling onAudioData with ArrayBuffer');
+                this.onAudioData(reader.result);
+              }
+            };
+            reader.readAsArrayBuffer(event.data);
+          }
+        };
+
+        this.mediaRecorder.start(1000); // Capture every second
+        this.isRecording = true;
+        console.log('✅ SimpleAudioRecorder started successfully');
+      } catch (error) {
+        console.error('❌ Error starting audio recording:', error);
+        throw error;
+      }
+    }
+
+    stop() {
+      console.log('🛑 SimpleAudioRecorder stopping...');
+      if (this.mediaRecorder && this.isRecording) {
+        this.mediaRecorder.stop();
+        this.isRecording = false;
+      }
+      if (this.stream) {
+        this.stream.getTracks().forEach(track => track.stop());
+        this.stream = null;
+      }
+      console.log('✅ SimpleAudioRecorder stopped');
+    }
+
+    isActive() {
+      return this.isRecording;
+    }
+  }
+
+  // Audio recording function - EXACT COPY from ConvAI
   async function startRecording() {
     try {
-      console.log('🎤 Starting microphone recording...');
+      console.log('🎤 Starting recording with SimpleAudioRecorder...');
       
-      // Use exact same approach as working ConvAI - ScriptProcessorNode
-      state.audioStream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          sampleRate: 16000,
-          channelCount: 1,
-          echoCancellation: true,
-          noiseSuppression: true,
+      state.audioRecorder = new SimpleAudioRecorder((audioData) => {
+        if (state.websocket && state.websocket.readyState === WebSocket.OPEN) {
+          console.log('📤 Converting ArrayBuffer to base64...', audioData.byteLength, 'bytes');
+          // Convert to base64 and send - EXACT SAME as ConvAI
+          const base64Audio = btoa(String.fromCharCode(...new Uint8Array(audioData)));
+          console.log('📤 Sending audio_stream message, base64 length:', base64Audio.length);
+          state.websocket.send(JSON.stringify({
+            type: 'audio_stream',
+            audio_base_64: base64Audio
+          }));
+          console.log('✅ Audio chunk sent successfully');
+        } else {
+          console.warn('⚠️ WebSocket not ready, cannot send audio');
         }
       });
 
-      // Create AudioContext and ScriptProcessor like ConvAI
-      if (!state.audioContext) {
-        state.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      }
-
-      const source = state.audioContext.createMediaStreamSource(state.audioStream);
-      const processor = state.audioContext.createScriptProcessor(1024, 1, 1);
-      
-      processor.onaudioprocess = (e) => {
-        if (!state.isRecording || !state.websocket || state.websocket.readyState !== WebSocket.OPEN) {
-          console.log('❌ Cannot send audio:', {
-            isRecording: state.isRecording,
-            hasWebSocket: !!state.websocket,
-            wsReadyState: state.websocket?.readyState
-          });
-          return;
-        }
-        
-        const inputData = e.inputBuffer.getChannelData(0);
-        console.log('🎤 Processing audio chunk:', {
-          dataLength: inputData.length,
-          sampleRate: e.inputBuffer.sampleRate,
-          firstSample: inputData[0]
-        });
-        
-        // Convert Float32Array to ArrayBuffer exactly like ConvAI
-        const arrayBuffer = new ArrayBuffer(inputData.length * 4);
-        const view = new Float32Array(arrayBuffer);
-        view.set(inputData);
-        
-        // Convert to base64 and send exactly like ConvAI
-        const base64Audio = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
-        console.log('📤 Sending audio chunk:', {
-          base64Length: base64Audio.length,
-          base64Preview: base64Audio.substring(0, 50) + '...'
-        });
-        
-        state.websocket.send(JSON.stringify({
-          type: 'audio_stream',
-          audio_base_64: base64Audio
-        }));
-        
-        console.log('✅ Audio chunk sent successfully');
-      };
-      
-      source.connect(processor);
-      processor.connect(state.audioContext.destination);
-      
-      // Store references for cleanup
-      state.audioSource = source;
-      state.audioProcessor = processor;
+      await state.audioRecorder.start();
       state.isRecording = true;
       updateUI();
-      console.log('🎤 Recording started with ScriptProcessor - speak now!');
+      console.log('🎤 Recording started - speak now!');
     } catch (error) {
-      console.error('Error starting recording:', error);
+      console.error('❌ Error starting recording:', error);
       alert('Could not access microphone. Please allow microphone access.');
     }
   }
 
   function stopRecording() {
-    console.log('🎤 Stopping recording...');
-    state.isRecording = false;
-    
-    // Cleanup ScriptProcessor and MediaStream like ConvAI
-    if (state.audioSource) {
-      state.audioSource.disconnect();
-      state.audioSource = null;
+    console.log('🛑 Stopping recording...');
+    if (state.audioRecorder) {
+      state.audioRecorder.stop();
+      state.audioRecorder = null;
+      state.isRecording = false;
     }
-    if (state.audioProcessor) {
-      state.audioProcessor.disconnect();
-      state.audioProcessor = null;
-    }
-    if (state.audioStream) {
-      state.audioStream.getTracks().forEach(track => track.stop());
-      state.audioStream = null;
-    }
-    
     updateUI();
-    console.log('🎤 Recording stopped');
+    console.log('✅ Recording stopped');
   }
 
   // Audio playback function with detailed debugging
