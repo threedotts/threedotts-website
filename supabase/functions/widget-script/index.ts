@@ -638,10 +638,17 @@ const serve = async (req: Request): Promise<Response> => {
   function handleMessage(message) {
     console.log('📨 Global message received:', message.type);
     state.messages.push(message);
+    
+    // Only update UI for messages that change the speaking state
+    const oldSpeaking = state.isSpeaking;
     state.isSpeaking = message.type === 'agent_response' || message.type === 'agent_response_correction' 
       ? false 
       : message.audio_event ? true : state.isSpeaking;
-    updateUI();
+    
+    // Only call updateUI if speaking state actually changed
+    if (oldSpeaking !== state.isSpeaking) {
+      updateUI();
+    }
   }
 
   function handleConnectionChange(connected) {
