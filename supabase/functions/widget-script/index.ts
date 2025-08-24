@@ -27,7 +27,9 @@ const serve = async (req: Request): Promise<Response> => {
     websocket: null,
     audioContext: null,
     mediaRecorder: null,
-    audioStream: null
+    audioStream: null,
+    audioSource: null,      // For ScriptProcessor
+    audioProcessor: null    // For ScriptProcessor
   };
 
   // Inject CSS styles
@@ -200,11 +202,12 @@ const serve = async (req: Request): Promise<Response> => {
     document.body.appendChild(widget);
   }
 
-  // Audio recording function (exact copy from working ConvAI)
+  // Audio recording function (CORRECTED - using exact ConvAI implementation)
   async function startRecording() {
     try {
       console.log('🎤 Starting microphone recording...');
       
+      // Use exact same approach as working ConvAI - ScriptProcessorNode
       state.audioStream = await navigator.mediaDevices.getUserMedia({
         audio: {
           sampleRate: 16000,
@@ -214,31 +217,41 @@ const serve = async (req: Request): Promise<Response> => {
         }
       });
 
-      state.mediaRecorder = new MediaRecorder(state.audioStream, {
-        mimeType: 'audio/webm;codecs=opus'
-      });
+      // Create AudioContext and ScriptProcessor like ConvAI
+      if (!state.audioContext) {
+        state.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
 
-      state.mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0 && state.websocket?.readyState === WebSocket.OPEN) {
-          const reader = new FileReader();
-          reader.onload = () => {
-            if (reader.result instanceof ArrayBuffer) {
-              // Convert to base64 and send (exact same as working ConvAI)
-              const base64Audio = btoa(String.fromCharCode(...new Uint8Array(reader.result)));
-              state.websocket.send(JSON.stringify({
-                type: 'audio_stream',
-                audio_base_64: base64Audio
-              }));
-            }
-          };
-          reader.readAsArrayBuffer(event.data);
-        }
+      const source = state.audioContext.createMediaStreamSource(state.audioStream);
+      const processor = state.audioContext.createScriptProcessor(1024, 1, 1);
+      
+      processor.onaudioprocess = (e) => {
+        if (!state.isRecording || !state.websocket || state.websocket.readyState !== WebSocket.OPEN) return;
+        
+        const inputData = e.inputBuffer.getChannelData(0);
+        
+        // Convert Float32Array to ArrayBuffer exactly like ConvAI
+        const arrayBuffer = new ArrayBuffer(inputData.length * 4);
+        const view = new Float32Array(arrayBuffer);
+        view.set(inputData);
+        
+        // Convert to base64 and send exactly like ConvAI
+        const base64Audio = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+        state.websocket.send(JSON.stringify({
+          type: 'audio_stream',
+          audio_base_64: base64Audio
+        }));
       };
-
-      state.mediaRecorder.start(1000); // Capture every second
+      
+      source.connect(processor);
+      processor.connect(state.audioContext.destination);
+      
+      // Store references for cleanup
+      state.audioSource = source;
+      state.audioProcessor = processor;
       state.isRecording = true;
       updateUI();
-      console.log('🎤 Recording started - speak now!');
+      console.log('🎤 Recording started with ScriptProcessor - speak now!');
     } catch (error) {
       console.error('Error starting recording:', error);
       alert('Could not access microphone. Please allow microphone access.');
@@ -246,14 +259,23 @@ const serve = async (req: Request): Promise<Response> => {
   }
 
   function stopRecording() {
-    if (state.mediaRecorder && state.isRecording) {
-      state.mediaRecorder.stop();
-      state.isRecording = false;
+    console.log('🎤 Stopping recording...');
+    state.isRecording = false;
+    
+    // Cleanup ScriptProcessor and MediaStream like ConvAI
+    if (state.audioSource) {
+      state.audioSource.disconnect();
+      state.audioSource = null;
+    }
+    if (state.audioProcessor) {
+      state.audioProcessor.disconnect();
+      state.audioProcessor = null;
     }
     if (state.audioStream) {
       state.audioStream.getTracks().forEach(track => track.stop());
       state.audioStream = null;
     }
+    
     updateUI();
     console.log('🎤 Recording stopped');
   }
