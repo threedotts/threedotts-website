@@ -24,10 +24,12 @@ const serve = async (req: Request): Promise<Response> => {
     isSpeaking: false,
     message: '',
     messages: [],
-    websocket: null
+    websocket: null,
+    audioRecorder: null,
+    audioPlayer: null
   };
 
-  // Inject CSS styles - exactly like ThreeDotsEmbeddedConvai
+  // Inject CSS styles - EXACTLY like ThreeDotsEmbeddedConvai (same colors!)
   function injectStyles() {
     const styles = \`
       #threedotts-widget {
@@ -39,9 +41,9 @@ const serve = async (req: Request): Promise<Response> => {
       }
       
       .threedotts-container {
-        background: hsl(var(--background, 0 0% 100%) / 0.95);
+        background: hsl(var(--background) / 0.95);
         backdrop-filter: blur(12px);
-        border: 1px solid hsl(var(--border, 220 13% 91%));
+        border: 1px solid hsl(var(--border));
         box-shadow: 0 4px 6px -1px hsl(0 0% 0% / 0.1), 0 2px 4px -1px hsl(0 0% 0% / 0.06);
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         border-radius: 9999px;
@@ -52,15 +54,15 @@ const serve = async (req: Request): Promise<Response> => {
       }
       
       .threedotts-container.connected {
-        border-color: hsl(var(--primary, 220 93% 60%) / 0.3);
-        box-shadow: 0 4px 6px -1px hsl(var(--primary, 220 93% 60%) / 0.2);
+        border-color: hsl(var(--primary) / 0.3);
+        box-shadow: 0 4px 6px -1px hsl(var(--primary) / 0.2);
       }
       
       .threedotts-avatar {
         width: 40px;
         height: 40px;
         border-radius: 50%;
-        background: hsl(var(--muted, 220 14% 96%));
+        background: hsl(var(--muted));
         display: flex;
         align-items: center;
         justify-content: center;
@@ -70,7 +72,7 @@ const serve = async (req: Request): Promise<Response> => {
       .threedotts-avatar-inner {
         width: 100%;
         height: 100%;
-        background: hsl(var(--muted-foreground, 220 8% 46%) / 0.2);
+        background: hsl(var(--muted-foreground) / 0.2);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -79,12 +81,12 @@ const serve = async (req: Request): Promise<Response> => {
       .threedotts-avatar svg {
         width: 24px;
         height: 24px;
-        color: hsl(var(--muted-foreground, 220 8% 46%));
+        color: hsl(var(--muted-foreground));
       }
       
       .threedotts-button {
-        background: linear-gradient(135deg, hsl(var(--primary, 220 93% 60%)), hsl(var(--accent, 220 93% 70%)));
-        color: hsl(var(--primary-foreground, 210 40% 98%));
+        background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+        color: hsl(var(--primary-foreground));
         border: none;
         padding: 8px 16px;
         border-radius: 9999px;
@@ -103,8 +105,8 @@ const serve = async (req: Request): Promise<Response> => {
       }
       
       .threedotts-button.secondary {
-        background: hsl(var(--secondary, 220 14% 96%));
-        color: hsl(var(--secondary-foreground, 220 9% 9%));
+        background: hsl(var(--secondary));
+        color: hsl(var(--secondary-foreground));
         width: 32px;
         height: 32px;
         padding: 0;
@@ -112,8 +114,8 @@ const serve = async (req: Request): Promise<Response> => {
       }
       
       .threedotts-button.danger {
-        background: hsl(var(--destructive, 0 84% 60%));
-        color: hsl(var(--destructive-foreground, 210 40% 98%));
+        background: hsl(var(--destructive));
+        color: hsl(var(--destructive-foreground));
         width: 32px;
         height: 32px;
         padding: 0;
@@ -128,7 +130,7 @@ const serve = async (req: Request): Promise<Response> => {
       
       .threedotts-powered {
         font-size: 10px;
-        color: hsl(var(--muted-foreground, 220 8% 46%));
+        color: hsl(var(--muted-foreground));
         text-align: right;
         margin-top: 8px;
       }
@@ -201,7 +203,169 @@ const serve = async (req: Request): Promise<Response> => {
     document.body.appendChild(widget);
   }
 
-  // ElevenLabsWebSocket class - exactly like the main app
+  // AudioRecorder class - EXACTLY like ElevenLabsWebSocket.ts
+  class AudioRecorder {
+    constructor(onAudioData, onMuteChange) {
+      this.onAudioData = onAudioData;
+      this.onMuteChange = onMuteChange;
+      this.stream = null;
+      this.audioContext = null;
+      this.processor = null;
+      this.source = null;
+      this.isRecording = false;
+      this.isMuted = false;
+    }
+
+    async start() {
+      if (this.isRecording) return;
+
+      try {
+        console.log('Starting audio recording...');
+        
+        this.stream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            sampleRate: 16000, // ElevenLabs expects 16kHz
+            channelCount: 1,
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true
+          }
+        });
+        
+        this.audioContext = new AudioContext({
+          sampleRate: 16000,
+        });
+        
+        this.source = this.audioContext.createMediaStreamSource(this.stream);
+        this.processor = this.audioContext.createScriptProcessor(1024, 1, 1);
+        
+        this.processor.onaudioprocess = (e) => {
+          if (!this.isRecording) return;
+          
+          const inputData = e.inputBuffer.getChannelData(0);
+          
+          // Convert Float32Array to 16-bit PCM
+          const pcmData = new Int16Array(inputData.length);
+          for (let i = 0; i < inputData.length; i++) {
+            const s = Math.max(-1, Math.min(1, inputData[i]));
+            pcmData[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+          }
+          
+          // Only send audio data if not muted
+          if (!this.isMuted) {
+            this.onAudioData(pcmData.buffer);
+          }
+        };
+        
+        this.source.connect(this.processor);
+        this.processor.connect(this.audioContext.destination);
+        this.isRecording = true;
+        
+        console.log('Audio recording started successfully');
+      } catch (error) {
+        console.error('Error starting audio recording:', error);
+        throw error;
+      }
+    }
+
+    stop() {
+      console.log('Stopping audio recording...');
+      this.isRecording = false;
+      
+      if (this.source) {
+        this.source.disconnect();
+        this.source = null;
+      }
+      if (this.processor) {
+        this.processor.disconnect();
+        this.processor = null;
+      }
+      if (this.stream) {
+        this.stream.getTracks().forEach(track => track.stop());
+        this.stream = null;
+      }
+      if (this.audioContext && this.audioContext.state !== 'closed') {
+        this.audioContext.close();
+        this.audioContext = null;
+      }
+    }
+
+    isActive() {
+      return this.isRecording;
+    }
+
+    setMuted(muted) {
+      this.isMuted = muted;
+      console.log(muted ? '🔇 Microphone muted' : '🎤 Microphone unmuted');
+      if (this.onMuteChange) {
+        this.onMuteChange(muted);
+      }
+    }
+
+    isMicMuted() {
+      return this.isMuted;
+    }
+  }
+
+  // AudioPlayer class - EXACTLY like ElevenLabsWebSocket.ts
+  class AudioPlayer {
+    constructor() {
+      this.audioContext = new AudioContext({
+        sampleRate: 16000
+      });
+      this.audioQueue = [];
+      this.isPlaying = false;
+    }
+
+    async addAudioChunk(audioData) {
+      this.audioQueue.push(audioData);
+      if (!this.isPlaying) {
+        await this.playNext();
+      }
+    }
+
+    async playNext() {
+      if (this.audioQueue.length === 0 || !this.audioContext) {
+        this.isPlaying = false;
+        return;
+      }
+
+      this.isPlaying = true;
+      const audioData = this.audioQueue.shift();
+
+      try {
+        // Convert PCM data to AudioBuffer
+        const pcmData = new Int16Array(audioData);
+        const audioBuffer = this.audioContext.createBuffer(1, pcmData.length, 16000);
+        const channelData = audioBuffer.getChannelData(0);
+        
+        for (let i = 0; i < pcmData.length; i++) {
+          channelData[i] = pcmData[i] / 0x8000;
+        }
+        
+        const source = this.audioContext.createBufferSource();
+        source.buffer = audioBuffer;
+        source.connect(this.audioContext.destination);
+        
+        source.onended = () => this.playNext();
+        source.start(0);
+      } catch (error) {
+        console.error('Error playing audio:', error);
+        this.playNext(); // Continue with next chunk
+      }
+    }
+
+    stop() {
+      this.audioQueue = [];
+      this.isPlaying = false;
+      if (this.audioContext && this.audioContext.state !== 'closed') {
+        this.audioContext.close();
+        this.audioContext = null;
+      }
+    }
+  }
+
+  // ElevenLabsWebSocket class - DIRECT CONNECTION like main app
   class ElevenLabsWebSocket {
     constructor(agentId, apiKey, onMessage, onConnectionChange, onError) {
       this.agentId = agentId;
@@ -209,222 +373,213 @@ const serve = async (req: Request): Promise<Response> => {
       this.onMessage = onMessage;
       this.onConnectionChange = onConnectionChange;
       this.onError = onError;
-      this.websocket = null;
-      this.isMuted = false;
-      this.audioContext = null;
+      this.ws = null;
       this.audioRecorder = null;
+      this.audioPlayer = null;
+      this.isConnected = false;
+      this.isMuted = false;
     }
 
     async connect() {
+      if (this.isConnected) {
+        console.log('Already connected');
+        return;
+      }
+
       try {
-        console.log('🔌 Connecting to ElevenLabs WebSocket...');
+        console.log('🚀 Connecting to ElevenLabs Conversational AI...');
+        console.log('Agent ID:', this.agentId);
         
-        // Get signed URL
-        const response = await fetch('https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/get-elevenlabs-signed-url', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ agent_id: this.agentId })
+        // Initialize audio components
+        this.audioPlayer = new AudioPlayer();
+        this.audioRecorder = new AudioRecorder((audioData) => {
+          this.sendAudioChunk(audioData);
         });
 
-        if (!response.ok) {
-          throw new Error(\`Failed to get signed URL: \${response.status}\`);
-        }
-
-        const data = await response.json();
-        const signedUrl = data.signed_url;
-
-        this.websocket = new WebSocket(signedUrl);
+        // Connect DIRECTLY using the US endpoint - EXACTLY like main app
+        const wsUrl = \`wss://api.us.elevenlabs.io/v1/convai/conversation?agent_id=\${this.agentId}\`;
+        console.log('🔗 Connecting to:', wsUrl);
         
-        this.websocket.onopen = () => {
-          console.log('✅ Connected to ElevenLabs');
-          this.onConnectionChange(true);
-          this.startAudioRecording();
+        this.ws = new WebSocket(wsUrl);
+
+        this.ws.onopen = () => {
+          console.log('✅ WebSocket opened, sending conversation initiation...');
+          
+          // Send conversation initiation as per documentation
+          this.send({
+            type: "conversation_initiation_client_data"
+          });
         };
 
-        this.websocket.onmessage = async (event) => {
+        this.ws.onmessage = async (event) => {
           try {
-            const data = JSON.parse(event.data);
-            console.log('📨 Received message:', data.type);
+            const message = JSON.parse(event.data);
+            console.log('📨 Received:', message.type);
             
-            this.onMessage({
-              type: data.type,
-              audio_event: data.audio_event,
-              user_transcript: data.user_transcript,
-              agent_response_text: data.agent_response_text
-            });
-
-            // Handle audio playback
-            if (data.audio_event?.type === 'audio_stream' && data.audio_event.audio_base_64) {
-              await this.playAudio(data.audio_event.audio_base_64);
+            // Handle connection confirmation
+            if (message.type === 'conversation_initiation_metadata' && !this.isConnected) {
+              console.log('✅ Conversation initiated successfully');
+              this.isConnected = true;
+              this.onConnectionChange(true);
+              
+              // Auto-start recording when connection is established
+              await this.startRecording();
             }
+            
+            this.handleMessage(message);
+            this.onMessage(message);
           } catch (error) {
-            console.error('❌ Error processing message:', error);
+            console.error('❌ Error parsing message:', error, event.data);
           }
         };
 
-        this.websocket.onclose = () => {
-          console.log('🔌 Disconnected from ElevenLabs');
+        this.ws.onclose = (event) => {
+          console.log('❌ WebSocket closed:', event.code, event.reason);
+          this.isConnected = false;
           this.onConnectionChange(false);
-          this.stopAudioRecording();
         };
 
-        this.websocket.onerror = (error) => {
+        this.ws.onerror = (error) => {
           console.error('❌ WebSocket error:', error);
-          this.onError('Connection error');
+          this.onError('WebSocket connection failed');
         };
 
       } catch (error) {
-        console.error('❌ Failed to connect:', error);
-        this.onError(error.message);
+        console.error('❌ Connection error:', error);
+        this.onError(\`Connection failed: \${error}\`);
       }
     }
 
-    disconnect() {
-      if (this.websocket) {
-        this.stopAudioRecording();
-        this.websocket.close();
-        this.websocket = null;
-      }
-    }
-
-    async startAudioRecording() {
-      try {
-        if (!this.audioRecorder) {
-          this.audioRecorder = new SimpleAudioRecorder((audioData) => {
-            if (this.websocket && this.websocket.readyState === WebSocket.OPEN && !this.isMuted) {
-              const base64Audio = btoa(String.fromCharCode(...new Uint8Array(audioData)));
-              this.websocket.send(JSON.stringify({
-                type: 'audio_stream',
-                audio_base_64: base64Audio
-              }));
+    handleMessage(message) {
+      console.log('🔄 Handling message:', message.type);
+      
+      switch (message.type) {
+        case 'conversation_initiation_metadata':
+          console.log('✅ Conversation metadata:', message);
+          break;
+          
+        case 'user_transcript':
+          if (message.user_transcription_event?.user_transcript) {
+            console.log('📝 User said:', message.user_transcription_event.user_transcript);
+          }
+          break;
+          
+        case 'agent_response':
+          if (message.agent_response_event?.agent_response) {
+            console.log('🤖 Agent response:', message.agent_response_event.agent_response);
+          }
+          break;
+          
+        case 'audio':
+          if (message.audio_event?.audio_base_64 && this.audioPlayer) {
+            console.log('🎵 Playing audio chunk');
+            try {
+              // Convert base64 to ArrayBuffer
+              const binaryString = atob(message.audio_event.audio_base_64);
+              const bytes = new Uint8Array(binaryString.length);
+              for (let i = 0; i < binaryString.length; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+              }
+              this.audioPlayer.addAudioChunk(bytes.buffer);
+            } catch (error) {
+              console.error('❌ Error processing audio:', error);
             }
-          });
-        }
-        await this.audioRecorder.start();
-      } catch (error) {
-        console.error('❌ Failed to start audio recording:', error);
+          }
+          break;
+          
+        case 'interruption':
+          console.log('🛑 Conversation interrupted:', message.interruption_event?.reason);
+          if (this.audioPlayer) {
+            this.audioPlayer.stop();
+            this.audioPlayer = new AudioPlayer();
+          }
+          break;
       }
     }
 
-    stopAudioRecording() {
+    send(message) {
+      if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+        console.log('📤 Sending:', message.type);
+        this.ws.send(JSON.stringify(message));
+      } else {
+        console.warn('⚠️ WebSocket not ready, cannot send:', message.type);
+      }
+    }
+
+    sendAudioChunk(audioData) {
+      if (!this.isConnected) return;
+      
+      // Convert ArrayBuffer to base64 as required by the API
+      const uint8Array = new Uint8Array(audioData);
+      let binaryString = '';
+      for (let i = 0; i < uint8Array.length; i++) {
+        binaryString += String.fromCharCode(uint8Array[i]);
+      }
+      const base64Audio = btoa(binaryString);
+      
+      // Send using the correct message format from documentation
+      this.send({
+        user_audio_chunk: base64Audio
+      });
+    }
+
+    async startRecording() {
+      if (this.audioRecorder && !this.audioRecorder.isActive()) {
+        // Send user_activity event to interrupt agent speech
+        this.send({
+          type: "user_activity"
+        });
+        console.log('📢 Sent user_activity event to interrupt agent');
+        
+        await this.audioRecorder.start();
+      }
+    }
+
+    stopRecording() {
       if (this.audioRecorder) {
         this.audioRecorder.stop();
-        this.audioRecorder = null;
       }
     }
 
     setMuted(muted) {
       this.isMuted = muted;
-    }
-
-    async playAudio(base64Audio) {
-      try {
-        if (!this.audioContext) {
-          this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        }
-
-        if (this.audioContext.state === 'suspended') {
-          await this.audioContext.resume();
-        }
-
-        const audioData = atob(base64Audio);
-        const arrayBuffer = new ArrayBuffer(audioData.length);
-        const view = new Uint8Array(arrayBuffer);
-        
-        for (let i = 0; i < audioData.length; i++) {
-          view[i] = audioData.charCodeAt(i);
-        }
-
-        const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
-        const source = this.audioContext.createBufferSource();
-        source.buffer = audioBuffer;
-        source.connect(this.audioContext.destination);
-        source.start(0);
-      } catch (error) {
-        console.error('❌ Error playing audio:', error);
+      if (this.audioRecorder) {
+        this.audioRecorder.setMuted(muted);
       }
-    }
-  }
-
-  // SimpleAudioRecorder class - exactly like the main app
-  class SimpleAudioRecorder {
-    constructor(onAudioData) {
-      this.onAudioData = onAudioData;
-      this.stream = null;
-      this.mediaRecorder = null;
-      this.isRecording = false;
-    }
-
-    async start() {
-      try {
-        this.stream = await navigator.mediaDevices.getUserMedia({
-          audio: {
-            sampleRate: 16000,
-            channelCount: 1,
-            echoCancellation: true,
-            noiseSuppression: true,
-          }
+      
+      if (!muted) {
+        // Send user_activity when unmuting to interrupt agent if speaking
+        this.send({
+          type: "user_activity"
         });
-
-        this.mediaRecorder = new MediaRecorder(this.stream, {
-          mimeType: 'audio/webm;codecs=opus'
-        });
-
-        this.mediaRecorder.ondataavailable = (event) => {
-          if (event.data.size > 0) {
-            const reader = new FileReader();
-            reader.onload = () => {
-              if (reader.result instanceof ArrayBuffer) {
-                this.onAudioData(reader.result);
-              }
-            };
-            reader.readAsArrayBuffer(event.data);
-          }
-        };
-
-        this.mediaRecorder.start(1000);
-        this.isRecording = true;
-      } catch (error) {
-        console.error('❌ Error starting audio recording:', error);
-        throw error;
       }
     }
 
-    stop() {
-      if (this.mediaRecorder && this.isRecording) {
-        this.mediaRecorder.stop();
-        this.isRecording = false;
+    disconnect() {
+      console.log('🔌 Disconnecting...');
+      
+      if (this.audioRecorder) {
+        this.audioRecorder.stop();
+        this.audioRecorder = null;
       }
-      if (this.stream) {
-        this.stream.getTracks().forEach(track => track.stop());
-        this.stream = null;
+      
+      if (this.audioPlayer) {
+        this.audioPlayer.stop();
+        this.audioPlayer = null;
       }
+      
+      if (this.ws) {
+        this.ws.close();
+        this.ws = null;
+      }
+      
+      this.isConnected = false;
+      this.onConnectionChange(false);
     }
 
-    isActive() {
-      return this.isRecording;
+    getConnectionStatus() {
+      return this.isConnected;
     }
-  }
-
-  // Message handler - exactly like useGlobalConvaiState
-  function handleMessage(message) {
-    console.log('📨 Global message received:', message.type);
-    state.messages.push(message);
-    state.isSpeaking = message.type === 'agent_response' || message.type === 'agent_response_correction' 
-      ? false 
-      : message.audio_event ? true : state.isSpeaking;
-    updateUI();
-  }
-
-  function handleConnectionChange(connected) {
-    state.isConnected = connected;
-    state.isSpeaking = false;
-    updateUI();
-  }
-
-  function handleError(error) {
-    console.error('❌ Widget error:', error);
-    alert(\`Erro: \${error}\`);
   }
 
   // Update UI based on state - exactly like ThreeDotsEmbeddedConvai
@@ -474,6 +629,27 @@ const serve = async (req: Request): Promise<Response> => {
     }
   }
 
+  // Message handler - exactly like useGlobalConvaiState
+  function handleMessage(message) {
+    console.log('📨 Global message received:', message.type);
+    state.messages.push(message);
+    state.isSpeaking = message.type === 'agent_response' || message.type === 'agent_response_correction' 
+      ? false 
+      : message.audio_event ? true : state.isSpeaking;
+    updateUI();
+  }
+
+  function handleConnectionChange(connected) {
+    state.isConnected = connected;
+    state.isSpeaking = false;
+    updateUI();
+  }
+
+  function handleError(error) {
+    console.error('❌ Widget error:', error);
+    alert(\`Erro: \${error}\`);
+  }
+  
   // Global actions - exactly like useGlobalConvaiState
   let webSocketInstance = null;
 
