@@ -6,13 +6,19 @@ import { toast } from "sonner";
 
 const EmbedDemo = () => {
   const embedCode = `<!-- ThreeDotts AI Widget -->
-<script src="https://yourdomain.com/embed/threedotts-widget.js" 
-        data-agent-id="your-agent-id-here"></script>`;
+<script src="https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script"></script>`;
 
-  const advancedEmbedCode = `<script src="https://yourdomain.com/embed/threedotts-widget.js" 
-        data-agent-id="your-agent-id"
-        data-position="bottom-right"
-        data-theme="auto"></script>`;
+  const advancedEmbedCode = `<script src="https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script"></script>
+<script>
+  // Configure the widget after it loads
+  window.addEventListener('load', function() {
+    if (window.threedottsWidget) {
+      window.threedottsWidget.configure({
+        agentId: 'your-agent-id-here'
+      });
+    }
+  });
+</script>`;
 
   const customizationCode = `<style>
   :root {
@@ -98,7 +104,7 @@ const EmbedDemo = () => {
             </div>
             <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
               <p className="text-sm text-blue-800 dark:text-blue-200">
-                <strong>Note:</strong> Replace <code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">your-agent-id-here</code> with your actual ElevenLabs agent ID, and update the script src URL to point to your hosted widget file.
+                <strong>Note:</strong> The widget script is hosted on our Supabase edge function, so no hosting required on your end!
               </p>
             </div>
           </CardContent>
@@ -137,15 +143,15 @@ const EmbedDemo = () => {
             <ol className="space-y-3 text-sm">
               <li className="flex gap-3">
                 <span className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-semibold">1</span>
-                <span>Host the <code className="bg-muted px-1 rounded">threedotts-widget.js</code> file on your server or CDN</span>
-              </li>
-              <li className="flex gap-3">
-                <span className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-semibold">2</span>
                 <span>Get your ElevenLabs agent ID from your dashboard</span>
               </li>
               <li className="flex gap-3">
-                <span className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-semibold">3</span>
+                <span className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-semibold">2</span>
                 <span>Add the script tag to your website's HTML (preferably before closing <code className="bg-muted px-1 rounded">&lt;/body&gt;</code> tag)</span>
+              </li>
+              <li className="flex gap-3">
+                <span className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-semibold">3</span>
+                <span>Configure your agent ID using the widget API or URL parameters</span>
               </li>
               <li className="flex gap-3">
                 <span className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-semibold">4</span>
@@ -212,15 +218,15 @@ const EmbedDemo = () => {
               <Button 
                 variant="outline" 
                 className="justify-start"
-                onClick={() => window.open('/embed/threedotts-widget.js', '_blank')}
+                onClick={() => window.open('https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script', '_blank')}
               >
                 <ExternalLink className="w-4 h-4 mr-2" />
-                Download Widget Script
+                View Widget Script
               </Button>
               <Button 
                 variant="outline" 
                 className="justify-start"
-                onClick={() => copyToClipboard(window.location.origin + '/embed/threedotts-widget.js', 'URL do script')}
+                onClick={() => copyToClipboard('https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script', 'URL do script')}
               >
                 <Copy className="w-4 h-4 mr-2" />
                 Copy Script URL
