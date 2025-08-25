@@ -124,7 +124,7 @@ const serve = async (req: Request): Promise<Response> => {
       .threedotts-button svg {
         width: 16px;
         height: 16px;
-        margin-right: 4px;
+        margin: 0;
         flex-shrink: 0;
       }
       
@@ -135,6 +135,9 @@ const serve = async (req: Request): Promise<Response> => {
         height: 40px;
         padding: 0;
         box-shadow: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
       
       .threedotts-button.secondary:hover {
@@ -149,6 +152,9 @@ const serve = async (req: Request): Promise<Response> => {
         height: 40px;
         padding: 0;
         box-shadow: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
       
       .threedotts-button.danger:hover {
@@ -206,6 +212,7 @@ const serve = async (req: Request): Promise<Response> => {
         width: 18px;
         height: 18px;
         flex-shrink: 0;
+        margin: 0;
       }
       
       .icon-phone {
