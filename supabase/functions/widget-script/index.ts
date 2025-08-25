@@ -110,6 +110,13 @@ const serve = async (req: Request): Promise<Response> => {
         transform: scale(1);
       }
       
+      .threedotts-button svg {
+        width: 16px;
+        height: 16px;
+        margin-right: 4px;
+        flex-shrink: 0;
+      }
+      
       .threedotts-button:hover {
         opacity: 0.9;
         transform: scale(1.05);
@@ -121,11 +128,16 @@ const serve = async (req: Request): Promise<Response> => {
         outline-offset: 2px;
       }
       
-      .threedotts-button svg {
-        width: 16px;
-        height: 16px;
+      .threedotts-button.secondary svg,
+      .threedotts-button.danger svg {
+        width: 18px;
+        height: 18px;
         margin: 0;
         flex-shrink: 0;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
       }
       
       .threedotts-button.secondary {
@@ -138,6 +150,7 @@ const serve = async (req: Request): Promise<Response> => {
         display: flex;
         align-items: center;
         justify-content: center;
+        position: relative;
       }
       
       .threedotts-button.secondary:hover {
@@ -155,6 +168,7 @@ const serve = async (req: Request): Promise<Response> => {
         display: flex;
         align-items: center;
         justify-content: center;
+        position: relative;
       }
       
       .threedotts-button.danger:hover {
@@ -682,20 +696,20 @@ const serve = async (req: Request): Promise<Response> => {
       buttonsContainer.innerHTML = \`
         <div class="threedotts-controls \${animateClass}">
           <button class="threedotts-button danger" onclick="window.threedottsWidget.disconnect()">
-            <svg class="icon-phone-off" viewBox="0 0 24 24">
-              <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-              <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <svg class="icon-phone-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
           </button>
           <button class="threedotts-button secondary \${state.isMuted ? 'danger' : ''}" onclick="window.threedottsWidget.toggleMute()">
             \${state.isMuted ? 
-              \`<svg class="icon-mic-off" viewBox="0 0 24 24">
+              \`<svg class="icon-mic-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="2" x2="22" y1="2" y2="22"/>
                 <path d="m7 7-.78-.22a1.53 1.53 0 0 0-.12-.03A3 3 0 0 0 3 9v3a9 9 0 0 0 5.69 8.31A3 3 0 0 0 12 17v-6"/>
                 <path d="M9 9v4a3 3 0 0 0 5.12 2.12L9 9z"/>
                 <path d="M15 9.34V5a3 3 0 0 0-5.94-.6"/>
               </svg>\` : 
-              \`<svg class="icon-mic" viewBox="0 0 24 24">
+              \`<svg class="icon-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
                 <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
                 <line x1="12" x2="12" y1="19" y2="23"/>
