@@ -49,10 +49,11 @@ const serve = async (req: Request): Promise<Response> => {
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         border-radius: 9999px;
-        padding: 8px 16px 8px 8px;
+        padding: 16px;
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 16px;
+        min-width: 300px;
       }
       
       .threedotts-container.connected {
@@ -130,8 +131,8 @@ const serve = async (req: Request): Promise<Response> => {
       .threedotts-button.secondary {
         background: hsl(175, 30%, 96%);
         color: hsl(160, 100%, 8%);
-        width: 32px;
-        height: 32px;
+        width: 40px;
+        height: 40px;
         padding: 0;
         box-shadow: none;
       }
@@ -144,8 +145,8 @@ const serve = async (req: Request): Promise<Response> => {
       .threedotts-button.danger {
         background: hsl(0, 84%, 60%);
         color: hsl(0, 0%, 100%);
-        width: 32px;
-        height: 32px;
+        width: 40px;
+        height: 40px;
         padding: 0;
         box-shadow: none;
       }
@@ -202,8 +203,8 @@ const serve = async (req: Request): Promise<Response> => {
       .icon-phone-off,
       .icon-mic,
       .icon-mic-off {
-        width: 16px;
-        height: 16px;
+        width: 18px;
+        height: 18px;
         flex-shrink: 0;
       }
       
