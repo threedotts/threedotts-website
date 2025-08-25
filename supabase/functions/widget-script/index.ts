@@ -52,8 +52,8 @@ const serve = async (req: Request): Promise<Response> => {
         padding: 16px;
         display: flex;
         align-items: center;
-        gap: 16px;
-        min-width: 300px;
+        gap: 12px;
+        width: fit-content;
       }
       
       .threedotts-container.connected {
@@ -194,6 +194,7 @@ const serve = async (req: Request): Promise<Response> => {
       .threedotts-controls {
         display: flex;
         gap: 8px;
+        flex-shrink: 0;
       }
       
       .threedotts-powered {
