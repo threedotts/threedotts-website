@@ -49,7 +49,7 @@ const serve = async (req: Request): Promise<Response> => {
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         border-radius: 9999px;
-        padding: 16px;
+        padding: 8px;
         display: flex;
         align-items: center;
         gap: 12px;
