@@ -149,7 +149,7 @@ const EmbedDemo = () => {
           <CardContent className="space-y-4">
             <div className="relative">
             <pre className="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto text-sm">
-              <code>{`<script src="https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?v=38"></script>
+              <code>{`<script src="https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?v=39"></script>
 <script>
   // Configure the widget with your agent ID
   window.threedottsWidget.configure({

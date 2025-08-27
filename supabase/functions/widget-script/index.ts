@@ -11,8 +11,12 @@ const widgetScript = `
 (function() {
   'use strict';
   
+  // Storage keys for persistence
+  const STORAGE_KEY = 'threedotts-widget-state';
+  const CONFIG_KEY = 'threedotts-widget-config';
+  
   // Configuration
-  const config = {
+  let config = {
     agentId: null,
     theme: 'light',
     position: 'bottom-right'
@@ -22,8 +26,35 @@ const widgetScript = `
   let widgetIframe = null;
   let isWidgetReady = false;
 
+  // Load persisted state and config
+  function loadPersistedData() {
+    try {
+      const savedConfig = localStorage.getItem(CONFIG_KEY);
+      if (savedConfig) {
+        config = { ...config, ...JSON.parse(savedConfig) };
+        console.log('📦 Loaded persisted config:', config);
+      }
+    } catch (error) {
+      console.warn('Failed to load persisted config:', error);
+    }
+  }
+
+  // Save config to localStorage
+  function saveConfig() {
+    try {
+      localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
+    } catch (error) {
+      console.warn('Failed to save config:', error);
+    }
+  }
+
   // Inject iframe styles
   function injectStyles() {
+    // Check if styles already exist
+    if (document.getElementById('threedotts-widget-styles')) {
+      return;
+    }
+    
     const styles = \`
       #threedotts-widget-iframe {
         position: fixed !important;
@@ -43,6 +74,7 @@ const widgetScript = `
     \`;
     
     const styleSheet = document.createElement('style');
+    styleSheet.id = 'threedotts-widget-styles';
     styleSheet.textContent = styles;
     document.head.appendChild(styleSheet);
   }
@@ -54,7 +86,12 @@ const widgetScript = `
     if (existingWidget) {
       console.log('🔄 Widget iframe already exists, reusing...');
       widgetIframe = existingWidget;
-      isWidgetReady = true; // Assume existing widget is ready
+      isWidgetReady = false; // Reset ready state to resend config
+      
+      // Wait for iframe to be ready again
+      setTimeout(() => {
+        sendConfigToIframe();
+      }, 1000);
       return;
     }
     
@@ -63,20 +100,26 @@ const widgetScript = `
     // Create iframe element
     widgetIframe = document.createElement('iframe');
     widgetIframe.id = 'threedotts-widget-iframe';
-    widgetIframe.src = 'https://d641cc7c-1eb2-4b38-9c11-73630dae5f26.sandbox.lovable.dev/embedded-widget';
+    
+    // Add session parameter to maintain state across navigations
+    const sessionId = sessionStorage.getItem('threedotts-session-id') || 
+                     Math.random().toString(36).substring(7);
+    sessionStorage.setItem('threedotts-session-id', sessionId);
+    
+    widgetIframe.src = \`https://d641cc7c-1eb2-4b38-9c11-73630dae5f26.sandbox.lovable.dev/embedded-widget?sessionId=\${sessionId}\`;
     widgetIframe.allow = 'microphone';
     widgetIframe.title = 'ThreeDotts AI Widget';
     
     // Append to body
     document.body.appendChild(widgetIframe);
     
-    console.log('✅ Widget iframe created');
+    console.log('✅ Widget iframe created with session:', sessionId);
   }
 
   // Message handling between parent window and iframe
   function handleIframeMessage(event) {
     // Security check - ensure message is from our iframe
-    if (event.source !== widgetIframe.contentWindow) return;
+    if (event.source !== widgetIframe?.contentWindow) return;
     
     console.log('📨 Received message from widget iframe:', event.data);
     
@@ -84,8 +127,15 @@ const widgetScript = `
       console.log('✅ Widget iframe is ready');
       isWidgetReady = true;
       
-      // Send configuration to iframe
+      // Send configuration and any persisted state to iframe
       sendConfigToIframe();
+    } else if (event.data.type === 'WIDGET_STATE_UPDATE') {
+      // Save state updates from iframe
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(event.data.state));
+      } catch (error) {
+        console.warn('Failed to save widget state:', error);
+      }
     }
   }
 
@@ -95,9 +145,21 @@ const widgetScript = `
     
     console.log('📤 Sending configuration to iframe:', config);
     
+    // Get persisted state
+    let persistedState = null;
+    try {
+      const savedState = localStorage.getItem(STORAGE_KEY);
+      if (savedState) {
+        persistedState = JSON.parse(savedState);
+      }
+    } catch (error) {
+      console.warn('Failed to load persisted state:', error);
+    }
+    
     widgetIframe.contentWindow.postMessage({
       type: 'CONFIGURE_WIDGET',
-      config: config
+      config: config,
+      persistedState: persistedState
     }, '*');
   }
 
@@ -107,6 +169,9 @@ const widgetScript = `
       console.log('🔧 Configuring widget with options:', options);
       Object.assign(config, options);
       console.log('✅ Widget configuration updated:', config);
+      
+      // Save config to localStorage
+      saveConfig();
       
       // Send updated config to iframe if ready
       if (isWidgetReady) {
@@ -130,6 +195,9 @@ const widgetScript = `
   function initWidget() {
     console.log('🚀 Initializing ThreeDotts embedded widget...');
     
+    // Load persisted data first
+    loadPersistedData();
+    
     injectStyles();
     createWidget();
     
@@ -146,13 +214,17 @@ const widgetScript = `
     initWidget();
   }
 
-  // Cleanup on page unload
-  window.addEventListener('beforeunload', () => {
+  // Don't cleanup on page unload - let the widget persist
+  // Only clean up if explicitly requested
+  window.threedottsWidget.destroy = () => {
     if (widgetIframe) {
       widgetIframe.remove();
     }
     window.removeEventListener('message', handleIframeMessage);
-  });
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(CONFIG_KEY);
+    sessionStorage.removeItem('threedotts-session-id');
+  };
 })();
     `;
 
