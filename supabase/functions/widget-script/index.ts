@@ -476,7 +476,7 @@ const serve = async (req: Request): Promise<Response> => {
         });
 
         // Connect DIRECTLY using the US endpoint - EXACTLY like main app
-        const wsUrl = `wss://api.us.elevenlabs.io/v1/convai/conversation?agent_id=${this.agentId}`;
+        const wsUrl = \`wss://api.us.elevenlabs.io/v1/convai/conversation?agent_id=\${this.agentId}\`;
         console.log('🔗 Connecting to:', wsUrl);
         
         this.ws = new WebSocket(wsUrl);
@@ -525,7 +525,7 @@ const serve = async (req: Request): Promise<Response> => {
 
       } catch (error) {
         console.error('❌ Connection error:', error);
-        this.onError(`Connection failed: ${error}`);
+        this.onError(\`Connection failed: \${error}\`);
       }
     }
 
@@ -749,7 +749,7 @@ const serve = async (req: Request): Promise<Response> => {
 
   function handleError(error) {
     console.error('❌ Widget error:', error);
-    alert(`Erro: ${error}`);
+    alert(\`Erro: \${error}\`);
   }
   
   // Global actions - exactly like useGlobalConvaiState
