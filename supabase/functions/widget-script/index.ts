@@ -49,7 +49,7 @@ const serve = async (req: Request): Promise<Response> => {
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         border-radius: 9999px;
-        padding: 16px;
+        padding: 8px;
         display: flex;
         align-items: center;
         gap: 12px;
@@ -177,8 +177,8 @@ const serve = async (req: Request): Promise<Response> => {
       }
       
       .threedotts-button.connecting {
-        background: hsl(0, 0%, 90%);
-        color: hsl(0, 0%, 40%);
+        background: hsl(0, 0%, 94%);
+        color: hsl(0, 0%, 60%);
         padding: 8px 16px;
         font-size: 13px;
         font-weight: 400;
@@ -698,8 +698,9 @@ const serve = async (req: Request): Promise<Response> => {
         <div class="threedotts-controls \${animateClass}">
           <button class="threedotts-button danger" onclick="window.threedottsWidget.disconnect()">
             <svg class="icon-phone-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
+              <path d="M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6z"/>
+              <path d="M16.5 8.5L22 3"/>
+              <path d="M22 8.5l-5.5-5.5"/>
             </svg>
           </button>
           <button class="threedotts-button secondary \${state.isMuted ? 'danger' : ''}" onclick="window.threedottsWidget.toggleMute()">

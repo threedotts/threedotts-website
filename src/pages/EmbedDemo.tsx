@@ -17,7 +17,7 @@ const EmbedDemo = () => {
     
     // Create and load widget script
     const script = document.createElement('script');
-    script.src = 'https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?v=27';
+    script.src = 'https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?v=29';
     script.onload = () => {
       console.log('✅ Widget script loaded, configuring...');
       // Configure widget when loaded
