@@ -49,6 +49,15 @@ const widgetScript = `
 
   // Create widget iframe
   function createWidget() {
+    // Check if widget already exists
+    const existingWidget = document.getElementById('threedotts-widget-iframe');
+    if (existingWidget) {
+      console.log('🔄 Widget iframe already exists, reusing...');
+      widgetIframe = existingWidget;
+      isWidgetReady = true; // Assume existing widget is ready
+      return;
+    }
+    
     console.log('🏗️ Creating widget iframe...');
     
     // Create iframe element
