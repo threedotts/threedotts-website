@@ -54,7 +54,7 @@ const widgetScript = `
     // Create iframe element
     widgetIframe = document.createElement('iframe');
     widgetIframe.id = 'threedotts-widget-iframe';
-    widgetIframe.src = 'https://dkqzzypemdewomxrjftv.supabase.co/embedded-widget';
+    widgetIframe.src = 'https://d641cc7c-1eb2-4b38-9c11-73630dae5f26.sandbox.lovable.dev/embedded-widget';
     widgetIframe.allow = 'microphone';
     widgetIframe.title = 'ThreeDotts AI Widget';
     
