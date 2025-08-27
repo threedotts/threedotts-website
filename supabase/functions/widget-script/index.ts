@@ -33,7 +33,7 @@ const serve = async (req: Request): Promise<Response> => {
 
   // Inject CSS styles - EXACTLY like ThreeDotsEmbeddedConvai (same colors!)
   function injectStyles() {
-    const styles = \`
+    const styles = `
       #threedotts-widget {
         position: fixed;
         bottom: 24px;
@@ -247,7 +247,7 @@ const serve = async (req: Request): Promise<Response> => {
         stroke-linecap: round;
         stroke-linejoin: round;
       }
-    \`;
+    `;
     
     const styleSheet = document.createElement('style');
     styleSheet.textContent = styles;
@@ -258,7 +258,7 @@ const serve = async (req: Request): Promise<Response> => {
   function createWidget() {
     const widget = document.createElement('div');
     widget.id = 'threedotts-widget';
-    widget.innerHTML = \`
+    widget.innerHTML = `
       <div class="threedotts-container" id="threedotts-container">
         <div class="threedotts-avatar">
           <div class="threedotts-avatar-inner">
@@ -277,7 +277,7 @@ const serve = async (req: Request): Promise<Response> => {
         </div>
       </div>
       <p class="threedotts-powered">Powered by threedotts AI</p>
-    \`;
+    `;
     
     document.body.appendChild(widget);
   }
@@ -476,7 +476,7 @@ const serve = async (req: Request): Promise<Response> => {
         });
 
         // Connect DIRECTLY using the US endpoint - EXACTLY like main app
-        const wsUrl = \`wss://api.us.elevenlabs.io/v1/convai/conversation?agent_id=\${this.agentId}\`;
+        const wsUrl = `wss://api.us.elevenlabs.io/v1/convai/conversation?agent_id=${this.agentId}`;
         console.log('🔗 Connecting to:', wsUrl);
         
         this.ws = new WebSocket(wsUrl);
@@ -525,7 +525,7 @@ const serve = async (req: Request): Promise<Response> => {
 
       } catch (error) {
         console.error('❌ Connection error:', error);
-        this.onError(\`Connection failed: \${error}\`);
+        this.onError(`Connection failed: ${error}`);
       }
     }
 
@@ -670,21 +670,21 @@ const serve = async (req: Request): Promise<Response> => {
     if (!state.isConnected && !state.isConnecting) {
       container.classList.remove('connected');
       state.hasAnimated = false; // Reset animation flag when disconnected
-      buttonsContainer.innerHTML = \`
+      buttonsContainer.innerHTML = `
         <button class="threedotts-button" onclick="window.threedottsWidget.connect()">
           <svg class="icon-phone" viewBox="0 0 24 24">
             <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
           </svg>
           Ligar
         </button>
-      \`;
+      `;
     } else if (state.isConnecting) {
       container.classList.remove('connected');
-      buttonsContainer.innerHTML = \`
+      buttonsContainer.innerHTML = `
         <button class="threedotts-button connecting">
           Conectando...
         </button>
-      \`;
+      `;
     } else {
       container.classList.add('connected');
       
@@ -694,8 +694,8 @@ const serve = async (req: Request): Promise<Response> => {
         state.hasAnimated = true;
       }
       
-      buttonsContainer.innerHTML = \`
-        <div class="threedotts-controls \${animateClass}">
+      buttonsContainer.innerHTML = `
+        <div class="threedotts-controls ${animateClass}">
           <button class="threedotts-button danger" onclick="window.threedottsWidget.disconnect()">
             <svg class="icon-phone-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6z"/>
@@ -703,23 +703,23 @@ const serve = async (req: Request): Promise<Response> => {
               <path d="M22 8.5l-5.5-5.5"/>
             </svg>
           </button>
-          <button class="threedotts-button secondary \${state.isMuted ? 'danger' : ''}" onclick="window.threedottsWidget.toggleMute()">
-            \${state.isMuted ? 
-              \`<svg class="icon-mic-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <button class="threedotts-button secondary ${state.isMuted ? 'danger' : ''}" onclick="window.threedottsWidget.toggleMute()">
+            ${state.isMuted ? 
+              `<svg class="icon-mic-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="2" x2="22" y1="2" y2="22"/>
                 <path d="m7 7-.78-.22a1.53 1.53 0 0 0-.12-.03A3 3 0 0 0 3 9v3a9 9 0 0 0 5.69 8.31A3 3 0 0 0 12 17v-6"/>
                 <path d="M9 9v4a3 3 0 0 0 5.12 2.12L9 9z"/>
                 <path d="M15 9.34V5a3 3 0 0 0-5.94-.6"/>
-              </svg>\` : 
-              \`<svg class="icon-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              </svg>` : 
+              `<svg class="icon-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
                 <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
                 <line x1="12" x2="12" y1="19" y2="23"/>
                 <line x1="8" x2="16" y1="23" y2="23"/>
-              </svg>\`}
+              </svg>`}
           </button>
         </div>
-      \`;
+      `;
     }
   }
 
@@ -749,7 +749,7 @@ const serve = async (req: Request): Promise<Response> => {
 
   function handleError(error) {
     console.error('❌ Widget error:', error);
-    alert(\`Erro: \${error}\`);
+    alert(`Erro: ${error}`);
   }
   
   // Global actions - exactly like useGlobalConvaiState
