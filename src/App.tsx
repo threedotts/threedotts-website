@@ -35,6 +35,7 @@ import NotFound from "./pages/NotFound";
 import AcceptInvitation from "./pages/AcceptInvitation";
 import CustomWidgetDemo from "./components/CustomWidgetDemo";
 import EmbedDemo from "./pages/EmbedDemo";
+// Import embedded widget component for iframe-based widget
 import EmbeddedWidget from "./pages/EmbeddedWidget";
 import { ChatWidgetErrorBoundary } from "./components/ChatWidgetErrorBoundary";
 import { SecurityHeaders } from "./components/SecurityHeaders";
