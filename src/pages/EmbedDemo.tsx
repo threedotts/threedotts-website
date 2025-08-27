@@ -48,7 +48,7 @@ const EmbedDemo = () => {
   }, []);
 
   const embedCode = `<!-- ThreeDotts AI Widget -->
-<script src="https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?v=27"></script>
+<script src="https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?v=35"></script>
 <script>
   // Configure the agent ID
   window.addEventListener('load', function() {
