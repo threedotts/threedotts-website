@@ -84,14 +84,16 @@ const widgetScript = `
     // Check if widget already exists
     const existingWidget = document.getElementById('threedotts-widget-iframe');
     if (existingWidget) {
-      console.log('🔄 Widget iframe already exists, reusing...');
+      console.log('🔄 Widget iframe already exists, reconnecting...');
       widgetIframe = existingWidget;
-      isWidgetReady = false; // Reset ready state to resend config
       
-      // Wait for iframe to be ready again
-      setTimeout(() => {
-        sendConfigToIframe();
-      }, 1000);
+      // Don't reset ready state - the iframe is still functional
+      // Just check if we need to resend config
+      if (isWidgetReady) {
+        setTimeout(() => {
+          sendConfigToIframe();
+        }, 500);
+      }
       return;
     }
     
@@ -191,12 +193,40 @@ const widgetScript = `
     }
   };
 
+  // Check if widget is already initialized globally
+  function isWidgetAlreadyInitialized() {
+    // Check if the iframe already exists in the DOM
+    const existingWidget = document.getElementById('threedotts-widget-iframe');
+    if (existingWidget) {
+      console.log('🔄 Widget already exists globally, attaching to existing instance');
+      widgetIframe = existingWidget;
+      isWidgetReady = true;
+      
+      // Reattach message listener
+      window.addEventListener('message', handleIframeMessage);
+      
+      // Send config immediately since widget is ready
+      setTimeout(() => {
+        sendConfigToIframe();
+      }, 100);
+      
+      return true;
+    }
+    return false;
+  }
+
   // Initialize widget when DOM is ready
   function initWidget() {
     console.log('🚀 Initializing ThreeDotts embedded widget...');
     
     // Load persisted data first
     loadPersistedData();
+    
+    // Check if widget already exists
+    if (isWidgetAlreadyInitialized()) {
+      console.log('✅ Widget reattached to existing instance');
+      return;
+    }
     
     injectStyles();
     createWidget();
