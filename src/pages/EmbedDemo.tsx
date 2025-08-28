@@ -17,7 +17,7 @@ const EmbedDemo = () => {
     
     // Create and load widget script
     const script = document.createElement('script');
-    script.src = 'https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?organizationId=550e8400-e29b-41d4-a716-446655440000&v=37';
+    script.src = 'https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?organizationId=550e8400-e29b-41d4-a716-446655440000&v=38';
     script.onload = () => {
       console.log('✅ Widget script loaded, configuring...');
       // Configure widget when loaded
@@ -48,10 +48,10 @@ const EmbedDemo = () => {
   }, []);
 
   const embedCode = `<!-- ThreeDotts AI Widget -->
-<script src="https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?organizationId=your-organization-id&v=37"></script>
+<script src="https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?organizationId=your-organization-id&v=38"></script>
 
 <!-- OR configure via JavaScript -->
-<script src="https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?v=37"></script>
+<script src="https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?v=38"></script>
 <script>
   // Configure with your Organization ID
   window.addEventListener('load', function() {
@@ -64,10 +64,10 @@ const EmbedDemo = () => {
 </script>`;
 
   const advancedEmbedCode = `<!-- Alternative: Use URL parameter -->
-<script src="https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?organizationId=your-org-id&v=37"></script>
+<script src="https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?organizationId=your-org-id&v=38"></script>
 
 <!-- OR configure via JavaScript with additional options -->
-<script src="https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?v=37"></script>
+<script src="https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?v=38"></script>
 <script>
   window.addEventListener('load', function() {
     if (window.threedottsWidget) {
