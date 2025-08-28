@@ -1003,17 +1003,23 @@ const widgetServe = async (req: Request): Promise<Response> => {
     executeClientTool(toolName, parameters) {
       console.log('🔨 Executing client tool: ' + toolName);
       
-      // Get configured client tools
+      // First try to find the tool directly on the window object
+      if (typeof window[toolName] === 'function') {
+        console.log('✅ Found tool function on window: ' + toolName);
+        return window[toolName](parameters);
+      }
+      
+      // Fallback: Get configured client tools
       const clientTools = this.getClientTools();
       
       if (clientTools && typeof clientTools[toolName] === 'function') {
-        console.log('✅ Found tool function: ' + toolName);
+        console.log('✅ Found tool function in clientTools: ' + toolName);
         return clientTools[toolName](parameters);
       }
       
-      // No default tools - all tools must be defined by the client
-      console.warn('⚠️ Tool not found: ' + toolName + '. Please define this tool in window.threedottsWidget.clientTools');
-      return 'Tool "' + toolName + '" not found. Define it in clientTools to use it.';
+      // Tool not found anywhere
+      console.warn('⚠️ Tool not found: ' + toolName + '. Please define this tool on window object or in window.threedottsWidget.clientTools');
+      return 'Tool "' + toolName + '" not found. Define it on window object to use it.';
     }
     
     getClientTools() {
