@@ -31,24 +31,36 @@ const widgetServe = async (req: Request): Promise<Response> => {
         console.error('Please add organizationId parameter to the script URL or configure via JavaScript');
         
         // Show error message on page
-        (function() {
-          const errorDiv = document.createElement('div');
-          errorDiv.style.cssText = \`
-            position: fixed; bottom: 24px; right: 24px; z-index: 9999;
-            background: #fee2e2; border: 1px solid #fecaca; color: #dc2626;
-            padding: 12px; border-radius: 8px; max-width: 300px;
-            font-family: system-ui, -apple-system, sans-serif; font-size: 14px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-          \`;
-          errorDiv.innerHTML = \`
-            <strong>ThreeDotts Widget Error:</strong><br>
-            Organization ID is required. Please check your embed code.
-          \`;
-          document.body.appendChild(errorDiv);
-          
-          // Auto-remove after 10 seconds
-          setTimeout(() => errorDiv.remove(), 10000);
-        })();
+          (function() {
+            const showError = (message) => {
+              // Wait for DOM to be ready
+              const display = () => {
+                if (!document.body) {
+                  setTimeout(display, 10);
+                  return;
+                }
+                const errorDiv = document.createElement('div');
+                errorDiv.style.cssText = \`
+                  position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+                  background: #fee2e2; border: 1px solid #fecaca; color: #dc2626;
+                  padding: 12px; border-radius: 8px; max-width: 300px;
+                  font-family: system-ui, -apple-system, sans-serif; font-size: 14px;
+                  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                \`;
+                errorDiv.innerHTML = message;
+                document.body.appendChild(errorDiv);
+                
+                // Auto-remove after 10 seconds
+                setTimeout(() => errorDiv.remove(), 10000);
+              };
+              display();
+            };
+            
+            showError(\`
+              <strong>ThreeDotts Widget Error:</strong><br>
+              Organization ID is required. Please check your embed code.
+            \`);
+          })();
       `;
       return new Response(errorScript, {
         status: 200, // Return 200 so the browser executes the JavaScript
@@ -74,21 +86,32 @@ const widgetServe = async (req: Request): Promise<Response> => {
           console.error('Error details:', ${JSON.stringify(error.message)});
           
           (function() {
-            const errorDiv = document.createElement('div');
-            errorDiv.style.cssText = \`
-              position: fixed; bottom: 24px; right: 24px; z-index: 9999;
-              background: #fee2e2; border: 1px solid #fecaca; color: #dc2626;
-              padding: 12px; border-radius: 8px; max-width: 300px;
-              font-family: system-ui, -apple-system, sans-serif; font-size: 14px;
-              box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            \`;
-            errorDiv.innerHTML = \`
+            const showError = (message) => {
+              // Wait for DOM to be ready
+              const display = () => {
+                if (!document.body) {
+                  setTimeout(display, 10);
+                  return;
+                }
+                const errorDiv = document.createElement('div');
+                errorDiv.style.cssText = \`
+                  position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+                  background: #fee2e2; border: 1px solid #fecaca; color: #dc2626;
+                  padding: 12px; border-radius: 8px; max-width: 300px;
+                  font-family: system-ui, -apple-system, sans-serif; font-size: 14px;
+                  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                \`;
+                errorDiv.innerHTML = message;
+                document.body.appendChild(errorDiv);
+                setTimeout(() => errorDiv.remove(), 10000);
+              };
+              display();
+            };
+            
+            showError(\`
               <strong>ThreeDotts Widget Error:</strong><br>
               Database connection failed. Please try again later.
-            \`;
-            document.body.appendChild(errorDiv);
-            setTimeout(() => errorDiv.remove(), 10000);
-          })();
+            \`);
         `;
         return new Response(errorScript, {
           status: 200,
@@ -104,20 +127,32 @@ const widgetServe = async (req: Request): Promise<Response> => {
           console.error('Please contact your administrator to configure the AI agent settings');
           
           (function() {
-            const errorDiv = document.createElement('div');
-            errorDiv.style.cssText = \`
-              position: fixed; bottom: 24px; right: 24px; z-index: 9999;
-              background: #fee2e2; border: 1px solid #fecaca; color: #dc2626;
-              padding: 12px; border-radius: 8px; max-width: 300px;
-              font-family: system-ui, -apple-system, sans-serif; font-size: 14px;
-              box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            \`;
-            errorDiv.innerHTML = \`
+            const showError = (message) => {
+              // Wait for DOM to be ready
+              const display = () => {
+                if (!document.body) {
+                  setTimeout(display, 10);
+                  return;
+                }
+                const errorDiv = document.createElement('div');
+                errorDiv.style.cssText = \`
+                  position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+                  background: #fee2e2; border: 1px solid #fecaca; color: #dc2626;
+                  padding: 12px; border-radius: 8px; max-width: 300px;
+                  font-family: system-ui, -apple-system, sans-serif; font-size: 14px;
+                  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                \`;
+                errorDiv.innerHTML = message;
+                document.body.appendChild(errorDiv);
+                setTimeout(() => errorDiv.remove(), 15000);
+              };
+              display();
+            };
+            
+            showError(\`
               <strong>ThreeDotts Widget:</strong><br>
               Agent not configured for this organization. Please contact your administrator.
-            \`;
-            document.body.appendChild(errorDiv);
-            setTimeout(() => errorDiv.remove(), 15000);
+            \`);
           })();
         `;
         return new Response(errorScript, {
@@ -140,20 +175,32 @@ const widgetServe = async (req: Request): Promise<Response> => {
             console.error('❌ ThreeDotts Widget Error: Could not retrieve API key from secrets');
             
             (function() {
-              const errorDiv = document.createElement('div');
-              errorDiv.style.cssText = \`
-                position: fixed; bottom: 24px; right: 24px; z-index: 9999;
-                background: #fee2e2; border: 1px solid #fecaca; color: #dc2626;
-                padding: 12px; border-radius: 8px; max-width: 300px;
-                font-family: system-ui, -apple-system, sans-serif; font-size: 14px;
-                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-              \`;
-              errorDiv.innerHTML = \`
+              const showError = (message) => {
+                // Wait for DOM to be ready
+                const display = () => {
+                  if (!document.body) {
+                    setTimeout(display, 10);
+                    return;
+                  }
+                  const errorDiv = document.createElement('div');
+                  errorDiv.style.cssText = \`
+                    position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+                    background: #fee2e2; border: 1px solid #fecaca; color: #dc2626;
+                    padding: 12px; border-radius: 8px; max-width: 300px;
+                    font-family: system-ui, -apple-system, sans-serif; font-size: 14px;
+                    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                  \`;
+                  errorDiv.innerHTML = message;
+                  document.body.appendChild(errorDiv);
+                  setTimeout(() => errorDiv.remove(), 10000);
+                };
+                display();
+              };
+              
+              showError(\`
                 <strong>ThreeDotts Widget:</strong><br>
                 API key configuration error. Please contact your administrator.
-              \`;
-              document.body.appendChild(errorDiv);
-              setTimeout(() => errorDiv.remove(), 10000);
+              \`);
             })();
           `;
           return new Response(errorScript, {
@@ -168,20 +215,32 @@ const widgetServe = async (req: Request): Promise<Response> => {
             console.error('❌ ThreeDotts Widget Error: API key not found in secrets');
             
             (function() {
-              const errorDiv = document.createElement('div');
-              errorDiv.style.cssText = \`
-                position: fixed; bottom: 24px; right: 24px; z-index: 9999;
-                background: #fee2e2; border: 1px solid #fecaca; color: #dc2626;
-                padding: 12px; border-radius: 8px; max-width: 300px;
-                font-family: system-ui, -apple-system, sans-serif; font-size: 14px;
-                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-              \`;
-              errorDiv.innerHTML = \`
+              const showError = (message) => {
+                // Wait for DOM to be ready
+                const display = () => {
+                  if (!document.body) {
+                    setTimeout(display, 10);
+                    return;
+                  }
+                  const errorDiv = document.createElement('div');
+                  errorDiv.style.cssText = \`
+                    position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+                    background: #fee2e2; border: 1px solid #fecaca; color: #dc2626;
+                    padding: 12px; border-radius: 8px; max-width: 300px;
+                    font-family: system-ui, -apple-system, sans-serif; font-size: 14px;
+                    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                  \`;
+                  errorDiv.innerHTML = message;
+                  document.body.appendChild(errorDiv);
+                  setTimeout(() => errorDiv.remove(), 10000);
+                };
+                display();
+              };
+              
+              showError(\`
                 <strong>ThreeDotts Widget:</strong><br>
                 API key not configured. Please contact your administrator.
-              \`;
-              document.body.appendChild(errorDiv);
-              setTimeout(() => errorDiv.remove(), 10000);
+              \`);
             })();
           `;
           return new Response(errorScript, {
@@ -199,20 +258,32 @@ const widgetServe = async (req: Request): Promise<Response> => {
           console.error('❌ ThreeDotts Widget Error: Failed to retrieve API key');
           
           (function() {
-            const errorDiv = document.createElement('div');
-            errorDiv.style.cssText = \`
-              position: fixed; bottom: 24px; right: 24px; z-index: 9999;
-              background: #fee2e2; border: 1px solid #fecaca; color: #dc2626;
-              padding: 12px; border-radius: 8px; max-width: 300px;
-              font-family: system-ui, -apple-system, sans-serif; font-size: 14px;
-              box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            \`;
-            errorDiv.innerHTML = \`
+            const showError = (message) => {
+              // Wait for DOM to be ready
+              const display = () => {
+                if (!document.body) {
+                  setTimeout(display, 10);
+                  return;
+                }
+                const errorDiv = document.createElement('div');
+                errorDiv.style.cssText = \`
+                  position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+                  background: #fee2e2; border: 1px solid #fecaca; color: #dc2626;
+                  padding: 12px; border-radius: 8px; max-width: 300px;
+                  font-family: system-ui, -apple-system, sans-serif; font-size: 14px;
+                  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                \`;
+                errorDiv.innerHTML = message;
+                document.body.appendChild(errorDiv);
+                setTimeout(() => errorDiv.remove(), 10000);
+              };
+              display();
+            };
+            
+            showError(\`
               <strong>ThreeDotts Widget:</strong><br>
               Failed to retrieve API key. Please contact your administrator.
-            \`;
-            document.body.appendChild(errorDiv);
-            setTimeout(() => errorDiv.remove(), 10000);
+            \`);
           })();
         `;
         return new Response(errorScript, {
@@ -226,20 +297,32 @@ const widgetServe = async (req: Request): Promise<Response> => {
         console.error('❌ ThreeDotts Widget Error: Database connection failed');
         
         (function() {
-          const errorDiv = document.createElement('div');
-          errorDiv.style.cssText = \`
-            position: fixed; bottom: 24px; right: 24px; z-index: 9999;
-            background: #fee2e2; border: 1px solid #fecaca; color: #dc2626;
-            padding: 12px; border-radius: 8px; max-width: 300px;
-            font-family: system-ui, -apple-system, sans-serif; font-size: 14px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-          \`;
-          errorDiv.innerHTML = \`
+          const showError = (message) => {
+            // Wait for DOM to be ready
+            const display = () => {
+              if (!document.body) {
+                setTimeout(display, 10);
+                return;
+              }
+              const errorDiv = document.createElement('div');
+              errorDiv.style.cssText = \`
+                position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+                background: #fee2e2; border: 1px solid #fecaca; color: #dc2626;
+                padding: 12px; border-radius: 8px; max-width: 300px;
+                font-family: system-ui, -apple-system, sans-serif; font-size: 14px;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+              \`;
+              errorDiv.innerHTML = message;
+              document.body.appendChild(errorDiv);
+              setTimeout(() => errorDiv.remove(), 10000);
+            };
+            display();
+          };
+          
+          showError(\`
             <strong>ThreeDotts Widget:</strong><br>
             Database connection failed. Please try again later.
-          \`;
-          document.body.appendChild(errorDiv);
-          setTimeout(() => errorDiv.remove(), 10000);
+          \`);
         })();
       `;
       return new Response(errorScript, {
