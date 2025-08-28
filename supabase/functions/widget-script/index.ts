@@ -1011,54 +1011,9 @@ const widgetServe = async (req: Request): Promise<Response> => {
         return clientTools[toolName](parameters);
       }
       
-      // Default tools available on all widgets
-      switch (toolName) {
-        case 'showAlert':
-          const message = parameters?.message || 'Alert from AI Assistant';
-          alert(message);
-          return 'Alert shown: ' + message;
-          
-        case 'openUrl':
-          const url = parameters?.url;
-          if (url) {
-            window.open(url, '_blank');
-            return 'Opened URL: ' + url;
-          }
-          return 'Error: No URL provided';
-          
-        case 'scrollToElement':
-          const selector = parameters?.selector;
-          if (selector) {
-            const element = document.querySelector(selector);
-            if (element) {
-              element.scrollIntoView({ behavior: 'smooth' });
-              return 'Scrolled to element: ' + selector;
-            }
-            return 'Element not found: ' + selector;
-          }
-          return 'Error: No selector provided';
-          
-        case 'highlightElement':
-          const highlightSelector = parameters?.selector;
-          if (highlightSelector) {
-            const element = document.querySelector(highlightSelector);
-            if (element) {
-              element.style.outline = '3px solid #ff6b6b';
-              element.style.outlineOffset = '2px';
-              setTimeout(() => {
-                element.style.outline = '';
-                element.style.outlineOffset = '';
-              }, 3000);
-              return 'Highlighted element: ' + highlightSelector;
-            }
-            return 'Element not found: ' + highlightSelector;
-          }
-          return 'Error: No selector provided';
-          
-        default:
-          console.warn('⚠️ Unknown tool: ' + toolName);
-          return 'Unknown tool: ' + toolName;
-      }
+      // No default tools - all tools must be defined by the client
+      console.warn('⚠️ Tool not found: ' + toolName + '. Please define this tool in window.threedottsWidget.clientTools');
+      return 'Tool "' + toolName + '" not found. Define it in clientTools to use it.';
     }
     
     getClientTools() {
