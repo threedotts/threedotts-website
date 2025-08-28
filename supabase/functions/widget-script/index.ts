@@ -994,7 +994,7 @@ const widgetServe = async (req: Request): Promise<Response> => {
           this.send({
             type: "client_tool_result", 
             tool_call_id: message.client_tool_call_event.tool_call_id,
-            result: `Error: ${error.message}`
+            result: "Error: " + error.message
           });
         }
       }
