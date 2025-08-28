@@ -17,23 +17,50 @@ const EmbedDemo = () => {
     
     // Create and load widget script
     const script = document.createElement('script');
-    script.src = 'https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?organizationId=550e8400-e29b-41d4-a716-446655440000&v=38';
+    script.src = 'https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?organizationId=1e926240-b303-444b-9f8c-57abd9fa657b&v=38';
+    script.onerror = (error) => {
+      console.error('❌ Failed to load widget script:', error);
+    };
+    
+    // Add error handling for HTTP errors (script loads but returns error response)
     script.onload = () => {
+      // Check if the script actually loaded JavaScript or returned an error
+      fetch(script.src)
+        .then(response => {
+          if (!response.ok) {
+            response.text().then(errorText => {
+              console.error('❌ Widget script returned error:', errorText);
+              // Show user-friendly error message
+              const errorDiv = document.createElement('div');
+              errorDiv.style.cssText = `
+                position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+                background: #fee; border: 1px solid #fcc; color: #c33;
+                padding: 12px; border-radius: 8px; max-width: 300px;
+                font-family: system-ui, -apple-system, sans-serif; font-size: 14px;
+              `;
+              errorDiv.innerHTML = `
+                <strong>Widget Error:</strong><br>
+                ${errorText}
+              `;
+              document.body.appendChild(errorDiv);
+            });
+            return;
+          }
+        })
+        .catch(console.error);
+      
       console.log('✅ Widget script loaded, configuring...');
       // Configure widget when loaded
       setTimeout(() => {
         if ((window as any).threedottsWidget) {
           (window as any).threedottsWidget.configure({
-            organizationId: '550e8400-e29b-41d4-a716-446655440000' // Example organization ID
+            organizationId: '1e926240-b303-444b-9f8c-57abd9fa657b' // Real organization ID
           });
           console.log('✅ Embed demo widget configured with organizationId!');
         } else {
           console.error('❌ Widget not found after loading script');
         }
       }, 100);
-    };
-    script.onerror = () => {
-      console.error('❌ Failed to load widget script');
     };
     
     document.head.appendChild(script);
