@@ -1192,22 +1192,21 @@ const widgetServe = async (req: Request): Promise<Response> => {
 
   // Load Comfortaa font and initialize widget
   function loadComfortaaAndInit() {
-    const font = new FontFace('Comfortaa', "url('https://fonts.gstatic.com/s/comfortaa/v35/1Ptsg8LJRfWJmhDAuUs4TYFs.woff2') format('woff2')");
+    // Create Google Fonts link element instead of trying to load specific woff2 file
+    const fontLink = document.createElement('link');
+    fontLink.rel = 'stylesheet';
+    fontLink.href = 'https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&display=swap';
     
-    font.load().then(loadedFont => {
-      document.fonts.add(loadedFont);
-      console.log('✅ Comfortaa font loaded successfully');
+    // Add font to head
+    document.head.appendChild(fontLink);
+    
+    // Wait a bit for font to load, then initialize
+    setTimeout(() => {
+      console.log('✅ Comfortaa font loaded via Google Fonts');
       injectStyles();
       createWidget();
       updateUI();
-    }).catch(err => {
-      console.error('❌ Font failed to load:', err);
-      // fallback to create widget anyway
-      console.log('📝 Creating widget with fallback fonts');
-      injectStyles();
-      createWidget();
-      updateUI();
-    });
+    }, 100);
   }
 
   // Initialize widget
