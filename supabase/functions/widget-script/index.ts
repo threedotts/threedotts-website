@@ -965,9 +965,9 @@ const widgetServe = async (req: Request): Promise<Response> => {
       console.log('🛠️ Processing client tool call:', message);
       
       try {
-        const toolCall = message.client_tool_call_event;
+        const toolCall = message.client_tool_call;
         if (!toolCall) {
-          console.error('❌ No client_tool_call_event in message:', message);
+          console.error('❌ No client_tool_call in message:', message);
           return;
         }
         
@@ -990,10 +990,10 @@ const widgetServe = async (req: Request): Promise<Response> => {
         console.error('❌ Error handling client tool call:', error);
         
         // Send error response back to agent
-        if (message.client_tool_call_event?.tool_call_id) {
+        if (message.client_tool_call?.tool_call_id) {
           this.send({
             type: "client_tool_result", 
-            tool_call_id: message.client_tool_call_event.tool_call_id,
+            tool_call_id: message.client_tool_call.tool_call_id,
             result: "Error: " + error.message
           });
         }
