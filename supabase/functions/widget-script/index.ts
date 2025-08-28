@@ -164,15 +164,112 @@ const widgetServe = async (req: Request): Promise<Response> => {
       console.log('✅ Found org config:', config);
       agentId = config.primary_agent_id;
       
-      // Fetch API key from Supabase secrets using the secret name
-      try {
-        const { data: secretData, error: secretError } = await supabase
-          .rpc('vault.read_secret', { secret_name: config.api_key_secret_name });
+      // Try to get API key - first check if it's available as environment variable
+      console.log('🔍 Trying to fetch API key:', config.api_key_secret_name);
+      
+      // Method 1: Try as environment variable first
+      elevenLabsApiKey = Deno.env.get(config.api_key_secret_name);
+      
+      if (elevenLabsApiKey) {
+        console.log('✅ Retrieved API key from environment variable');
+      } else {
+        console.log('⚠️ API key not found in environment, trying vault...');
+        
+        // Method 2: Try vault.read_secret
+        try {
+          const { data: secretData, error: secretError } = await supabase
+            .rpc('vault.read_secret', { secret_name: config.api_key_secret_name });
+            
+          if (secretError) {
+            console.error('❌ Vault error details:', secretError);
+            console.error('❌ Error fetching secret from vault:', secretError);
+            const errorScript = `
+              console.error('❌ ThreeDotts Widget Error: Could not retrieve API key from secrets');
+              console.error('Vault error:', ${JSON.stringify(secretError.message || 'Unknown vault error')});
+              
+              (function() {
+                const showError = (message) => {
+                  // Wait for DOM to be ready
+                  const display = () => {
+                    if (!document.body) {
+                      setTimeout(display, 10);
+                      return;
+                    }
+                    const errorDiv = document.createElement('div');
+                    errorDiv.style.cssText = \`
+                      position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+                      background: #fee2e2; border: 1px solid #fecaca; color: #dc2626;
+                      padding: 12px; border-radius: 8px; max-width: 300px;
+                      font-family: system-ui, -apple-system, sans-serif; font-size: 14px;
+                      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                    \`;
+                    errorDiv.innerHTML = message;
+                    document.body.appendChild(errorDiv);
+                    setTimeout(() => errorDiv.remove(), 10000);
+                  };
+                  display();
+                };
+                
+                showError(\`
+                  <strong>ThreeDotts Widget:</strong><br>
+                  API key configuration error. Please contact your administrator.
+                \`);
+              })();
+            `;
+            return new Response(errorScript, {
+              status: 200,
+              headers: { ...corsHeaders, 'Content-Type': 'application/javascript' }
+            });
+          }
           
-        if (secretError) {
-          console.error('❌ Error fetching secret:', secretError);
+          if (!secretData) {
+            console.error('❌ No API key found in vault for:', config.api_key_secret_name);
+            const errorScript = `
+              console.error('❌ ThreeDotts Widget Error: API key not found in secrets');
+              
+              (function() {
+                const showError = (message) => {
+                  // Wait for DOM to be ready
+                  const display = () => {
+                    if (!document.body) {
+                      setTimeout(display, 10);
+                      return;
+                    }
+                    const errorDiv = document.createElement('div');
+                    errorDiv.style.cssText = \`
+                      position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+                      background: #fee2e2; border: 1px solid #fecaca; color: #dc2626;
+                      padding: 12px; border-radius: 8px; max-width: 300px;
+                      font-family: system-ui, -apple-system, sans-serif; font-size: 14px;
+                      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                    \`;
+                    errorDiv.innerHTML = message;
+                    document.body.appendChild(errorDiv);
+                    setTimeout(() => errorDiv.remove(), 10000);
+                  };
+                  display();
+                };
+                
+                showError(\`
+                  <strong>ThreeDotts Widget:</strong><br>
+                  API key not configured. Please contact your administrator.
+                \`);
+              })();
+            `;
+            return new Response(errorScript, {
+              status: 200,
+              headers: { ...corsHeaders, 'Content-Type': 'application/javascript' }
+            });
+          }
+          
+          elevenLabsApiKey = secretData;
+          console.log('✅ Retrieved API key from vault');
+          
+        } catch (secretError) {
+          console.error('❌ Exception when fetching secret:', secretError);
           const errorScript = `
-            console.error('❌ ThreeDotts Widget Error: Could not retrieve API key from secrets');
+            console.error('❌ ThreeDotts Widget Error: Failed to retrieve API key');
+            console.error('Exception:', ${JSON.stringify(secretError.message || 'Unknown error')});
             
             (function() {
               const showError = (message) => {
@@ -199,7 +296,7 @@ const widgetServe = async (req: Request): Promise<Response> => {
               
               showError(\`
                 <strong>ThreeDotts Widget:</strong><br>
-                API key configuration error. Please contact your administrator.
+                Failed to retrieve API key. Please contact your administrator.
               \`);
             })();
           `;
@@ -208,88 +305,6 @@ const widgetServe = async (req: Request): Promise<Response> => {
             headers: { ...corsHeaders, 'Content-Type': 'application/javascript' }
           });
         }
-        
-        if (!secretData) {
-          console.error('❌ No API key found in secrets for:', config.api_key_secret_name);
-          const errorScript = `
-            console.error('❌ ThreeDotts Widget Error: API key not found in secrets');
-            
-            (function() {
-              const showError = (message) => {
-                // Wait for DOM to be ready
-                const display = () => {
-                  if (!document.body) {
-                    setTimeout(display, 10);
-                    return;
-                  }
-                  const errorDiv = document.createElement('div');
-                  errorDiv.style.cssText = \`
-                    position: fixed; bottom: 24px; right: 24px; z-index: 9999;
-                    background: #fee2e2; border: 1px solid #fecaca; color: #dc2626;
-                    padding: 12px; border-radius: 8px; max-width: 300px;
-                    font-family: system-ui, -apple-system, sans-serif; font-size: 14px;
-                    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-                  \`;
-                  errorDiv.innerHTML = message;
-                  document.body.appendChild(errorDiv);
-                  setTimeout(() => errorDiv.remove(), 10000);
-                };
-                display();
-              };
-              
-              showError(\`
-                <strong>ThreeDotts Widget:</strong><br>
-                API key not configured. Please contact your administrator.
-              \`);
-            })();
-          `;
-          return new Response(errorScript, {
-            status: 200,
-            headers: { ...corsHeaders, 'Content-Type': 'application/javascript' }
-          });
-        }
-        
-        elevenLabsApiKey = secretData;
-        console.log('✅ Retrieved API key from secrets');
-        
-      } catch (secretError) {
-        console.error('❌ Error fetching secret:', secretError);
-        const errorScript = `
-          console.error('❌ ThreeDotts Widget Error: Failed to retrieve API key');
-          
-          (function() {
-            const showError = (message) => {
-              // Wait for DOM to be ready
-              const display = () => {
-                if (!document.body) {
-                  setTimeout(display, 10);
-                  return;
-                }
-                const errorDiv = document.createElement('div');
-                errorDiv.style.cssText = \`
-                  position: fixed; bottom: 24px; right: 24px; z-index: 9999;
-                  background: #fee2e2; border: 1px solid #fecaca; color: #dc2626;
-                  padding: 12px; border-radius: 8px; max-width: 300px;
-                  font-family: system-ui, -apple-system, sans-serif; font-size: 14px;
-                  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-                \`;
-                errorDiv.innerHTML = message;
-                document.body.appendChild(errorDiv);
-                setTimeout(() => errorDiv.remove(), 10000);
-              };
-              display();
-            };
-            
-            showError(\`
-              <strong>ThreeDotts Widget:</strong><br>
-              Failed to retrieve API key. Please contact your administrator.
-            \`);
-          })();
-        `;
-        return new Response(errorScript, {
-          status: 200,
-          headers: { ...corsHeaders, 'Content-Type': 'application/javascript' }
-        });
       }
     } catch (dbError) {
       console.error('❌ Database connection error:', dbError);
