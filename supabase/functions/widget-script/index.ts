@@ -805,10 +805,10 @@ const widgetServe = async (req: Request): Promise<Response> => {
     }
   }
 
-  // VoiceWebSocket class - DIRECT CONNECTION like main app
+  // VoiceWebSocket class - SECURE PROXY CONNECTION
   class VoiceWebSocket {
-    constructor(agentId, apiKey, onMessage, onConnectionChange, onError) {
-      this.agentId = agentId;
+    constructor(organizationId, apiKey, onMessage, onConnectionChange, onError) {
+      this.organizationId = organizationId;
       this.apiKey = apiKey;
       this.onMessage = onMessage;
       this.onConnectionChange = onConnectionChange;
@@ -828,7 +828,7 @@ const widgetServe = async (req: Request): Promise<Response> => {
 
       try {
         console.log('🚀 Connecting to Voice AI...');
-        console.log('Agent ID:', this.agentId);
+        console.log('Organization ID:', this.organizationId);
         
         // Initialize audio components
         this.audioPlayer = new AudioPlayer();
@@ -837,9 +837,9 @@ const widgetServe = async (req: Request): Promise<Response> => {
           this.sendAudioChunk(audioData);
         });
 
-        // Connect DIRECTLY using the US endpoint
-        const wsUrl = \`wss://api.us.elevenlabs.io/v1/convai/conversation?agent_id=\${this.agentId}\`;
-        console.log('🔗 Connecting to:', wsUrl);
+        // Connect through our secure proxy
+        const wsUrl = \`wss://dkqzzypemdewomxrjftv.supabase.co/functions/v1/voice-proxy?organizationId=\${config.organizationId}\`;
+        console.log('🔗 Connecting to voice service:', wsUrl);
         
         this.ws = new WebSocket(wsUrl);
 
@@ -1120,16 +1120,15 @@ const widgetServe = async (req: Request): Promise<Response> => {
   const actions = {
     handleConnect: async () => {
       try {
-        // Use the pre-resolved agent ID from server configuration
-        const agentId = config.agentId;
+        // Use organization ID for secure connection
+        const organizationId = config.organizationId;
         
-        if (!agentId) {
-          alert('Agent ID não configurado. Verifique a configuração da organização.');
+        if (!organizationId) {
+          alert('Organization não configurada. Verifique a configuração.');
           return;
         }
 
-        console.log('🔧 Connecting with agent ID:', agentId);
-        console.log('🏢 Organization ID:', config.organizationId || 'not provided');
+        console.log('🔧 Connecting with organization:', organizationId);
 
         // Show connecting state
         state.isConnecting = true;
@@ -1137,7 +1136,7 @@ const widgetServe = async (req: Request): Promise<Response> => {
 
         if (!webSocketInstance) {
           webSocketInstance = new VoiceWebSocket(
-            agentId,
+            organizationId,
             '',
             handleMessage,
             handleConnectionChange,
