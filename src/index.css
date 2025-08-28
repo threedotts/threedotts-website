@@ -116,24 +116,7 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 
-  /* Security and third-party integration styles */
-  .elevenlabs-chat-wrapper {
-    isolation: isolate;
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 1000;
-  }
-
-  .elevenlabs-chat-wrapper elevenlabs-convai {
-    display: block;
-  }
-
-  /* Ensure third-party widgets don't interfere with app security */
-  .elevenlabs-chat-wrapper iframe {
-    sandbox: allow-scripts allow-same-origin;
-  }
-
+  /* Chat widget error handling */
   .chat-widget-error {
     display: none !important;
   }
