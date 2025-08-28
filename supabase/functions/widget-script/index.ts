@@ -980,10 +980,8 @@ const widgetServe = async (req: Request): Promise<Response> => {
         // Send response back to agent
         this.send({
           type: "client_tool_result",
-          client_tool_result: {
-            tool_call_id: tool_call_id,
-            result: result || "Tool executed successfully"
-          }
+          tool_call_id: tool_call_id,
+          result: result || "Tool executed successfully"
         });
         
         console.log('✅ Tool ' + tool_name + ' executed, result sent back');
@@ -995,10 +993,8 @@ const widgetServe = async (req: Request): Promise<Response> => {
         if (message.client_tool_call?.tool_call_id) {
           this.send({
             type: "client_tool_result", 
-            client_tool_result: {
-              tool_call_id: message.client_tool_call.tool_call_id,
-              result: "Error: " + error.message
-            }
+            tool_call_id: message.client_tool_call.tool_call_id,
+            result: "Error: " + error.message
           });
         }
       }
