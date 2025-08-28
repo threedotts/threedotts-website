@@ -389,14 +389,27 @@ const serve = async (req: Request): Promise<Response> => {
   // AudioPlayer class - EXACTLY like ElevenLabsWebSocket.ts
   class AudioPlayer {
     constructor() {
-      this.audioContext = new AudioContext({
-        sampleRate: 16000
-      });
+      this.audioContext = null; // Initialize as null
       this.audioQueue = [];
       this.isPlaying = false;
     }
 
+    async initAudioContext() {
+      if (!this.audioContext) {
+        this.audioContext = new AudioContext({
+          sampleRate: 16000
+        });
+        
+        // Resume audio context if suspended (required for user interaction)
+        if (this.audioContext.state === 'suspended') {
+          console.log('🔊 Resuming audio context...');
+          await this.audioContext.resume();
+        }
+      }
+    }
+
     async addAudioChunk(audioData) {
+      await this.initAudioContext(); // Ensure audio context is ready
       this.audioQueue.push(audioData);
       if (!this.isPlaying) {
         await this.playNext();
@@ -413,6 +426,11 @@ const serve = async (req: Request): Promise<Response> => {
       const audioData = this.audioQueue.shift();
 
       try {
+        // Resume audio context if needed
+        if (this.audioContext.state === 'suspended') {
+          await this.audioContext.resume();
+        }
+
         // Convert PCM data to AudioBuffer
         const pcmData = new Int16Array(audioData);
         const audioBuffer = this.audioContext.createBuffer(1, pcmData.length, 16000);
@@ -428,6 +446,7 @@ const serve = async (req: Request): Promise<Response> => {
         
         source.onended = () => this.playNext();
         source.start(0);
+        console.log('🔊 Playing audio chunk');
       } catch (error) {
         console.error('Error playing audio:', error);
         this.playNext(); // Continue with next chunk
@@ -471,6 +490,7 @@ const serve = async (req: Request): Promise<Response> => {
         
         // Initialize audio components
         this.audioPlayer = new AudioPlayer();
+        await this.audioPlayer.initAudioContext(); // Initialize audio context with user interaction
         this.audioRecorder = new AudioRecorder((audioData) => {
           this.sendAudioChunk(audioData);
         });
