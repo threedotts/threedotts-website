@@ -311,40 +311,73 @@ const EmbedDemo = () => {
           </CardContent>
         </Card>
 
-        {/* Custom Tools Example */}
+        {/* Custom Tools Documentation */}
         <Card>
           <CardHeader>
-            <CardTitle>🧰 Custom Tools Example</CardTitle>
+            <CardTitle>🧰 Custom Tools - Como Funciona</CardTitle>
             <CardDescription>
-              See how to create custom tools that the AI agent can call on your website
+              Entenda onde o código das custom tools é definido e como implementar
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Learn how to implement custom tools that allow the AI agent to interact with your website's functionality. 
-              Our example shows an e-commerce site with tools for adding products to cart, getting product info, and more.
-            </p>
-            <div className="grid md:grid-cols-2 gap-4">
-              <Button 
-                variant="default"
-                className="justify-start"
-                onClick={() => window.open('/custom-tools-example', '_blank')}
-              >
-                <ExternalLink className="w-4 h-4 mr-2" />
-                View Live Example
-              </Button>
-              <Button 
-                variant="outline"
-                className="justify-start"
-                onClick={() => window.open('https://github.com/your-repo/custom-tools-docs', '_blank')}
-              >
-                <ExternalLink className="w-4 h-4 mr-2" />
-                View Documentation
-              </Button>
-            </div>
             <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+              <h4 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">📍 Onde fica o código?</h4>
               <p className="text-sm text-blue-800 dark:text-blue-200">
-                <strong>Try it:</strong> In the example, ask the AI "Add the laptop to my cart" or "Show me what's in my cart" to see custom tools in action!
+                <strong>No site do cliente!</strong> O código das custom tools é definido no próprio website do cliente, não no nosso sistema.
+              </p>
+            </div>
+            
+            <div className="space-y-3">
+              <h4 className="font-semibold">Como o cliente implementa:</h4>
+              <div className="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto text-sm">
+                <code>{`<!-- No site do cliente -->
+<script src="sua-widget-url-aqui"></script>
+<script>
+  // Cliente define suas próprias tools
+  window.addEventListener('load', function() {
+    if (window.threedottsWidget) {
+      window.threedottsWidget.configure({
+        organizationId: 'org-id-do-cliente'
+      });
+      
+      // AQUI o cliente define as custom tools dele
+      window.threedottsWidget.clientTools = {
+        addProductToCart: function(parameters) {
+          // Código específico do site do cliente
+          const { productId } = parameters;
+          // Usa APIs, DOM, sistema do cliente
+          return "Produto adicionado ao carrinho";
+        },
+        
+        getOrderStatus: function(parameters) {
+          // Integra com sistema de pedidos do cliente
+          return "Status: Enviado";
+        }
+      };
+    }
+  });
+</script>`}</code>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <h4 className="font-semibold">Fluxo Completo:</h4>
+              <ol className="space-y-2 text-sm list-decimal list-inside">
+                <li><strong>Cliente:</strong> Define as tools no site dele (JavaScript)</li>
+                <li><strong>ElevenLabs:</strong> AI agent é configurado com os nomes e parâmetros das tools</li>
+                <li><strong>Usuário:</strong> Fala com o AI agent</li>
+                <li><strong>AI:</strong> Decide chamar uma tool e envia mensagem para o widget</li>
+                <li><strong>Widget:</strong> Executa o código do cliente com acesso total ao site</li>
+                <li><strong>Widget:</strong> Retorna o resultado para o AI agent</li>
+                <li><strong>AI:</strong> Responde para o usuário baseado no resultado</li>
+              </ol>
+            </div>
+
+            <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
+              <h4 className="font-semibold text-amber-800 dark:text-amber-200 mb-2">🔑 Ponto importante:</h4>
+              <p className="text-sm text-amber-800 dark:text-amber-200">
+                O AI agent só conhece o <strong>nome da tool</strong> e os <strong>parâmetros</strong>. 
+                Ele não sabe como funciona internamente - isso fica no código do cliente.
               </p>
             </div>
           </CardContent>
