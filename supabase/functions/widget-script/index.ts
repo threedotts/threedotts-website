@@ -21,7 +21,7 @@ const widgetServe = async (req: Request): Promise<Response> => {
     const organizationId = url.searchParams.get('organizationId');
     
     let agentId: string;
-    let elevenLabsApiKey: string;
+    let voiceApiKey: string;
     
     // organizationId is required - no fallback defaults
     if (!organizationId) {
@@ -168,9 +168,9 @@ const widgetServe = async (req: Request): Promise<Response> => {
       console.log('🔍 Trying to fetch API key:', config.api_key_secret_name);
       
       // Method 1: Try as environment variable first
-      elevenLabsApiKey = Deno.env.get(config.api_key_secret_name);
+      voiceApiKey = Deno.env.get(config.api_key_secret_name);
       
-      if (elevenLabsApiKey) {
+      if (voiceApiKey) {
         console.log('✅ Retrieved API key from environment variable');
       } else {
         console.log('⚠️ API key not found in environment, trying vault...');
@@ -262,7 +262,7 @@ const widgetServe = async (req: Request): Promise<Response> => {
             });
           }
           
-          elevenLabsApiKey = secretData;
+          voiceApiKey = secretData;
           console.log('✅ Retrieved API key from vault');
           
         } catch (secretError) {
@@ -624,7 +624,7 @@ const widgetServe = async (req: Request): Promise<Response> => {
     document.body.appendChild(widget);
   }
 
-  // AudioRecorder class - EXACTLY like ElevenLabsWebSocket.ts
+  // AudioRecorder class - EXACTLY like VoiceWebSocket.ts
   class AudioRecorder {
     constructor(onAudioData, onMuteChange) {
       this.onAudioData = onAudioData;
@@ -645,7 +645,7 @@ const widgetServe = async (req: Request): Promise<Response> => {
         
         this.stream = await navigator.mediaDevices.getUserMedia({
           audio: {
-            sampleRate: 16000, // ElevenLabs expects 16kHz
+            sampleRate: 16000, // Voice AI expects 16kHz
             channelCount: 1,
             echoCancellation: true,
             noiseSuppression: true,
@@ -728,7 +728,7 @@ const widgetServe = async (req: Request): Promise<Response> => {
     }
   }
 
-  // AudioPlayer class - EXACTLY like ElevenLabsWebSocket.ts
+  // AudioPlayer class - EXACTLY like VoiceWebSocket.ts
   class AudioPlayer {
     constructor() {
       this.audioContext = null; // Initialize as null
@@ -805,8 +805,8 @@ const widgetServe = async (req: Request): Promise<Response> => {
     }
   }
 
-  // ElevenLabsWebSocket class - DIRECT CONNECTION like main app
-  class ElevenLabsWebSocket {
+  // VoiceWebSocket class - DIRECT CONNECTION like main app
+  class VoiceWebSocket {
     constructor(agentId, apiKey, onMessage, onConnectionChange, onError) {
       this.agentId = agentId;
       this.apiKey = apiKey;
@@ -827,7 +827,7 @@ const widgetServe = async (req: Request): Promise<Response> => {
       }
 
       try {
-        console.log('🚀 Connecting to ElevenLabs Conversational AI...');
+        console.log('🚀 Connecting to Voice AI...');
         console.log('Agent ID:', this.agentId);
         
         // Initialize audio components
@@ -837,7 +837,7 @@ const widgetServe = async (req: Request): Promise<Response> => {
           this.sendAudioChunk(audioData);
         });
 
-        // Connect DIRECTLY using the US endpoint - EXACTLY like main app
+        // Connect DIRECTLY using the US endpoint
         const wsUrl = \`wss://api.us.elevenlabs.io/v1/convai/conversation?agent_id=\${this.agentId}\`;
         console.log('🔗 Connecting to:', wsUrl);
         
@@ -1136,7 +1136,7 @@ const widgetServe = async (req: Request): Promise<Response> => {
         updateUI();
 
         if (!webSocketInstance) {
-          webSocketInstance = new ElevenLabsWebSocket(
+          webSocketInstance = new VoiceWebSocket(
             agentId,
             '',
             handleMessage,
