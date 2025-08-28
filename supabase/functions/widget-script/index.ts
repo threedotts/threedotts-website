@@ -1052,6 +1052,7 @@ const widgetServe = async (req: Request): Promise<Response> => {
       
       // Send using the correct message format from documentation
       this.send({
+        type: "user_audio_chunk",
         user_audio_chunk: base64Audio
       });
     }
