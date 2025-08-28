@@ -929,6 +929,11 @@ const widgetServe = async (req: Request): Promise<Response> => {
           }
           break;
           
+        case 'client_tool_call':
+          console.log('🔧 Client tool call received:', message);
+          this.handleClientToolCall(message);
+          break;
+          
         case 'audio':
           if (message.audio_event?.audio_base_64 && this.audioPlayer) {
             console.log('🎵 Playing audio chunk');
@@ -954,6 +959,114 @@ const widgetServe = async (req: Request): Promise<Response> => {
           }
           break;
       }
+    }
+
+    handleClientToolCall(message) {
+      console.log('🛠️ Processing client tool call:', message);
+      
+      try {
+        const toolCall = message.client_tool_call_event;
+        if (!toolCall) {
+          console.error('❌ No client_tool_call_event in message:', message);
+          return;
+        }
+        
+        const { tool_call_id, tool_name, parameters } = toolCall;
+        console.log(`🔧 Executing tool: ${tool_name} with params:`, parameters);
+        
+        // Execute the tool and get result
+        let result = this.executeClientTool(tool_name, parameters);
+        
+        // Send response back to agent
+        this.send({
+          type: "client_tool_result",
+          tool_call_id: tool_call_id,
+          result: result || "Tool executed successfully"
+        });
+        
+        console.log(`✅ Tool ${tool_name} executed, result sent back`);
+        
+      } catch (error) {
+        console.error('❌ Error handling client tool call:', error);
+        
+        // Send error response back to agent
+        if (message.client_tool_call_event?.tool_call_id) {
+          this.send({
+            type: "client_tool_result", 
+            tool_call_id: message.client_tool_call_event.tool_call_id,
+            result: `Error: ${error.message}`
+          });
+        }
+      }
+    }
+    
+    executeClientTool(toolName, parameters) {
+      console.log(`🔨 Executing client tool: ${toolName}`);
+      
+      // Get configured client tools
+      const clientTools = this.getClientTools();
+      
+      if (clientTools && typeof clientTools[toolName] === 'function') {
+        console.log(`✅ Found tool function: ${toolName}`);
+        return clientTools[toolName](parameters);
+      }
+      
+      // Default tools available on all widgets
+      switch (toolName) {
+        case 'showAlert':
+          const message = parameters?.message || 'Alert from AI Assistant';
+          alert(message);
+          return `Alert shown: ${message}`;
+          
+        case 'openUrl':
+          const url = parameters?.url;
+          if (url) {
+            window.open(url, '_blank');
+            return `Opened URL: ${url}`;
+          }
+          return 'Error: No URL provided';
+          
+        case 'scrollToElement':
+          const selector = parameters?.selector;
+          if (selector) {
+            const element = document.querySelector(selector);
+            if (element) {
+              element.scrollIntoView({ behavior: 'smooth' });
+              return `Scrolled to element: ${selector}`;
+            }
+            return `Element not found: ${selector}`;
+          }
+          return 'Error: No selector provided';
+          
+        case 'highlightElement':
+          const highlightSelector = parameters?.selector;
+          if (highlightSelector) {
+            const element = document.querySelector(highlightSelector);
+            if (element) {
+              element.style.outline = '3px solid #ff6b6b';
+              element.style.outlineOffset = '2px';
+              setTimeout(() => {
+                element.style.outline = '';
+                element.style.outlineOffset = '';
+              }, 3000);
+              return `Highlighted element: ${highlightSelector}`;
+            }
+            return `Element not found: ${highlightSelector}`;
+          }
+          return 'Error: No selector provided';
+          
+        default:
+          console.warn(`⚠️ Unknown tool: ${toolName}`);
+          return `Unknown tool: ${toolName}`;
+      }
+    }
+    
+    getClientTools() {
+      // Check if client tools are configured globally
+      if (window.threedottsWidget && window.threedottsWidget.clientTools) {
+        return window.threedottsWidget.clientTools;
+      }
+      return null;
     }
 
     send(message) {
