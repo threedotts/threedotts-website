@@ -1045,7 +1045,17 @@ const widgetServe = async (req: Request): Promise<Response> => {
     }
 
     sendAudioChunk(audioData) {
-      if (!this.isConnected) return;
+      // Check if WebSocket is closing or closed
+      if (!this.isConnected || !this.ws || this.ws.readyState !== WebSocket.OPEN) {
+        if (this.ws && this.ws.readyState === WebSocket.CLOSING) {
+          console.log('🛑 WebSocket is closing, stopping audio recording...');
+          this.isConnected = false;
+          if (this.audioRecorder) {
+            this.audioRecorder.stop();
+          }
+        }
+        return;
+      }
       
       // Convert ArrayBuffer to base64 as required by the API
       const uint8Array = new Uint8Array(audioData);
