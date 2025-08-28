@@ -108,7 +108,7 @@ const widgetScript = `
                      Math.random().toString(36).substring(7);
     sessionStorage.setItem('threedotts-session-id', sessionId);
     
-    widgetIframe.src = \`https://d641cc7c-1eb2-4b38-9c11-73630dae5f26.sandbox.lovable.dev/embedded-widget?sessionId=\${sessionId}\`;
+    widgetIframe.src = \`https://threedottspro.com/embedded-widget?sessionId=\${sessionId}\`;
     widgetIframe.allow = 'microphone';
     widgetIframe.title = 'ThreeDotts AI Widget';
     
