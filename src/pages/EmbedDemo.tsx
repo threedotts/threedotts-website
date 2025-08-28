@@ -311,6 +311,45 @@ const EmbedDemo = () => {
           </CardContent>
         </Card>
 
+        {/* Custom Tools Example */}
+        <Card>
+          <CardHeader>
+            <CardTitle>🧰 Custom Tools Example</CardTitle>
+            <CardDescription>
+              See how to create custom tools that the AI agent can call on your website
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Learn how to implement custom tools that allow the AI agent to interact with your website's functionality. 
+              Our example shows an e-commerce site with tools for adding products to cart, getting product info, and more.
+            </p>
+            <div className="grid md:grid-cols-2 gap-4">
+              <Button 
+                variant="default"
+                className="justify-start"
+                onClick={() => window.open('/custom-tools-example', '_blank')}
+              >
+                <ExternalLink className="w-4 h-4 mr-2" />
+                View Live Example
+              </Button>
+              <Button 
+                variant="outline"
+                className="justify-start"
+                onClick={() => window.open('https://github.com/your-repo/custom-tools-docs', '_blank')}
+              >
+                <ExternalLink className="w-4 h-4 mr-2" />
+                View Documentation
+              </Button>
+            </div>
+            <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+              <p className="text-sm text-blue-800 dark:text-blue-200">
+                <strong>Try it:</strong> In the example, ask the AI "Add the laptop to my cart" or "Show me what's in my cart" to see custom tools in action!
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Download Links */}
         <Card>
           <CardHeader>
