@@ -17,16 +17,16 @@ const EmbedDemo = () => {
     
     // Create and load widget script
     const script = document.createElement('script');
-    script.src = 'https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?v=36';
+    script.src = 'https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?organizationId=550e8400-e29b-41d4-a716-446655440000&v=37';
     script.onload = () => {
       console.log('✅ Widget script loaded, configuring...');
       // Configure widget when loaded
       setTimeout(() => {
         if ((window as any).threedottsWidget) {
           (window as any).threedottsWidget.configure({
-            agentId: 'agent_01k02ete3tfjgrq97y8a7v541y'
+            organizationId: '550e8400-e29b-41d4-a716-446655440000' // Example organization ID
           });
-          console.log('✅ Embed demo widget configured!');
+          console.log('✅ Embed demo widget configured with organizationId!');
         } else {
           console.error('❌ Widget not found after loading script');
         }
@@ -48,30 +48,32 @@ const EmbedDemo = () => {
   }, []);
 
   const embedCode = `<!-- ThreeDotts AI Widget -->
-<script src="https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?v=36"></script>
+<script src="https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?organizationId=your-organization-id&v=37"></script>
+
+<!-- OR configure via JavaScript -->
+<script src="https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?v=37"></script>
 <script>
-  // Configure the agent ID
+  // Configure with your Organization ID
   window.addEventListener('load', function() {
     if (window.threedottsWidget) {
       window.threedottsWidget.configure({
-        agentId: 'YOUR_AGENT_ID'
+        organizationId: 'your-organization-id'
       });
     }
   });
 </script>`;
 
   const advancedEmbedCode = `<!-- Alternative: Use URL parameter -->
-<script src="https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script"></script>
-<!-- Make sure your page URL includes: yoursite.com?agentId=YOUR_AGENT_ID -->
+<script src="https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?organizationId=your-org-id&v=37"></script>
 
-<!-- OR configure via JavaScript -->
-<script src="https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script"></script>
+<!-- OR configure via JavaScript with additional options -->
+<script src="https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?v=37"></script>
 <script>
-  // Wait for the widget to load, then configure
   window.addEventListener('load', function() {
     if (window.threedottsWidget) {
       window.threedottsWidget.configure({
-        agentId: 'YOUR_AGENT_ID'
+        organizationId: 'your-organization-id',
+        // Additional configuration options can be added here
       });
     }
   });
@@ -161,7 +163,7 @@ const EmbedDemo = () => {
             </div>
             <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
               <p className="text-sm text-blue-800 dark:text-blue-200">
-                <strong>Note:</strong> Replace "YOUR_AGENT_ID" with your actual ElevenLabs agent ID. The agentId can be set via JavaScript configuration or by adding ?agentId=YOUR_AGENT_ID to your page URL.
+                <strong>Note:</strong> Replace "your-organization-id" with your actual Organization ID. The widget will automatically use your organization's configured ElevenLabs agent and API key.
               </p>
             </div>
           </CardContent>
@@ -200,18 +202,22 @@ const EmbedDemo = () => {
             <ol className="space-y-3 text-sm">
               <li className="flex gap-3">
                 <span className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-semibold">1</span>
-                <span>Get your ElevenLabs agent ID from your dashboard</span>
+                <span>Get your Organization ID from your dashboard</span>
               </li>
               <li className="flex gap-3">
                 <span className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-semibold">2</span>
-                <span>Add the script tag to your website's HTML (preferably before closing <code className="bg-muted px-1 rounded">&lt;/body&gt;</code> tag)</span>
+                <span>Set up your ElevenLabs agent ID and API key in organization settings</span>
               </li>
               <li className="flex gap-3">
                 <span className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-semibold">3</span>
-                <span>Configure your agent ID using the widget API or URL parameters</span>
+                <span>Add the script tag to your website's HTML (preferably before closing <code className="bg-muted px-1 rounded">&lt;/body&gt;</code> tag)</span>
               </li>
               <li className="flex gap-3">
                 <span className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-semibold">4</span>
+                <span>Configure your organization ID using the widget API or URL parameters</span>
+              </li>
+              <li className="flex gap-3">
+                <span className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-semibold">5</span>
                 <span>Test the widget on your website</span>
               </li>
             </ol>
@@ -235,7 +241,7 @@ const EmbedDemo = () => {
             </p>
             <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
               <p className="text-sm text-amber-800 dark:text-amber-200">
-                <strong>Important:</strong> Make sure to configure your ElevenLabs agent ID and WebSocket endpoints before using in production.
+                <strong>Important:</strong> Configure your organization's ElevenLabs agent ID and API key in the dashboard before using in production. Each organization has its own secure configuration.
               </p>
             </div>
           </CardContent>

@@ -366,6 +366,44 @@ export type Database = {
         }
         Relationships: []
       }
+      organization_agent_config: {
+        Row: {
+          api_key_secret_name: string
+          created_at: string
+          id: string
+          organization_id: string
+          primary_agent_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          api_key_secret_name: string
+          created_at?: string
+          id?: string
+          organization_id: string
+          primary_agent_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          api_key_secret_name?: string
+          created_at?: string
+          id?: string
+          organization_id?: string
+          primary_agent_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_agent_config_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_invitations: {
         Row: {
           accepted_at: string | null

@@ -1,19 +1,81 @@
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { corsHeaders } from '../_shared/cors.ts'
 
-const serve = async (req: Request): Promise<Response> => {
+const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+const widgetServe = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    console.log('📦 Widget script requested');
+
+    // Extract organizationId from query params if provided
+    const url = new URL(req.url);
+    const organizationId = url.searchParams.get('organizationId');
+    
+    let agentId = 'agent_01k02ete3tfjgrq97y8a7v541y'; // Default fallback
+    let elevenLabsApiKey = Deno.env.get('ELEVENLABS_API_KEY'); // Default API key
+    
+    // If organizationId is provided, lookup the configuration
+    if (organizationId) {
+      console.log('🔍 Looking up config for organization:', organizationId);
+      
+      try {
+        // Fetch organization agent config
+        const { data: config, error } = await supabase
+          .from('organization_agent_config')
+          .select('primary_agent_id, api_key_secret_name')
+          .eq('organization_id', organizationId)
+          .eq('status', 'active')
+          .single();
+        
+        if (error) {
+          console.error('❌ Error fetching org config:', error);
+          // Continue with defaults
+        } else if (config) {
+          console.log('✅ Found org config:', config);
+          agentId = config.primary_agent_id;
+          
+          // Fetch API key from Supabase secrets using the secret name
+          try {
+            // Use direct SQL function to get secret
+            const { data: secretData, error: secretError } = await supabase
+              .rpc('vault.read_secret', { secret_name: config.api_key_secret_name });
+              
+            if (secretError) {
+              console.error('❌ Error fetching secret:', secretError);
+            } else if (secretData) {
+              elevenLabsApiKey = secretData;
+              console.log('✅ Retrieved API key from secrets');
+            }
+          } catch (secretError) {
+            console.error('❌ Error fetching secret:', secretError);
+            // Continue with default API key
+          }
+        }
+      } catch (dbError) {
+        console.error('❌ Database error:', dbError);
+        // Continue with defaults
+      }
+    }
+    
+    console.log('🎯 Using agent ID:', agentId);
+
     const widgetScript = `
 (function() {
   'use strict';
   
-  // Configuration
+  // Configuration - support both agentId and organizationId
   const config = {
-    agentId: null // Will be set from URL params or config
+    agentId: '${agentId}', // Pre-resolved from server
+    organizationId: '${organizationId || ''}' // Store org ID if provided
   };
 
   // Widget state - exactly like useGlobalConvaiState
@@ -693,7 +755,7 @@ const serve = async (req: Request): Promise<Response> => {
       buttonsContainer.innerHTML = \`
         <button class="threedotts-button" onclick="window.threedottsWidget.connect()">
           <svg class="icon-phone" viewBox="0 0 24 24">
-            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07a19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
           </svg>
           Ligar
         </button>
@@ -778,12 +840,16 @@ const serve = async (req: Request): Promise<Response> => {
   const actions = {
     handleConnect: async () => {
       try {
-        const agentId = config.agentId || new URLSearchParams(window.location.search).get('agentId');
+        // Use the pre-resolved agent ID from server configuration
+        const agentId = config.agentId;
         
         if (!agentId) {
-          alert('Agent ID não configurado. Configure usando: window.threedottsWidget.configure({ agentId: "YOUR_AGENT_ID" })');
+          alert('Agent ID não configurado. Verifique a configuração da organização.');
           return;
         }
+
+        console.log('🔧 Connecting with agent ID:', agentId);
+        console.log('🏢 Organization ID:', config.organizationId || 'not provided');
 
         // Show connecting state
         state.isConnecting = true;
@@ -820,14 +886,26 @@ const serve = async (req: Request): Promise<Response> => {
     }
   };
 
-  // Global API - exactly like the component interface
+  // Global API - now supports both agentId and organizationId configuration
   window.threedottsWidget = {
     connect: actions.handleConnect,
     disconnect: actions.handleDisconnect,
     toggleMute: actions.toggleMute,
     configure: (options) => {
       console.log('🔧 Configuring widget with options:', options);
-      Object.assign(config, options);
+      
+      // Support both agentId (direct) and organizationId (server-resolved)
+      if (options.agentId) {
+        config.agentId = options.agentId;
+        console.log('✅ Agent ID configured:', config.agentId);
+      }
+      
+      if (options.organizationId) {
+        config.organizationId = options.organizationId;
+        console.log('✅ Organization ID configured:', config.organizationId);
+        console.log('ℹ️ Agent ID was pre-resolved on server:', config.agentId);
+      }
+      
       console.log('✅ Widget configuration updated:', config);
     }
   };
@@ -892,4 +970,4 @@ const serve = async (req: Request): Promise<Response> => {
   }
 };
 
-Deno.serve(serve);
+Deno.serve(widgetServe);
