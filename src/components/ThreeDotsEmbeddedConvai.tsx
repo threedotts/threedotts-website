@@ -25,6 +25,25 @@ const ThreeDotsEmbeddedConvai: React.FC<ThreeDotsEmbeddedConvaiProps> = ({
     
     script.onload = () => {
       console.log('✅ Widget script loaded successfully');
+      
+      // Define client tools globally on window
+      (window as any).redirectToExternalURL = (parameters: { url: string }) => {
+        const url = parameters?.url;
+        if (url) {
+          console.log('🔗 Redirecting to:', url);
+          // Perform the actual redirect
+          if (url.startsWith('http')) {
+            window.open(url, '_blank');
+            return `Opened ${url} in new tab`;
+          } else {
+            window.location.href = url;
+            return `Redirected to ${url}`;
+          }
+        } else {
+          throw new Error('URL parameter is required');
+        }
+      };
+      
       // Configure widget when loaded
       setTimeout(() => {
         if ((window as any).threedottsWidget) {
