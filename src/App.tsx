@@ -35,8 +35,6 @@ import NotFound from "./pages/NotFound";
 import AcceptInvitation from "./pages/AcceptInvitation";
 import CustomWidgetDemo from "./components/CustomWidgetDemo";
 import EmbedDemo from "./pages/EmbedDemo";
-// Import embedded widget component for iframe-based widget
-import EmbeddedWidget from "./pages/EmbeddedWidget";
 import { ChatWidgetErrorBoundary } from "./components/ChatWidgetErrorBoundary";
 import { SecurityHeaders } from "./components/SecurityHeaders";
 import { OrganizationMemberListener } from "./components/OrganizationMemberListener";
@@ -98,7 +96,6 @@ const App = () => {
               <Route path="/scheduling" element={<Scheduling />} />
               <Route path="/custom-widget-demo" element={<CustomWidgetDemo />} />
               <Route path="/embed-demo" element={<EmbedDemo />} />
-              <Route path="/embedded-widget" element={<EmbeddedWidget />} />
               <Route path="/accept-invitation/:token" element={<AcceptInvitation />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
