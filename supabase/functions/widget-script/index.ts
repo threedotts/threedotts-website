@@ -972,7 +972,7 @@ const widgetServe = async (req: Request): Promise<Response> => {
         }
         
         const { tool_call_id, tool_name, parameters } = toolCall;
-        console.log(`🔧 Executing tool: ${tool_name} with params:`, parameters);
+        console.log('🔧 Executing tool: ' + tool_name + ' with params:', parameters);
         
         // Execute the tool and get result
         let result = this.executeClientTool(tool_name, parameters);
@@ -984,7 +984,7 @@ const widgetServe = async (req: Request): Promise<Response> => {
           result: result || "Tool executed successfully"
         });
         
-        console.log(`✅ Tool ${tool_name} executed, result sent back`);
+        console.log('✅ Tool ' + tool_name + ' executed, result sent back');
         
       } catch (error) {
         console.error('❌ Error handling client tool call:', error);
@@ -1001,13 +1001,13 @@ const widgetServe = async (req: Request): Promise<Response> => {
     }
     
     executeClientTool(toolName, parameters) {
-      console.log(`🔨 Executing client tool: ${toolName}`);
+      console.log('🔨 Executing client tool: ' + toolName);
       
       // Get configured client tools
       const clientTools = this.getClientTools();
       
       if (clientTools && typeof clientTools[toolName] === 'function') {
-        console.log(`✅ Found tool function: ${toolName}`);
+        console.log('✅ Found tool function: ' + toolName);
         return clientTools[toolName](parameters);
       }
       
@@ -1016,13 +1016,13 @@ const widgetServe = async (req: Request): Promise<Response> => {
         case 'showAlert':
           const message = parameters?.message || 'Alert from AI Assistant';
           alert(message);
-          return `Alert shown: ${message}`;
+          return 'Alert shown: ' + message;
           
         case 'openUrl':
           const url = parameters?.url;
           if (url) {
             window.open(url, '_blank');
-            return `Opened URL: ${url}`;
+            return 'Opened URL: ' + url;
           }
           return 'Error: No URL provided';
           
@@ -1032,9 +1032,9 @@ const widgetServe = async (req: Request): Promise<Response> => {
             const element = document.querySelector(selector);
             if (element) {
               element.scrollIntoView({ behavior: 'smooth' });
-              return `Scrolled to element: ${selector}`;
+              return 'Scrolled to element: ' + selector;
             }
-            return `Element not found: ${selector}`;
+            return 'Element not found: ' + selector;
           }
           return 'Error: No selector provided';
           
@@ -1049,15 +1049,15 @@ const widgetServe = async (req: Request): Promise<Response> => {
                 element.style.outline = '';
                 element.style.outlineOffset = '';
               }, 3000);
-              return `Highlighted element: ${highlightSelector}`;
+              return 'Highlighted element: ' + highlightSelector;
             }
-            return `Element not found: ${highlightSelector}`;
+            return 'Element not found: ' + highlightSelector;
           }
           return 'Error: No selector provided';
           
         default:
-          console.warn(`⚠️ Unknown tool: ${toolName}`);
-          return `Unknown tool: ${toolName}`;
+          console.warn('⚠️ Unknown tool: ' + toolName);
+          return 'Unknown tool: ' + toolName;
       }
     }
     
