@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Tools Example - E-commerce Site</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .product { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 8px; }
+        .cart { background: #f0f0f0; padding: 15px; margin: 20px 0; border-radius: 8px; }
+        .notification { position: fixed; top: 20px; right: 20px; background: #4CAF50; color: white; padding: 15px; border-radius: 8px; display: none; }
+        .highlight-product { outline: 3px solid #ff6b6b !important; outline-offset: 2px; }
+    </style>
+</head>
+<body>
+    <h1>E-commerce Site with Custom AI Tools</h1>
+    
+    <!-- Sample Products -->
+    <div class="product" data-product-id="123" data-product-name="Laptop" data-price="999.99">
+        <h3>Gaming Laptop</h3>
+        <p>Price: $999.99</p>
+        <p>High-performance gaming laptop with RTX 4080</p>
+        <button onclick="addToCart('123')">Add to Cart</button>
+    </div>
+    
+    <div class="product" data-product-id="456" data-product-name="Mouse" data-price="49.99">
+        <h3>Gaming Mouse</h3>
+        <p>Price: $49.99</p>
+        <p>RGB gaming mouse with 12000 DPI</p>
+        <button onclick="addToCart('456')">Add to Cart</button>
+    </div>
+    
+    <!-- Cart Display -->
+    <div class="cart">
+        <h3>Shopping Cart</h3>
+        <div id="cart-items">No items in cart</div>
+        <div id="cart-total">Total: $0.00</div>
+    </div>
+    
+    <!-- Notification -->
+    <div id="notification" class="notification"></div>
+    
+    <!-- Load the widget script -->
+    <script src="https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?organizationId=1e926240-b303-444b-9f8c-57abd9fa657b&v=46"></script>
+    
+    <script>
+        // Simulate a simple shopping cart
+        let cart = [];
+        
+        // Regular website functions
+        function addToCart(productId) {
+            const productElement = document.querySelector(`[data-product-id="${productId}"]`);
+            if (productElement) {
+                const product = {
+                    id: productId,
+                    name: productElement.dataset.productName,
+                    price: parseFloat(productElement.dataset.price)
+                };
+                cart.push(product);
+                updateCartDisplay();
+                showNotification(`${product.name} added to cart!`);
+            }
+        }
+        
+        function updateCartDisplay() {
+            const cartItems = document.getElementById('cart-items');
+            const cartTotal = document.getElementById('cart-total');
+            
+            if (cart.length === 0) {
+                cartItems.innerHTML = 'No items in cart';
+                cartTotal.innerHTML = 'Total: $0.00';
+            } else {
+                cartItems.innerHTML = cart.map(item => 
+                    `<div>${item.name} - $${item.price}</div>`
+                ).join('');
+                
+                const total = cart.reduce((sum, item) => sum + item.price, 0);
+                cartTotal.innerHTML = `Total: $${total.toFixed(2)}`;
+            }
+        }
+        
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+        
+        // ====================================
+        // CUSTOM TOOLS FOR AI AGENT
+        // ====================================
+        
+        // Wait for widget to load, then define custom tools
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                if (window.threedottsWidget) {
+                    // Configure the widget
+                    window.threedottsWidget.configure({
+                        organizationId: '1e926240-b303-444b-9f8c-57abd9fa657b'
+                    });
+                    
+                    // Define custom tools that the AI agent can call
+                    window.threedottsWidget.clientTools = {
+                        
+                        // Tool 1: Add product to cart
+                        addProductToCart: function(parameters) {
+                            console.log('🛒 AI called addProductToCart with:', parameters);
+                            
+                            const { productId } = parameters;
+                            if (!productId) {
+                                return 'Error: Product ID required';
+                            }
+                            
+                            const productElement = document.querySelector(`[data-product-id="${productId}"]`);
+                            if (!productElement) {
+                                return `Error: Product ${productId} not found`;
+                            }
+                            
+                            const product = {
+                                id: productId,
+                                name: productElement.dataset.productName,
+                                price: parseFloat(productElement.dataset.price)
+                            };
+                            
+                            cart.push(product);
+                            updateCartDisplay();
+                            showNotification(`AI added ${product.name} to your cart!`);
+                            
+                            return `Successfully added ${product.name} ($${product.price}) to cart. Cart now has ${cart.length} items.`;
+                        },
+                        
+                        // Tool 2: Get product information
+                        getProductInfo: function(parameters) {
+                            console.log('📋 AI called getProductInfo with:', parameters);
+                            
+                            const { productId } = parameters;
+                            if (!productId) {
+                                return 'Error: Product ID required';
+                            }
+                            
+                            const productElement = document.querySelector(`[data-product-id="${productId}"]`);
+                            if (!productElement) {
+                                return `Product ${productId} not found`;
+                            }
+                            
+                            const productInfo = {
+                                id: productId,
+                                name: productElement.dataset.productName,
+                                price: productElement.dataset.price,
+                                description: productElement.querySelector('p:last-of-type').textContent
+                            };
+                            
+                            return `Product: ${productInfo.name}, Price: $${productInfo.price}, Description: ${productInfo.description}`;
+                        },
+                        
+                        // Tool 3: Show cart contents
+                        showCartContents: function(parameters) {
+                            console.log('🛍️ AI called showCartContents');
+                            
+                            if (cart.length === 0) {
+                                return 'Your cart is empty';
+                            }
+                            
+                            const total = cart.reduce((sum, item) => sum + item.price, 0);
+                            const itemsList = cart.map(item => `${item.name} ($${item.price})`).join(', ');
+                            
+                            return `Cart contains ${cart.length} items: ${itemsList}. Total: $${total.toFixed(2)}`;
+                        },
+                        
+                        // Tool 4: Clear cart
+                        clearCart: function(parameters) {
+                            console.log('🗑️ AI called clearCart');
+                            
+                            const itemCount = cart.length;
+                            cart = [];
+                            updateCartDisplay();
+                            showNotification('Cart cleared by AI assistant');
+                            
+                            return `Cleared ${itemCount} items from cart`;
+                        },
+                        
+                        // Tool 5: Highlight product
+                        highlightProduct: function(parameters) {
+                            console.log('✨ AI called highlightProduct with:', parameters);
+                            
+                            const { productId } = parameters;
+                            if (!productId) {
+                                return 'Error: Product ID required';
+                            }
+                            
+                            const productElement = document.querySelector(`[data-product-id="${productId}"]`);
+                            if (!productElement) {
+                                return `Product ${productId} not found`;
+                            }
+                            
+                            // Remove previous highlights
+                            document.querySelectorAll('.highlight-product').forEach(el => {
+                                el.classList.remove('highlight-product');
+                            });
+                            
+                            // Add highlight
+                            productElement.classList.add('highlight-product');
+                            
+                            // Auto-remove highlight after 5 seconds
+                            setTimeout(() => {
+                                productElement.classList.remove('highlight-product');
+                            }, 5000);
+                            
+                            // Scroll to product
+                            productElement.scrollIntoView({ behavior: 'smooth' });
+                            
+                            return `Highlighted and scrolled to ${productElement.dataset.productName}`;
+                        }
+                    };
+                    
+                    console.log('✅ Custom tools configured:', Object.keys(window.threedottsWidget.clientTools));
+                }
+            }, 500);
+        });
+    </script>
+    
+    <div style="margin-top: 40px; padding: 20px; background: #f9f9f9; border-radius: 8px;">
+        <h3>How to Test Custom Tools:</h3>
+        <p>When the AI widget loads, try asking it things like:</p>
+        <ul>
+            <li>"Add the laptop to my cart"</li>
+            <li>"What products are available?"</li>
+            <li>"Show me what's in my cart"</li>
+            <li>"Clear my cart"</li>
+            <li>"Highlight the gaming mouse"</li>
+        </ul>
+        <p><strong>The AI agent will automatically call the appropriate custom tools based on your requests!</strong></p>
+    </div>
+</body>
+</html>
