@@ -12,5 +12,8 @@ verify_jwt = false
 [functions.get-elevenlabs-signed-url]
 verify_jwt = false
 
+[functions.voice-proxy]
+verify_jwt = false
+
 [functions.widget-script]
 verify_jwt = false
