@@ -896,17 +896,6 @@ const widgetServe = async (req: Request): Promise<Response> => {
           console.log('❌ WebSocket closed:', event.code, event.reason);
           this.isConnected = false;
           this.onConnectionChange(false);
-          
-          // Auto-reconnect for unexpected closures (like error 1008)
-          if (event.code !== 1000 && event.code !== 1001) { // 1000 = normal, 1001 = going away
-            console.log('🔄 Attempting auto-reconnect in 2 seconds...');
-            setTimeout(() => {
-              if (!this.isConnected) {
-                console.log('🔄 Auto-reconnecting...');
-                this.connect();
-              }
-            }, 2000);
-          }
         };
 
         this.ws.onerror = (error) => {
@@ -1046,11 +1035,12 @@ const widgetServe = async (req: Request): Promise<Response> => {
     }
 
     send(message) {
+      console.log('🔍 WebSocket state check - readyState:', this.ws?.readyState, 'isConnected:', this.isConnected);
       if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-        console.log('📤 Sending:', message.type);
+        console.log('📤 Sending:', message.type, JSON.stringify(message));
         this.ws.send(JSON.stringify(message));
       } else {
-        console.warn('⚠️ WebSocket not ready, cannot send:', message.type);
+        console.warn('⚠️ WebSocket not ready, cannot send:', message.type, 'readyState:', this.ws?.readyState);
       }
     }
 
