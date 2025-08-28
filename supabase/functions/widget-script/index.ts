@@ -645,7 +645,6 @@ const widgetServe = async (req: Request): Promise<Response> => {
         
         this.stream = await navigator.mediaDevices.getUserMedia({
           audio: {
-            sampleRate: 16000, // Voice AI expects 16kHz
             channelCount: 1,
             echoCancellation: true,
             noiseSuppression: true,
@@ -653,22 +652,41 @@ const widgetServe = async (req: Request): Promise<Response> => {
           }
         });
         
-        this.audioContext = new AudioContext({
-          sampleRate: 16000,
-        });
+        // Let AudioContext use the stream's native sample rate to avoid mismatch
+        this.audioContext = new AudioContext();
         
         this.source = this.audioContext.createMediaStreamSource(this.stream);
         this.processor = this.audioContext.createScriptProcessor(1024, 1, 1);
+        
+        console.log('AudioContext sample rate:', this.audioContext.sampleRate);
+        console.log('Stream sample rate:', this.stream.getAudioTracks()[0].getSettings().sampleRate);
         
         this.processor.onaudioprocess = (e) => {
           if (!this.isRecording) return;
           
           const inputData = e.inputBuffer.getChannelData(0);
           
+          // Resample to 16kHz if necessary
+          let processedData = inputData;
+          const currentSampleRate = this.audioContext.sampleRate;
+          const targetSampleRate = 16000;
+          
+          if (currentSampleRate !== targetSampleRate) {
+            // Simple downsampling - take every nth sample
+            const ratio = currentSampleRate / targetSampleRate;
+            const newLength = Math.floor(inputData.length / ratio);
+            processedData = new Float32Array(newLength);
+            
+            for (let i = 0; i < newLength; i++) {
+              const sourceIndex = Math.floor(i * ratio);
+              processedData[i] = inputData[sourceIndex];
+            }
+          }
+          
           // Convert Float32Array to 16-bit PCM
-          const pcmData = new Int16Array(inputData.length);
-          for (let i = 0; i < inputData.length; i++) {
-            const s = Math.max(-1, Math.min(1, inputData[i]));
+          const pcmData = new Int16Array(processedData.length);
+          for (let i = 0; i < processedData.length; i++) {
+            const s = Math.max(-1, Math.min(1, processedData[i]));
             pcmData[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
           }
           
