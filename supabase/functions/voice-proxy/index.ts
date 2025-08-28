@@ -60,20 +60,20 @@ serve(async (req) => {
     // Upgrade client connection to WebSocket
     const { socket, response } = Deno.upgradeWebSocket(req);
     
-    // Connect to ElevenLabs
-    const elevenLabsUrl = `wss://api.us.elevenlabs.io/v1/convai/conversation?agent_id=${config.primary_agent_id}`;
-    const elevenLabsSocket = new WebSocket(elevenLabsUrl);
+    // Connect to voice service API
+    const voiceApiUrl = `wss://api.us.elevenlabs.io/v1/convai/conversation?agent_id=${config.primary_agent_id}`;
+    const voiceSocket = new WebSocket(voiceApiUrl);
 
-    // Forward messages from client to ElevenLabs
+    // Forward messages from client to voice API
     socket.onmessage = (event) => {
       console.log('📤 Client -> Voice API:', JSON.parse(event.data).type || 'audio_chunk');
-      if (elevenLabsSocket.readyState === WebSocket.OPEN) {
-        elevenLabsSocket.send(event.data);
+      if (voiceSocket.readyState === WebSocket.OPEN) {
+        voiceSocket.send(event.data);
       }
     };
 
-    // Forward messages from ElevenLabs to client
-    elevenLabsSocket.onmessage = (event) => {
+    // Forward messages from voice API to client
+    voiceSocket.onmessage = (event) => {
       const message = JSON.parse(event.data);
       console.log('📥 Voice API -> Client:', message.type || 'unknown');
       if (socket.readyState === WebSocket.OPEN) {
@@ -81,19 +81,19 @@ serve(async (req) => {
       }
     };
 
-    // Handle ElevenLabs connection events
-    elevenLabsSocket.onopen = () => {
+    // Handle voice API connection events
+    voiceSocket.onopen = () => {
       console.log('✅ Connected to Voice API');
     };
 
-    elevenLabsSocket.onclose = (event) => {
+    voiceSocket.onclose = (event) => {
       console.log('❌ Voice API disconnected:', event.code, event.reason);
       if (socket.readyState === WebSocket.OPEN) {
         socket.close();
       }
     };
 
-    elevenLabsSocket.onerror = (error) => {
+    voiceSocket.onerror = (error) => {
       console.error('❌ Voice API error:', error);
       if (socket.readyState === WebSocket.OPEN) {
         socket.close();
@@ -107,23 +107,23 @@ serve(async (req) => {
 
     socket.onclose = (event) => {
       console.log('❌ Client disconnected:', event.code, event.reason);
-      if (elevenLabsSocket.readyState === WebSocket.OPEN) {
-        elevenLabsSocket.close();
+      if (voiceSocket.readyState === WebSocket.OPEN) {
+        voiceSocket.close();
       }
     };
 
     socket.onerror = (error) => {
       console.error('❌ Client error:', error);
-      if (elevenLabsSocket.readyState === WebSocket.OPEN) {
-        elevenLabsSocket.close();
+      if (voiceSocket.readyState === WebSocket.OPEN) {
+        voiceSocket.close();
       }
     };
 
     // Connection timeout after 10 seconds
     setTimeout(() => {
-      if (elevenLabsSocket.readyState === WebSocket.CONNECTING) {
+      if (voiceSocket.readyState === WebSocket.CONNECTING) {
         console.log('⏰ Connection timeout');
-        elevenLabsSocket.close();
+        voiceSocket.close();
         socket.close();
       }
     }, 10000);
