@@ -20,21 +20,6 @@ const EmbeddedWidget: React.FC<EmbeddedWidgetProps> = () => {
     position: 'bottom-right'
   });
 
-  // Send state updates to parent for persistence
-  useEffect(() => {
-    const widgetState = {
-      isConnected: state.isConnected,
-      isMuted: state.isMuted,
-      isExpanded: state.isExpanded,
-      messages: state.messages
-    };
-    
-    window.parent.postMessage({
-      type: 'WIDGET_STATE_UPDATE',
-      state: widgetState
-    }, '*');
-  }, [state.isConnected, state.isMuted, state.isExpanded, state.messages]);
-
   // Listen for configuration messages from parent window
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
@@ -42,16 +27,10 @@ const EmbeddedWidget: React.FC<EmbeddedWidgetProps> = () => {
         console.log('📱 Widget received configuration:', event.data.config);
         setConfig(prev => ({ ...prev, ...event.data.config }));
         
-        // Store agentId for connection
-        if (event.data.config.agentId) {
+        // Auto-connect if agentId is provided
+        if (event.data.config.agentId && !state.isConnected) {
+          // Store agentId for connection
           window.THREEDOTTS_AGENT_ID = event.data.config.agentId;
-        }
-        
-        // Restore persisted state if available
-        if (event.data.persistedState) {
-          console.log('📦 Restoring persisted state:', event.data.persistedState);
-          // Note: The state restoration would need to be implemented in the ConvaiProvider
-          // For now, we just log it to show the persistence is working
         }
       }
     };
@@ -62,7 +41,7 @@ const EmbeddedWidget: React.FC<EmbeddedWidgetProps> = () => {
     window.parent.postMessage({ type: 'WIDGET_READY' }, '*');
     
     return () => window.removeEventListener('message', handleMessage);
-  }, []);
+  }, [state.isConnected]);
 
   // Custom connect function that uses the configured agentId
   const handleConnect = async () => {
