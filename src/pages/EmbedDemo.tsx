@@ -8,8 +8,11 @@ import { useEffect } from 'react';
 const EmbedDemo = () => {
   // Add embedded widget script to this page for testing
   useEffect(() => {
+    console.log('🔧 EmbedDemo useEffect triggered - adding widget script...');
+    
     // Check if script is already loaded
     if (document.querySelector('script[src*="widget-script"]')) {
+      console.log('⚠️ Widget script already exists, skipping...');
       return;
     }
 
@@ -24,9 +27,13 @@ const EmbedDemo = () => {
     
     // Add error handling for HTTP errors (script loads but returns error response)
     script.onload = () => {
+      console.log('📥 Script tag loaded, checking response...');
+      
       // Check if the script actually loaded JavaScript or returned an error
       fetch(script.src)
         .then(response => {
+          console.log('📊 Widget script fetch response:', response.status, response.statusText);
+          
           if (!response.ok) {
             response.text().then(errorText => {
               console.error('❌ Widget script returned error:', errorText);
@@ -46,8 +53,12 @@ const EmbedDemo = () => {
             });
             return;
           }
+          
+          console.log('✅ Widget script response OK');
         })
-        .catch(console.error);
+        .catch(fetchError => {
+          console.error('❌ Error fetching widget script:', fetchError);
+        });
       
       console.log('✅ Widget script loaded, configuring...');
       // Configure widget when loaded
@@ -58,14 +69,16 @@ const EmbedDemo = () => {
           });
           console.log('✅ Embed demo widget configured with organizationId!');
         } else {
-          console.error('❌ Widget not found after loading script');
+          console.error('❌ Widget not found after loading script - window.threedottsWidget is:', (window as any).threedottsWidget);
         }
       }, 100);
     };
     
+    console.log('📝 Adding script to document head...');
     document.head.appendChild(script);
     
     return () => {
+      console.log('🧹 Cleaning up widget script...');
       // Cleanup - remove script when component unmounts
       const existingScript = document.querySelector('script[src*="widget-script"]');
       if (existingScript) {
