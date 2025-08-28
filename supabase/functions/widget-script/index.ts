@@ -20,50 +20,86 @@ const widgetServe = async (req: Request): Promise<Response> => {
     const url = new URL(req.url);
     const organizationId = url.searchParams.get('organizationId');
     
-    let agentId = 'agent_01k02ete3tfjgrq97y8a7v541y'; // Default fallback
-    let elevenLabsApiKey = Deno.env.get('ELEVENLABS_API_KEY'); // Default API key
+    let agentId: string;
+    let elevenLabsApiKey: string;
     
-    // If organizationId is provided, lookup the configuration
-    if (organizationId) {
-      console.log('🔍 Looking up config for organization:', organizationId);
+    // organizationId is required - no fallback defaults
+    if (!organizationId) {
+      console.error('❌ Organization ID is required');
+      return new Response('Error: Organization ID is required', {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'text/plain' }
+      });
+    }
+    
+    console.log('🔍 Looking up config for organization:', organizationId);
+    
+    try {
+      // Fetch organization agent config
+      const { data: config, error } = await supabase
+        .from('organization_agent_config')
+        .select('primary_agent_id, api_key_secret_name')
+        .eq('organization_id', organizationId)
+        .eq('status', 'active')
+        .maybeSingle();
       
-      try {
-        // Fetch organization agent config
-        const { data: config, error } = await supabase
-          .from('organization_agent_config')
-          .select('primary_agent_id, api_key_secret_name')
-          .eq('organization_id', organizationId)
-          .eq('status', 'active')
-          .single();
-        
-        if (error) {
-          console.error('❌ Error fetching org config:', error);
-          // Continue with defaults
-        } else if (config) {
-          console.log('✅ Found org config:', config);
-          agentId = config.primary_agent_id;
-          
-          // Fetch API key from Supabase secrets using the secret name
-          try {
-            // Use direct SQL function to get secret
-            const { data: secretData, error: secretError } = await supabase
-              .rpc('vault.read_secret', { secret_name: config.api_key_secret_name });
-              
-            if (secretError) {
-              console.error('❌ Error fetching secret:', secretError);
-            } else if (secretData) {
-              elevenLabsApiKey = secretData;
-              console.log('✅ Retrieved API key from secrets');
-            }
-          } catch (secretError) {
-            console.error('❌ Error fetching secret:', secretError);
-            // Continue with default API key
-          }
-        }
-      } catch (dbError) {
-        console.error('❌ Database error:', dbError);
-        // Continue with defaults
+      if (error) {
+        console.error('❌ Database error fetching org config:', error);
+        return new Response('Error: Database error fetching organization configuration', {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'text/plain' }
+        });
       }
+      
+      if (!config) {
+        console.error('❌ No agent configuration found for organization:', organizationId);
+        console.error('Please add agent configuration in the organization_agent_config table');
+        return new Response('Error: No agent configuration found for this organization. Please contact your administrator to configure the AI agent settings.', {
+          status: 404,
+          headers: { ...corsHeaders, 'Content-Type': 'text/plain' }
+        });
+      }
+      
+      console.log('✅ Found org config:', config);
+      agentId = config.primary_agent_id;
+      
+      // Fetch API key from Supabase secrets using the secret name
+      try {
+        const { data: secretData, error: secretError } = await supabase
+          .rpc('vault.read_secret', { secret_name: config.api_key_secret_name });
+          
+        if (secretError) {
+          console.error('❌ Error fetching secret:', secretError);
+          return new Response('Error: Could not retrieve API key from secrets', {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'text/plain' }
+          });
+        }
+        
+        if (!secretData) {
+          console.error('❌ No API key found in secrets for:', config.api_key_secret_name);
+          return new Response('Error: API key not found in secrets. Please contact your administrator.', {
+            status: 404,
+            headers: { ...corsHeaders, 'Content-Type': 'text/plain' }
+          });
+        }
+        
+        elevenLabsApiKey = secretData;
+        console.log('✅ Retrieved API key from secrets');
+        
+      } catch (secretError) {
+        console.error('❌ Error fetching secret:', secretError);
+        return new Response('Error: Failed to retrieve API key', {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'text/plain' }
+        });
+      }
+    } catch (dbError) {
+      console.error('❌ Database connection error:', dbError);
+      return new Response('Error: Database connection failed', {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'text/plain' }
+      });
     }
     
     console.log('🎯 Using agent ID:', agentId);
