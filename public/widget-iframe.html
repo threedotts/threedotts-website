@@ -21,70 +21,89 @@
 </head>
 <body>
     <script>
+        console.log('🔧 [WIDGET IFRAME] Starting widget iframe initialization...');
+        
         // Get organizationId from URL params
         const urlParams = new URLSearchParams(window.location.search);
         const organizationId = urlParams.get('organizationId');
         
+        console.log('🔍 [WIDGET IFRAME] Organization ID:', organizationId);
+        
         if (organizationId) {
+            console.log('🚀 [WIDGET IFRAME] Loading widget script...');
+            
             // Load the widget script with the organizationId
             const script = document.createElement('script');
-            script.src = `https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?organizationId=${organizationId}&v=60`;
+            script.src = `https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?organizationId=${organizationId}&v=61`;
             script.onerror = (error) => {
-                console.error('❌ Failed to load widget script:', error);
+                console.error('❌ [WIDGET IFRAME] Failed to load widget script:', error);
             };
             
             script.onload = () => {
-                console.log('✅ Widget script loaded successfully in iframe');
+                console.log('✅ [WIDGET IFRAME] Widget script loaded successfully in iframe');
                 
                 // Define client tools globally on window (same as before)
                 window.redirectToExternalURL = (parameters) => {
+                    console.log('🔗 [WIDGET IFRAME] redirectToExternalURL called with:', parameters);
+                    
                     const url = parameters?.url;
                     if (url) {
-                        console.log('🔗 Redirecting to:', url);
+                        console.log('🔗 [WIDGET IFRAME] Processing redirect to:', url);
+                        
                         // For iframe, we need to communicate with parent window
                         if (url.startsWith('http')) {
+                            console.log('🌐 [WIDGET IFRAME] Sending openExternalURL message to parent');
                             // Send message to parent to open in new tab
                             parent.postMessage({
                                 type: 'openExternalURL',
                                 url: url
                             }, '*');
+                            console.log('✅ [WIDGET IFRAME] External URL message sent to parent');
                             return `Opened ${url} in new tab`;
                         } else {
+                            console.log('📍 [WIDGET IFRAME] Sending navigate message to parent');
                             // Send message to parent to navigate
                             parent.postMessage({
                                 type: 'navigate',
                                 url: url
                             }, '*');
+                            console.log('✅ [WIDGET IFRAME] Navigate message sent to parent');
                             return `Redirected to ${url}`;
                         }
                     } else {
+                        console.error('❌ [WIDGET IFRAME] No URL provided to redirectToExternalURL');
                         throw new Error('URL parameter is required');
                     }
                 };
                 
+                console.log('🔧 [WIDGET IFRAME] Client tools registered, configuring widget...');
+                
                 // Configure widget when loaded
                 setTimeout(() => {
                     if (window.threedottsWidget) {
+                        console.log('✅ [WIDGET IFRAME] Widget found, configuring with organizationId');
                         window.threedottsWidget.configure({
                             organizationId: organizationId
                         });
-                        console.log('✅ Widget configured with organizationId!');
+                        console.log('✅ [WIDGET IFRAME] Widget configured with organizationId:', organizationId);
                     } else {
-                        console.error('❌ Widget not found after loading script');
+                        console.error('❌ [WIDGET IFRAME] Widget not found after loading script');
                     }
                 }, 100);
             };
             
             document.head.appendChild(script);
+            console.log('📄 [WIDGET IFRAME] Script element added to head');
         } else {
-            console.error('❌ No organizationId provided to widget iframe');
+            console.error('❌ [WIDGET IFRAME] No organizationId provided to widget iframe');
         }
 
         // Listen for messages from parent window (for future communication if needed)
         window.addEventListener('message', (event) => {
-            // Handle any messages from parent if needed
-            console.log('Iframe received message:', event.data);
+            console.log('📨 [WIDGET IFRAME] Received message from parent:', event.data);
         });
+        
+        console.log('🎯 [WIDGET IFRAME] Iframe initialization complete');
     </script>
 </body>
 </html>
