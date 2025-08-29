@@ -1045,37 +1045,31 @@ const widgetServe = async (req: Request): Promise<Response> => {
     sendAudioChunk(audioData) {
       // Remove audio logs to reduce console noise
       if (this.ws && this.ws.readyState === WebSocket.OPEN && !this.isMuted) {
-        const audioMessage = {
-          type: 'user_audio_chunk',
-          chunk: this.encodeAudio(audioData)
-        };
-        this.ws.send(JSON.stringify(audioMessage));
-      }
-    }
-      // Check if WebSocket is closing or closed
-      if (!this.isConnected || !this.ws || this.ws.readyState !== WebSocket.OPEN) {
-        if (this.ws && this.ws.readyState === WebSocket.CLOSING) {
-          this.isConnected = false;
-          if (this.audioRecorder) {
-            this.audioRecorder.stop();
+        // Check if WebSocket is closing or closed
+        if (!this.isConnected || !this.ws || this.ws.readyState !== WebSocket.OPEN) {
+          if (this.ws && this.ws.readyState === WebSocket.CLOSING) {
+            this.isConnected = false;
+            if (this.audioRecorder) {
+              this.audioRecorder.stop();
+            }
           }
+          return;
         }
-        return;
+        
+        // Convert ArrayBuffer to base64 as required by the API
+        const uint8Array = new Uint8Array(audioData);
+        let binaryString = '';
+        for (let i = 0; i < uint8Array.length; i++) {
+          binaryString += String.fromCharCode(uint8Array[i]);
+        }
+        const base64Audio = btoa(binaryString);
+        
+        // Send using the correct message format from documentation
+        this.send({
+          type: "user_audio_chunk",
+          user_audio_chunk: base64Audio
+        });
       }
-      
-      // Convert ArrayBuffer to base64 as required by the API
-      const uint8Array = new Uint8Array(audioData);
-      let binaryString = '';
-      for (let i = 0; i < uint8Array.length; i++) {
-        binaryString += String.fromCharCode(uint8Array[i]);
-      }
-      const base64Audio = btoa(binaryString);
-      
-      // Send using the correct message format from documentation
-      this.send({
-        type: "user_audio_chunk",
-        user_audio_chunk: base64Audio
-      });
     }
 
     async startRecording() {
@@ -1276,22 +1270,30 @@ const widgetServe = async (req: Request): Promise<Response> => {
   };
 
   // Global API - now supports both agentId and organizationId configuration
+  console.log('📋 [WIDGET REGISTRATION] Registering window.threedottsWidget...');
   window.threedottsWidget = {
     connect: actions.handleConnect,
     disconnect: actions.handleDisconnect,
     toggleMute: actions.toggleMute,
     configure: (options) => {
+      console.log('⚙️ [WIDGET CONFIG] Configuring widget with:', options);
       
       // Support both agentId (direct) and organizationId (server-resolved)
         if (options.agentId) {
           config.agentId = options.agentId;
+          console.log('✅ [WIDGET CONFIG] Agent ID set:', options.agentId);
         }
         
         if (options.organizationId) {
           config.organizationId = options.organizationId;
+          console.log('✅ [WIDGET CONFIG] Organization ID set:', options.organizationId);
         }
-    }
+    },
+    isConnected: () => state.isConnected,
+    getState: () => state,
+    clientTools: {} // Add default empty clientTools object
   };
+  console.log('✅ [WIDGET REGISTRATION] window.threedottsWidget registered successfully:', window.threedottsWidget);
 
   // Load Comfortaa font and initialize widget
   function loadComfortaaAndInit() {

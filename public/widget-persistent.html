@@ -41,7 +41,7 @@
             
             // Load the widget script
             const script = document.createElement('script');
-            script.src = `https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?organizationId=${organizationId}&v=61`;
+            script.src = `https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?organizationId=${organizationId}&v=62`;
             script.onerror = (error) => {
                 console.error('❌ [PERSISTENT WIDGET] Failed to load widget script:', error);
             };
@@ -84,6 +84,9 @@
                 
                 // Configure widget when loaded
                 setTimeout(() => {
+                    console.log('🔍 [PERSISTENT WIDGET] Checking for threedottsWidget...');
+                    console.log('🔍 [PERSISTENT WIDGET] window.threedottsWidget exists:', !!window.threedottsWidget);
+                    
                     if (window.threedottsWidget) {
                         console.log('✅ [PERSISTENT WIDGET] Widget found, configuring with organizationId');
                         window.threedottsWidget.configure({
