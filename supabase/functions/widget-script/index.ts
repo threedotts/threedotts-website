@@ -818,15 +818,11 @@ const widgetServe = async (req: Request): Promise<Response> => {
     }
 
     async connect() {
-      console.log('🔌 [WEBSOCKET] Starting connection to ElevenLabs...');
-      
       if (this.isConnected) {
-        console.log('⚠️ [WEBSOCKET] Already connected, skipping');
         return;
       }
       
       try {
-        console.log('🎤 [WEBSOCKET] Initializing audio components...');
         
         // Initialize audio components
         this.audioPlayer = new AudioPlayer();
@@ -834,33 +830,26 @@ const widgetServe = async (req: Request): Promise<Response> => {
         this.audioRecorder = new AudioRecorder((audioData) => {
           this.sendAudioChunk(audioData);
         });
-        console.log('✅ [WEBSOCKET] Audio components initialized');
 
         // Connect DIRECTLY using the US endpoint
         const wsUrl = \`wss://api.us.elevenlabs.io/v1/convai/conversation?agent_id=\${this.agentId}\`;
-        console.log('🌐 [WEBSOCKET] Connecting to:', wsUrl);
         
         this.ws = new WebSocket(wsUrl);
         
         this.ws.onopen = () => {
-          console.log('🔗 [WEBSOCKET] WebSocket connection opened');
           
           // Send conversation initiation as per documentation
-          const initMessage = {
+          this.send({
             type: "conversation_initiation_client_data"
-          };
-          console.log('📤 [WEBSOCKET] Sending initiation message:', initMessage);
-          this.send(initMessage);
+          });
         };
 
         this.ws.onmessage = async (event) => {
           try {
             const message = JSON.parse(event.data);
-            console.log('📥 [WEBSOCKET] Received message:', message.type, message);
             
             // Handle connection confirmation
             if (message.type === 'conversation_initiation_metadata' && !this.isConnected) {
-              console.log('✅ [WEBSOCKET] Connection confirmed, setting up recording');
               this.isConnected = true;
               this.onConnectionChange(true);
               
@@ -871,55 +860,48 @@ const widgetServe = async (req: Request): Promise<Response> => {
             this.handleMessage(message);
             this.onMessage(message);
           } catch (error) {
-            console.error('❌ [WEBSOCKET] Error parsing message:', error, event.data);
+            console.error('❌ Error parsing message:', error, event.data);
           }
         };
         
         this.ws.onclose = (event) => {
-          console.log('🔌 [WEBSOCKET] Connection closed:', event.code, event.reason);
           this.isConnected = false;
           this.onConnectionChange(false);
         };
 
         this.ws.onerror = (error) => {
-          console.error('❌ [WEBSOCKET] WebSocket error:', error);
+          console.error('❌ WebSocket error:', error);
           this.onError('WebSocket connection failed');
         };
 
       } catch (error) {
-        console.error('❌ [WEBSOCKET] Connection error:', error);
+        console.error('❌ Connection error:', error);
         this.onError(\`Connection failed: \${error}\`);
       }
     }
     
     handleMessage(message) {
-      console.log('📋 [MESSAGE HANDLER] Processing message type:', message.type);
       
       switch (message.type) {
         case 'conversation_initiation_metadata':
-          console.log('🎯 [MESSAGE HANDLER] Conversation initiated');
           break;
           
         case 'user_transcript':
           if (message.user_transcription_event?.user_transcript) {
-            console.log('📝 [MESSAGE HANDLER] User transcript:', message.user_transcription_event.user_transcript);
           }
           break;
           
         case 'agent_response':
           if (message.agent_response_event?.agent_response) {
-            console.log('🤖 [MESSAGE HANDLER] Agent response:', message.agent_response_event.agent_response);
           }
           break;
           
         case 'client_tool_call':
-          console.log('🛠️ [MESSAGE HANDLER] Client tool call received:', message);
           this.handleClientToolCall(message);
           break;
           
         case 'audio':
           if (message.audio_event?.audio_base_64 && this.audioPlayer) {
-            console.log('🎵 [MESSAGE HANDLER] Processing audio chunk');
             try {
               // Convert base64 to ArrayBuffer
               const binaryString = atob(message.audio_event.audio_base_64);
@@ -928,100 +910,75 @@ const widgetServe = async (req: Request): Promise<Response> => {
                 bytes[i] = binaryString.charCodeAt(i);
               }
               this.audioPlayer.addAudioChunk(bytes.buffer);
-              console.log('✅ [MESSAGE HANDLER] Audio chunk processed');
             } catch (error) {
-              console.error('❌ [MESSAGE HANDLER] Error processing audio:', error);
+              console.error('❌ Error processing audio:', error);
             }
           }
           break;
           
         case 'interruption':
-          console.log('⏹️ [MESSAGE HANDLER] Interruption received, stopping audio');
           if (this.audioPlayer) {
             this.audioPlayer.stop();
             this.audioPlayer = new AudioPlayer();
           }
           break;
-          
-        default:
-          console.log('❓ [MESSAGE HANDLER] Unknown message type:', message.type);
       }
     }
     
     handleClientToolCall(message) {
-      console.log('🔧 [TOOL HANDLER] Starting tool call handling');
-      console.log('🔧 [TOOL HANDLER] Full message:', JSON.stringify(message, null, 2));
       
       try {
         const toolCall = message.client_tool_call;
         if (!toolCall) {
-          console.error('❌ [TOOL HANDLER] No client_tool_call in message:', message);
+          console.error('❌ No client_tool_call in message:', message);
           return;
         }
         
         const { tool_call_id, tool_name, parameters } = toolCall;
-        console.log('🔧 [TOOL HANDLER] Tool details:', { tool_call_id, tool_name, parameters });
         
         // Execute the tool and get result
-        console.log('🚀 [TOOL HANDLER] Executing tool:', tool_name);
         let result = this.executeClientTool(tool_name, parameters);
-        console.log('✅ [TOOL HANDLER] Tool execution result:', result);
         
         // Send response back to agent - using flat structure format
-        const response = {
+        this.send({
           type: "client_tool_result",
           tool_call_id: tool_call_id,
           result: result || "Tool executed successfully",
           is_error: false
-        };
-        console.log('📤 [TOOL HANDLER] Sending tool result:', response);
-        this.send(response);
+        });
         
       } catch (error) {
-        console.error('❌ [TOOL HANDLER] Error handling client tool call:', error);
+        console.error('❌ Error handling client tool call:', error);
         
         // Send error response back to agent - using flat structure format
         if (message.client_tool_call?.tool_call_id) {
-          const errorResponse = {
+          this.send({
             type: "client_tool_result", 
             tool_call_id: message.client_tool_call.tool_call_id,
             result: "Error: " + error.message,
             is_error: true
-          };
-          console.log('📤 [TOOL HANDLER] Sending error response:', errorResponse);
-          this.send(errorResponse);
+          });
         }
       }
     }
     
     executeClientTool(toolName, parameters) {
-      console.log('🔍 [TOOL EXECUTOR] Looking for tool:', toolName);
-      console.log('🔍 [TOOL EXECUTOR] Tool parameters:', parameters);
       
       // First try to find the tool directly on the window object
       if (typeof window[toolName] === 'function') {
-        console.log('✅ [TOOL EXECUTOR] Found tool on window object');
-        const result = window[toolName](parameters);
-        console.log('✅ [TOOL EXECUTOR] Tool executed with result:', result);
-        return result;
+        return window[toolName](parameters);
       }
       
       // Fallback: Get configured client tools
       const clientTools = this.getClientTools();
-      console.log('🔍 [TOOL EXECUTOR] Checking client tools:', clientTools);
       
       if (clientTools && typeof clientTools[toolName] === 'function') {
-        console.log('✅ [TOOL EXECUTOR] Found tool in client tools');
-        const result = clientTools[toolName](parameters);
-        console.log('✅ [TOOL EXECUTOR] Tool executed with result:', result);
-        return result;
+        return clientTools[toolName](parameters);
       }
       
       // Tool not found anywhere
-      console.warn('⚠️ [TOOL EXECUTOR] Tool not found: ' + toolName + '. Please define this tool on window object or in window.threedottsWidget.clientTools');
-      const errorMsg = 'Tool "' + toolName + '" not found. Define it on window object to use it.';
-      console.warn('⚠️ [TOOL EXECUTOR] Returning error message:', errorMsg);
-      return errorMsg;
+      console.warn('⚠️ Tool not found: ' + toolName + '. Please define this tool on window object or in window.threedottsWidget.clientTools');
+      return 'Tool "' + toolName + '" not found. Define it on window object to use it.';
     }
     
     getClientTools() {
@@ -1033,12 +990,10 @@ const widgetServe = async (req: Request): Promise<Response> => {
     }
     
     send(message) {
-      console.log('📤 [WEBSOCKET] Sending message:', message.type, message);
       if (this.ws && this.ws.readyState === WebSocket.OPEN) {
         this.ws.send(JSON.stringify(message));
-        console.log('✅ [WEBSOCKET] Message sent successfully');
       } else {
-        console.warn('⚠️ [WEBSOCKET] WebSocket not ready, cannot send:', message.type, 'readyState:', this.ws?.readyState);
+        console.warn('⚠️ WebSocket not ready, cannot send:', message.type, 'readyState:', this.ws?.readyState);
       }
     }
 
