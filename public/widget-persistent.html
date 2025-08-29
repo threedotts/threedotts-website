@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ThreeDotts Persistent Widget</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        
+        /* Only allow pointer events on the widget itself */
+        #threedotts-widget {
+            pointer-events: auto;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        console.log('🚀 [PERSISTENT WIDGET] Starting persistent widget...');
+        
+        // Configuration from localStorage or URL params
+        let organizationId = localStorage.getItem('threedotts_org_id');
+        
+        if (!organizationId) {
+            const urlParams = new URLSearchParams(window.location.search);
+            organizationId = urlParams.get('organizationId');
+            if (organizationId) {
+                localStorage.setItem('threedotts_org_id', organizationId);
+            }
+        }
+        
+        console.log('🔍 [PERSISTENT WIDGET] Organization ID:', organizationId);
+        
+        if (organizationId) {
+            console.log('🚀 [PERSISTENT WIDGET] Loading widget script...');
+            
+            // Load the widget script
+            const script = document.createElement('script');
+            script.src = `https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?organizationId=${organizationId}&v=61`;
+            script.onerror = (error) => {
+                console.error('❌ [PERSISTENT WIDGET] Failed to load widget script:', error);
+            };
+            
+            script.onload = () => {
+                console.log('✅ [PERSISTENT WIDGET] Widget script loaded successfully');
+                
+                // Define client tools globally
+                window.redirectToExternalURL = (parameters) => {
+                    console.log('🔗 [PERSISTENT WIDGET] redirectToExternalURL called with:', parameters);
+                    
+                    const url = parameters?.url;
+                    if (url) {
+                        console.log('🔗 [PERSISTENT WIDGET] Processing redirect to:', url);
+                        
+                        if (url.startsWith('http')) {
+                            console.log('🌐 [PERSISTENT WIDGET] Sending openExternalURL message to parent');
+                            parent.postMessage({
+                                type: 'openExternalURL',
+                                url: url
+                            }, '*');
+                            console.log('✅ [PERSISTENT WIDGET] External URL message sent to parent');
+                            return `Opened ${url} in new tab`;
+                        } else {
+                            console.log('📍 [PERSISTENT WIDGET] Sending navigate message to parent');
+                            parent.postMessage({
+                                type: 'navigate',
+                                url: url
+                            }, '*');
+                            console.log('✅ [PERSISTENT WIDGET] Navigate message sent to parent');
+                            return `Redirected to ${url}`;
+                        }
+                    } else {
+                        console.error('❌ [PERSISTENT WIDGET] No URL provided to redirectToExternalURL');
+                        throw new Error('URL parameter is required');
+                    }
+                };
+                
+                console.log('🔧 [PERSISTENT WIDGET] Client tools registered, configuring widget...');
+                
+                // Configure widget when loaded
+                setTimeout(() => {
+                    if (window.threedottsWidget) {
+                        console.log('✅ [PERSISTENT WIDGET] Widget found, configuring with organizationId');
+                        window.threedottsWidget.configure({
+                            organizationId: organizationId
+                        });
+                        console.log('✅ [PERSISTENT WIDGET] Widget configured with organizationId:', organizationId);
+                        
+                        // Save widget state for persistence across page reloads
+                        const saveWidgetState = () => {
+                            if (window.threedottsWidget && window.threedottsWidget.isConnected) {
+                                localStorage.setItem('threedotts_connected', 'true');
+                                localStorage.setItem('threedotts_connection_time', Date.now().toString());
+                            }
+                        };
+                        
+                        // Listen for widget state changes
+                        const originalOnConnectionChange = window.threedottsWidget.onConnectionChange;
+                        window.threedottsWidget.onConnectionChange = (connected) => {
+                            if (originalOnConnectionChange) originalOnConnectionChange(connected);
+                            if (connected) {
+                                localStorage.setItem('threedotts_connected', 'true');
+                                localStorage.setItem('threedotts_connection_time', Date.now().toString());
+                                console.log('💾 [PERSISTENT WIDGET] Connection state saved');
+                            } else {
+                                localStorage.removeItem('threedotts_connected');
+                                localStorage.removeItem('threedotts_connection_time');
+                                console.log('🗑️ [PERSISTENT WIDGET] Connection state cleared');
+                            }
+                        };
+                        
+                        // Check if we should attempt to reconnect quickly
+                        const wasConnected = localStorage.getItem('threedotts_connected');
+                        const connectionTime = localStorage.getItem('threedotts_connection_time');
+                        
+                        if (wasConnected === 'true' && connectionTime) {
+                            const timeSinceConnection = Date.now() - parseInt(connectionTime);
+                            // If connected recently (within 30 seconds), consider it a page navigation
+                            if (timeSinceConnection < 30000) {
+                                console.log('🔄 [PERSISTENT WIDGET] Recent connection detected, this looks like a page navigation');
+                            }
+                        }
+                        
+                    } else {
+                        console.error('❌ [PERSISTENT WIDGET] Widget not found after loading script');
+                    }
+                }, 100);
+            };
+            
+            document.head.appendChild(script);
+            console.log('📄 [PERSISTENT WIDGET] Script element added to head');
+        } else {
+            console.error('❌ [PERSISTENT WIDGET] No organizationId available');
+        }
+
+        // Listen for messages from parent window
+        window.addEventListener('message', (event) => {
+            console.log('📨 [PERSISTENT WIDGET] Received message from parent:', event.data);
+            
+            // Handle commands from parent if needed
+            if (event.data.type === 'ping') {
+                parent.postMessage({ type: 'pong', timestamp: Date.now() }, '*');
+            }
+        });
+        
+        // Notify parent that widget is ready
+        setTimeout(() => {
+            parent.postMessage({ type: 'widgetReady', timestamp: Date.now() }, '*');
+            console.log('📡 [PERSISTENT WIDGET] Sent ready signal to parent');
+        }, 500);
+        
+        console.log('🎯 [PERSISTENT WIDGET] Persistent widget initialization complete');
+    </script>
+</body>
+</html>

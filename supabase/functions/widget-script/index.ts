@@ -1043,6 +1043,15 @@ const widgetServe = async (req: Request): Promise<Response> => {
     }
 
     sendAudioChunk(audioData) {
+      // Remove audio logs to reduce console noise
+      if (this.ws && this.ws.readyState === WebSocket.OPEN && !this.isMuted) {
+        const audioMessage = {
+          type: 'user_audio_chunk',
+          chunk: this.encodeAudio(audioData)
+        };
+        this.ws.send(JSON.stringify(audioMessage));
+      }
+    }
       // Check if WebSocket is closing or closed
       if (!this.isConnected || !this.ws || this.ws.readyState !== WebSocket.OPEN) {
         if (this.ws && this.ws.readyState === WebSocket.CLOSING) {
