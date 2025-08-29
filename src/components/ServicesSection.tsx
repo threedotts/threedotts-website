@@ -26,7 +26,7 @@ const services = [
     title: "Websites Profissionais e Sistemas Online",
     description: "Websites bonitos e plataformas online que o ajudam a vender mais, servir melhor os clientes e fazer crescer o seu negócio.",
     features: ["Lojas Online", "Portais de Clientes", "Sistemas de Reservas"],
-    pricing: "3 Pacotes (Enterprise sob consulta)"
+    pricing: "Consulta"
   },
   {
     id: "ai",
@@ -34,7 +34,7 @@ const services = [
     title: "Call Center e Atendimento ao Cliente com IA",
     description: "Call center inteligente com agentes de IA que fazem e atendem chamadas telefônicas e conversas via WhatsApp, Facebook, email, SMS e outras plataformas, com redirecionamento para agentes reais.",
     features: ["Agentes de IA para Chamadas", "WhatsApp, Facebook, Email, SMS", "Dashboard para Agentes Reais"],
-    pricing: "3 Pacotes (Enterprise sob consulta)"
+    pricing: "Consulta"
   },
   {
     id: "automation",
@@ -42,7 +42,7 @@ const services = [
     title: "Poupe Tempo com Automação IA",
     description: "Pare de fazer tarefas repetitivas manualmente. Automatizamos o seu trabalho diário para se focar no crescimento do negócio.",
     features: ["Geração Automática de Relatórios", "Processamento Inteligente de Documentos", "Gestão de Inventário"],
-    pricing: "1 Pacote"
+    pricing: "Consulta"
   },
   {
     id: "custom",
@@ -58,7 +58,7 @@ const services = [
     title: "Inteligência de Dados e Insights Empresariais",
     description: "Transforme os dados do seu negócio em insights claros que o ajudam a tomar melhores decisões e prever tendências futuras.",
     features: ["Previsão de Vendas", "Análise de Comportamento do Cliente", "Relatórios de Desempenho"],
-    pricing: "3 Pacotes (Enterprise sob consulta)"
+    pricing: "Consulta"
   }
 ];
 

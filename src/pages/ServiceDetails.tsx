@@ -85,24 +85,8 @@ const servicesData = {
       "Lançamento e formação"
     ],
     timeline: "3-6 semanas",
-    price: "3 Pacotes disponíveis",
-    packages: [
-      {
-        name: "Básico",
-        price: "Desde 75.000 MT",
-        features: ["Website responsivo", "5 páginas", "Formulário de contacto", "Otimização SEO básica"]
-      },
-      {
-        name: "Profissional", 
-        price: "Desde 150.000 MT",
-        features: ["Website avançado", "10 páginas", "Loja online", "CMS", "Analytics", "Suporte 6 meses"]
-      },
-      {
-        name: "Enterprise",
-        price: "Consulta",
-        features: ["Solução personalizada", "Funcionalidades avançadas", "Integrações complexas", "Suporte dedicado"]
-      }
-    ]
+    price: "Consulta",
+    packages: null
   },
   ai: {
     id: "ai",
@@ -136,24 +120,8 @@ const servicesData = {
       "Monitorização e otimização contínua"
     ],
     timeline: "2-4 semanas",
-    price: "3 Pacotes disponíveis",
-    packages: [
-      {
-        name: "Básico",
-        price: "Desde 40.000 MT/mês",
-        features: ["Chat em 1 plataforma", "500 conversas/mês", "Horário comercial", "Suporte por email"]
-      },
-      {
-        name: "Profissional",
-        price: "Desde 80.000 MT/mês", 
-        features: ["Chat multiplataforma", "2000 conversas/mês", "24/7", "Dashboard avançado", "Agentes humanos"]
-      },
-      {
-        name: "Enterprise",
-        price: "Consulta",
-        features: ["Solução personalizada", "Conversas ilimitadas", "Integrações avançadas", "Suporte dedicado"]
-      }
-    ]
+    price: "Consulta",
+    packages: null
   },
   automation: {
     id: "automation",
@@ -187,14 +155,8 @@ const servicesData = {
       "Implementação e formação"
     ],
     timeline: "2-5 semanas",
-    price: "Desde 60.000 MT",
-    packages: [
-      {
-        name: "Pacote Automação",
-        price: "Desde 60.000 MT",
-        features: ["Até 5 automações", "Relatórios automáticos", "Integração com 3 sistemas", "Suporte 3 meses", "Formação incluída"]
-      }
-    ]
+    price: "Consulta",
+    packages: null
   },
   custom: {
     id: "custom",
@@ -263,24 +225,8 @@ const servicesData = {
       "Formação e acompanhamento"
     ],
     timeline: "3-7 semanas",
-    price: "3 Pacotes disponíveis",
-    packages: [
-      {
-        name: "Básico",
-        price: "Desde 100.000 MT",
-        features: ["Dashboard básico", "5 KPIs principais", "Relatórios mensais", "Dados históricos 1 ano"]
-      },
-      {
-        name: "Profissional",
-        price: "Desde 200.000 MT",
-        features: ["Dashboard avançado", "KPIs ilimitados", "Previsões com IA", "Relatórios automáticos", "Dados históricos completos"]
-      },
-      {
-        name: "Enterprise", 
-        price: "Consulta",
-        features: ["Solução personalizada", "Análises preditivas avançadas", "Integrações complexas", "Consultoria dedicada"]
-      }
-    ]
+    price: "Consulta",
+    packages: null
   }
 };
 
