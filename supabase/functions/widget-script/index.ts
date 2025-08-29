@@ -919,6 +919,7 @@ const widgetServe = async (req: Request): Promise<Response> => {
           
         case 'audio':
           if (message.audio_event?.audio_base_64 && this.audioPlayer) {
+            console.log('🎵 [MESSAGE HANDLER] Processing audio chunk');
             try {
               // Convert base64 to ArrayBuffer
               const binaryString = atob(message.audio_event.audio_base_64);
@@ -927,6 +928,7 @@ const widgetServe = async (req: Request): Promise<Response> => {
                 bytes[i] = binaryString.charCodeAt(i);
               }
               this.audioPlayer.addAudioChunk(bytes.buffer);
+              console.log('✅ [MESSAGE HANDLER] Audio chunk processed');
             } catch (error) {
               console.error('❌ [MESSAGE HANDLER] Error processing audio:', error);
             }
@@ -1031,48 +1033,40 @@ const widgetServe = async (req: Request): Promise<Response> => {
     }
     
     send(message) {
-      // Don't log audio chunk messages to reduce console noise
-      if (message.type !== 'user_audio_chunk') {
-        console.log('📤 [WEBSOCKET] Sending message:', message.type, message);
-      }
+      console.log('📤 [WEBSOCKET] Sending message:', message.type, message);
       if (this.ws && this.ws.readyState === WebSocket.OPEN) {
         this.ws.send(JSON.stringify(message));
-        if (message.type !== 'user_audio_chunk') {
-          console.log('✅ [WEBSOCKET] Message sent successfully');
-        }
+        console.log('✅ [WEBSOCKET] Message sent successfully');
       } else {
         console.warn('⚠️ [WEBSOCKET] WebSocket not ready, cannot send:', message.type, 'readyState:', this.ws?.readyState);
       }
     }
 
     sendAudioChunk(audioData) {
-      // Remove audio logs to reduce console noise
-      if (this.ws && this.ws.readyState === WebSocket.OPEN && !this.isMuted) {
-        // Check if WebSocket is closing or closed
-        if (!this.isConnected || !this.ws || this.ws.readyState !== WebSocket.OPEN) {
-          if (this.ws && this.ws.readyState === WebSocket.CLOSING) {
-            this.isConnected = false;
-            if (this.audioRecorder) {
-              this.audioRecorder.stop();
-            }
+      // Check if WebSocket is closing or closed
+      if (!this.isConnected || !this.ws || this.ws.readyState !== WebSocket.OPEN) {
+        if (this.ws && this.ws.readyState === WebSocket.CLOSING) {
+          this.isConnected = false;
+          if (this.audioRecorder) {
+            this.audioRecorder.stop();
           }
-          return;
         }
-        
-        // Convert ArrayBuffer to base64 as required by the API
-        const uint8Array = new Uint8Array(audioData);
-        let binaryString = '';
-        for (let i = 0; i < uint8Array.length; i++) {
-          binaryString += String.fromCharCode(uint8Array[i]);
-        }
-        const base64Audio = btoa(binaryString);
-        
-        // Send using the correct message format from documentation
-        this.send({
-          type: "user_audio_chunk",
-          user_audio_chunk: base64Audio
-        });
+        return;
       }
+      
+      // Convert ArrayBuffer to base64 as required by the API
+      const uint8Array = new Uint8Array(audioData);
+      let binaryString = '';
+      for (let i = 0; i < uint8Array.length; i++) {
+        binaryString += String.fromCharCode(uint8Array[i]);
+      }
+      const base64Audio = btoa(binaryString);
+      
+      // Send using the correct message format from documentation
+      this.send({
+        type: "user_audio_chunk",
+        user_audio_chunk: base64Audio
+      });
     }
 
     async startRecording() {
@@ -1273,30 +1267,22 @@ const widgetServe = async (req: Request): Promise<Response> => {
   };
 
   // Global API - now supports both agentId and organizationId configuration
-  console.log('📋 [WIDGET REGISTRATION] Registering window.threedottsWidget...');
   window.threedottsWidget = {
     connect: actions.handleConnect,
     disconnect: actions.handleDisconnect,
     toggleMute: actions.toggleMute,
     configure: (options) => {
-      console.log('⚙️ [WIDGET CONFIG] Configuring widget with:', options);
       
       // Support both agentId (direct) and organizationId (server-resolved)
         if (options.agentId) {
           config.agentId = options.agentId;
-          console.log('✅ [WIDGET CONFIG] Agent ID set:', options.agentId);
         }
         
         if (options.organizationId) {
           config.organizationId = options.organizationId;
-          console.log('✅ [WIDGET CONFIG] Organization ID set:', options.organizationId);
         }
-    },
-    isConnected: () => state.isConnected,
-    getState: () => state,
-    clientTools: {} // Add default empty clientTools object
+    }
   };
-  console.log('✅ [WIDGET REGISTRATION] window.threedottsWidget registered successfully:', window.threedottsWidget);
 
   // Load Comfortaa font and initialize widget
   function loadComfortaaAndInit() {
