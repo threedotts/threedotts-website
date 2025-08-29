@@ -1,84 +1,49 @@
-// ThreeDotts Persistent Widget Injector
-// This script maintains a persistent iframe across page navigations
+// ThreeDotts Persistent Widget Injector using SharedWorker
+// This script uses SharedWorker to maintain WebSocket connection across page navigations
 (function() {
     'use strict';
     
-    console.log('🚀 [WIDGET INJECTOR] Loading ThreeDotts persistent widget injector...');
+    console.log('🚀 [WIDGET INJECTOR] Loading ThreeDotts persistent widget injector with SharedWorker...');
     
-    const WIDGET_ID = 'threedotts-persistent-widget';
-    const ORGANIZATION_ID = '1e926240-b303-444b-9f8c-57abd9fa657b';
+    const MANAGER_SCRIPT_ID = 'threedotts-widget-manager';
     
-    // Check if widget iframe already exists
-    let existingWidget = document.getElementById(WIDGET_ID);
+    // Check if manager script already exists
+    let existingScript = document.getElementById(MANAGER_SCRIPT_ID);
     
-    if (existingWidget) {
-        console.log('✅ [WIDGET INJECTOR] Widget iframe already exists, skipping creation');
+    if (existingScript) {
+        console.log('✅ [WIDGET INJECTOR] Widget manager already loaded, skipping');
         return;
     }
     
-    console.log('🔧 [WIDGET INJECTOR] Creating new persistent widget iframe...');
+    console.log('🔧 [WIDGET INJECTOR] Loading persistent widget manager...');
     
-    // Create the persistent iframe
-    const iframe = document.createElement('iframe');
-    iframe.id = WIDGET_ID;
-    iframe.src = `/widget-persistent.html?organizationId=${ORGANIZATION_ID}`;
-    iframe.style.cssText = `
-        position: fixed !important;
-        bottom: 0 !important;
-        right: 0 !important;
-        width: 100% !important;
-        height: 100% !important;
-        border: none !important;
-        background: transparent !important;
-        pointer-events: auto !important;
-        z-index: 9999 !important;
-    `;
-    iframe.title = 'ThreeDotts AI Assistant';
-    
-    // Add event listeners
-    iframe.onload = () => {
-        console.log('✅ [WIDGET INJECTOR] Persistent iframe loaded successfully');
+    // Load the persistent widget manager script
+    const script = document.createElement('script');
+    script.id = MANAGER_SCRIPT_ID;
+    script.src = '/persistent-widget-manager.js';
+    script.onload = () => {
+        console.log('✅ [WIDGET INJECTOR] Persistent widget manager loaded successfully');
     };
     
-    iframe.onerror = () => {
-        console.error('❌ [WIDGET INJECTOR] Persistent iframe failed to load');
+    script.onerror = () => {
+        console.error('❌ [WIDGET INJECTOR] Failed to load persistent widget manager');
     };
     
-    // Listen for messages from the iframe
-    window.addEventListener('message', (event) => {
-        console.log('📨 [WIDGET INJECTOR] Received message from widget:', event.data);
-        
-        if (event.data.type === 'openExternalURL') {
-            console.log('🌐 [WIDGET INJECTOR] Opening external URL:', event.data.url);
-            window.open(event.data.url, '_blank');
-        } else if (event.data.type === 'navigate') {
-            console.log('📍 [WIDGET INJECTOR] Navigating to:', event.data.url);
-            window.location.href = event.data.url;
-        } else if (event.data.type === 'widgetReady') {
-            console.log('✅ [WIDGET INJECTOR] Widget reported ready');
-        }
-    });
-    
-    // Append to body when DOM is ready
-    const appendWidget = () => {
-        if (document.body) {
-            document.body.appendChild(iframe);
-            console.log('✅ [WIDGET INJECTOR] Widget iframe added to DOM');
-            
-            // Send a ping to test communication
-            setTimeout(() => {
-                iframe.contentWindow?.postMessage({ type: 'ping' }, '*');
-            }, 1000);
+    // Append script when DOM is ready
+    const appendScript = () => {
+        if (document.head) {
+            document.head.appendChild(script);
+            console.log('✅ [WIDGET INJECTOR] Widget manager script added to DOM');
         } else {
-            setTimeout(appendWidget, 10);
+            setTimeout(appendScript, 10);
         }
     };
     
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', appendWidget);
+        document.addEventListener('DOMContentLoaded', appendScript);
     } else {
-        appendWidget();
+        appendScript();
     }
     
-    console.log('🎯 [WIDGET INJECTOR] Widget injector setup complete');
+    console.log('🎯 [WIDGET INJECTOR] SharedWorker-based widget injector setup complete');
 })();

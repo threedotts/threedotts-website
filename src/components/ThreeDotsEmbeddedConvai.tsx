@@ -9,10 +9,10 @@ const ThreeDotsEmbeddedConvai: React.FC<ThreeDotsEmbeddedConvaiProps> = ({
 }) => {
   console.log('🔧 [REACT COMPONENT] ThreeDotsEmbeddedConvai rendering...');
   
-  // This component now just loads the external injector script
-  // The script will handle creating and managing the persistent iframe
+  // This component loads the SharedWorker-based widget injector
+  // The injector maintains WebSocket connection across page navigations
   React.useEffect(() => {
-    console.log('🚀 [REACT COMPONENT] Loading widget injector script...');
+    console.log('🚀 [REACT COMPONENT] Loading SharedWorker widget injector...');
     
     // Check if injector script is already loaded
     if (document.querySelector('script[src="/widget-injector.js"]')) {
@@ -23,17 +23,17 @@ const ThreeDotsEmbeddedConvai: React.FC<ThreeDotsEmbeddedConvaiProps> = ({
     const script = document.createElement('script');
     script.src = '/widget-injector.js';
     script.onload = () => {
-      console.log('✅ [REACT COMPONENT] Widget injector script loaded');
+      console.log('✅ [REACT COMPONENT] SharedWorker widget injector loaded');
     };
     script.onerror = () => {
-      console.error('❌ [REACT COMPONENT] Failed to load widget injector script');
+      console.error('❌ [REACT COMPONENT] Failed to load SharedWorker widget injector');
     };
     
     document.head.appendChild(script);
     
     return () => {
       // Don't remove the script on unmount to maintain persistence
-      console.log('🔄 [REACT COMPONENT] Component unmounting but keeping injector script');
+      console.log('🔄 [REACT COMPONENT] Component unmounting but keeping SharedWorker injector');
     };
   }, []);
 
