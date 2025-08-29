@@ -14,8 +14,6 @@ const widgetServe = async (req: Request): Promise<Response> => {
   }
 
   try {
-    console.log('📦 Widget script requested');
-
     // Extract organizationId from query params if provided
     const url = new URL(req.url);
     const organizationId = url.searchParams.get('organizationId');
@@ -25,7 +23,6 @@ const widgetServe = async (req: Request): Promise<Response> => {
     
     // organizationId is required - no fallback defaults
     if (!organizationId) {
-      console.error('❌ Organization ID is required');
       const errorScript = `
         console.error('❌ ThreeDotts Widget Error: Organization ID is required');
         console.error('Please add organizationId parameter to the script URL or configure via JavaScript');
@@ -68,8 +65,6 @@ const widgetServe = async (req: Request): Promise<Response> => {
       });
     }
     
-    console.log('🔍 Looking up config for organization:', organizationId);
-    
     try {
       // Fetch organization agent config
       const { data: config, error } = await supabase
@@ -80,7 +75,6 @@ const widgetServe = async (req: Request): Promise<Response> => {
         .maybeSingle();
       
       if (error) {
-        console.error('❌ Database error fetching org config:', error);
         const errorScript = `
           console.error('❌ ThreeDotts Widget Error: Database error fetching organization configuration');
           console.error('Error details:', ${JSON.stringify(error.message)});
@@ -161,19 +155,14 @@ const widgetServe = async (req: Request): Promise<Response> => {
         });
       }
       
-      console.log('✅ Found org config:', config);
       agentId = config.primary_agent_id;
       
       // Try to get API key - first check if it's available as environment variable
-      console.log('🔍 Trying to fetch API key:', config.api_key_secret_name);
       
       // Method 1: Try as environment variable first
       voiceApiKey = Deno.env.get(config.api_key_secret_name);
       
-      if (voiceApiKey) {
-        console.log('✅ Retrieved API key from environment variable');
-      } else {
-        console.log('⚠️ API key not found in environment, trying vault...');
+      if (!voiceApiKey) {
         
         // Method 2: Try vault.read_secret
         try {
@@ -263,7 +252,6 @@ const widgetServe = async (req: Request): Promise<Response> => {
           }
           
           voiceApiKey = secretData;
-          console.log('✅ Retrieved API key from vault');
           
         } catch (secretError) {
           console.error('❌ Exception when fetching secret:', secretError);
@@ -346,7 +334,6 @@ const widgetServe = async (req: Request): Promise<Response> => {
       });
     }
     
-    console.log('🎯 Using agent ID:', agentId);
 
     const widgetScript = `
 (function() {
@@ -641,7 +628,6 @@ const widgetServe = async (req: Request): Promise<Response> => {
       if (this.isRecording) return;
 
       try {
-        console.log('Starting audio recording...');
         
         this.stream = await navigator.mediaDevices.getUserMedia({
           audio: {
@@ -658,8 +644,6 @@ const widgetServe = async (req: Request): Promise<Response> => {
         this.source = this.audioContext.createMediaStreamSource(this.stream);
         this.processor = this.audioContext.createScriptProcessor(1024, 1, 1);
         
-        console.log('AudioContext sample rate:', this.audioContext.sampleRate);
-        console.log('Stream sample rate:', this.stream.getAudioTracks()[0].getSettings().sampleRate);
         
         this.processor.onaudioprocess = (e) => {
           if (!this.isRecording) return;
@@ -700,7 +684,6 @@ const widgetServe = async (req: Request): Promise<Response> => {
         this.processor.connect(this.audioContext.destination);
         this.isRecording = true;
         
-        console.log('Audio recording started successfully');
       } catch (error) {
         console.error('Error starting audio recording:', error);
         throw error;
@@ -708,7 +691,6 @@ const widgetServe = async (req: Request): Promise<Response> => {
     }
 
     stop() {
-      console.log('Stopping audio recording...');
       this.isRecording = false;
       
       if (this.source) {
@@ -735,7 +717,6 @@ const widgetServe = async (req: Request): Promise<Response> => {
 
     setMuted(muted) {
       this.isMuted = muted;
-      console.log(muted ? '🔇 Microphone muted' : '🎤 Microphone unmuted');
       if (this.onMuteChange) {
         this.onMuteChange(muted);
       }
@@ -762,7 +743,6 @@ const widgetServe = async (req: Request): Promise<Response> => {
         
         // Resume audio context if suspended (required for user interaction)
         if (this.audioContext.state === 'suspended') {
-          console.log('🔊 Resuming audio context...');
           await this.audioContext.resume();
         }
       }
@@ -806,7 +786,6 @@ const widgetServe = async (req: Request): Promise<Response> => {
         
         source.onended = () => this.playNext();
         source.start(0);
-        console.log('🔊 Playing audio chunk');
       } catch (error) {
         console.error('Error playing audio:', error);
         this.playNext(); // Continue with next chunk
@@ -840,13 +819,10 @@ const widgetServe = async (req: Request): Promise<Response> => {
 
     async connect() {
       if (this.isConnected) {
-        console.log('Already connected');
         return;
       }
-
+      
       try {
-        console.log('🚀 Connecting to Voice AI...');
-        console.log('Agent ID:', this.agentId);
         
         // Initialize audio components
         this.audioPlayer = new AudioPlayer();
@@ -857,12 +833,10 @@ const widgetServe = async (req: Request): Promise<Response> => {
 
         // Connect DIRECTLY using the US endpoint
         const wsUrl = \`wss://api.us.elevenlabs.io/v1/convai/conversation?agent_id=\${this.agentId}\`;
-        console.log('🔗 Connecting to:', wsUrl);
         
         this.ws = new WebSocket(wsUrl);
-
+        
         this.ws.onopen = () => {
-          console.log('✅ WebSocket opened, sending conversation initiation...');
           
           // Send conversation initiation as per documentation
           this.send({
@@ -873,11 +847,9 @@ const widgetServe = async (req: Request): Promise<Response> => {
         this.ws.onmessage = async (event) => {
           try {
             const message = JSON.parse(event.data);
-            console.log('📨 Received:', message.type);
             
             // Handle connection confirmation
             if (message.type === 'conversation_initiation_metadata' && !this.isConnected) {
-              console.log('✅ Conversation initiated successfully');
               this.isConnected = true;
               this.onConnectionChange(true);
               
@@ -891,9 +863,8 @@ const widgetServe = async (req: Request): Promise<Response> => {
             console.error('❌ Error parsing message:', error, event.data);
           }
         };
-
+        
         this.ws.onclose = (event) => {
-          console.log('❌ WebSocket closed:', event.code, event.reason);
           this.isConnected = false;
           this.onConnectionChange(false);
         };
@@ -908,35 +879,29 @@ const widgetServe = async (req: Request): Promise<Response> => {
         this.onError(\`Connection failed: \${error}\`);
       }
     }
-
+    
     handleMessage(message) {
-      console.log('🔄 Handling message:', message.type);
       
       switch (message.type) {
         case 'conversation_initiation_metadata':
-          console.log('✅ Conversation metadata:', message);
           break;
           
         case 'user_transcript':
           if (message.user_transcription_event?.user_transcript) {
-            console.log('📝 User said:', message.user_transcription_event.user_transcript);
           }
           break;
           
         case 'agent_response':
           if (message.agent_response_event?.agent_response) {
-            console.log('🤖 Agent response:', message.agent_response_event.agent_response);
           }
           break;
           
         case 'client_tool_call':
-          console.log('🔧 Client tool call received:', message);
           this.handleClientToolCall(message);
           break;
           
         case 'audio':
           if (message.audio_event?.audio_base_64 && this.audioPlayer) {
-            console.log('🎵 Playing audio chunk');
             try {
               // Convert base64 to ArrayBuffer
               const binaryString = atob(message.audio_event.audio_base_64);
@@ -952,7 +917,6 @@ const widgetServe = async (req: Request): Promise<Response> => {
           break;
           
         case 'interruption':
-          console.log('🛑 Conversation interrupted:', message.interruption_event?.reason);
           if (this.audioPlayer) {
             this.audioPlayer.stop();
             this.audioPlayer = new AudioPlayer();
@@ -960,9 +924,8 @@ const widgetServe = async (req: Request): Promise<Response> => {
           break;
       }
     }
-
+    
     handleClientToolCall(message) {
-      console.log('🛠️ Processing client tool call:', message);
       
       try {
         const toolCall = message.client_tool_call;
@@ -972,7 +935,6 @@ const widgetServe = async (req: Request): Promise<Response> => {
         }
         
         const { tool_call_id, tool_name, parameters } = toolCall;
-        console.log('🔧 Executing tool: ' + tool_name + ' with params:', parameters);
         
         // Execute the tool and get result
         let result = this.executeClientTool(tool_name, parameters);
@@ -984,8 +946,6 @@ const widgetServe = async (req: Request): Promise<Response> => {
           result: result || "Tool executed successfully",
           is_error: false
         });
-        
-        console.log('✅ Tool ' + tool_name + ' executed, result sent back');
         
       } catch (error) {
         console.error('❌ Error handling client tool call:', error);
@@ -1003,11 +963,9 @@ const widgetServe = async (req: Request): Promise<Response> => {
     }
     
     executeClientTool(toolName, parameters) {
-      console.log('🔨 Executing client tool: ' + toolName);
       
       // First try to find the tool directly on the window object
       if (typeof window[toolName] === 'function') {
-        console.log('✅ Found tool function on window: ' + toolName);
         return window[toolName](parameters);
       }
       
@@ -1015,7 +973,6 @@ const widgetServe = async (req: Request): Promise<Response> => {
       const clientTools = this.getClientTools();
       
       if (clientTools && typeof clientTools[toolName] === 'function') {
-        console.log('✅ Found tool function in clientTools: ' + toolName);
         return clientTools[toolName](parameters);
       }
       
@@ -1031,11 +988,9 @@ const widgetServe = async (req: Request): Promise<Response> => {
       }
       return null;
     }
-
+    
     send(message) {
-      console.log('🔍 WebSocket state check - readyState:', this.ws?.readyState, 'isConnected:', this.isConnected);
       if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-        console.log('📤 Sending:', message.type, JSON.stringify(message));
         this.ws.send(JSON.stringify(message));
       } else {
         console.warn('⚠️ WebSocket not ready, cannot send:', message.type, 'readyState:', this.ws?.readyState);
@@ -1046,7 +1001,6 @@ const widgetServe = async (req: Request): Promise<Response> => {
       // Check if WebSocket is closing or closed
       if (!this.isConnected || !this.ws || this.ws.readyState !== WebSocket.OPEN) {
         if (this.ws && this.ws.readyState === WebSocket.CLOSING) {
-          console.log('🛑 WebSocket is closing, stopping audio recording...');
           this.isConnected = false;
           if (this.audioRecorder) {
             this.audioRecorder.stop();
@@ -1076,7 +1030,6 @@ const widgetServe = async (req: Request): Promise<Response> => {
         this.send({
           type: "user_activity"
         });
-        console.log('📢 Sent user_activity event to interrupt agent');
         
         await this.audioRecorder.start();
       }
@@ -1101,9 +1054,8 @@ const widgetServe = async (req: Request): Promise<Response> => {
         });
       }
     }
-
+    
     disconnect() {
-      console.log('🔌 Disconnecting...');
       
       if (this.audioRecorder) {
         this.audioRecorder.stop();
@@ -1193,7 +1145,6 @@ const widgetServe = async (req: Request): Promise<Response> => {
 
   // Message handler - exactly like useGlobalConvaiState
   function handleMessage(message) {
-    console.log('📨 Global message received:', message.type);
     state.messages.push(message);
     
     // Only update UI for messages that change the speaking state
@@ -1234,8 +1185,6 @@ const widgetServe = async (req: Request): Promise<Response> => {
           return;
         }
 
-        console.log('🔧 Connecting with agent ID:', agentId);
-        console.log('🏢 Organization ID:', config.organizationId || 'not provided');
 
         // Show connecting state
         state.isConnecting = true;
@@ -1278,21 +1227,15 @@ const widgetServe = async (req: Request): Promise<Response> => {
     disconnect: actions.handleDisconnect,
     toggleMute: actions.toggleMute,
     configure: (options) => {
-      console.log('🔧 Configuring widget with options:', options);
       
       // Support both agentId (direct) and organizationId (server-resolved)
-      if (options.agentId) {
-        config.agentId = options.agentId;
-        console.log('✅ Agent ID configured:', config.agentId);
-      }
-      
-      if (options.organizationId) {
-        config.organizationId = options.organizationId;
-        console.log('✅ Organization ID configured:', config.organizationId);
-        console.log('ℹ️ Agent ID was pre-resolved on server:', config.agentId);
-      }
-      
-      console.log('✅ Widget configuration updated:', config);
+        if (options.agentId) {
+          config.agentId = options.agentId;
+        }
+        
+        if (options.organizationId) {
+          config.organizationId = options.organizationId;
+        }
     }
   };
 
@@ -1308,7 +1251,6 @@ const widgetServe = async (req: Request): Promise<Response> => {
     
     // Wait a bit for font to load, then initialize
     setTimeout(() => {
-      console.log('✅ Comfortaa font loaded via Google Fonts');
       injectStyles();
       createWidget();
       updateUI();
