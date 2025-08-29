@@ -977,11 +977,14 @@ const widgetServe = async (req: Request): Promise<Response> => {
         // Execute the tool and get result
         let result = this.executeClientTool(tool_name, parameters);
         
-        // Send response back to agent
+        // Send response back to agent - using proper ElevenLabs format
         this.send({
           type: "client_tool_result",
-          tool_call_id: tool_call_id,
-          result: result || "Tool executed successfully"
+          client_tool_result: {
+            tool_call_id: tool_call_id,
+            result: result || "Tool executed successfully",
+            is_error: false
+          }
         });
         
         console.log('✅ Tool ' + tool_name + ' executed, result sent back');
@@ -989,12 +992,15 @@ const widgetServe = async (req: Request): Promise<Response> => {
       } catch (error) {
         console.error('❌ Error handling client tool call:', error);
         
-        // Send error response back to agent
+        // Send error response back to agent - using proper ElevenLabs format
         if (message.client_tool_call?.tool_call_id) {
           this.send({
             type: "client_tool_result", 
-            tool_call_id: message.client_tool_call.tool_call_id,
-            result: "Error: " + error.message
+            client_tool_result: {
+              tool_call_id: message.client_tool_call.tool_call_id,
+              result: "Error: " + error.message,
+              is_error: true
+            }
           });
         }
       }
