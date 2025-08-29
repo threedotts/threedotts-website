@@ -87,7 +87,7 @@ const App = () => {
           </Routes>
         </BrowserRouter>
         
-        {/* ThreeDots embedded convai widget - global and persistent */}
+        {/* ThreeDots embedded convai widget - persistent iframe */}
         <ThreeDotsWidget />
       </TooltipProvider>
     </QueryClientProvider>
