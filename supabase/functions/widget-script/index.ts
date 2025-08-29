@@ -919,7 +919,6 @@ const widgetServe = async (req: Request): Promise<Response> => {
           
         case 'audio':
           if (message.audio_event?.audio_base_64 && this.audioPlayer) {
-            console.log('🎵 [MESSAGE HANDLER] Processing audio chunk');
             try {
               // Convert base64 to ArrayBuffer
               const binaryString = atob(message.audio_event.audio_base_64);
@@ -928,7 +927,6 @@ const widgetServe = async (req: Request): Promise<Response> => {
                 bytes[i] = binaryString.charCodeAt(i);
               }
               this.audioPlayer.addAudioChunk(bytes.buffer);
-              console.log('✅ [MESSAGE HANDLER] Audio chunk processed');
             } catch (error) {
               console.error('❌ [MESSAGE HANDLER] Error processing audio:', error);
             }
