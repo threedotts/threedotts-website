@@ -1031,10 +1031,15 @@ const widgetServe = async (req: Request): Promise<Response> => {
     }
     
     send(message) {
-      console.log('📤 [WEBSOCKET] Sending message:', message.type, message);
+      // Don't log audio chunk messages to reduce console noise
+      if (message.type !== 'user_audio_chunk') {
+        console.log('📤 [WEBSOCKET] Sending message:', message.type, message);
+      }
       if (this.ws && this.ws.readyState === WebSocket.OPEN) {
         this.ws.send(JSON.stringify(message));
-        console.log('✅ [WEBSOCKET] Message sent successfully');
+        if (message.type !== 'user_audio_chunk') {
+          console.log('✅ [WEBSOCKET] Message sent successfully');
+        }
       } else {
         console.warn('⚠️ [WEBSOCKET] WebSocket not ready, cannot send:', message.type, 'readyState:', this.ws?.readyState);
       }
