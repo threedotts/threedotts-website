@@ -56,27 +56,23 @@ serve(async (req) => {
     console.log('Upgrading WebSocket connection...');
     const { socket, response } = Deno.upgradeWebSocket(req);
     
-    // Add connection timeout
-    let connectionTimeout: number;
+    // Keep-alive system
+    let keepAliveInterval: number;
     let elevenLabsWs: WebSocket | null = null;
+    let lastActivity = Date.now();
     
     // Handle client connection
     socket.onopen = () => {
       console.log('Client WebSocket connected, initiating ElevenLabs multi-context connection...');
+      lastActivity = Date.now();
       
-      // Clear any existing timeout
-      if (connectionTimeout) {
-        clearTimeout(connectionTimeout);
-      }
-      
-      // Set connection timeout
-      connectionTimeout = setTimeout(() => {
-        console.log('Connection timeout, closing sockets');
-        if (elevenLabsWs) elevenLabsWs.close();
+      // Start keep-alive system
+      keepAliveInterval = setInterval(() => {
         if (socket.readyState === WebSocket.OPEN) {
-          socket.close(1008, 'Connection timeout');
+          socket.send(JSON.stringify({ type: 'ping', timestamp: Date.now() }));
+          console.log('🏓 Sending keep-alive ping');
         }
-      }, 10000); // 10 second timeout
+      }, 30000); // Send ping every 30 seconds
       
       try {
         const elevenLabsUrl = `wss://api.elevenlabs.io/v1/text-to-speech/${voiceId}/multi-stream-input?model_id=${modelId}`;
@@ -87,7 +83,7 @@ serve(async (req) => {
         
         elevenLabsWs.onopen = () => {
           console.log('✅ ElevenLabs Multi-Context WebSocket connected successfully');
-          clearTimeout(connectionTimeout);
+          lastActivity = Date.now();
           
           // Notify client that connection is ready
           if (socket.readyState === WebSocket.OPEN) {
@@ -153,49 +149,53 @@ serve(async (req) => {
     };
 
     socket.onmessage = (event) => {
-      console.log('📤 Message from client to ElevenLabs:', typeof event.data);
+      lastActivity = Date.now();
+      
       let clientData;
       try {
         clientData = JSON.parse(event.data);
-        console.log('📤 Client message details:', {
-          hasText: !!clientData.text,
-          contextId: clientData.context_id,
-          hasVoiceSettings: !!clientData.voice_settings,
-          textLength: clientData.text ? clientData.text.length : 0
-        });
         
-        // Add API key to every message as per ElevenLabs requirements
-        const messageWithAuth = {
-          ...clientData,
-          xi_api_key: elevenLabsApiKey
-        };
+        // Handle ping/pong messages for keep-alive
+        if (clientData.type === 'ping') {
+          console.log('🏓 Received ping from client, sending pong');
+          socket.send(JSON.stringify({ type: 'pong', timestamp: Date.now() }));
+          return;
+        }
         
-        console.log('📤 Sending message with auth to ElevenLabs:', JSON.stringify(messageWithAuth));
+        // Don't log user_audio_chunk messages to reduce console noise
+        if (clientData.type !== 'user_audio_chunk') {
+          console.log('📤 Client message details:', {
+            type: clientData.type,
+            hasText: !!clientData.text,
+            contextId: clientData.context_id,
+            hasVoiceSettings: !!clientData.voice_settings,
+            textLength: clientData.text ? clientData.text.length : 0
+          });
+        }
         
       } catch (e) {
         console.log('📤 Raw client message length:', event.data.length);
       }
       
-      if (elevenLabsWs && elevenLabsWs.readyState === WebSocket.OPEN) {
+      if (elevenLabsWs && elevenLabsWs.readyState === WebSocket.OPEN && clientData && clientData.type !== 'ping') {
         // Send the message with API key included
-        if (clientData) {
-          const messageWithAuth = {
-            ...clientData,
-            xi_api_key: elevenLabsApiKey
-          };
-          elevenLabsWs.send(JSON.stringify(messageWithAuth));
-        } else {
-          elevenLabsWs.send(event.data);
+        const messageWithAuth = {
+          ...clientData,
+          xi_api_key: elevenLabsApiKey
+        };
+        elevenLabsWs.send(JSON.stringify(messageWithAuth));
+        
+        if (clientData.type !== 'user_audio_chunk') {
+          console.log('✅ Message forwarded to ElevenLabs');
         }
-        console.log('✅ Message forwarded to ElevenLabs');
-      } else {
+      } else if (clientData && clientData.type !== 'ping' && clientData.type !== 'pong') {
         console.log('❌ ElevenLabs WebSocket not ready, state:', elevenLabsWs?.readyState);
       }
     };
 
     socket.onclose = (event) => {
       console.log('Client WebSocket closed:', event.code, event.reason);
-      clearTimeout(connectionTimeout);
+      clearInterval(keepAliveInterval);
       if (elevenLabsWs && elevenLabsWs.readyState === WebSocket.OPEN) {
         elevenLabsWs.close();
       }
@@ -203,7 +203,7 @@ serve(async (req) => {
 
     socket.onerror = (error) => {
       console.error('Client WebSocket error:', error);
-      clearTimeout(connectionTimeout);
+      clearInterval(keepAliveInterval);
     };
 
     return response;

@@ -16,6 +16,9 @@ let widgetState = {
   isSpeaking: false,
   lastActivity: Date.now()
 };
+let heartbeatInterval = null;
+let pingTimeout = null;
+let lastPongReceived = Date.now();
 
 // Função para conectar ao WebSocket
 function connectWebSocket(orgId) {
@@ -34,6 +37,10 @@ function connectWebSocket(orgId) {
             console.log('✅ [SHARED WORKER] WebSocket connected');
             isConnected = true;
             connectionAttempts = 0;
+            lastPongReceived = Date.now();
+            
+            // Start heartbeat system
+            startHeartbeat();
             
             // Notificar todas as abas conectadas
             broadcastMessage({
@@ -44,6 +51,23 @@ function connectWebSocket(orgId) {
 
         websocket.onmessage = (event) => {
             console.log('📨 [SHARED WORKER] WebSocket message received');
+            
+            try {
+                const message = JSON.parse(event.data);
+                
+                // Handle ping/pong for keep-alive
+                if (message.type === 'ping') {
+                    console.log('🏓 [SHARED WORKER] Received ping, sending pong');
+                    sendWebSocketMessage({ type: 'pong', timestamp: Date.now() });
+                    return;
+                } else if (message.type === 'pong') {
+                    console.log('🏓 [SHARED WORKER] Received pong');
+                    lastPongReceived = Date.now();
+                    return;
+                }
+            } catch (e) {
+                // Message might not be JSON, continue processing
+            }
             
             // Retransmitir mensagem para todas as abas
             broadcastMessage({
@@ -56,6 +80,7 @@ function connectWebSocket(orgId) {
         websocket.onclose = (event) => {
             console.log('🔌 [SHARED WORKER] WebSocket closed:', event.code, event.reason);
             isConnected = false;
+            stopHeartbeat();
             
             // Notificar todas as abas
             broadcastMessage({
@@ -73,6 +98,7 @@ function connectWebSocket(orgId) {
 
         websocket.onerror = (error) => {
             console.error('❌ [SHARED WORKER] WebSocket error:', error);
+            stopHeartbeat();
             
             broadcastMessage({
                 type: 'websocket_error',
@@ -86,6 +112,51 @@ function connectWebSocket(orgId) {
     }
 }
 
+// Função para iniciar o sistema de heartbeat
+function startHeartbeat() {
+    console.log('💓 [SHARED WORKER] Starting heartbeat system');
+    
+    // Clear any existing heartbeat
+    stopHeartbeat();
+    
+    // Send ping every 25 seconds (less than server's 30 second interval)
+    heartbeatInterval = setInterval(() => {
+        if (websocket && websocket.readyState === WebSocket.OPEN) {
+            console.log('🏓 [SHARED WORKER] Sending heartbeat ping');
+            sendWebSocketMessage({ type: 'ping', timestamp: Date.now() });
+            
+            // Check if we received a pong recently
+            const timeSinceLastPong = Date.now() - lastPongReceived;
+            if (timeSinceLastPong > 45000) { // 45 seconds without pong
+                console.warn('⚠️ [SHARED WORKER] No pong received in 45s, connection might be dead');
+                websocket.close(1000, 'Heartbeat timeout');
+            }
+        }
+    }, 25000);
+    
+    // Set timeout for ping response
+    pingTimeout = setTimeout(() => {
+        if (isConnected && websocket && websocket.readyState === WebSocket.OPEN) {
+            const timeSinceLastPong = Date.now() - lastPongReceived;
+            if (timeSinceLastPong > 60000) { // 60 seconds without any pong
+                console.error('❌ [SHARED WORKER] Ping timeout, closing connection');
+                websocket.close(1000, 'Ping timeout');
+            }
+        }
+    }, 60000);
+}
+
+// Função para parar o sistema de heartbeat
+function stopHeartbeat() {
+    if (heartbeatInterval) {
+        clearInterval(heartbeatInterval);
+        heartbeatInterval = null;
+    }
+    if (pingTimeout) {
+        clearTimeout(pingTimeout);
+        pingTimeout = null;
+    }
+}
 // Função para reconectar
 function scheduleReconnect() {
     if (reconnectTimeout) {
@@ -159,6 +230,7 @@ self.addEventListener('connect', (event) => {
                 break;
 
             case 'disconnect':
+                stopHeartbeat();
                 if (websocket) {
                     websocket.close(1000, 'User requested disconnect');
                     websocket = null;
