@@ -10,6 +10,12 @@ let connectionAttempts = 0;
 let maxReconnectAttempts = 5;
 let reconnectTimeout = null;
 let ports = new Set();
+let conversationActive = false;
+let widgetState = {
+  isVisible: false,
+  isSpeaking: false,
+  lastActivity: Date.now()
+};
 
 // Função para conectar ao WebSocket
 function connectWebSocket(orgId) {
@@ -136,6 +142,8 @@ self.addEventListener('connect', (event) => {
         type: 'worker_ready',
         isConnected: isConnected,
         organizationId: organizationId,
+        widgetState: widgetState,
+        conversationActive: conversationActive,
         timestamp: Date.now()
     });
 
@@ -160,6 +168,33 @@ self.addEventListener('connect', (event) => {
 
             case 'send_message':
                 sendWebSocketMessage(data.message);
+                break;
+
+            case 'update_widget_state':
+                widgetState = { ...widgetState, ...data.state };
+                widgetState.lastActivity = Date.now();
+                // Broadcast state to all tabs
+                broadcastMessage({
+                    type: 'widget_state_updated',
+                    state: widgetState,
+                    timestamp: Date.now()
+                });
+                break;
+
+            case 'start_conversation':
+                conversationActive = true;
+                broadcastMessage({
+                    type: 'conversation_started',
+                    timestamp: Date.now()
+                });
+                break;
+
+            case 'end_conversation':
+                conversationActive = false;
+                broadcastMessage({
+                    type: 'conversation_ended',
+                    timestamp: Date.now()
+                });
                 break;
 
             case 'ping':
