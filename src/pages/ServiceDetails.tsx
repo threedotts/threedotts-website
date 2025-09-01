@@ -421,9 +421,11 @@ const ServiceDetails = () => {
                 <p className="text-primary-foreground/80 mb-4 text-sm">
                   Agende uma conversa gratuita para discutir o seu projeto.
                 </p>
-                <Button variant="secondary" className="w-full">
-                  Contactar agora
-                </Button>
+                <Link to="/scheduling">
+                  <Button variant="secondary" className="w-full">
+                    Contactar agora
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
 
