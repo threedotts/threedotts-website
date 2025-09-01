@@ -411,22 +411,27 @@ export function ContactSection() {
                 <ArrowRight className="group-hover:translate-x-1 transition-transform ml-2 flex-shrink-0" />
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-5xl h-[80vh] p-0">
-              <DialogHeader className="px-6 py-4 border-b">
-                <DialogTitle className="text-2xl font-semibold">
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle className="text-2xl font-semibold text-center">
                   Agende a Sua Consulta
                 </DialogTitle>
               </DialogHeader>
-              <div className="flex-1 p-6 overflow-hidden">
-                <div className="w-full h-full bg-muted/5 rounded-lg border">
-                  <iframe 
-                    src="https://calendar.google.com/calendar/embed?height=600&wkst=1&ctz=Africa%2FMaputo&showPrint=0&title=Threedotts&src=Y185NTM4YmZjZjYyYTQwMDFmNTlkN2VkNTA4OTM1ZmYyMDM2MWQ2MGVjMzVjMWZkYjNjZmJhNGU4ZWNkMThhOWQzQGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20&color=%23c0ca33" 
-                    style={{ border: 'none' }} 
-                    width="100%" 
-                    height="100%" 
-                    title="Calendário de Agendamento Threedotts"
-                    loading="lazy"
-                  />
+              <div className="p-6 space-y-6">
+                <p className="text-center text-muted-foreground">
+                  Clique no botão abaixo para abrir o nosso calendário e escolher o melhor horário para a sua consulta gratuita.
+                </p>
+                <div className="flex flex-col gap-4">
+                  <Button 
+                    onClick={() => window.open('https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ2FER7FS8dfLrR1h-M-3q2ENbLxNmU3yIFOgCJ-NgsKW8ddB2zNJ4PnkzYc5eCtGrlhCFOmMl2H', '_blank')}
+                    className="w-full"
+                    size="lg"
+                  >
+                    Abrir Calendário de Agendamento
+                  </Button>
+                  <p className="text-xs text-center text-muted-foreground">
+                    Será aberto numa nova janela
+                  </p>
                 </div>
               </div>
             </DialogContent>
