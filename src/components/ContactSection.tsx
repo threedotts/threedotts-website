@@ -417,18 +417,17 @@ export function ContactSection() {
                   Agende a Sua Consulta
                 </DialogTitle>
               </DialogHeader>
-              <div className="flex-1 p-6">
-                <iframe 
-                  src="https://calendar.google.com/calendar/embed?height=600&wkst=1&ctz=Africa%2FMaputo&showPrint=0&title=Threedotts&src=Y185NTM4YmZjZjYyYTQwMDFmNTlkN2VkNTA4OTM1ZmYyMDM2MWQ2MGVjMzVjMWZkYjNjZmJhNGU4ZWNkMThhOWQzQGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20&color=%23c0ca33" 
-                  style={{ borderWidth: 0 }} 
-                  width="100%" 
-                  height="100%" 
-                  frameBorder="0" 
-                  scrolling="no"
-                  title="Calendário de Agendamento Threedotts"
-                  className="rounded-lg"
-                  allow="fullscreen"
-                />
+              <div className="flex-1 p-6 overflow-hidden">
+                <div className="w-full h-full bg-muted/5 rounded-lg border">
+                  <iframe 
+                    src="https://calendar.google.com/calendar/embed?height=600&wkst=1&ctz=Africa%2FMaputo&showPrint=0&title=Threedotts&src=Y185NTM4YmZjZjYyYTQwMDFmNTlkN2VkNTA4OTM1ZmYyMDM2MWQ2MGVjMzVjMWZkYjNjZmJhNGU4ZWNkMThhOWQzQGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20&color=%23c0ca33" 
+                    style={{ border: 'none' }} 
+                    width="100%" 
+                    height="100%" 
+                    title="Calendário de Agendamento Threedotts"
+                    loading="lazy"
+                  />
+                </div>
               </div>
             </DialogContent>
           </Dialog>
