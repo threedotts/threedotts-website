@@ -14,7 +14,7 @@ export const SecurityHeaders = () => {
       connect-src 'self' https://dkqzzypemdewomxrjftv.supabase.co https://*.supabase.co wss://dkqzzypemdewomxrjftv.supabase.co wss://*.supabase.co https://elevenlabs.io https://*.elevenlabs.io wss://*.elevenlabs.io https://api.us.elevenlabs.io wss://api.us.elevenlabs.io https://lovable.dev; 
       media-src 'self' blob: https://dkqzzypemdewomxrjftv.supabase.co;
       worker-src 'self' blob: https://cdn.jsdelivr.net https://elevenlabs.io https://*.elevenlabs.io;
-      frame-src 'self';
+      frame-src 'self' https://calendar.google.com;
     `.replace(/\s+/g, ' ').trim();
     
     // Remove existing CSP meta tag if present

@@ -427,6 +427,7 @@ export function ContactSection() {
                   scrolling="no"
                   title="Calendário de Agendamento Threedotts"
                   className="rounded-lg"
+                  allow="fullscreen"
                 />
               </div>
             </DialogContent>
