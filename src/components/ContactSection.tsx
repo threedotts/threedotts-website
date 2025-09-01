@@ -417,16 +417,68 @@ export function ContactSection() {
                   Agende a Sua Consulta
                 </DialogTitle>
               </DialogHeader>
-              <div className="p-4">
-                <iframe 
-                  src="https://calendar.google.com/calendar/embed?src=c_9538bfcf62a4001f59d7ed508935ff20361d60ec35c1fdb3cfba4e8ecd18a9d3%40group.calendar.google.com&ctz=Africa%2FMaputo" 
-                  style={{ border: 0 }} 
-                  width="100%" 
-                  height="600" 
-                  frameBorder="0" 
-                  scrolling="no"
-                  className="rounded-lg"
-                />
+              <div className="p-6 space-y-6">
+                <div className="text-center">
+                  <h4 className="text-lg font-semibold text-foreground mb-2">
+                    Calendário de Agendamentos
+                  </h4>
+                  <p className="text-muted-foreground mb-6">
+                    Clique abaixo para aceder ao nosso calendário e escolher o melhor horário para a sua consulta gratuita.
+                  </p>
+                </div>
+                
+                {/* Calendar Preview Mockup */}
+                <div 
+                  onClick={() => window.open('https://calendar.google.com/calendar/embed?src=c_9538bfcf62a4001f59d7ed508935ff20361d60ec35c1fdb3cfba4e8ecd18a9d3%40group.calendar.google.com&ctz=Africa%2FMaputo', '_blank')}
+                  className="border border-primary/20 rounded-lg p-4 bg-gradient-card hover:border-primary/40 cursor-pointer transition-all duration-300 hover:shadow-elegant"
+                >
+                  <div className="grid grid-cols-7 gap-2 text-center text-xs font-medium text-muted-foreground mb-3">
+                    <div>Dom</div>
+                    <div>Seg</div>
+                    <div>Ter</div>
+                    <div>Qua</div>
+                    <div>Qui</div>
+                    <div>Sex</div>
+                    <div>Sáb</div>
+                  </div>
+                  <div className="grid grid-cols-7 gap-2 text-center">
+                    {Array.from({ length: 35 }, (_, i) => {
+                      const day = i - 4; // Start from a Monday
+                      const isCurrentMonth = day > 0 && day <= 30;
+                      const hasEvent = [5, 12, 18, 25].includes(day);
+                      return (
+                        <div 
+                          key={i}
+                          className={`
+                            h-8 flex items-center justify-center rounded text-sm
+                            ${isCurrentMonth ? 'text-foreground' : 'text-muted-foreground/50'}
+                            ${hasEvent ? 'bg-primary/20 text-primary font-medium' : ''}
+                            ${day === 15 ? 'bg-primary text-primary-foreground font-bold' : ''}
+                          `}
+                        >
+                          {isCurrentMonth ? day : ''}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="mt-4 text-center">
+                    <div className="inline-flex items-center gap-2 text-sm text-primary">
+                      <div className="w-3 h-3 bg-primary rounded"></div>
+                      <span>Clique para abrir calendário completo</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="text-center">
+                  <Button 
+                    onClick={() => window.open('https://calendar.google.com/calendar/embed?src=c_9538bfcf62a4001f59d7ed508935ff20361d60ec35c1fdb3cfba4e8ecd18a9d3%40group.calendar.google.com&ctz=Africa%2FMaputo', '_blank')}
+                    variant="hero"
+                    size="lg"
+                    className="w-full sm:w-auto"
+                  >
+                    Abrir Calendário Completo
+                  </Button>
+                </div>
               </div>
             </DialogContent>
           </Dialog>
