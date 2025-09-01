@@ -420,64 +420,129 @@ export function ContactSection() {
               <div className="p-6 space-y-6">
                 <div className="text-center">
                   <h4 className="text-lg font-semibold text-foreground mb-2">
-                    Calendário de Agendamentos
+                    Agende a Sua Consulta
                   </h4>
                   <p className="text-muted-foreground mb-6">
-                    Clique abaixo para aceder ao nosso calendário e escolher o melhor horário para a sua consulta gratuita.
+                    Escolha uma das opções abaixo para agendar a sua consulta gratuita connosco.
                   </p>
                 </div>
                 
-                {/* Calendar Preview Mockup */}
-                <div 
-                  onClick={() => window.open('https://calendar.google.com/calendar/embed?src=c_9538bfcf62a4001f59d7ed508935ff20361d60ec35c1fdb3cfba4e8ecd18a9d3%40group.calendar.google.com&ctz=Africa%2FMaputo', '_blank')}
-                  className="border border-primary/20 rounded-lg p-4 bg-gradient-card hover:border-primary/40 cursor-pointer transition-all duration-300 hover:shadow-elegant"
-                >
-                  <div className="grid grid-cols-7 gap-2 text-center text-xs font-medium text-muted-foreground mb-3">
-                    <div>Dom</div>
-                    <div>Seg</div>
-                    <div>Ter</div>
-                    <div>Qua</div>
-                    <div>Qui</div>
-                    <div>Sex</div>
-                    <div>Sáb</div>
+                {/* Scheduling Options */}
+                <div className="space-y-4">
+                  {/* Option 1: Direct Calendar Event Creation */}
+                  <div className="border border-primary/20 rounded-lg p-4 bg-gradient-card hover:border-primary/40 transition-all duration-300">
+                    <h5 className="font-semibold text-foreground mb-2 flex items-center gap-2">
+                      <div className="w-3 h-3 bg-primary rounded-full"></div>
+                      Agendar Directamente no Google Calendar
+                    </h5>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Crie um evento directamente no seu Google Calendar para uma consulta connosco.
+                    </p>
+                    <Button 
+                      onClick={() => {
+                        const startDate = new Date();
+                        startDate.setDate(startDate.getDate() + 1);
+                        startDate.setHours(14, 0, 0, 0); // 2 PM tomorrow
+                        
+                        const endDate = new Date(startDate);
+                        endDate.setHours(15, 0, 0, 0); // 3 PM tomorrow
+                        
+                        const eventDetails = {
+                          action: 'TEMPLATE',
+                          text: 'Consulta Gratuita - ThreeDotts',
+                          dates: `${startDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z/${endDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z`,
+                          details: 'Consulta gratuita sobre soluções tecnológicas com a equipa da ThreeDotts.\n\nContacto: +258 87 611 0005\nEmail: suporte@threedotts.com',
+                          location: 'Quinta Avenida Minguene, Costa do Sol, Maputo'
+                        };
+                        
+                        const url = `https://calendar.google.com/calendar/render?${new URLSearchParams(eventDetails).toString()}`;
+                        window.open(url, '_blank');
+                      }}
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                    >
+                      Criar Evento no Calendar
+                    </Button>
                   </div>
-                  <div className="grid grid-cols-7 gap-2 text-center">
-                    {Array.from({ length: 35 }, (_, i) => {
-                      const day = i - 4; // Start from a Monday
-                      const isCurrentMonth = day > 0 && day <= 30;
-                      const hasEvent = [5, 12, 18, 25].includes(day);
-                      return (
-                        <div 
-                          key={i}
-                          className={`
-                            h-8 flex items-center justify-center rounded text-sm
-                            ${isCurrentMonth ? 'text-foreground' : 'text-muted-foreground/50'}
-                            ${hasEvent ? 'bg-primary/20 text-primary font-medium' : ''}
-                            ${day === 15 ? 'bg-primary text-primary-foreground font-bold' : ''}
-                          `}
-                        >
-                          {isCurrentMonth ? day : ''}
-                        </div>
-                      );
-                    })}
+
+                  {/* Option 2: Email Scheduling */}
+                  <div className="border border-primary/20 rounded-lg p-4 bg-gradient-card hover:border-primary/40 transition-all duration-300">
+                    <h5 className="font-semibold text-foreground mb-2 flex items-center gap-2">
+                      <div className="w-3 h-3 bg-secondary rounded-full"></div>
+                      Agendar por Email
+                    </h5>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Envie-nos um email com a sua disponibilidade e entraremos em contacto.
+                    </p>
+                    <Button 
+                      onClick={() => {
+                        const subject = encodeURIComponent('Pedido de Agendamento - Consulta Gratuita');
+                        const body = encodeURIComponent(`Olá,
+
+Gostaria de agendar uma consulta gratuita sobre soluções tecnológicas.
+
+Informações de contacto:
+- Nome: [O seu nome]
+- Empresa: [Nome da empresa]
+- Telefone: [O seu telefone]
+
+Disponibilidade preferida:
+- Dia: [Ex: Próxima segunda-feira]
+- Horário: [Ex: 14h00-16h00]
+
+Assunto da consulta:
+[Descreva brevemente o que gostaria de discutir]
+
+Obrigado!`);
+                        
+                        window.open(`mailto:suporte@threedotts.com?subject=${subject}&body=${body}`, '_blank');
+                      }}
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                    >
+                      Enviar Email para Agendar
+                    </Button>
                   </div>
-                  <div className="mt-4 text-center">
-                    <div className="inline-flex items-center gap-2 text-sm text-primary">
-                      <div className="w-3 h-3 bg-primary rounded"></div>
-                      <span>Clique para abrir calendário completo</span>
-                    </div>
+
+                  {/* Option 3: WhatsApp Scheduling */}
+                  <div className="border border-primary/20 rounded-lg p-4 bg-gradient-card hover:border-primary/40 transition-all duration-300">
+                    <h5 className="font-semibold text-foreground mb-2 flex items-center gap-2">
+                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                      Agendar pelo WhatsApp
+                    </h5>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Contacte-nos directamente pelo WhatsApp para agendar rapidamente.
+                    </p>
+                    <Button 
+                      onClick={() => {
+                        const message = encodeURIComponent('Olá! Gostaria de agendar uma consulta gratuita sobre soluções tecnológicas. Qual é a vossa disponibilidade?');
+                        window.open(`https://wa.me/258876110005?text=${message}`, '_blank');
+                      }}
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                    >
+                      Agendar via WhatsApp
+                    </Button>
                   </div>
                 </div>
                 
-                <div className="text-center">
-                  <Button 
-                    onClick={() => window.open('https://calendar.google.com/calendar/embed?src=c_9538bfcf62a4001f59d7ed508935ff20361d60ec35c1fdb3cfba4e8ecd18a9d3%40group.calendar.google.com&ctz=Africa%2FMaputo', '_blank')}
-                    variant="hero"
-                    size="lg"
-                    className="w-full sm:w-auto"
-                  >
-                    Abrir Calendário Completo
-                  </Button>
+                {/* Calendar View Option */}
+                <div className="border-t pt-6">
+                  <div className="text-center">
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Ou visualize o nosso calendário para verificar disponibilidade:
+                    </p>
+                    <Button 
+                      onClick={() => window.open('https://calendar.google.com/calendar/embed?src=c_9538bfcf62a4001f59d7ed508935ff20361d60ec35c1fdb3cfba4e8ecd18a9d3%40group.calendar.google.com&ctz=Africa%2FMaputo', '_blank')}
+                      variant="secondary"
+                      size="sm"
+                    >
+                      Ver Calendário Completo
+                    </Button>
+                  </div>
                 </div>
               </div>
             </DialogContent>
