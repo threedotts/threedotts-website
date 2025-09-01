@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -399,21 +400,36 @@ export function ContactSection() {
           <p className="text-lg text-primary-foreground/90 mb-8 max-w-2xl mx-auto">
             Dê o primeiro passo rumo à transformação digital. Vamos discutir o seu projecto e criar soluções que geram resultados reais para o seu negócio.
           </p>
-          <Button 
-            variant="secondary" 
-            size="lg" 
-            className="group w-full sm:w-auto px-4 sm:px-6"
-            asChild
-          >
-            <a 
-              href="https://calendar.app.google/dWHm8n2NiDPH8ksb8" 
-              target="_blank" 
-              rel="noopener noreferrer"
-            >
-              <span className="truncate">Agende Consulta Gratuita</span>
-              <ArrowRight className="group-hover:translate-x-1 transition-transform ml-2 flex-shrink-0" />
-            </a>
-          </Button>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button 
+                variant="secondary" 
+                size="lg" 
+                className="group w-full sm:w-auto px-4 sm:px-6"
+              >
+                <span className="truncate">Agende Consulta Gratuita</span>
+                <ArrowRight className="group-hover:translate-x-1 transition-transform ml-2 flex-shrink-0" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-4xl w-full mx-4">
+              <DialogHeader>
+                <DialogTitle className="text-2xl font-semibold text-center">
+                  Agende a Sua Consulta
+                </DialogTitle>
+              </DialogHeader>
+              <div className="p-4">
+                <iframe 
+                  src="https://calendar.google.com/calendar/embed?src=c_9538bfcf62a4001f59d7ed508935ff20361d60ec35c1fdb3cfba4e8ecd18a9d3%40group.calendar.google.com&ctz=Africa%2FMaputo" 
+                  style={{ border: 0 }} 
+                  width="100%" 
+                  height="600" 
+                  frameBorder="0" 
+                  scrolling="no"
+                  className="rounded-lg"
+                />
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
     </section>
