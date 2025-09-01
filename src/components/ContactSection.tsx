@@ -403,16 +403,10 @@ export function ContactSection() {
             variant="secondary" 
             size="lg" 
             className="group w-full sm:w-auto px-4 sm:px-6"
-            asChild
+            onClick={() => window.open("https://calendar.app.google/dWHm8n2NiDPH8ksb8", "_blank", "noopener,noreferrer")}
           >
-            <a 
-              href="https://calendar.app.google/dWHm8n2NiDPH8ksb8" 
-              target="_blank" 
-              rel="noopener noreferrer"
-            >
-              <span className="truncate">Agende Consulta Gratuita</span>
-              <ArrowRight className="group-hover:translate-x-1 transition-transform ml-2 flex-shrink-0" />
-            </a>
+            <span className="truncate">Agende Consulta Gratuita</span>
+            <ArrowRight className="group-hover:translate-x-1 transition-transform ml-2 flex-shrink-0" />
           </Button>
         </div>
       </div>
