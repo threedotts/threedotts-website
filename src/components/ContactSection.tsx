@@ -417,22 +417,16 @@ export function ContactSection() {
                   Agende a Sua Consulta
                 </DialogTitle>
               </DialogHeader>
-              <div className="p-6 space-y-6">
-                <p className="text-center text-muted-foreground">
-                  Clique no botão abaixo para abrir o nosso calendário e escolher o melhor horário para a sua consulta gratuita.
-                </p>
-                <div className="flex flex-col gap-4">
-                  <Button 
-                    onClick={() => window.open('https://calendar.google.com/calendar/embed?src=c_9538bfcf62a4001f59d7ed508935ff20361d60ec35c1fdb3cfba4e8ecd18a9d3%40group.calendar.google.com&ctz=Africa%2FMaputo', '_blank')}
-                    className="w-full"
-                    size="lg"
-                  >
-                    Abrir Calendário de Agendamento
-                  </Button>
-                  <p className="text-xs text-center text-muted-foreground">
-                    Será aberto numa nova janela
-                  </p>
-                </div>
+              <div className="p-4">
+                <iframe 
+                  src="https://calendar.google.com/calendar/embed?src=c_9538bfcf62a4001f59d7ed508935ff20361d60ec35c1fdb3cfba4e8ecd18a9d3%40group.calendar.google.com&ctz=Africa%2FMaputo" 
+                  style={{ border: 0 }} 
+                  width="100%" 
+                  height="600" 
+                  frameBorder="0" 
+                  scrolling="no"
+                  className="rounded-lg"
+                />
               </div>
             </DialogContent>
           </Dialog>
