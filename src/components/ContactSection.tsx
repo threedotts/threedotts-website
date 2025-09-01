@@ -412,19 +412,13 @@ export function ContactSection() {
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-4xl w-full mx-4">
-              <DialogHeader>
-                <DialogTitle className="text-2xl font-semibold text-center">
-                  Agende a Sua Consulta
-                </DialogTitle>
-              </DialogHeader>
               <div className="p-4">
                 <iframe 
-                  src="https://calendar.google.com/calendar/embed?src=c_9538bfcf62a4001f59d7ed508935ff20361d60ec35c1fdb3cfba4e8ecd18a9d3%40group.calendar.google.com&ctz=Africa%2FMaputo" 
+                  src="https://calendar.google.com/calendar/appointments/schedules/AcZssZ03epljbaei6jPZ2HxQMy0gI1-mPI_PpWILcLcSGtBgTnzdlW3_dusq9GU2alg6-_1cNo2hZREu?gv=true" 
                   style={{ border: 0 }} 
                   width="100%" 
                   height="600" 
-                  frameBorder="0" 
-                  scrolling="no"
+                  frameBorder="0"
                   className="rounded-lg"
                 />
               </div>
