@@ -411,7 +411,7 @@ export function ContactSection() {
                 <ArrowRight className="group-hover:translate-x-1 transition-transform ml-2 flex-shrink-0" />
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-md">
+            <DialogContent className="max-w-4xl w-full mx-4">
               <DialogHeader>
                 <DialogTitle className="text-2xl font-semibold text-center">
                   Agende a Sua Consulta
