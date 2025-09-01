@@ -400,16 +400,37 @@ export function ContactSection() {
           <p className="text-lg text-primary-foreground/90 mb-8 max-w-2xl mx-auto">
             Dê o primeiro passo rumo à transformação digital. Vamos discutir o seu projecto e criar soluções que geram resultados reais para o seu negócio.
           </p>
-          <Link to="/scheduling">
-            <Button 
-              variant="secondary" 
-              size="lg" 
-              className="group w-full sm:w-auto px-4 sm:px-6"
-            >
-              <span className="truncate">Agende Consulta Gratuita</span>
-              <ArrowRight className="group-hover:translate-x-1 transition-transform ml-2 flex-shrink-0" />
-            </Button>
-          </Link>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button 
+                variant="secondary" 
+                size="lg" 
+                className="group w-full sm:w-auto px-4 sm:px-6"
+              >
+                <span className="truncate">Agende Consulta Gratuita</span>
+                <ArrowRight className="group-hover:translate-x-1 transition-transform ml-2 flex-shrink-0" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-5xl h-[80vh] p-0">
+              <DialogHeader className="px-6 py-4 border-b">
+                <DialogTitle className="text-2xl font-semibold">
+                  Agende a Sua Consulta
+                </DialogTitle>
+              </DialogHeader>
+              <div className="flex-1 p-6">
+                <iframe 
+                  src="https://calendar.google.com/calendar/embed?height=600&wkst=1&ctz=Africa%2FMaputo&showPrint=0&title=Threedotts&src=Y185NTM4YmZjZjYyYTQwMDFmNTlkN2VkNTA4OTM1ZmYyMDM2MWQ2MGVjMzVjMWZkYjNjZmJhNGU4ZWNkMThhOWQzQGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20&color=%23c0ca33" 
+                  style={{ borderWidth: 0 }} 
+                  width="100%" 
+                  height="100%" 
+                  frameBorder="0" 
+                  scrolling="no"
+                  title="Calendário de Agendamento Threedotts"
+                  className="rounded-lg"
+                />
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
     </section>
