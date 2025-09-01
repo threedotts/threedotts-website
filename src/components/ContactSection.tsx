@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -399,15 +400,30 @@ export function ContactSection() {
           <p className="text-lg text-primary-foreground/90 mb-8 max-w-2xl mx-auto">
             Dê o primeiro passo rumo à transformação digital. Vamos discutir o seu projecto e criar soluções que geram resultados reais para o seu negócio.
           </p>
-          <Button 
-            variant="secondary" 
-            size="lg" 
-            className="group w-full sm:w-auto px-4 sm:px-6"
-            onClick={() => window.open("https://calendar.app.google/dWHm8n2NiDPH8ksb8", "_blank", "noopener,noreferrer")}
-          >
-            <span className="truncate">Agende Consulta Gratuita</span>
-            <ArrowRight className="group-hover:translate-x-1 transition-transform ml-2 flex-shrink-0" />
-          </Button>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button 
+                variant="secondary" 
+                size="lg" 
+                className="group w-full sm:w-auto px-4 sm:px-6"
+              >
+                <span className="truncate">Agende Consulta Gratuita</span>
+                <ArrowRight className="group-hover:translate-x-1 transition-transform ml-2 flex-shrink-0" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-4xl w-full mx-4">
+              <div className="p-4">
+                <iframe 
+                  src="https://calendar.google.com/calendar/appointments/schedules/AcZssZ03epljbaei6jPZ2HxQMy0gI1-mPI_PpWILcLcSGtBgTnzdlW3_dusq9GU2alg6-_1cNo2hZREu?gv=true" 
+                  style={{ border: 0 }} 
+                  width="100%" 
+                  height="600" 
+                  frameBorder="0"
+                  className="rounded-lg"
+                />
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
     </section>
