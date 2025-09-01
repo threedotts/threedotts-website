@@ -118,10 +118,12 @@ export function ServicesSection() {
         </div>
 
         <div className="text-center">
-          <Button variant="hero" size="lg" className="group">
-            Discuta o Seu Projecto
-            <ArrowRight className="group-hover:translate-x-1 transition-transform" />
-          </Button>
+          <Link to="/project-request">
+            <Button variant="hero" size="lg" className="group">
+              Discuta o Seu Projecto
+              <ArrowRight className="group-hover:translate-x-1 transition-transform" />
+            </Button>
+          </Link>
         </div>
       </div>
     </section>
