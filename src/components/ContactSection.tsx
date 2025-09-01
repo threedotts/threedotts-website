@@ -417,79 +417,20 @@ export function ContactSection() {
                   Agende a Sua Consulta
                 </DialogTitle>
               </DialogHeader>
-              <div className="p-6 space-y-4">
-                <form className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium text-foreground mb-2 block">
-                      Nome Completo
-                    </label>
-                    <Input 
-                      placeholder="Seu nome completo" 
-                      className="border-primary/20 focus:border-primary"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="text-sm font-medium text-foreground mb-2 block">
-                      Email
-                    </label>
-                    <Input 
-                      type="email" 
-                      placeholder="seu@email.com" 
-                      className="border-primary/20 focus:border-primary"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="text-sm font-medium text-foreground mb-2 block">
-                      Telefone
-                    </label>
-                    <Input 
-                      placeholder="+258 XX XXX XXXX" 
-                      className="border-primary/20 focus:border-primary"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="text-sm font-medium text-foreground mb-2 block">
-                      Data Preferida
-                    </label>
-                    <Input 
-                      type="date" 
-                      className="border-primary/20 focus:border-primary"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="text-sm font-medium text-foreground mb-2 block">
-                      Horário Preferido
-                    </label>
-                    <select className="w-full border border-primary/20 rounded-md px-3 py-2 text-sm focus:border-primary focus:outline-none">
-                      <option value="">Selecione um horário</option>
-                      <option value="09:00">09:00</option>
-                      <option value="10:00">10:00</option>
-                      <option value="11:00">11:00</option>
-                      <option value="14:00">14:00</option>
-                      <option value="15:00">15:00</option>
-                      <option value="16:00">16:00</option>
-                    </select>
-                  </div>
-                  
+              <div className="p-6 space-y-6">
+                <p className="text-center text-muted-foreground">
+                  Clique no botão abaixo para abrir o nosso calendário e escolher o melhor horário para a sua consulta gratuita.
+                </p>
+                <div className="flex flex-col gap-4">
                   <Button 
-                    type="submit" 
-                    className="w-full" 
+                    onClick={() => window.open('https://calendar.google.com/calendar/embed?src=c_9538bfcf62a4001f59d7ed508935ff20361d60ec35c1fdb3cfba4e8ecd18a9d3%40group.calendar.google.com&ctz=Africa%2FMaputo', '_blank')}
+                    className="w-full"
                     size="lg"
                   >
-                    Solicitar Agendamento
+                    Abrir Calendário de Agendamento
                   </Button>
-                </form>
-                
-                <div className="text-center pt-4 border-t">
-                  <p className="text-xs text-muted-foreground mb-2">
-                    Ou contacte-nos diretamente:
-                  </p>
-                  <p className="text-sm font-medium text-primary">
-                    +258 87 611 0005
+                  <p className="text-xs text-center text-muted-foreground">
+                    Será aberto numa nova janela
                   </p>
                 </div>
               </div>
