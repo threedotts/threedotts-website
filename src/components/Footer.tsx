@@ -13,7 +13,7 @@ const footerSections = [
   {
     title: "Serviços",
     links: [
-      { name: "Consulta Gratuita", href: "/consulta" },
+      { name: "Agendamento", href: "/scheduling" },
       { name: "Pedido de Projeto", href: "/project-request" }
     ]
   },
