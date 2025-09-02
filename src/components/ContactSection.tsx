@@ -277,7 +277,7 @@ export function ContactSection() {
                         <h4 className="font-semibold text-foreground mb-1">
                           {info.title}
                         </h4>
-                        <p className="text-sm font-medium text-primary mb-1">
+                        <p className="text-xs font-medium text-primary mb-1 break-all">
                           {info.content}
                         </p>
                         <p className="text-xs text-muted-foreground">
