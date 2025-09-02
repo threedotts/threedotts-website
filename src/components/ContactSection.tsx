@@ -197,7 +197,7 @@ export function ContactSection() {
           ...formData,
           timestamp: new Date().toISOString(),
           source: 'contact_form',
-          webhookUrl: 'https://n8n.srv922768.hstgr.cloud/webhook-test/1787c063-fda2-4ce2-83bb-79d78177e085'
+          webhookUrl: 'https://n8n.srv922768.hstgr.cloud/webhook-test/bca4e21a-2d74-485e-8e46-5f7238ca0b7a'
         }
       });
 
