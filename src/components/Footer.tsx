@@ -8,6 +8,9 @@ import {
   Phone,
   MapPin
 } from "lucide-react";
+import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const footerSections = [
   {
@@ -33,6 +36,36 @@ const socialLinks = [
 ];
 
 export function Footer() {
+  const [email, setEmail] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!email) {
+      toast.error("Por favor, insira um email válido");
+      return;
+    }
+
+    setIsLoading(true);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('newsletter-signup', {
+        body: { email }
+      });
+
+      if (error) throw error;
+
+      toast.success("Email subscrito com sucesso!");
+      setEmail("");
+    } catch (error) {
+      console.error('Erro ao subscrever newsletter:', error);
+      toast.error("Erro ao subscrever newsletter. Tente novamente.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <footer className="bg-foreground text-background">
       <div className="container mx-auto px-4 py-16">
@@ -113,16 +146,25 @@ export function Footer() {
                 Receba as últimas novidades e actualizações tecnológicas na sua caixa de entrada.
               </p>
             </div>
-            <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+            <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
               <input
                 type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="Insira o seu email"
                 className="flex-1 sm:w-64 px-4 py-2 rounded-md bg-background/10 border border-background/20 text-background placeholder-background/60 focus:outline-none focus:border-primary min-w-0"
+                required
+                disabled={isLoading}
               />
-              <Button variant="default" className="w-full sm:w-auto">
-                Subscrever
+              <Button 
+                type="submit" 
+                variant="default" 
+                className="w-full sm:w-auto"
+                disabled={isLoading}
+              >
+                {isLoading ? "Enviando..." : "Subscrever"}
               </Button>
-            </div>
+            </form>
           </div>
         </div>
 
