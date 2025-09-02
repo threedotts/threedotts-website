@@ -95,8 +95,33 @@ serve(async (req) => {
       throw err;
     }
 
-    // Step 4: Get billing settings
-    console.log('\n⚙️ STEP 4: Fetching billing settings...');
+    // Step 4: Get organization members with emails
+    console.log('\n👥 STEP 4: Fetching organization members with emails...');
+    let organizationMembers;
+    try {
+      const { data: membersData, error: membersError } = await supabaseService
+        .from('organization_members')
+        .select('organization_id, user_id, email, role, status')
+        .eq('status', 'active');
+
+      if (membersError) {
+        console.error('❌ Organization members query error:', membersError);
+        throw new Error(`Organization members query failed: ${membersError.message}`);
+      }
+      
+      organizationMembers = membersData || [];
+      console.log(`✅ Found ${organizationMembers.length} active organization members`);
+      
+      for (const member of organizationMembers) {
+        console.log(`   - Org ${member.organization_id}: ${member.email} (${member.role})`);
+      }
+    } catch (err) {
+      console.error('❌ Organization members fetch error:', err);
+      throw err;
+    }
+
+    // Step 5: Get billing settings
+    console.log('\n⚙️ STEP 5: Fetching billing settings...');
     let billingSettings;
     try {
       const { data: settingsData, error: settingsError } = await supabaseService
@@ -119,8 +144,8 @@ serve(async (req) => {
       throw err;
     }
 
-    // Step 5: Process low credit alerts
-    console.log('\n🔄 STEP 5: Processing low credit alerts...');
+    // Step 6: Process low credit alerts
+    console.log('\n🔄 STEP 6: Processing low credit alerts...');
     const lowCreditAlerts = [];
     const currentTime = new Date().toISOString();
 
@@ -157,6 +182,12 @@ serve(async (req) => {
         if (orgCredits.current_credits <= threshold) {
           console.log(`   🚨 LOW CREDITS ALERT: ${orgCredits.current_credits} <= ${threshold}`);
           
+          // Find organization members with emails
+          const orgMembers = organizationMembers.filter(m => m.organization_id === org.id);
+          const memberEmails = orgMembers.map(m => m.email).filter(email => email);
+          
+          console.log(`   📧 Found ${memberEmails.length} member emails: ${memberEmails.join(', ')}`);
+          
           const alert = {
             organizationId: org.id,
             organizationName: org.name,
@@ -164,7 +195,9 @@ serve(async (req) => {
             threshold: threshold,
             timestamp: currentTime,
             alertType: 'low_credits_warning',
-            source: 'automated_monitoring'
+            source: 'automated_monitoring',
+            organizationEmails: memberEmails,
+            membersCount: orgMembers.length
           };
           
           lowCreditAlerts.push(alert);
@@ -183,9 +216,9 @@ serve(async (req) => {
     console.log(`   - Organizations checked: ${organizations.length}`);
     console.log(`   - Low credit alerts found: ${lowCreditAlerts.length}`);
 
-    // Step 6: Send webhook if alerts found
+    // Step 7: Send webhook if alerts found
     if (lowCreditAlerts.length > 0) {
-      console.log('\n📤 STEP 6: Sending webhook...');
+      console.log('\n📤 STEP 7: Sending webhook...');
       
       try {
         const webhookPayload = {
@@ -196,7 +229,8 @@ serve(async (req) => {
           systemInfo: {
             organizationsChecked: organizations.length,
             creditsRecordsFound: userCredits.length,
-            settingsRecordsFound: billingSettings.length
+            settingsRecordsFound: billingSettings.length,
+            membersRecordsFound: organizationMembers.length
           }
         };
         
@@ -243,7 +277,8 @@ serve(async (req) => {
         timestamp: currentTime,
         systemInfo: {
           creditsRecords: userCredits.length,
-          settingsRecords: billingSettings.length
+          settingsRecords: billingSettings.length,
+          membersRecords: organizationMembers.length
         }
       }),
       {
