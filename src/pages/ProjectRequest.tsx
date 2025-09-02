@@ -263,11 +263,48 @@ export default function ProjectRequest() {
   const form = useForm<ServiceFormData>({
     resolver: zodResolver(serviceSchema),
     defaultValues: {
+      // Basic info
+      fullName: "",
+      companyName: "",
+      email: "",
+      phone: "",
+      companyDomain: "",
+      // Services
       selectedServices: [],
-      supportChannels: [],
-      automationNeeds: [],
+      // Mobile apps
+      appPurpose: "",
+      needsUserAccount: undefined,
+      needsOfflineMode: undefined,
+      hasDesignIdentity: undefined,
       designFiles: [],
-      webDesignFiles: []
+      // Websites
+      websiteType: "",
+      websitePages: "",
+      needsLoginPayments: undefined,
+      hasDesignIdeasWeb: undefined,
+      webDesignFiles: [],
+      // Call center
+      supportChannels: [],
+      otherSupportChannels: "",
+      currentSupportMethod: "",
+      callCenterObjective: "",
+      // Automation
+      manualTasks: "",
+      automationNeeds: [],
+      // Business solutions
+      businessProblem: "",
+      solutionIdea: "",
+      userScope: undefined,
+      // Data intelligence
+      dataInsights: "",
+      currentDataSystems: "",
+      needsPredictions: undefined,
+      // Integration
+      needsIntegration: undefined,
+      integrationDetails: "",
+      // Final
+      additionalInfo: "",
+      additionalFiles: []
     }
   });
   const selectedServices = form.watch("selectedServices") || [];
