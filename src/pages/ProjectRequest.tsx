@@ -274,14 +274,31 @@ export default function ProjectRequest() {
   const hasMultipleServices = selectedServices.length > 1;
   const onSubmit = async (data: ServiceFormData) => {
     try {
-      console.log("Form data:", data);
+      // Send form data to webhook
+      const response = await fetch('https://n8n.srv922768.hstgr.cloud/webhook-test/1e4a11ee-8ae7-4654-beaa-e823e3531871', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...data,
+          timestamp: new Date().toISOString(),
+          source: 'project_request_form'
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Falha ao enviar dados para o webhook');
+      }
+
       toast({
         title: "Solicitação enviada com sucesso!",
         description: "Entraremos em contacto consigo em breve para discutir o seu projeto."
       });
 
-      // Aqui integrar com Supabase para salvar os dados
+      console.log("Form data sent successfully:", data);
     } catch (error) {
+      console.error('Webhook error:', error);
       toast({
         title: "Erro ao enviar solicitação",
         description: "Tente novamente mais tarde.",
