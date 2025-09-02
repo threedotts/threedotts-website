@@ -34,6 +34,12 @@ serve(async (req) => {
         billing_settings (
           low_credit_warning_threshold,
           enable_low_credit_notifications
+        ),
+        organization_members!inner (
+          user_id,
+          email,
+          role,
+          status
         )
       `);
 
@@ -66,6 +72,20 @@ serve(async (req) => {
       if (currentCredits <= threshold) {
         console.log(`⚠️ LOW CREDITS ALERT: ${org.name} has ${currentCredits} credits (threshold: ${threshold})`);
         
+        // Get emails of owners and admins
+        const adminEmails = org.organization_members
+          ?.filter(member => 
+            member.status === 'active' && 
+            (member.role === 'owner' || member.role === 'admin')
+          )
+          ?.map(member => ({
+            email: member.email,
+            role: member.role,
+            userId: member.user_id
+          })) || [];
+
+        console.log(`Found ${adminEmails.length} admin/owner emails for ${org.name}`);
+        
         lowCreditAlerts.push({
           organizationId: org.id,
           organizationName: org.name,
@@ -75,7 +95,9 @@ serve(async (req) => {
           totalPurchased: credits.total_credits_purchased || 0,
           totalUsed: credits.total_credits_used || 0,
           timestamp: currentTime,
-          alertType: 'low_credits_warning'
+          alertType: 'low_credits_warning',
+          adminEmails: adminEmails,
+          adminCount: adminEmails.length
         });
       }
     }
