@@ -11,9 +11,10 @@ import {
 
 const footerSections = [
   {
-    title: "Empresa",
+    title: "Serviços",
     links: [
-      { name: "Consulta Gratuita", href: "/project-request" }
+      { name: "Consulta Gratuita", href: "/consulta" },
+      { name: "Pedido de Projeto", href: "/project-request" }
     ]
   },
   {
