@@ -9,20 +9,7 @@ import {
   MapPin
 } from "lucide-react";
 
-const footerSections = [
-  {
-    title: "Empresa",
-    links: [
-      { name: "Consulta Gratuita", href: "/project-request" }
-    ]
-  },
-  {
-    title: "Suporte",
-    links: [
-      { name: "Dashboard", href: "/dashboard" }
-    ]
-  }
-];
+const footerSections = [];
 
 const socialLinks = [
   { icon: Facebook, href: "#", label: "Facebook" },
