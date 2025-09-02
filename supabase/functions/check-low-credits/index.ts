@@ -55,50 +55,65 @@ serve(async (req) => {
 
     // Check each organization for low credits
     for (const org of organizations || []) {
-      const credits = org.user_credits?.[0];
-      const settings = org.billing_settings?.[0];
+      try {
+        const credits = org.user_credits?.[0];
+        const settings = org.billing_settings?.[0];
 
-      // Skip if no credits data or notifications disabled
-      if (!credits || !settings?.enable_low_credit_notifications) {
+        // Skip if no credits data or notifications disabled
+        if (!credits || !settings?.enable_low_credit_notifications) {
+          console.log(`Skipping org ${org.name}: missing data or notifications disabled`);
+          continue;
+        }
+
+        const currentCredits = credits.current_credits || 0;
+        const threshold = settings.low_credit_warning_threshold || 100;
+
+        console.log(`Org ${org.name}: ${currentCredits} credits (threshold: ${threshold})`);
+
+        // Check if credits are at or below threshold
+        if (currentCredits <= threshold) {
+          console.log(`⚠️ LOW CREDITS ALERT: ${org.name} has ${currentCredits} credits (threshold: ${threshold})`);
+          
+          // Get emails of owners and admins safely
+          const adminEmails = [];
+          
+          if (org.organization_members && Array.isArray(org.organization_members)) {
+            for (const member of org.organization_members) {
+              if (
+                member &&
+                member.status === 'active' && 
+                (member.role === 'owner' || member.role === 'admin') &&
+                member.email
+              ) {
+                adminEmails.push({
+                  email: member.email,
+                  role: member.role,
+                  userId: member.user_id
+                });
+              }
+            }
+          }
+
+          console.log(`Found ${adminEmails.length} admin/owner emails for ${org.name}`);
+          
+          lowCreditAlerts.push({
+            organizationId: org.id,
+            organizationName: org.name,
+            userId: org.user_id,
+            currentCredits: currentCredits,
+            threshold: threshold,
+            totalPurchased: credits.total_credits_purchased || 0,
+            totalUsed: credits.total_credits_used || 0,
+            timestamp: currentTime,
+            alertType: 'low_credits_warning',
+            adminEmails: adminEmails,
+            adminCount: adminEmails.length
+          });
+        }
+      } catch (orgProcessError) {
+        console.error(`Error processing organization ${org?.name || 'unknown'}:`, orgProcessError);
+        // Continue with next organization instead of failing completely
         continue;
-      }
-
-      const currentCredits = credits.current_credits || 0;
-      const threshold = settings.low_credit_warning_threshold || 100;
-
-      console.log(`Org ${org.name}: ${currentCredits} credits (threshold: ${threshold})`);
-
-      // Check if credits are at or below threshold
-      if (currentCredits <= threshold) {
-        console.log(`⚠️ LOW CREDITS ALERT: ${org.name} has ${currentCredits} credits (threshold: ${threshold})`);
-        
-        // Get emails of owners and admins
-        const adminEmails = org.organization_members
-          ?.filter(member => 
-            member.status === 'active' && 
-            (member.role === 'owner' || member.role === 'admin')
-          )
-          ?.map(member => ({
-            email: member.email,
-            role: member.role,
-            userId: member.user_id
-          })) || [];
-
-        console.log(`Found ${adminEmails.length} admin/owner emails for ${org.name}`);
-        
-        lowCreditAlerts.push({
-          organizationId: org.id,
-          organizationName: org.name,
-          userId: org.user_id,
-          currentCredits: currentCredits,
-          threshold: threshold,
-          totalPurchased: credits.total_credits_purchased || 0,
-          totalUsed: credits.total_credits_used || 0,
-          timestamp: currentTime,
-          alertType: 'low_credits_warning',
-          adminEmails: adminEmails,
-          adminCount: adminEmails.length
-        });
       }
     }
 
