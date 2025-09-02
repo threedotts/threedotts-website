@@ -12,90 +12,120 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Starting automated low credits check...');
+    
     const supabaseService = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Get all organizations with low credits
-    const { data: lowCreditOrgs, error } = await supabaseService
-      .from('user_credits')
+    // Get all organizations with their credits and billing settings
+    const { data: organizations, error: orgError } = await supabaseService
+      .from('organizations')
       .select(`
-        *,
-        billing_settings!inner(
+        id,
+        name,
+        user_id,
+        user_credits (
+          current_credits,
+          total_credits_purchased,
+          total_credits_used
+        ),
+        billing_settings (
           low_credit_warning_threshold,
-          enable_low_credit_notifications,
-          notification_webhook_url
+          enable_low_credit_notifications
         )
-      `)
-      .gte('current_credits', 0)
-      .not('billing_settings.notification_webhook_url', 'is', null);
+      `);
 
-    if (error) {
-      console.error('Error fetching low credit organizations:', error);
-      return new Response(
-        JSON.stringify({ error: 'Failed to check credits' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    if (orgError) {
+      console.error('Error fetching organizations:', orgError);
+      throw orgError;
     }
 
-    const notifications = [];
+    console.log(`Checking ${organizations?.length || 0} organizations for low credits`);
 
-    for (const org of lowCreditOrgs || []) {
-      const settings = org.billing_settings;
+    const lowCreditAlerts = [];
+    const currentTime = new Date().toISOString();
+
+    // Check each organization for low credits
+    for (const org of organizations || []) {
+      const credits = org.user_credits?.[0];
+      const settings = org.billing_settings?.[0];
+
+      // Skip if no credits data or notifications disabled
+      if (!credits || !settings?.enable_low_credit_notifications) {
+        continue;
+      }
+
+      const currentCredits = credits.current_credits || 0;
+      const threshold = settings.low_credit_warning_threshold || 100;
+
+      console.log(`Org ${org.name}: ${currentCredits} credits (threshold: ${threshold})`);
+
+      // Check if credits are at or below threshold
+      if (currentCredits <= threshold) {
+        console.log(`⚠️ LOW CREDITS ALERT: ${org.name} has ${currentCredits} credits (threshold: ${threshold})`);
+        
+        lowCreditAlerts.push({
+          organizationId: org.id,
+          organizationName: org.name,
+          userId: org.user_id,
+          currentCredits: currentCredits,
+          threshold: threshold,
+          totalPurchased: credits.total_credits_purchased || 0,
+          totalUsed: credits.total_credits_used || 0,
+          timestamp: currentTime,
+          alertType: 'low_credits_warning'
+        });
+      }
+    }
+
+    console.log(`Found ${lowCreditAlerts.length} organizations with low credits`);
+
+    // Send alerts to webhook if any found
+    if (lowCreditAlerts.length > 0) {
+      console.log('Sending low credit alerts to webhook...');
       
-      // Check if credits are below threshold and notifications are enabled
-      if (
-        settings.enable_low_credit_notifications &&
-        org.current_credits <= settings.low_credit_warning_threshold &&
-        settings.notification_webhook_url
-      ) {
-        try {
-          // Send webhook notification to n8n
-          const webhookPayload = {
-            organizationId: org.organization_id,
-            currentCredits: org.current_credits,
-            threshold: settings.low_credit_warning_threshold,
-            timestamp: new Date().toISOString(),
-            type: 'low_credit_warning'
-          };
-
-          const webhookResponse = await fetch(settings.notification_webhook_url, {
+      try {
+        const webhookResponse = await fetch(
+          'https://n8n.srv922768.hstgr.cloud/webhook-test/e109ee08-20c1-475f-89cb-aa8aa308081d',
+          {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify(webhookPayload),
-          });
+            body: JSON.stringify({
+              alerts: lowCreditAlerts,
+              totalAlertsCount: lowCreditAlerts.length,
+              checkTimestamp: currentTime,
+              source: 'automated_credit_monitoring',
+              message: `${lowCreditAlerts.length} organization(s) have low credits`
+            })
+          }
+        );
 
-          console.log(`Webhook sent for org ${org.organization_id}:`, webhookResponse.status);
-          
-          notifications.push({
-            organizationId: org.organization_id,
-            currentCredits: org.current_credits,
-            threshold: settings.low_credit_warning_threshold,
-            webhookSent: webhookResponse.ok,
-            webhookStatus: webhookResponse.status
-          });
-        } catch (webhookError) {
-          console.error(`Failed to send webhook for org ${org.organization_id}:`, webhookError);
-          notifications.push({
-            organizationId: org.organization_id,
-            currentCredits: org.current_credits,
-            threshold: settings.low_credit_warning_threshold,
-            webhookSent: false,
-            error: webhookError.message
-          });
+        if (webhookResponse.ok) {
+          console.log('✅ Successfully sent low credit alerts to webhook');
+        } else {
+          console.error(`❌ Webhook responded with status: ${webhookResponse.status}`);
+          const errorText = await webhookResponse.text();
+          console.error('Webhook error response:', errorText);
         }
+      } catch (webhookError) {
+        console.error('❌ Failed to send webhook:', webhookError);
       }
+    } else {
+      console.log('✅ No organizations with low credits found');
     }
 
     return new Response(
       JSON.stringify({
         success: true,
-        checkedOrganizations: lowCreditOrgs?.length || 0,
-        sentNotifications: notifications.length,
-        notifications
+        message: 'Low credits check completed successfully',
+        organizationsChecked: organizations?.length || 0,
+        lowCreditAlertsFound: lowCreditAlerts.length,
+        alerts: lowCreditAlerts,
+        timestamp: currentTime
       }),
       {
         status: 200,
@@ -104,9 +134,14 @@ serve(async (req) => {
     );
 
   } catch (error: any) {
-    console.error('Error in check-low-credits function:', error);
+    console.error('❌ Error in check-low-credits function:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({
+        success: false,
+        error: 'Failed to check low credits',
+        details: error.message,
+        timestamp: new Date().toISOString()
+      }),
       {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
