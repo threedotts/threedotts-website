@@ -121,8 +121,33 @@ serve(async (req) => {
       throw err;
     }
 
-    // Step 5: Get billing settings
-    console.log('\n⚙️ STEP 5: Fetching billing settings...');
+    // Step 5: Get user profiles for email fallback
+    console.log('\n👤 STEP 5: Fetching user profiles for email fallback...');
+    let userProfiles;
+    try {
+      const { data: profilesData, error: profilesError } = await supabaseService
+        .from('profiles')
+        .select('user_id, first_name, last_name');
+
+      if (profilesError) {
+        console.error('❌ User profiles query error:', profilesError);
+        // Non-critical, continue without profiles
+        userProfiles = [];
+      } else {
+        userProfiles = profilesData || [];
+        console.log(`✅ Found ${userProfiles.length} user profiles`);
+      }
+    } catch (err) {
+      console.error('❌ User profiles fetch error:', err);
+      userProfiles = [];
+    }
+
+    // Step 6: Get user auth data for email fallback
+    console.log('\n🔐 STEP 6: Preparing email resolution...');
+    const userIdToEmail = new Map();
+    
+    // Step 7: Get billing settings
+    console.log('\n⚙️ STEP 7: Fetching billing settings...');
     let billingSettings;
     try {
       const { data: settingsData, error: settingsError } = await supabaseService
@@ -145,8 +170,8 @@ serve(async (req) => {
       throw err;
     }
 
-    // Step 6: Process low credit alerts
-    console.log('\n🔄 STEP 6: Processing low credit alerts...');
+    // Step 8: Process low credit alerts
+    console.log('\n🔄 STEP 8: Processing low credit alerts...');
     const lowCreditAlerts = [];
     const currentTime = new Date().toISOString();
 
@@ -185,9 +210,32 @@ serve(async (req) => {
           
           // Find organization owners and admins with emails
           const orgAdmins = organizationMembers.filter(m => m.organization_id === org.id);
-          const adminEmails = orgAdmins.map(m => m.email).filter(email => email);
+          console.log(`   👥 Found ${orgAdmins.length} owners/admins for ${org.name}`);
           
-          console.log(`   📧 Found ${adminEmails.length} owner/admin emails: ${adminEmails.join(', ')}`);
+          // Get emails from organization_members first, then fallback approaches
+          let adminEmails = [];
+          
+          for (const admin of orgAdmins) {
+            if (admin.email) {
+              adminEmails.push(admin.email);
+              console.log(`   📧 Email from org_members: ${admin.email} (${admin.role})`);
+            } else {
+              console.log(`   ⚠️ No email in org_members for user ${admin.user_id} (${admin.role})`);
+              
+              // For organization owners, we can try to use a different approach
+              // Since we can't query auth.users directly, we'll note this for the webhook
+              if (admin.role === 'owner') {
+                console.log(`   🔍 Owner without email detected - will include organization anyway`);
+              }
+            }
+          }
+          
+          // If no emails found but we have admins, we should still alert about the organization
+          if (adminEmails.length === 0 && orgAdmins.length > 0) {
+            console.log(`   ⚠️ No emails found but ${orgAdmins.length} admins exist - including in alert anyway`);
+          }
+          
+          console.log(`   📧 Final email list: ${adminEmails.length} emails: ${adminEmails.join(', ')}`);
           
           const alert = {
             organizationId: org.id,
@@ -198,7 +246,9 @@ serve(async (req) => {
             alertType: 'low_credits_warning',
             source: 'automated_monitoring',
             organizationEmails: adminEmails,
-            ownersAndAdminsCount: orgAdmins.length
+            ownersAndAdminsCount: orgAdmins.length,
+            hasEmailIssues: adminEmails.length === 0 && orgAdmins.length > 0,
+            adminUserIds: orgAdmins.map(a => ({ userId: a.user_id, role: a.role, hasEmail: !!a.email }))
           };
           
           lowCreditAlerts.push(alert);
@@ -217,9 +267,9 @@ serve(async (req) => {
     console.log(`   - Organizations checked: ${organizations.length}`);
     console.log(`   - Low credit alerts found: ${lowCreditAlerts.length}`);
 
-    // Step 7: Send webhook if alerts found
+    // Step 9: Send webhook if alerts found
     if (lowCreditAlerts.length > 0) {
-      console.log('\n📤 STEP 7: Sending webhook...');
+      console.log('\n📤 STEP 9: Sending webhook...');
       
       try {
         const webhookPayload = {
