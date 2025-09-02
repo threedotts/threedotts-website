@@ -12,7 +12,7 @@ serve(async (req) => {
     
     // Send data to n8n webhook
     const webhookResponse = await fetch(
-      'https://n8n.srv922768.hstgr.cloud/webhook-test/ef343510-6dc3-4b6a-b1fa-6b4c26b2c5cb',
+      'https://n8n.srv922768.hstgr.cloud/webhook/ef343510-6dc3-4b6a-b1fa-6b4c26b2c5cb',
       {
         method: 'POST',
         headers: {
