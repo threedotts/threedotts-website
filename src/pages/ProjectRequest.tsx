@@ -257,9 +257,8 @@ const supportChannelOptions = ["Telefone", "WhatsApp", "Facebook", "E-mail", "SM
 const automationOptions = ["Relatórios automáticos", "Leitura de documentos", "Gerenciamento de estoque", "Outros"];
 export default function ProjectRequest() {
   const navigate = useNavigate();
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const form = useForm<ServiceFormData>({
     resolver: zodResolver(serviceSchema),
     defaultValues: {
@@ -310,6 +309,7 @@ export default function ProjectRequest() {
   const selectedServices = form.watch("selectedServices") || [];
   const hasMultipleServices = selectedServices.length > 1;
   const onSubmit = async (data: ServiceFormData) => {
+    setIsSubmitting(true);
     try {
       // Prepare complete form data with all fields explicitly included
       const completeFormData = {
@@ -385,6 +385,9 @@ export default function ProjectRequest() {
         description: "Entraremos em contacto consigo em breve para discutir o seu projeto."
       });
 
+      // Clear the form after successful submission
+      form.reset();
+
       console.log("Form data sent successfully:", data);
     } catch (error) {
       console.error('Erro ao enviar:', error);
@@ -393,6 +396,8 @@ export default function ProjectRequest() {
         description: "Tente novamente mais tarde.",
         variant: "destructive"
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
   const renderRadioGroup = (field: any, options: {
@@ -1052,9 +1057,18 @@ export default function ProjectRequest() {
 
             {/* Submit Button */}
             <div className="flex justify-center">
-              <Button type="submit" size="lg" className="w-full md:w-auto">
-                <Send className="mr-2 h-4 w-4" />
-                Enviar Solicitação
+              <Button type="submit" size="lg" className="w-full md:w-auto" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2" />
+                    Enviando...
+                  </>
+                ) : (
+                  <>
+                    <Send className="mr-2 h-4 w-4" />
+                    Enviar Solicitação
+                  </>
+                )}
               </Button>
             </div>
           </form>
