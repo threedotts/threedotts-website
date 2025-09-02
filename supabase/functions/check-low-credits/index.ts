@@ -95,14 +95,15 @@ serve(async (req) => {
       throw err;
     }
 
-    // Step 4: Get organization members with emails
-    console.log('\n👥 STEP 4: Fetching organization members with emails...');
+    // Step 4: Get organization members with emails (owners and admins only)
+    console.log('\n👥 STEP 4: Fetching organization owners and admins with emails...');
     let organizationMembers;
     try {
       const { data: membersData, error: membersError } = await supabaseService
         .from('organization_members')
         .select('organization_id, user_id, email, role, status')
-        .eq('status', 'active');
+        .eq('status', 'active')
+        .in('role', ['owner', 'admin']);
 
       if (membersError) {
         console.error('❌ Organization members query error:', membersError);
@@ -110,7 +111,7 @@ serve(async (req) => {
       }
       
       organizationMembers = membersData || [];
-      console.log(`✅ Found ${organizationMembers.length} active organization members`);
+      console.log(`✅ Found ${organizationMembers.length} active owners and admins`);
       
       for (const member of organizationMembers) {
         console.log(`   - Org ${member.organization_id}: ${member.email} (${member.role})`);
@@ -182,11 +183,11 @@ serve(async (req) => {
         if (orgCredits.current_credits <= threshold) {
           console.log(`   🚨 LOW CREDITS ALERT: ${orgCredits.current_credits} <= ${threshold}`);
           
-          // Find organization members with emails
-          const orgMembers = organizationMembers.filter(m => m.organization_id === org.id);
-          const memberEmails = orgMembers.map(m => m.email).filter(email => email);
+          // Find organization owners and admins with emails
+          const orgAdmins = organizationMembers.filter(m => m.organization_id === org.id);
+          const adminEmails = orgAdmins.map(m => m.email).filter(email => email);
           
-          console.log(`   📧 Found ${memberEmails.length} member emails: ${memberEmails.join(', ')}`);
+          console.log(`   📧 Found ${adminEmails.length} owner/admin emails: ${adminEmails.join(', ')}`);
           
           const alert = {
             organizationId: org.id,
@@ -196,8 +197,8 @@ serve(async (req) => {
             timestamp: currentTime,
             alertType: 'low_credits_warning',
             source: 'automated_monitoring',
-            organizationEmails: memberEmails,
-            membersCount: orgMembers.length
+            organizationEmails: adminEmails,
+            ownersAndAdminsCount: orgAdmins.length
           };
           
           lowCreditAlerts.push(alert);
