@@ -654,9 +654,9 @@ export default function Billing({ selectedOrganization }: BillingProps) {
   return (
     <div className="p-6 space-y-8">
       {/* Aviso sobre refresh após M-Pesa */}
-      <Alert className="border-primary/20 bg-secondary">
-        <AlertTriangle className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
-        <AlertDescription className="text-primary flex items-start">
+      <Alert className="border-primary/20 bg-secondary flex items-center gap-3">
+        <AlertTriangle className="h-4 w-4 text-primary flex-shrink-0" />
+        <AlertDescription className="text-primary">
           <strong>Importante:</strong> Após completar um pagamento M-Pesa, faça refresh na página para ver o saldo actualizado reflectir no seu dashboard.
         </AlertDescription>
       </Alert>
