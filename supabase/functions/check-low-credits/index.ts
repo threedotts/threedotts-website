@@ -12,116 +12,92 @@ serve(async (req) => {
   }
 
   try {
-    console.log('Starting automated low credits check...');
+    console.log('=== Starting low credits check ===');
     
     const supabaseService = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Get all organizations with their credits and billing settings
+    console.log('✅ Supabase client created');
+
+    // Simple test query first
+    const { data: testOrgs, error: testError } = await supabaseService
+      .from('organizations')
+      .select('id, name')
+      .limit(1);
+
+    if (testError) {
+      console.error('❌ Test query failed:', testError);
+      throw new Error(`Database connection failed: ${testError.message}`);
+    }
+
+    console.log('✅ Database connection working, found orgs:', testOrgs?.length);
+
+    // Get organizations with credits and settings - simplified query
     const { data: organizations, error: orgError } = await supabaseService
       .from('organizations')
       .select(`
         id,
         name,
-        user_id,
         user_credits (
-          current_credits,
-          total_credits_purchased,
-          total_credits_used
+          current_credits
         ),
         billing_settings (
           low_credit_warning_threshold,
           enable_low_credit_notifications
-        ),
-        organization_members (
-          user_id,
-          email,
-          role,
-          status
         )
       `);
 
     if (orgError) {
-      console.error('Error fetching organizations:', orgError);
-      throw orgError;
+      console.error('❌ Organizations query failed:', orgError);
+      throw new Error(`Organizations query failed: ${orgError.message}`);
     }
 
-    console.log(`Checking ${organizations?.length || 0} organizations for low credits`);
+    console.log(`✅ Found ${organizations?.length || 0} organizations`);
 
     const lowCreditAlerts = [];
     const currentTime = new Date().toISOString();
 
-    // Check each organization for low credits
+    // Process organizations with simple logic
     for (const org of organizations || []) {
       try {
         const credits = org.user_credits?.[0];
         const settings = org.billing_settings?.[0];
 
-        // Skip if no credits data or notifications disabled
         if (!credits || !settings?.enable_low_credit_notifications) {
-          console.log(`Skipping org ${org.name}: missing data or notifications disabled`);
+          console.log(`⏭️ Skipping ${org.name}: no credits data or notifications disabled`);
           continue;
         }
 
         const currentCredits = credits.current_credits || 0;
         const threshold = settings.low_credit_warning_threshold || 100;
 
-        console.log(`Org ${org.name}: ${currentCredits} credits (threshold: ${threshold})`);
+        console.log(`🔍 Checking ${org.name}: ${currentCredits} vs ${threshold}`);
 
-        // Check if credits are at or below threshold
         if (currentCredits <= threshold) {
-          console.log(`⚠️ LOW CREDITS ALERT: ${org.name} has ${currentCredits} credits (threshold: ${threshold})`);
-          
-          // Get emails of owners and admins safely
-          const adminEmails = [];
-          
-          if (org.organization_members && Array.isArray(org.organization_members)) {
-            for (const member of org.organization_members) {
-              if (
-                member &&
-                member.status === 'active' && 
-                (member.role === 'owner' || member.role === 'admin') &&
-                member.email
-              ) {
-                adminEmails.push({
-                  email: member.email,
-                  role: member.role,
-                  userId: member.user_id
-                });
-              }
-            }
-          }
-
-          console.log(`Found ${adminEmails.length} admin/owner emails for ${org.name}`);
+          console.log(`🚨 LOW CREDITS: ${org.name} (${currentCredits} <= ${threshold})`);
           
           lowCreditAlerts.push({
             organizationId: org.id,
             organizationName: org.name,
-            userId: org.user_id,
             currentCredits: currentCredits,
             threshold: threshold,
-            totalPurchased: credits.total_credits_purchased || 0,
-            totalUsed: credits.total_credits_used || 0,
             timestamp: currentTime,
-            alertType: 'low_credits_warning',
-            adminEmails: adminEmails,
-            adminCount: adminEmails.length
+            alertType: 'low_credits_warning'
           });
         }
-      } catch (orgProcessError) {
-        console.error(`Error processing organization ${org?.name || 'unknown'}:`, orgProcessError);
-        // Continue with next organization instead of failing completely
+      } catch (orgError) {
+        console.error(`❌ Error processing org ${org?.name}:`, orgError);
         continue;
       }
     }
 
-    console.log(`Found ${lowCreditAlerts.length} organizations with low credits`);
+    console.log(`📊 Found ${lowCreditAlerts.length} low credit alerts`);
 
-    // Send alerts to webhook if any found
+    // Send webhook if alerts found
     if (lowCreditAlerts.length > 0) {
-      console.log('Sending low credit alerts to webhook...');
+      console.log('📤 Sending webhook...');
       
       try {
         const webhookResponse = await fetch(
@@ -135,30 +111,30 @@ serve(async (req) => {
               alerts: lowCreditAlerts,
               totalAlertsCount: lowCreditAlerts.length,
               checkTimestamp: currentTime,
-              source: 'automated_credit_monitoring',
-              message: `${lowCreditAlerts.length} organization(s) have low credits`
+              source: 'automated_credit_monitoring_v2'
             })
           }
         );
 
+        console.log(`📬 Webhook status: ${webhookResponse.status}`);
+        
         if (webhookResponse.ok) {
-          console.log('✅ Successfully sent low credit alerts to webhook');
+          console.log('✅ Webhook sent successfully');
         } else {
-          console.error(`❌ Webhook responded with status: ${webhookResponse.status}`);
           const errorText = await webhookResponse.text();
-          console.error('Webhook error response:', errorText);
+          console.log('⚠️ Webhook error:', errorText);
         }
       } catch (webhookError) {
-        console.error('❌ Failed to send webhook:', webhookError);
+        console.error('❌ Webhook failed:', webhookError);
       }
-    } else {
-      console.log('✅ No organizations with low credits found');
     }
+
+    console.log('🎉 Check completed successfully');
 
     return new Response(
       JSON.stringify({
         success: true,
-        message: 'Low credits check completed successfully',
+        message: 'Low credits check completed',
         organizationsChecked: organizations?.length || 0,
         lowCreditAlertsFound: lowCreditAlerts.length,
         alerts: lowCreditAlerts,
@@ -171,11 +147,13 @@ serve(async (req) => {
     );
 
   } catch (error: any) {
-    console.error('❌ Error in check-low-credits function:', error);
+    console.error('💥 FUNCTION ERROR:', error);
+    console.error('💥 Error stack:', error.stack);
+    
     return new Response(
       JSON.stringify({
         success: false,
-        error: 'Failed to check low credits',
+        error: 'Function execution failed',
         details: error.message,
         timestamp: new Date().toISOString()
       }),
