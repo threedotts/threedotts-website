@@ -249,6 +249,40 @@ export default function Billing({ selectedOrganization }: BillingProps) {
     await updateBillingSettings(settingsToSave);
   };
 
+  const checkLowCreditsNow = async (settings: BillingSettings) => {
+    if (!selectedOrganization || !minuteData || !settings.enableNotifications) return;
+
+    const currentCredits = minuteData.currentMinutes;
+    const threshold = settings.lowMinuteThreshold;
+
+    console.log(`Checking credits immediately: ${currentCredits} vs threshold ${threshold}`);
+
+    // If current credits are at or below threshold, trigger webhook immediately
+    if (currentCredits <= threshold) {
+      console.log(`⚠️ IMMEDIATE LOW CREDITS ALERT: ${currentCredits} <= ${threshold}`);
+      
+      try {
+        // Call the check-low-credits function to trigger webhook
+        const { data, error } = await supabase.functions.invoke('check-low-credits');
+        
+        if (error) {
+          console.error('Error calling check-low-credits:', error);
+        } else {
+          console.log('✅ Low credits check triggered successfully:', data);
+          toast({
+            title: "Alerta de Créditos Baixos",
+            description: "Notificação enviada - seus créditos estão abaixo do limite configurado.",
+            variant: "destructive"
+          });
+        }
+      } catch (error) {
+        console.error('Failed to trigger low credits check:', error);
+      }
+    } else {
+      console.log('✅ Credits above threshold, no alert needed');
+    }
+  };
+
   const updateBillingSettings = async (newSettings: Partial<BillingSettings>) => {
     if (!selectedOrganization || !billingSettings) return;
 
@@ -296,6 +330,10 @@ export default function Billing({ selectedOrganization }: BillingProps) {
       setTempBillingSettings(updatedSettings);
       setTempThreshold(updatedSettings.lowMinuteThreshold.toString());
       setHasUnsavedChanges(false);
+      
+      // Check immediately for low credits after updating settings
+      await checkLowCreditsNow(updatedSettings);
+      
       toast({
         title: "Configurações Atualizadas",
         description: "Suas preferências de cobrança foram salvas."
@@ -504,6 +542,11 @@ export default function Billing({ selectedOrganization }: BillingProps) {
           // Refresh data after successful payment
           fetchMinuteData();
           fetchBillingHistory();
+          
+          // Check for low credits after top-up
+          if (billingSettings) {
+            await checkLowCreditsNow(billingSettings);
+          }
         } else {
           // Fallback for any non-success response that wasn't caught as an error
           toast({
