@@ -311,13 +311,68 @@ export default function ProjectRequest() {
   const hasMultipleServices = selectedServices.length > 1;
   const onSubmit = async (data: ServiceFormData) => {
     try {
+      // Prepare complete form data with all fields explicitly included
+      const completeFormData = {
+        // Basic Information
+        fullName: data.fullName || "",
+        companyName: data.companyName || "",
+        email: data.email || "",
+        phone: data.phone || "",
+        companyDomain: data.companyDomain || "",
+        
+        // Selected Services
+        selectedServices: data.selectedServices || [],
+        
+        // Mobile Apps
+        appPurpose: data.appPurpose || "",
+        needsUserAccount: data.needsUserAccount || undefined,
+        needsOfflineMode: data.needsOfflineMode || undefined,
+        hasDesignIdentity: data.hasDesignIdentity || undefined,
+        designFiles: data.designFiles || [],
+        
+        // Websites
+        websiteType: data.websiteType || "",
+        websitePages: data.websitePages || "",
+        needsLoginPayments: data.needsLoginPayments || undefined,
+        hasDesignIdeasWeb: data.hasDesignIdeasWeb || undefined,
+        webDesignFiles: data.webDesignFiles || [],
+        
+        // Call Center
+        supportChannels: data.supportChannels || [],
+        otherSupportChannels: data.otherSupportChannels || "",
+        currentSupportMethod: data.currentSupportMethod || "",
+        callCenterObjective: data.callCenterObjective || "",
+        
+        // Automation
+        manualTasks: data.manualTasks || "",
+        automationNeeds: data.automationNeeds || [],
+        
+        // Business Solutions
+        businessProblem: data.businessProblem || "",
+        solutionIdea: data.solutionIdea || "",
+        userScope: data.userScope || undefined,
+        
+        // Data Intelligence
+        dataInsights: data.dataInsights || "",
+        currentDataSystems: data.currentDataSystems || "",
+        needsPredictions: data.needsPredictions || undefined,
+        
+        // Integration
+        needsIntegration: data.needsIntegration || undefined,
+        integrationDetails: data.integrationDetails || "",
+        
+        // Additional
+        additionalInfo: data.additionalInfo || "",
+        additionalFiles: data.additionalFiles || []
+      };
+
       // Send form data through Supabase edge function (proxy to n8n webhook)
       const response = await fetch('https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/send-project-request', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify(completeFormData)
       });
 
       if (!response.ok) {
