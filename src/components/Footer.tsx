@@ -11,36 +11,15 @@ import {
 
 const footerSections = [
   {
-    title: "Serviços",
-    links: [
-      "Aplicações Móveis",
-      "Websites Profissionais", 
-      "Soluções de Atendimento ao Cliente",
-      "Automação Empresarial",
-      "Software Personalizado",
-      "Inteligência de Dados"
-    ]
-  },
-  {
     title: "Empresa",
     links: [
-      "Sobre Nós",
-      "A Nossa Equipa",
-      "Portfólio",
-      "Histórias de Sucesso",
-      "Contacte-nos",
-      "Consulta Gratuita"
+      { name: "Consulta Gratuita", href: "/project-request" }
     ]
   },
   {
     title: "Suporte",
     links: [
-      "Centro de Ajuda",
-      "Documentação",
-      "Suporte Técnico",
-      "Formação",
-      "Manutenção",
-      "FAQ"
+      { name: "Dashboard", href: "/dashboard" }
     ]
   }
 ];
@@ -108,12 +87,12 @@ export function Footer() {
               </h3>
               <ul className="space-y-3">
                 {section.links.map((link) => (
-                  <li key={link}>
+                  <li key={link.name}>
                     <a 
-                      href="#" 
+                      href={link.href} 
                       className="text-background/80 hover:text-background transition-colors"
                     >
-                      {link}
+                      {link.name}
                     </a>
                   </li>
                 ))}
@@ -149,7 +128,7 @@ export function Footer() {
         {/* Copyright */}
         <div className="border-t border-background/20 pt-8 mt-8 text-center">
           <p className="text-background/60">
-            © 2024 Threedotts. Todos os direitos reservados. | Política de Privacidade | Termos de Serviço
+            © {new Date().getFullYear()} Threedotts. Todos os direitos reservados. | Política de Privacidade | Termos de Serviço
           </p>
         </div>
       </div>
