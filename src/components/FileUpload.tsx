@@ -187,9 +187,11 @@ export default function FileUpload({
               key={index}
               className="flex items-center justify-between p-3 bg-muted/30 rounded-lg"
             >
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 min-w-0 flex-1">
                 {getFileIcon(file.name)}
-                <span className="text-sm truncate flex-1">{file.name}</span>
+                <span className="text-sm truncate max-w-[200px] md:max-w-[300px]" title={file.name}>
+                  {file.name}
+                </span>
               </div>
               <Button
                 variant="ghost"
