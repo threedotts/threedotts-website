@@ -35,7 +35,7 @@ serve(async (req) => {
           low_credit_warning_threshold,
           enable_low_credit_notifications
         ),
-        organization_members!inner (
+        organization_members (
           user_id,
           email,
           role,

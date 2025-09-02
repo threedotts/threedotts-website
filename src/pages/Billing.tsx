@@ -267,16 +267,31 @@ export default function Billing({ selectedOrganization }: BillingProps) {
         
         if (error) {
           console.error('Error calling check-low-credits:', error);
-        } else {
-          console.log('✅ Low credits check triggered successfully:', data);
           toast({
-            title: "Alerta de Créditos Baixos",
-            description: "Notificação enviada - seus créditos estão abaixo do limite configurado.",
+            title: "Erro na Verificação",
+            description: "Não foi possível verificar os créditos no momento. Tente novamente.",
             variant: "destructive"
           });
+        } else {
+          console.log('✅ Low credits check triggered successfully:', data);
+          
+          if (data?.lowCreditAlertsFound > 0) {
+            toast({
+              title: "Alerta de Créditos Baixos",
+              description: "Notificação enviada - seus créditos estão abaixo do limite configurado.",
+              variant: "destructive"
+            });
+          } else {
+            console.log('✅ Credits check completed, no alerts needed');
+          }
         }
       } catch (error) {
         console.error('Failed to trigger low credits check:', error);
+        toast({
+          title: "Erro de Conexão",
+          description: "Falha ao conectar com o sistema de monitoramento. Configurações salvas, mas verificação de alerta falhou.",
+          variant: "destructive"
+        });
       }
     } else {
       console.log('✅ Credits above threshold, no alert needed');
