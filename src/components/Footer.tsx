@@ -21,7 +21,7 @@ const footerSections = [
     ]
   },
   {
-    title: "Suporte",
+    title: "Plataforma",
     links: [
       { name: "Dashboard", href: "/dashboard" }
     ]
