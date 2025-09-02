@@ -311,21 +311,18 @@ export default function ProjectRequest() {
   const hasMultipleServices = selectedServices.length > 1;
   const onSubmit = async (data: ServiceFormData) => {
     try {
-      // Send form data to webhook
-      const response = await fetch('https://n8n.srv922768.hstgr.cloud/webhook-test/1e4a11ee-8ae7-4654-beaa-e823e3531871', {
+      // Send form data through Supabase edge function (proxy to n8n webhook)
+      const response = await fetch('https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/send-project-request', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ...data,
-          timestamp: new Date().toISOString(),
-          source: 'project_request_form'
-        })
+        body: JSON.stringify(data)
       });
 
       if (!response.ok) {
-        throw new Error('Falha ao enviar dados para o webhook');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Falha ao enviar dados');
       }
 
       toast({
@@ -335,7 +332,7 @@ export default function ProjectRequest() {
 
       console.log("Form data sent successfully:", data);
     } catch (error) {
-      console.error('Webhook error:', error);
+      console.error('Erro ao enviar:', error);
       toast({
         title: "Erro ao enviar solicitação",
         description: "Tente novamente mais tarde.",
