@@ -261,11 +261,34 @@ export default function Billing({ selectedOrganization }: BillingProps) {
     if (currentCredits <= threshold) {
       console.log(`⚠️ IMMEDIATE LOW CREDITS ALERT: ${currentCredits} <= ${threshold}`);
       
-      toast({
-        title: "Alerta de Créditos Baixos",
-        description: `Seus créditos (${currentCredits}) estão abaixo do limite configurado (${threshold}). O sistema enviará notificações automaticamente.`,
-        variant: "destructive"
-      });
+      // Trigger immediate check via edge function
+      try {
+        console.log('🚀 Calling check-low-credits edge function...');
+        const { data, error } = await supabase.functions.invoke('check-low-credits');
+        
+        if (error) {
+          console.error('❌ Edge function error:', error);
+          toast({
+            title: "Erro na Verificação",
+            description: "Não foi possível verificar créditos. Tente novamente.",
+            variant: "destructive"
+          });
+        } else {
+          console.log('✅ Edge function response:', data);
+          toast({
+            title: "Alerta de Créditos Baixos",
+            description: `Seus créditos (${currentCredits}) estão abaixo do limite configurado (${threshold}). Notificação enviada automaticamente.`,
+            variant: "destructive"
+          });
+        }
+      } catch (functionError) {
+        console.error('❌ Function call error:', functionError);
+        toast({
+          title: "Erro de Conexão",
+          description: "Falha ao conectar com sistema de monitoramento.",
+          variant: "destructive"
+        });
+      }
     } else {
       console.log('✅ Credits above threshold, no alert needed');
     }
