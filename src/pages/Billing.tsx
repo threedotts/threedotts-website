@@ -261,64 +261,11 @@ export default function Billing({ selectedOrganization }: BillingProps) {
     if (currentCredits <= threshold) {
       console.log(`⚠️ IMMEDIATE LOW CREDITS ALERT: ${currentCredits} <= ${threshold}`);
       
-      try {
-        // Send webhook directly from frontend
-        const webhookPayload = {
-          alerts: [
-            {
-              organizationId: selectedOrganization.id,
-              organizationName: selectedOrganization.name,
-              currentCredits: currentCredits,
-              threshold: threshold,
-              totalPurchased: minuteData.totalPurchased,
-              totalUsed: minuteData.totalUsed,
-              timestamp: new Date().toISOString(),
-              alertType: 'low_credits_warning_immediate',
-              source: 'frontend_immediate_check'
-            }
-          ],
-          totalAlertsCount: 1,
-          checkTimestamp: new Date().toISOString(),
-          source: 'frontend_immediate_detection',
-          message: 'Immediate low credits detection from settings update'
-        };
-
-        const webhookResponse = await fetch(
-          'https://n8n.srv922768.hstgr.cloud/webhook-test/e109ee08-20c1-475f-89cb-aa8aa308081d',
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(webhookPayload)
-          }
-        );
-
-        if (webhookResponse.ok) {
-          console.log('✅ Webhook sent successfully from frontend');
-          toast({
-            title: "Alerta de Créditos Baixos",
-            description: "Notificação enviada - seus créditos estão abaixo do limite configurado.",
-            variant: "destructive"
-          });
-        } else {
-          console.error(`❌ Webhook failed with status: ${webhookResponse.status}`);
-          const errorText = await webhookResponse.text();
-          console.error('Webhook error:', errorText);
-          toast({
-            title: "Erro no Webhook",
-            description: "Não foi possível enviar a notificação. Tente novamente.",
-            variant: "destructive"
-          });
-        }
-      } catch (error) {
-        console.error('❌ Failed to send webhook from frontend:', error);
-        toast({
-          title: "Erro de Conexão",
-          description: "Falha ao enviar notificação. Verifique sua conexão.",
-          variant: "destructive"
-        });
-      }
+      toast({
+        title: "Alerta de Créditos Baixos",
+        description: `Seus créditos (${currentCredits}) estão abaixo do limite configurado (${threshold}). O sistema enviará notificações automaticamente.`,
+        variant: "destructive"
+      });
     } else {
       console.log('✅ Credits above threshold, no alert needed');
     }
