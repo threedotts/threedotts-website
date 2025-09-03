@@ -1376,7 +1376,10 @@ const widgetServe = async (req: Request): Promise<Response> => {
           if (!hasCredits) {
             console.log('❌ Connection denied - insufficient credits');
             showError();
-            updateUI();
+            // Don't call updateUI() immediately - let the error animation run first
+            setTimeout(() => {
+              updateUI();
+            }, 2700); // After error animation completes
             return;
           }
           console.log('✅ Credits validated - proceeding with connection');
