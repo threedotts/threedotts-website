@@ -1468,6 +1468,9 @@ const widgetServe = async (req: Request): Promise<Response> => {
     isSpeaking: () => state.isSpeaking
   };
 
+  // Expose initWidget function for reinitialization
+  window.initWidget = initWidget;
+
   // Load Comfortaa font and initialize widget
   function loadComfortaaAndInit() {
     // Create Google Fonts link element instead of trying to load specific woff2 file

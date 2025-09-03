@@ -11,8 +11,27 @@ const ThreeDotsEmbeddedConvai: React.FC<ThreeDotsEmbeddedConvaiProps> = ({
     console.log('🔧 Loading embedded widget script...');
     
     // Check if script is already loaded
-    if (document.querySelector('script[src*="widget-script"]')) {
-      console.log('⚠️ Widget script already exists, skipping...');
+    const existingScript = document.querySelector('script[src*="widget-script"]');
+    if (existingScript) {
+      console.log('⚠️ Widget script already exists, reinitializing widget...');
+      
+      // If script exists but widget isn't working, reinitialize it
+      setTimeout(() => {
+        if ((window as any).threedottsWidget) {
+          console.log('🔄 Reinitializing existing widget...');
+          
+          // Force recreate the widget UI
+          const existingWidget = document.getElementById('threedotts-widget');
+          if (existingWidget) {
+            existingWidget.remove();
+          }
+          
+          // Recreate widget by calling the internal function
+          if (typeof (window as any).initWidget === 'function') {
+            (window as any).initWidget();
+          }
+        }
+      }, 50);
       return;
     }
 
