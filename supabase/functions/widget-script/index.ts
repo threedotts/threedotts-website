@@ -1162,8 +1162,25 @@ const widgetServe = async (req: Request): Promise<Response> => {
     const container = document.getElementById('threedotts-container');
     if (!buttonsContainer || !container) return;
     
-    if (!state.isConnected && !state.isConnecting) {
-      container.classList.remove('connected');
+    // Handle error flash animation
+    if (state.showError) {
+      container.classList.add('error-flash');
+      setTimeout(() => {
+        container.classList.remove('error-flash');
+        state.showError = false;
+      }, 2000);
+    }
+    
+    if (state.isCheckingCredits) {
+      // Credit checking state - show connecting with shimmer
+      container.classList.remove('connected', 'error-flash');
+      buttonsContainer.innerHTML = \`
+        <button class="threedotts-button connecting">
+          <span>Conectando...</span>
+        </button>
+      \`;
+    } else if (!state.isConnected && !state.isConnecting) {
+      container.classList.remove('connected', 'error-flash');
       state.hasAnimated = false; // Reset animation flag when disconnected
       buttonsContainer.innerHTML = \`
         <button class="threedotts-button" onclick="window.threedottsWidget.connect()">
@@ -1174,10 +1191,10 @@ const widgetServe = async (req: Request): Promise<Response> => {
         </button>
       \`;
     } else if (state.isConnecting) {
-      container.classList.remove('connected');
+      container.classList.remove('connected', 'error-flash');
       buttonsContainer.innerHTML = \`
         <button class="threedotts-button connecting">
-          Conectando...
+          <span>Conectando...</span>
         </button>
       \`;
     } else {
