@@ -385,24 +385,84 @@ const widgetServe = async (req: Request): Promise<Response> => {
         align-items: center;
         gap: 12px;
         width: fit-content;
+        position: relative;
       }
       
-      .threedotts-container.error-flash {
-        background: hsla(0, 84%, 60%, 0.9);
-        border-color: hsl(0, 84%, 50%);
-        box-shadow: 0 10px 15px -3px hsla(0, 84%, 60%, 0.3), 0 4px 6px -2px hsla(0, 84%, 60%, 0.2);
-        animation: error-pulse 0.6s ease-out;
+      .threedotts-container::before {
+        content: '';
+        position: absolute;
+        inset: -2px;
+        border-radius: 9999px;
+        background: transparent;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: -1;
       }
       
-      @keyframes error-pulse {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.05); }
-        100% { transform: scale(1); }
+      .threedotts-container.connected::before {
+        background: linear-gradient(135deg, hsla(175, 85%, 35%, 0.2), hsla(175, 85%, 35%, 0.1));
+        box-shadow: 0 0 20px hsla(175, 85%, 35%, 0.3);
       }
       
-      .threedotts-container.connected {
-        border-color: hsla(175, 85%, 35%, 0.3);
-        box-shadow: 0 10px 15px -3px hsla(175, 85%, 35%, 0.2), 0 4px 6px -2px hsla(175, 85%, 35%, 0.1);
+      .threedotts-container.error-flash::before {
+        background: linear-gradient(135deg, hsla(0, 84%, 60%, 0.3), hsla(0, 84%, 60%, 0.1));
+        box-shadow: 0 0 20px hsla(0, 84%, 60%, 0.4);
+        animation: error-glow 2s ease-out;
+      }
+      
+      @keyframes error-glow {
+        0% { 
+          background: transparent;
+          box-shadow: 0 0 0 hsla(0, 84%, 60%, 0);
+        }
+        20% { 
+          background: linear-gradient(135deg, hsla(0, 84%, 60%, 0.4), hsla(0, 84%, 60%, 0.2));
+          box-shadow: 0 0 25px hsla(0, 84%, 60%, 0.5);
+        }
+        80% { 
+          background: linear-gradient(135deg, hsla(0, 84%, 60%, 0.3), hsla(0, 84%, 60%, 0.1));
+          box-shadow: 0 0 20px hsla(0, 84%, 60%, 0.4);
+        }
+        100% { 
+          background: transparent;
+          box-shadow: 0 0 0 hsla(0, 84%, 60%, 0);
+        }
+      }
+      
+      @keyframes shimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+      }
+      
+      .threedotts-button.connecting {
+        background: hsl(0, 0%, 85%);
+        color: hsl(0, 0%, 60%);
+        border: 1px solid hsl(0, 0%, 80%);
+        cursor: not-allowed;
+        pointer-events: none;
+        position: relative;
+        overflow: hidden;
+      }
+      
+      .threedotts-button.connecting::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          hsla(0, 0%, 100%, 0.4),
+          transparent
+        );
+        animation: shimmer 1.5s infinite;
+        z-index: 1;
+      }
+      
+      .threedotts-button.connecting span {
+        position: relative;
+        z-index: 2;
       }
       
       .threedotts-avatar {
