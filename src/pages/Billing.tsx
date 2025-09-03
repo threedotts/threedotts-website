@@ -557,11 +557,6 @@ export default function Billing({ selectedOrganization }: BillingProps) {
           // Refresh data after successful payment
           fetchMinuteData();
           fetchBillingHistory();
-          
-          // Check for low credits after top-up
-          if (billingSettings) {
-            await checkLowCreditsNow(billingSettings);
-          }
         } else {
           // Fallback for any non-success response that wasn't caught as an error
           toast({
