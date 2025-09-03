@@ -282,7 +282,7 @@ serve(async (req) => {
           };
 
           // Send webhook
-          const webhookResponse = await fetch('https://n8n.srv922768.hstgr.cloud/webhook-test/77e7630a-938a-4510-8b38-4953fd7292ba', {
+          const webhookResponse = await fetch('https://n8n.srv922768.hstgr.cloud/webhook/77e7630a-938a-4510-8b38-4953fd7292ba', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
