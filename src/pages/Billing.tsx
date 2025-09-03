@@ -88,6 +88,7 @@ export default function Billing({ selectedOrganization }: BillingProps) {
   const [currentPlan, setCurrentPlan] = useState<string | null>(null);
   const [mpesaPhone, setMpesaPhone] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
   const [useCustomAmount, setUseCustomAmount] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -297,7 +298,7 @@ export default function Billing({ selectedOrganization }: BillingProps) {
   const updateBillingSettings = async (newSettings: Partial<BillingSettings>) => {
     if (!selectedOrganization || !billingSettings) return;
 
-    setLoading(true);
+    setIsSavingSettings(true);
     try {
       const updatedSettings = { ...billingSettings, ...newSettings };
       
@@ -358,7 +359,7 @@ export default function Billing({ selectedOrganization }: BillingProps) {
         variant: "destructive"
       });
     } finally {
-      setLoading(false);
+      setIsSavingSettings(false);
     }
   };
 
@@ -1094,10 +1095,10 @@ export default function Billing({ selectedOrganization }: BillingProps) {
                 <div className="pt-4 border-t">
                   <Button 
                     onClick={handleSaveSettings}
-                    disabled={!hasUnsavedChanges || loading}
+                    disabled={!hasUnsavedChanges || isSavingSettings}
                     className="w-full"
                   >
-                    {loading ? "Salvando..." : "Salvar Configurações"}
+                    {isSavingSettings ? "Salvando..." : "Salvar Configurações"}
                   </Button>
                   {hasUnsavedChanges && (
                     <p className="text-sm text-amber-600 mt-2 text-center">
