@@ -177,6 +177,133 @@ serve(async (req) => {
       // Start the background task without waiting for it
       EdgeRuntime.waitUntil(addCreditsTask());
 
+      // Start webhook notification task
+      const webhookTask = async () => {
+        try {
+          console.log('Webhook task: Sending payment notification');
+          
+          // Initialize Supabase client with service role
+          const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+          const supabaseServiceRole = createClient(
+            Deno.env.get('SUPABASE_URL') ?? '',
+            Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+          );
+          
+          // Get organization details
+          const { data: orgData, error: orgError } = await supabaseServiceRole
+            .from('organizations')
+            .select('id, name, description, domain, user_id, members_count, created_at')
+            .eq('id', organizationId)
+            .single();
+
+          if (orgError) {
+            console.error('Webhook task error - Failed to get organization:', orgError);
+            return;
+          }
+
+          // Get organization owners and admins with their emails
+          const { data: membersData, error: membersError } = await supabaseServiceRole
+            .from('organization_members')
+            .select('user_id, role, email, status, joined_at')
+            .eq('organization_id', organizationId)
+            .in('role', ['owner', 'admin'])
+            .eq('status', 'active');
+
+          if (membersError) {
+            console.error('Webhook task error - Failed to get members:', membersError);
+            return;
+          }
+
+          // Get user emails from auth.users for those who don't have email in members table
+          const userIds = membersData?.filter(m => !m.email).map(m => m.user_id) || [];
+          let userEmails = {};
+          
+          if (userIds.length > 0) {
+            const { data: usersData } = await supabaseServiceRole.auth.admin.listUsers();
+            usersData?.users?.forEach(user => {
+              if (userIds.includes(user.id) && user.email) {
+                userEmails[user.id] = user.email;
+              }
+            });
+          }
+
+          // Combine member data with emails
+          const membersWithEmails = membersData?.map(member => ({
+            ...member,
+            email: member.email || userEmails[member.user_id] || null
+          })) || [];
+
+          // Get credit information
+          const { data: creditsData } = await supabaseServiceRole
+            .from('user_credits')
+            .select('current_credits, total_credits_purchased, total_credits_used')
+            .eq('organization_id', organizationId)
+            .single();
+
+          // Prepare webhook payload
+          const webhookPayload = {
+            event: 'mpesa_payment_success',
+            timestamp: new Date().toISOString(),
+            payment: {
+              transactionReference,
+              amount: parseFloat(amount),
+              currency: 'KES',
+              creditsAdded: credits,
+              customerMSISDN,
+              mpesaTransactionId: mpesaResult.body?.output_TransactionID,
+              mpesaConversationId: mpesaResult.body?.output_ConversationID,
+              mpesaThirdPartyRef: mpesaResult.body?.output_ThirdPartyReference,
+              mpesaResponse: mpesaResult
+            },
+            organization: {
+              id: orgData.id,
+              name: orgData.name,
+              description: orgData.description,
+              domain: orgData.domain,
+              membersCount: orgData.members_count,
+              createdAt: orgData.created_at,
+              ownerId: orgData.user_id
+            },
+            members: {
+              owners: membersWithEmails.filter(m => m.role === 'owner'),
+              admins: membersWithEmails.filter(m => m.role === 'admin'),
+              emails: {
+                owners: membersWithEmails.filter(m => m.role === 'owner' && m.email).map(m => m.email),
+                admins: membersWithEmails.filter(m => m.role === 'admin' && m.email).map(m => m.email),
+                all: membersWithEmails.filter(m => m.email).map(m => m.email)
+              }
+            },
+            credits: {
+              current: creditsData?.current_credits || 0,
+              totalPurchased: creditsData?.total_credits_purchased || 0,
+              totalUsed: creditsData?.total_credits_used || 0,
+              addedInThisPayment: credits
+            }
+          };
+
+          // Send webhook
+          const webhookResponse = await fetch('https://n8n.srv922768.hstgr.cloud/webhook-test/77e7630a-938a-4510-8b38-4953fd7292ba', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(webhookPayload)
+          });
+
+          if (webhookResponse.ok) {
+            console.log('Webhook sent successfully');
+          } else {
+            console.error('Webhook failed:', webhookResponse.status, await webhookResponse.text());
+          }
+
+        } catch (error) {
+          console.error('Webhook task error:', error);
+        }
+      };
+
+      // Start webhook task without waiting
+      EdgeRuntime.waitUntil(webhookTask());
+
       // Return immediate success response
       return new Response(
         JSON.stringify({ 
