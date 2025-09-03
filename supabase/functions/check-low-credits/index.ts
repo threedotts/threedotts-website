@@ -170,8 +170,8 @@ serve(async (req) => {
       throw err;
     }
 
-    // Step 8: Process low credit alerts
-    console.log('\n🔄 STEP 8: Processing low credit alerts...');
+    // Step 8: Process low credit alerts (scheduled check)
+    console.log('\n🔄 STEP 8: Processing scheduled low credit alerts...');
     const lowCreditAlerts = [];
     const currentTime = new Date().toISOString();
 
@@ -260,6 +260,90 @@ serve(async (req) => {
       } catch (orgError) {
         console.error(`   ❌ Error processing ${org.name}:`, orgError);
         continue;
+      }
+    }
+
+    // Step 8b: Process queued low credit alerts (from real-time consumption)
+    console.log('\n🎯 STEP 8b: Processing queued low credit alerts...');
+    let queuedAlerts;
+    try {
+      const { data: queueData, error: queueError } = await supabaseService
+        .from('low_credit_alert_queue')
+        .select('*')
+        .eq('status', 'pending')
+        .order('created_at', { ascending: true });
+
+      if (queueError) {
+        console.error('❌ Queue query error:', queueError);
+        queuedAlerts = [];
+      } else {
+        queuedAlerts = queueData || [];
+        console.log(`✅ Found ${queuedAlerts.length} queued alerts`);
+      }
+    } catch (err) {
+      console.error('❌ Queue fetch error:', err);
+      queuedAlerts = [];
+    }
+
+    // Process each queued alert
+    for (const queuedAlert of queuedAlerts) {
+      try {
+        console.log(`\n📋 Processing queued alert for organization ${queuedAlert.organization_id}`);
+        
+        // Find organization info
+        const org = organizations.find(o => o.id === queuedAlert.organization_id);
+        if (!org) {
+          console.log(`   ⚠️ Organization not found, marking as failed`);
+          await supabaseService
+            .from('low_credit_alert_queue')
+            .update({ status: 'failed', processed_at: currentTime })
+            .eq('id', queuedAlert.id);
+          continue;
+        }
+
+        // Find organization owners and admins with emails
+        const orgAdmins = organizationMembers.filter(m => m.organization_id === queuedAlert.organization_id);
+        console.log(`   👥 Found ${orgAdmins.length} owners/admins for ${org.name}`);
+        
+        // Get emails from organization_members
+        let adminEmails = [];
+        for (const admin of orgAdmins) {
+          if (admin.email) {
+            adminEmails.push(admin.email);
+            console.log(`   📧 Email from org_members: ${admin.email} (${admin.role})`);
+          }
+        }
+
+        const alert = {
+          organizationId: queuedAlert.organization_id,
+          organizationName: org.name,
+          currentCredits: queuedAlert.current_credits,
+          threshold: queuedAlert.threshold,
+          timestamp: queuedAlert.created_at,
+          alertType: 'low_credits_warning',
+          source: 'real_time_consumption',
+          organizationEmails: adminEmails,
+          ownersAndAdminsCount: orgAdmins.length,
+          hasEmailIssues: adminEmails.length === 0 && orgAdmins.length > 0,
+          adminUserIds: orgAdmins.map(a => ({ userId: a.user_id, role: a.role, hasEmail: !!a.email }))
+        };
+        
+        lowCreditAlerts.push(alert);
+        console.log(`   ✅ Queued alert added for ${org.name}`);
+
+        // Mark as processed
+        await supabaseService
+          .from('low_credit_alert_queue')
+          .update({ status: 'processed', processed_at: currentTime })
+          .eq('id', queuedAlert.id);
+
+      } catch (queueError) {
+        console.error(`   ❌ Error processing queued alert ${queuedAlert.id}:`, queueError);
+        // Mark as failed
+        await supabaseService
+          .from('low_credit_alert_queue')
+          .update({ status: 'failed', processed_at: currentTime })
+          .eq('id', queuedAlert.id);
       }
     }
 

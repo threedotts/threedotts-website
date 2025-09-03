@@ -318,6 +318,36 @@ export type Database = {
         }
         Relationships: []
       }
+      low_credit_alert_queue: {
+        Row: {
+          created_at: string
+          current_credits: number
+          id: string
+          organization_id: string
+          processed_at: string | null
+          status: string
+          threshold: number
+        }
+        Insert: {
+          created_at?: string
+          current_credits: number
+          id?: string
+          organization_id: string
+          processed_at?: string | null
+          status?: string
+          threshold: number
+        }
+        Update: {
+          created_at?: string
+          current_credits?: number
+          id?: string
+          organization_id?: string
+          processed_at?: string | null
+          status?: string
+          threshold?: number
+        }
+        Relationships: []
+      }
       onboarding: {
         Row: {
           completed_at: string | null
