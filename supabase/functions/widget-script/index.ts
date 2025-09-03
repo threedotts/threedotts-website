@@ -403,28 +403,32 @@ const widgetServe = async (req: Request): Promise<Response> => {
         box-shadow: 0 0 20px hsla(175, 85%, 35%, 0.3);
       }
       
-      .threedotts-container.error-flash::before {
-        background: linear-gradient(135deg, hsla(0, 84%, 60%, 0.3), hsla(0, 84%, 60%, 0.1));
-        box-shadow: 0 0 20px hsla(0, 84%, 60%, 0.4);
-        animation: error-glow 2s ease-out;
+      .threedotts-container.error-flash {
+        border-color: hsla(0, 84%, 60%, 0.6) !important;
+        box-shadow: 0 0 20px hsla(0, 84%, 60%, 0.4), 0 10px 15px -3px hsla(0, 84%, 60%, 0.2) !important;
+        animation: error-glow-pulse 2s ease-out;
       }
       
-      @keyframes error-glow {
+      @keyframes error-glow-pulse {
         0% { 
-          background: transparent;
-          box-shadow: 0 0 0 hsla(0, 84%, 60%, 0);
+          border-color: hsl(175, 30%, 91%);
+          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
-        20% { 
-          background: linear-gradient(135deg, hsla(0, 84%, 60%, 0.4), hsla(0, 84%, 60%, 0.2));
-          box-shadow: 0 0 25px hsla(0, 84%, 60%, 0.5);
+        15% { 
+          border-color: hsla(0, 84%, 60%, 0.8);
+          box-shadow: 0 0 25px hsla(0, 84%, 60%, 0.6), 0 0 40px hsla(0, 84%, 60%, 0.3);
         }
-        80% { 
-          background: linear-gradient(135deg, hsla(0, 84%, 60%, 0.3), hsla(0, 84%, 60%, 0.1));
-          box-shadow: 0 0 20px hsla(0, 84%, 60%, 0.4);
+        30% { 
+          border-color: hsla(0, 84%, 60%, 0.6);
+          box-shadow: 0 0 20px hsla(0, 84%, 60%, 0.5), 0 10px 15px -3px hsla(0, 84%, 60%, 0.3);
+        }
+        70% { 
+          border-color: hsla(0, 84%, 60%, 0.4);
+          box-shadow: 0 0 15px hsla(0, 84%, 60%, 0.3), 0 10px 15px -3px hsla(0, 84%, 60%, 0.2);
         }
         100% { 
-          background: transparent;
-          box-shadow: 0 0 0 hsla(0, 84%, 60%, 0);
+          border-color: hsl(175, 30%, 91%);
+          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
       }
       
@@ -1312,14 +1316,17 @@ const widgetServe = async (req: Request): Promise<Response> => {
   
   function showError() {
     // Trigger error flash animation
-    console.log('🔴 Triggering error glow animation');
+    console.log('🔴 Triggering red glow animation');
     const container = document.getElementById('threedotts-container');
     if (container) {
       container.classList.add('error-flash');
+      console.log('🔴 Added error-flash class to container');
       setTimeout(() => {
         container.classList.remove('error-flash');
-        console.log('🔴 Error glow animation finished');
-      }, 2000);
+        console.log('🔴 Removed error-flash class from container');
+      }, 2100); // Slightly longer than animation duration
+    } else {
+      console.log('🔴 Container not found!');
     }
   }
   
