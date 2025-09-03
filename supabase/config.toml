@@ -20,3 +20,12 @@ verify_jwt = false
 
 [functions.widget-script]
 verify_jwt = false
+
+[functions.check-low-credits]
+verify_jwt = false
+
+# Cron job para processar alertas de créditos baixos a cada 5 minutos
+[[edge_runtime.schedulers]]
+name = "check-low-credits-scheduler"
+cron = "*/5 * * * *"
+path = "/check-low-credits"
