@@ -429,14 +429,18 @@ const widgetServe = async (req: Request): Promise<Response> => {
       }
       
       @keyframes shimmer {
-        0% { background-position: -200% 0; }
-        100% { background-position: 200% 0; }
+        0% { 
+          transform: translateX(-100%);
+        }
+        100% { 
+          transform: translateX(100%);
+        }
       }
       
       .threedotts-button.connecting {
-        background: hsl(0, 0%, 85%);
-        color: hsl(0, 0%, 60%);
-        border: 1px solid hsl(0, 0%, 80%);
+        background: hsl(0, 0%, 85%) !important;
+        color: hsl(0, 0%, 60%) !important;
+        border: 1px solid hsl(0, 0%, 80%) !important;
         cursor: not-allowed;
         pointer-events: none;
         position: relative;
@@ -448,15 +452,15 @@ const widgetServe = async (req: Request): Promise<Response> => {
         position: absolute;
         top: 0;
         left: 0;
-        right: 0;
-        bottom: 0;
+        width: 100%;
+        height: 100%;
         background: linear-gradient(
           90deg,
           transparent,
-          hsla(0, 0%, 100%, 0.4),
+          hsla(0, 0%, 100%, 0.6),
           transparent
         );
-        animation: shimmer 1.5s infinite;
+        animation: shimmer 1.5s ease-in-out infinite;
         z-index: 1;
       }
       
@@ -1162,14 +1166,8 @@ const widgetServe = async (req: Request): Promise<Response> => {
     const container = document.getElementById('threedotts-container');
     if (!buttonsContainer || !container) return;
     
-    // Handle error flash animation
-    if (state.showError) {
-      container.classList.add('error-flash');
-      setTimeout(() => {
-        container.classList.remove('error-flash');
-        state.showError = false;
-      }, 2000);
-    }
+    // Remove any existing error class first
+    container.classList.remove('error-flash');
     
     if (state.isCheckingCredits) {
       // Credit checking state - show connecting with shimmer
@@ -1314,8 +1312,15 @@ const widgetServe = async (req: Request): Promise<Response> => {
   
   function showError() {
     // Trigger error flash animation
-    state.showError = true;
-    updateUI();
+    console.log('🔴 Triggering error glow animation');
+    const container = document.getElementById('threedotts-container');
+    if (container) {
+      container.classList.add('error-flash');
+      setTimeout(() => {
+        container.classList.remove('error-flash');
+        console.log('🔴 Error glow animation finished');
+      }, 2000);
+    }
   }
   
   function endConversationDueToCredits() {
