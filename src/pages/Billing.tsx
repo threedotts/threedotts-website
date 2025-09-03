@@ -230,9 +230,12 @@ export default function Billing({ selectedOrganization }: BillingProps) {
   const handleSaveSettings = async () => {
     if (!tempBillingSettings) return;
     
+    setLoading(true);
+    
     // Validate threshold before saving - minimum is 100
     const thresholdNum = parseInt(tempThreshold);
     if (tempThreshold === '' || isNaN(thresholdNum) || thresholdNum < 100) {
+      setLoading(false);
       toast({
         title: "Erro de Validação",
         description: "O limite de aviso deve ser no mínimo 100 minutos.",
@@ -247,6 +250,7 @@ export default function Billing({ selectedOrganization }: BillingProps) {
     };
     
     await updateBillingSettings(settingsToSave);
+    setLoading(false);
   };
 
   const checkLowCreditsNow = async (settings: BillingSettings) => {
