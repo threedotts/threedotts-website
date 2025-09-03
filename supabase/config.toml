@@ -9,6 +9,12 @@ verify_jwt = false
 [functions.elevenlabs-websocket]
 verify_jwt = false
 
+[functions.elevenlabs-websocket-proxy]
+verify_jwt = false
+
+[functions.credit-validator]
+verify_jwt = false
+
 [functions.get-elevenlabs-signed-url]
 verify_jwt = false
 

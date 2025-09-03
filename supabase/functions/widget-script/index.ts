@@ -1171,12 +1171,125 @@ const widgetServe = async (req: Request): Promise<Response> => {
     alert(\`Erro: \${error}\`);
   }
   
+  // LAYER 4: Credit monitoring for widget
+  let creditMonitoringInterval = null;
+  const CREDIT_CHECK_INTERVAL = 30000; // 30 seconds
+  
+  async function checkCreditsStatus() {
+    if (!config.organizationId) return true;
+    
+    try {
+      const response = await fetch('https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/credit-validator', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          organization_id: config.organizationId,
+          action: 'check'
+        })
+      });
+      
+      const data = await response.json();
+      return data.has_credits && data.current_credits > 0;
+    } catch (error) {
+      console.error('❌ Credit check failed:', error);
+      return false; // Fail safe - assume no credits on error
+    }
+  }
+  
+  function startCreditMonitoring() {
+    if (!config.organizationId) return;
+    
+    creditMonitoringInterval = setInterval(async () => {
+      const hasCredits = await checkCreditsStatus();
+      
+      if (!hasCredits && state.isConnected) {
+        console.log('🚫 Credits depleted during conversation - terminating');
+        showError({
+          title: 'Credits Depleted',
+          message: 'Your conversation credits have been used up. The call will now end.',
+          credits: 0
+        });
+        
+        setTimeout(() => {
+          actions.handleDisconnect();
+        }, 3000);
+      }
+    }, CREDIT_CHECK_INTERVAL);
+  }
+  
+  function stopCreditMonitoring() {
+    if (creditMonitoringInterval) {
+      clearInterval(creditMonitoringInterval);
+      creditMonitoringInterval = null;
+    }
+  }
+  
+  function showError(errorInfo) {
+    // Show error in widget UI
+    const errorDiv = document.createElement('div');
+    errorDiv.style.cssText = \`
+      position: fixed;
+      bottom: 100px;
+      right: 24px;
+      background: hsl(0, 84%, 60%);
+      color: white;
+      padding: 16px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      z-index: 10000;
+      max-width: 300px;
+      font-family: 'Comfortaa', sans-serif;
+    \`;
+    
+    errorDiv.innerHTML = \`
+      <div style="font-weight: 600; margin-bottom: 8px;">\${errorInfo.title}</div>
+      <div style="font-size: 14px; opacity: 0.9;">\${errorInfo.message}</div>
+      <div style="font-size: 12px; margin-top: 8px; opacity: 0.7;">Credits: \${errorInfo.credits}</div>
+    \`;
+    
+    document.body.appendChild(errorDiv);
+    
+    setTimeout(() => {
+      if (document.body.contains(errorDiv)) {
+        document.body.removeChild(errorDiv);
+      }
+    }, 5000);
+  }
+  
+  function endConversationDueToCredits() {
+    console.log('🚫 Ending conversation due to credit depletion');
+    showError({
+      title: 'Credits Depleted',
+      message: 'Your conversation has been ended due to insufficient credits.',
+      credits: 0
+    });
+    stopCreditMonitoring();
+    actions.handleDisconnect();
+  }
+
   // Global actions - exactly like useGlobalConvaiState
   let webSocketInstance = null;
 
   const actions = {
     handleConnect: async () => {
       try {
+        // LAYER 4: Check credits before connecting
+        if (config.organizationId) {
+          console.log('🔍 Checking credits before connection...');
+          const hasCredits = await checkCreditsStatus();
+          
+          if (!hasCredits) {
+            console.log('❌ Connection denied - insufficient credits');
+            showError({
+              title: 'No Credits Available',
+              message: 'Please top up your account to start a conversation.',
+              credits: 0
+            });
+            return;
+          }
+          console.log('✅ Credits validated - proceeding with connection');
+        }
+
         // Use the pre-resolved agent ID from server configuration
         const agentId = config.agentId;
         
@@ -1184,7 +1297,6 @@ const widgetServe = async (req: Request): Promise<Response> => {
           alert('Agent ID não configurado. Verifique a configuração da organização.');
           return;
         }
-
 
         // Show connecting state
         state.isConnecting = true;
@@ -1200,6 +1312,10 @@ const widgetServe = async (req: Request): Promise<Response> => {
           );
         }
         await webSocketInstance.connect();
+        
+        // Start credit monitoring once connected
+        startCreditMonitoring();
+        
       } catch (error) {
         console.error('Failed to connect:', error);
         state.isConnecting = false;
@@ -1207,6 +1323,7 @@ const widgetServe = async (req: Request): Promise<Response> => {
       }
     },
     handleDisconnect: () => {
+      stopCreditMonitoring(); // Stop monitoring when disconnecting
       if (webSocketInstance) {
         webSocketInstance.disconnect();
       }
@@ -1236,7 +1353,23 @@ const widgetServe = async (req: Request): Promise<Response> => {
         if (options.organizationId) {
           config.organizationId = options.organizationId;
         }
-    }
+        
+        // LAYER 4: Store credit validation state
+        if (options.creditsValidated !== undefined) {
+          config.creditsValidated = options.creditsValidated;
+        }
+        
+        if (options.currentCredits !== undefined) {
+          config.currentCredits = options.currentCredits;
+        }
+    },
+    // LAYER 4: Expose credit management functions
+    showError,
+    endConversationDueToCredits,
+    checkCredits: checkCreditsStatus,
+    isConnected: () => state.isConnected,
+    isMuted: () => state.isMuted,
+    isSpeaking: () => state.isSpeaking
   };
 
   // Load Comfortaa font and initialize widget

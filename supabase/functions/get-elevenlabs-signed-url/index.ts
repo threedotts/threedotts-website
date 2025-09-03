@@ -1,12 +1,18 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.51.0';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Initialize Supabase client
+const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
+const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
 serve(async (req) => {
-  console.log('=== ElevenLabs Signed URL Generator ===');
+  console.log('=== ElevenLabs Signed URL Generator with Credit Validation ===');
   
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -15,8 +21,8 @@ serve(async (req) => {
   }
 
   try {
-    const { agent_id } = await req.json();
-    console.log('Generating signed URL for agent:', agent_id);
+    const { agent_id, organization_id } = await req.json();
+    console.log('Generating signed URL for agent:', agent_id, 'organization:', organization_id);
     
     if (!agent_id) {
       console.log('Missing agent_id parameter');
@@ -28,6 +34,53 @@ serve(async (req) => {
         }
       );
     }
+
+    if (!organization_id) {
+      console.log('Missing organization_id parameter');
+      return new Response(
+        JSON.stringify({ error: "Missing organization_id parameter" }), 
+        { 
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    // LAYER 1: Check credits before generating signed URL
+    console.log('Checking credits for organization:', organization_id);
+    const { data: creditData, error: creditError } = await supabase
+      .from('user_credits')
+      .select('current_credits')
+      .eq('organization_id', organization_id)
+      .single();
+
+    if (creditError) {
+      console.error('Error checking credits:', creditError);
+      return new Response(
+        JSON.stringify({ error: "Unable to verify credit balance" }), 
+        { 
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    if (!creditData || creditData.current_credits <= 0) {
+      console.log('Insufficient credits. Current balance:', creditData?.current_credits || 0);
+      return new Response(
+        JSON.stringify({ 
+          error: "Insufficient credits", 
+          current_credits: creditData?.current_credits || 0,
+          message: "Please top up your account to continue using AI conversations"
+        }), 
+        { 
+          status: 402, // Payment Required
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    console.log('Credits available:', creditData.current_credits);
 
     const elevenLabsApiKey = Deno.env.get('ELEVENLABS_API_KEY');
     if (!elevenLabsApiKey) {
