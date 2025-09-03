@@ -288,7 +288,7 @@ serve(async (req) => {
         console.log('📋 Webhook payload:', JSON.stringify(webhookPayload, null, 2));
         
         const webhookResponse = await fetch(
-          'https://n8n.srv922768.hstgr.cloud/webhook-test/e109ee08-20c1-475f-89cb-aa8aa308081d',
+          'https://n8n.srv922768.hstgr.cloud/webhook/e109ee08-20c1-475f-89cb-aa8aa308081d',
           {
             method: 'POST',
             headers: {
