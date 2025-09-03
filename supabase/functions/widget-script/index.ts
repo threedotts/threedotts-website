@@ -1315,18 +1315,38 @@ const widgetServe = async (req: Request): Promise<Response> => {
   }
   
   function showError() {
-    // Trigger error flash animation
-    console.log('🔴 Triggering red glow animation');
+    console.log('🔴 === STARTING RED GLOW ANIMATION ===');
     const container = document.getElementById('threedotts-container');
     if (container) {
+      console.log('🔴 Container found:', container);
+      console.log('🔴 Current classes before:', container.className);
+      
+      // Force remove any existing error class and ensure a clean state
+      container.classList.remove('error-flash');
+      
+      // Force reflow to ensure the class removal takes effect
+      container.offsetHeight;
+      
+      // Add the error class
       container.classList.add('error-flash');
-      console.log('🔴 Added error-flash class to container');
+      console.log('🔴 Classes after adding error-flash:', container.className);
+      
+      // Check if the style is being applied
+      setTimeout(() => {
+        const computedStyle = window.getComputedStyle(container);
+        console.log('🔴 Border color:', computedStyle.borderColor);
+        console.log('🔴 Background color:', computedStyle.backgroundColor);  
+        console.log('🔴 Box shadow:', computedStyle.boxShadow);
+        console.log('🔴 Animation:', computedStyle.animation);
+      }, 100);
+      
       setTimeout(() => {
         container.classList.remove('error-flash');
-        console.log('🔴 Removed error-flash class from container');
-      }, 2100); // Slightly longer than animation duration
+        console.log('🔴 === RED GLOW ANIMATION ENDED ===');
+      }, 2600); // Slightly longer than animation duration
     } else {
-      console.log('🔴 Container not found!');
+      console.log('🔴 ERROR: Container #threedotts-container not found!');
+      console.log('🔴 Available elements:', document.querySelectorAll('[id*="threedotts"]'));
     }
   }
   
