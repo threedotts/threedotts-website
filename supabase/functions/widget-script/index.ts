@@ -357,7 +357,9 @@ const widgetServe = async (req: Request): Promise<Response> => {
     websocket: null,
     audioRecorder: null,
     audioPlayer: null,
-    hasAnimated: false
+    hasAnimated: false,
+    isCheckingCredits: false,
+    showError: false
   };
 
   // Inject CSS styles - EXACTLY like ThreeDotsEmbeddedConvai (same colors!)
@@ -383,6 +385,19 @@ const widgetServe = async (req: Request): Promise<Response> => {
         align-items: center;
         gap: 12px;
         width: fit-content;
+      }
+      
+      .threedotts-container.error-flash {
+        background: hsla(0, 84%, 60%, 0.9);
+        border-color: hsl(0, 84%, 50%);
+        box-shadow: 0 10px 15px -3px hsla(0, 84%, 60%, 0.3), 0 4px 6px -2px hsla(0, 84%, 60%, 0.2);
+        animation: error-pulse 0.6s ease-out;
+      }
+      
+      @keyframes error-pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
       }
       
       .threedotts-container.connected {
@@ -1204,15 +1219,11 @@ const widgetServe = async (req: Request): Promise<Response> => {
       
       if (!hasCredits && state.isConnected) {
         console.log('🚫 Credits depleted during conversation - terminating');
-        showError({
-          title: 'Credits Depleted',
-          message: 'Your conversation credits have been used up. The call will now end.',
-          credits: 0
-        });
+        showError();
         
         setTimeout(() => {
           actions.handleDisconnect();
-        }, 3000);
+        }, 1500);
       }
     }, CREDIT_CHECK_INTERVAL);
   }
@@ -1224,45 +1235,15 @@ const widgetServe = async (req: Request): Promise<Response> => {
     }
   }
   
-  function showError(errorInfo) {
-    // Show error in widget UI
-    const errorDiv = document.createElement('div');
-    errorDiv.style.cssText = \`
-      position: fixed;
-      bottom: 100px;
-      right: 24px;
-      background: hsl(0, 84%, 60%);
-      color: white;
-      padding: 16px;
-      border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      z-index: 10000;
-      max-width: 300px;
-      font-family: 'Comfortaa', sans-serif;
-    \`;
-    
-    errorDiv.innerHTML = \`
-      <div style="font-weight: 600; margin-bottom: 8px;">\${errorInfo.title}</div>
-      <div style="font-size: 14px; opacity: 0.9;">\${errorInfo.message}</div>
-      <div style="font-size: 12px; margin-top: 8px; opacity: 0.7;">Credits: \${errorInfo.credits}</div>
-    \`;
-    
-    document.body.appendChild(errorDiv);
-    
-    setTimeout(() => {
-      if (document.body.contains(errorDiv)) {
-        document.body.removeChild(errorDiv);
-      }
-    }, 5000);
+  function showError() {
+    // Trigger error flash animation
+    state.showError = true;
+    updateUI();
   }
   
   function endConversationDueToCredits() {
     console.log('🚫 Ending conversation due to credit depletion');
-    showError({
-      title: 'Credits Depleted',
-      message: 'Your conversation has been ended due to insufficient credits.',
-      credits: 0
-    });
+    showError();
     stopCreditMonitoring();
     actions.handleDisconnect();
   }
@@ -1276,15 +1257,17 @@ const widgetServe = async (req: Request): Promise<Response> => {
         // LAYER 4: Check credits before connecting
         if (config.organizationId) {
           console.log('🔍 Checking credits before connection...');
+          state.isCheckingCredits = true;
+          updateUI();
+          
           const hasCredits = await checkCreditsStatus();
+          
+          state.isCheckingCredits = false;
           
           if (!hasCredits) {
             console.log('❌ Connection denied - insufficient credits');
-            showError({
-              title: 'No Credits Available',
-              message: 'Please top up your account to start a conversation.',
-              credits: 0
-            });
+            showError();
+            updateUI();
             return;
           }
           console.log('✅ Credits validated - proceeding with connection');
@@ -1319,6 +1302,7 @@ const widgetServe = async (req: Request): Promise<Response> => {
       } catch (error) {
         console.error('Failed to connect:', error);
         state.isConnecting = false;
+        state.isCheckingCredits = false;
         handleError('Falha ao conectar');
       }
     },
