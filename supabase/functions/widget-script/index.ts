@@ -441,15 +441,6 @@ const widgetServe = async (req: Request): Promise<Response> => {
         }
       }
       
-      @keyframes shimmer-red {
-        0% { 
-          transform: translateX(-100%);
-        }
-        100% { 
-          transform: translateX(100%);
-        }
-      }
-      
       .threedotts-button.connecting {
         background: hsl(0, 0%, 85%) !important;
         color: hsl(0, 0%, 60%) !important;
@@ -477,35 +468,7 @@ const widgetServe = async (req: Request): Promise<Response> => {
         z-index: 1;
       }
       
-      .threedotts-button.error-shimmer {
-        background: hsla(0, 84%, 50%, 0.9) !important;
-        color: white !important;
-        border: 1px solid hsla(0, 84%, 40%, 1) !important;
-        cursor: not-allowed;
-        pointer-events: none;
-        position: relative;
-        overflow: hidden;
-      }
-      
-      .threedotts-button.error-shimmer::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(
-          90deg,
-          transparent,
-          hsla(0, 100%, 100%, 0.8),
-          transparent
-        );
-        animation: shimmer-red 0.8s ease-in-out infinite;
-        z-index: 1;
-      }
-      
-      .threedotts-button.connecting span,
-      .threedotts-button.error-shimmer span {
+      .threedotts-button.connecting span {
         position: relative;
         z-index: 2;
       }
@@ -1352,22 +1315,38 @@ const widgetServe = async (req: Request): Promise<Response> => {
   }
   
   function showError() {
-    console.log('🔴 Showing red shimmer on button');
-    const buttonsContainer = document.getElementById('threedotts-buttons');
-    if (buttonsContainer) {
-      // Show red shimmer button for 2 seconds
-      buttonsContainer.innerHTML = \`
-        <button class="threedotts-button error-shimmer">
-          <span>Sem créditos</span>
-        </button>
-      \`;
+    console.log('🔴 === STARTING RED GLOW ANIMATION ===');
+    const container = document.getElementById('threedotts-container');
+    if (container) {
+      console.log('🔴 Container found:', container);
+      console.log('🔴 Current classes before:', container.className);
+      
+      // Force remove any existing error class and ensure a clean state
+      container.classList.remove('error-flash');
+      
+      // Force reflow to ensure the class removal takes effect
+      container.offsetHeight;
+      
+      // Add the error class
+      container.classList.add('error-flash');
+      console.log('🔴 Classes after adding error-flash:', container.className);
+      
+      // Check if the style is being applied
+      setTimeout(() => {
+        const computedStyle = window.getComputedStyle(container);
+        console.log('🔴 Border color:', computedStyle.borderColor);
+        console.log('🔴 Background color:', computedStyle.backgroundColor);  
+        console.log('🔴 Box shadow:', computedStyle.boxShadow);
+        console.log('🔴 Animation:', computedStyle.animation);
+      }, 100);
       
       setTimeout(() => {
-        // Reset to normal "Ligar" button after error shimmer
-        state.isCheckingCredits = false;
-        updateUI();
-        console.log('🔴 Red shimmer ended, back to normal button');
-      }, 2000);
+        container.classList.remove('error-flash');
+        console.log('🔴 === RED GLOW ANIMATION ENDED ===');
+      }, 2600); // Slightly longer than animation duration
+    } else {
+      console.log('🔴 ERROR: Container #threedotts-container not found!');
+      console.log('🔴 Available elements:', document.querySelectorAll('[id*="threedotts"]'));
     }
   }
   
