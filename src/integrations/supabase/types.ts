@@ -288,6 +288,45 @@ export type Database = {
           },
         ]
       }
+      credit_notification_state: {
+        Row: {
+          created_at: string
+          current_threshold: number
+          first_warning_sent: boolean
+          first_warning_sent_at: string | null
+          id: string
+          last_credit_balance: number
+          organization_id: string
+          updated_at: string
+          zero_credits_warning_sent: boolean
+          zero_credits_warning_sent_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          current_threshold: number
+          first_warning_sent?: boolean
+          first_warning_sent_at?: string | null
+          id?: string
+          last_credit_balance?: number
+          organization_id: string
+          updated_at?: string
+          zero_credits_warning_sent?: boolean
+          zero_credits_warning_sent_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          current_threshold?: number
+          first_warning_sent?: boolean
+          first_warning_sent_at?: string | null
+          id?: string
+          last_credit_balance?: number
+          organization_id?: string
+          updated_at?: string
+          zero_credits_warning_sent?: boolean
+          zero_credits_warning_sent_at?: string | null
+        }
+        Relationships: []
+      }
       credit_usage: {
         Row: {
           call_duration_minutes: number | null
@@ -320,6 +359,7 @@ export type Database = {
       }
       low_credit_alert_queue: {
         Row: {
+          alert_type: string | null
           created_at: string
           current_credits: number
           id: string
@@ -329,6 +369,7 @@ export type Database = {
           threshold: number
         }
         Insert: {
+          alert_type?: string | null
           created_at?: string
           current_credits: number
           id?: string
@@ -338,6 +379,7 @@ export type Database = {
           threshold: number
         }
         Update: {
+          alert_type?: string | null
           created_at?: string
           current_credits?: number
           id?: string
