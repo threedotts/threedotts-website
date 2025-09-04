@@ -63,16 +63,6 @@ const menuItems: MenuItem[] = [
     icon: TrendingUp,
   },
   { 
-    title: "Relatórios", 
-    url: "/dashboard/reports", 
-    icon: FileText,
-  },
-  { 
-    title: "Clientes", 
-    url: "/dashboard/customers", 
-    icon: UserCheck,
-  },
-  { 
     title: "Mensagens", 
     url: "/dashboard/messages", 
     icon: MessageSquare,
@@ -81,11 +71,6 @@ const menuItems: MenuItem[] = [
     title: "Histórico", 
     url: "/dashboard/call-history", 
     icon: PhoneCall,
-  },
-  { 
-    title: "Leads", 
-    url: "/dashboard/leads", 
-    icon: UserCheck,
   },
   { 
     title: "Configurações", 
