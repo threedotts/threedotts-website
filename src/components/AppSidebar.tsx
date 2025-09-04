@@ -205,18 +205,18 @@ export function AppSidebar({ user, profile, selectedOrganization }: AppSidebarPr
               );
             })}
           </SidebarMenu>
-          
-          {/* Credits Meter Card - only for admin/owner */}
-          {selectedOrganization && ['owner', 'admin'].includes(userRole || '') && (
-            <div className="mt-6">
-              <CreditsMeter 
-                organizationId={selectedOrganization.id} 
-                isCollapsed={state === 'collapsed'}
-                key={`credits-${selectedOrganization.id}`} 
-              />
-            </div>
-          )}
         </div>
+
+        {/* Credits Meter - Fixed above profile */}
+        {selectedOrganization && ['owner', 'admin'].includes(userRole || '') && (
+          <div className="p-4 border-t border-border/50">
+            <CreditsMeter 
+              organizationId={selectedOrganization.id} 
+              isCollapsed={state === 'collapsed'}
+              key={`credits-${selectedOrganization.id}`} 
+            />
+          </div>
+        )}
 
         {/* User Profile at Bottom */}
         {user && (
