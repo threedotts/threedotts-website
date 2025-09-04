@@ -226,6 +226,49 @@ const Auth = () => {
     }
   };
 
+  const handleGoogleSignUp = async () => {
+    // Validate organization name is provided
+    if (!formData.organizationName.trim()) {
+      toast({
+        title: "Nome da organização obrigatório",
+        description: "Por favor, preencha o nome da sua organização antes de continuar com Google.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const orgError = validateOrganization(formData.organizationName);
+    if (orgError) {
+      setErrors(prev => ({ ...prev, organizationName: orgError }));
+      toast({
+        title: "Nome da organização inválido",
+        description: orgError,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/`,
+          queryParams: {
+            organization_name: formData.organizationName,
+          }
+        }
+      });
+
+      if (error) throw error;
+    } catch (error: any) {
+      toast({
+        title: "Erro no cadastro com Google",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30 flex items-center justify-center p-4">
       <div className="w-full max-w-lg">
@@ -484,7 +527,7 @@ const Auth = () => {
                   type="button"
                   variant="outline"
                   className="w-full"
-                  onClick={handleGoogleSignIn}
+                  onClick={handleGoogleSignUp}
                 >
                   <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
                     <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
