@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSessionTimeout } from "@/hooks/useSessionTimeout";
+import { useGoogleAuthCallback } from "@/hooks/useGoogleAuthCallback";
 
 // Configuration for ThreeDots widget
 const CHAT_WIDGET_ENABLED = true;
@@ -43,6 +44,9 @@ const App = () => {
   
   // Enable session timeout only for authenticated users
   useSessionTimeout(isAuthenticated);
+  
+  // Handle Google OAuth callback for organization creation
+  useGoogleAuthCallback();
 
   useEffect(() => {
     // Monitor authentication state for security logging

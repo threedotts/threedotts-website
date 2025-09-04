@@ -249,12 +249,16 @@ const Auth = () => {
     }
 
     try {
+      // Store organization name in localStorage before OAuth
+      localStorage.setItem('pending_organization_name', formData.organizationName);
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/`,
           queryParams: {
-            organization_name: formData.organizationName,
+            access_type: 'offline',
+            prompt: 'consent'
           }
         }
       });
