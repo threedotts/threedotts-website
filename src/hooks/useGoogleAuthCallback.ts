@@ -8,37 +8,47 @@ export const useGoogleAuthCallback = () => {
   useEffect(() => {
     const handleGoogleAuthCallback = async () => {
       const pendingOrgName = localStorage.getItem('pending_organization_name');
+      console.log('Google auth callback - pendingOrgName:', pendingOrgName);
       
-      if (pendingOrgName) {
-        try {
-          // Get current session
-          const { data: { session } } = await supabase.auth.getSession();
-          
-          if (session?.user) {
-            // Check if this is a new user (user was just created)
-            const { data: profile } = await supabase
-              .from('profiles')
-              .select('*')
-              .eq('user_id', session.user.id)
-              .single();
+      // Always try to create organization for Google OAuth users, even without localStorage
+      const orgName = pendingOrgName || 'Minha Empresa';
+      console.log('Using organization name:', orgName);
+      try {
+        // Get current session
+        const { data: { session } } = await supabase.auth.getSession();
+        console.log('Session found:', !!session?.user);
+        
+        if (session?.user) {
+          // Check if this is a new user (user was just created)
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('user_id', session.user.id)
+            .single();
 
-            // If user exists but doesn't have an organization yet
-            const { data: organizations } = await supabase
+          console.log('Profile found:', !!profile);
+
+          // If user exists but doesn't have an organization yet
+          const { data: organizations } = await supabase
+            .from('organizations')
+            .select('*')
+            .eq('user_id', session.user.id);
+
+          console.log('Organizations found:', organizations?.length || 0);
+
+          if (profile && (!organizations || organizations.length === 0)) {
+            console.log('Creating organization with name:', orgName);
+            
+            // Create organization for Google OAuth user
+            const { data: newOrg, error: orgError } = await supabase
               .from('organizations')
-              .select('*')
-              .eq('user_id', session.user.id);
-
-            if (profile && (!organizations || organizations.length === 0)) {
-              // Create organization for Google OAuth user
-              const { data: newOrg, error: orgError } = await supabase
-                .from('organizations')
-                .insert({
-                  user_id: session.user.id,
-                  name: pendingOrgName,
-                  members_count: 1
-                })
-                .select()
-                .single();
+              .insert({
+                user_id: session.user.id,
+                name: orgName,
+                members_count: 1
+              })
+              .select()
+              .single();
 
               if (orgError) {
                 console.error('Error creating organization:', orgError);
@@ -68,7 +78,7 @@ export const useGoogleAuthCallback = () => {
 
               toast({
                 title: "Conta criada com sucesso!",
-                description: `Bem-vindo à ${pendingOrgName}`,
+                description: `Bem-vindo à ${orgName}`,
                 variant: "default",
               });
             }
@@ -80,7 +90,6 @@ export const useGoogleAuthCallback = () => {
           console.error('Error in Google auth callback:', error);
           localStorage.removeItem('pending_organization_name');
         }
-      }
     };
 
     // Listen for auth state changes
