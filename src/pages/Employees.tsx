@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { useToast } from "@/hooks/use-toast";
 import { useUserPresence } from "@/hooks/useUserPresence";
 import { Button } from "@/components/ui/button";
@@ -90,6 +91,8 @@ const roleLabels = {
 const Employees = ({ selectedOrganization }: EmployeesProps) => {
   const [members, setMembers] = useState<OrganizationMember[]>([]);
   const [invitations, setInvitations] = useState<OrganizationInvitation[]>([]);
+  
+  usePageTitle("Funcionários");
   const [loading, setLoading] = useState(true);
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");

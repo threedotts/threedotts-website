@@ -1,8 +1,11 @@
 import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 const Scheduling = () => {
+  usePageTitle("Agendamento");
+  
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden">
       {/* Header with back button - takes space at top */}

@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { Building, Key, Save, Check, X, Settings as SettingsIcon } from "lucide-react";
 
 interface Organization {
@@ -38,6 +39,8 @@ export default function Settings({ selectedOrganization, onOrganizationUpdate }:
     domain: "",
   });
   const { toast } = useToast();
+  
+  usePageTitle("Configurações");
 
   useEffect(() => {
     if (selectedOrganization) {

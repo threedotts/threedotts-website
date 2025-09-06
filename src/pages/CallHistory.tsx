@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { format } from "date-fns";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { Badge } from "@/components/ui/badge";
 import { ShimmerSkeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -104,6 +105,8 @@ const getEvaluationColor = (result: string) => {
 export default function CallHistory({ selectedOrganization }: CallHistoryProps) {
   const [selectedCall, setSelectedCall] = useState<CallTranscription | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  
+  usePageTitle("Histórico de Chamadas");
   const [calls, setCalls] = useState<CallTranscription[]>([]);
   const [loading, setLoading] = useState(true);
   

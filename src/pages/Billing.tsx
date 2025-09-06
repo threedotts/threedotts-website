@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { User } from "@supabase/supabase-js";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -77,6 +78,8 @@ interface BillingProps {
 export default function Billing({ selectedOrganization }: BillingProps) {
   const { toast } = useToast();
   const [user, setUser] = useState<User | null>(null);
+  
+  usePageTitle("Faturamento");
   const [minuteData, setMinuteData] = useState<MinuteData | null>(null);
   const [billingSettings, setBillingSettings] = useState<BillingSettings | null>(null);
   const [billingHistory, setBillingHistory] = useState<BillingHistoryItem[]>([]);

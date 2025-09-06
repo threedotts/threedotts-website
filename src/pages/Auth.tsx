@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Building2, Mail, Lock, Eye, EyeOff, User, Shield, CheckCircle } from "lucide-react";
 import { useSecurityMonitor } from "@/hooks/useSecurityMonitor";
 import { useSessionTimeout } from "@/hooks/useSessionTimeout";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { 
   sanitizeInput, 
   validateEmail, 
@@ -38,6 +39,7 @@ const Auth = () => {
   // Security monitoring
   const security = useSecurityMonitor(formData.email || 'anonymous');
   useSessionTimeout();
+  usePageTitle("Login");
 
   // Remove old validation functions as they're now imported from utils
 

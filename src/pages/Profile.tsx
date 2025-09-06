@@ -10,6 +10,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { Separator } from "@/components/ui/separator";
 import { 
   Upload, 
@@ -46,6 +47,8 @@ const Profile = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  usePageTitle("Perfil");
 
   const [formData, setFormData] = useState({
     firstName: "",

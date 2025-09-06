@@ -11,6 +11,7 @@ import { Plus, Users, Phone, TrendingUp, Clock } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useToast } from "@/hooks/use-toast";
 import { useConversationPolling } from "@/hooks/useConversationPolling";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import CallHistory from "./CallHistory";
 import DashboardHome from "@/components/DashboardHome";
 import Settings from "./Settings";
@@ -56,6 +57,8 @@ const Dashboard = () => {
     selectedOrganization: selectedOrg, 
     enabled: !!user && !!selectedOrg 
   });
+  
+  usePageTitle("Dashboard");
 
   const getPageTitle = () => {
     return "Dashboard";

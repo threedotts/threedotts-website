@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { ArrowLeft, CheckCircle, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +16,8 @@ const CreateOrganization = () => {
   const [organizationName, setOrganizationName] = useState("");
   const [description, setDescription] = useState("");
   const [domain, setDomain] = useState("");
+  
+  usePageTitle("Criar Organização");
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [checking, setChecking] = useState(true);
