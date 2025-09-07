@@ -396,7 +396,7 @@ const Demo = ({
               <ul className="space-y-1 text-muted-foreground">
                 <li>• Fale claramente e com pausas</li>
                 <li>• Fale para interromper o agente, conversa de forma natural</li>
-                <li>• Monitore o consumo de créditos</li>
+                <li>• Conversa de forma natural</li>
                 <li>• Observe a qualidade da conexão</li>
               </ul>
             </div>
