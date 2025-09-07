@@ -60,12 +60,50 @@ export default function Settings({ selectedOrganization, onOrganizationUpdate }:
 
     setLoading(true);
     try {
+      // Update organizations table with agent_id
       const { error } = await supabase
         .from("organizations")
         .update({ agent_id: [activationCode.trim()] })
         .eq("id", selectedOrganization.id);
 
       if (error) throw error;
+
+      // Create or update organization agent config
+      const { data: existingConfig, error: configError } = await supabase
+        .from("organization_agent_config")
+        .select("id")
+        .eq("organization_id", selectedOrganization.id)
+        .maybeSingle();
+
+      if (configError) {
+        console.error("Error checking existing config:", configError);
+      }
+
+      if (existingConfig) {
+        // Update existing config
+        const { error: updateError } = await supabase
+          .from("organization_agent_config")
+          .update({
+            primary_agent_id: activationCode.trim(),
+            status: 'active',
+            updated_at: new Date().toISOString()
+          })
+          .eq("id", existingConfig.id);
+
+        if (updateError) throw updateError;
+      } else {
+        // Create new config
+        const { error: insertError } = await supabase
+          .from("organization_agent_config")
+          .insert({
+            organization_id: selectedOrganization.id,
+            primary_agent_id: activationCode.trim(),
+            status: 'active',
+            api_key_secret_name: null
+          });
+
+        if (insertError) throw insertError;
+      }
 
       setIsActivated(true);
       toast({
