@@ -99,7 +99,7 @@ export default function Settings({ selectedOrganization, onOrganizationUpdate }:
             organization_id: selectedOrganization.id,
             primary_agent_id: activationCode.trim(),
             status: 'active',
-            api_key_secret_name: null
+            api_key_secret_name: 'KEY_HERE'
           });
 
         if (insertError) throw insertError;
