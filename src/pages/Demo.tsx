@@ -9,29 +9,13 @@ import { useToast } from "@/hooks/use-toast";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useCreditConsumption } from "@/hooks/useCreditConsumption";
 import { VoiceWebSocket, getAgentConfig } from "@/utils/ElevenLabsDemo";
-import { 
-  Phone, 
-  PhoneOff, 
-  Mic, 
-  MicOff, 
-  Volume2, 
-  VolumeX, 
-  Wifi, 
-  WifiOff,
-  Zap,
-  PlayCircle,
-  StopCircle,
-  Loader2,
-  AlertTriangle,
-  CheckCircle,
-  Activity
-} from "lucide-react";
-
+import { Phone, PhoneOff, Mic, MicOff, Volume2, VolumeX, Wifi, WifiOff, Zap, PlayCircle, StopCircle, Loader2, AlertTriangle, CheckCircle, Activity } from "lucide-react";
 interface DemoProps {
   selectedOrganization?: any;
 }
-
-const Demo = ({ selectedOrganization }: DemoProps) => {
+const Demo = ({
+  selectedOrganization
+}: DemoProps) => {
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -42,37 +26,36 @@ const Demo = ({ selectedOrganization }: DemoProps) => {
   const [connectionQuality, setConnectionQuality] = useState<'good' | 'poor' | 'disconnected'>('disconnected');
   const [creditsConsumed, setCreditsConsumed] = useState(0);
   const [currentCredits, setCurrentCredits] = useState<number | null>(null);
-  
-  const { toast } = useToast();
-  const { checkCreditBalance, loading: creditsLoading } = useCreditConsumption();
+  const {
+    toast
+  } = useToast();
+  const {
+    checkCreditBalance,
+    loading: creditsLoading
+  } = useCreditConsumption();
   const voiceWebSocketRef = useRef<VoiceWebSocket | null>(null);
-  
   usePageTitle("Demo - Teste do Agente");
-
   useEffect(() => {
     // Fetch current credit balance when component loads
     if (selectedOrganization?.id) {
       fetchCurrentCredits();
     }
   }, [selectedOrganization?.id]);
-
   const fetchCurrentCredits = async () => {
     if (!selectedOrganization?.id) return;
-    
     const balance = await checkCreditBalance(selectedOrganization.id);
     if (balance !== null) {
       setCurrentCredits(balance);
     }
   };
-
   const requestMicrophonePermission = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
+      const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
           noiseSuppression: true,
           autoGainControl: true
-        } 
+        }
       });
       // Test and release the stream
       stream.getTracks().forEach(track => track.stop());
@@ -82,18 +65,17 @@ const Demo = ({ selectedOrganization }: DemoProps) => {
       toast({
         title: "Permissão Negada",
         description: "É necessário permitir o acesso ao microfone para testar o agente",
-        variant: "destructive",
+        variant: "destructive"
       });
       return false;
     }
   };
-
   const startDemoCall = async () => {
     if (!selectedOrganization?.id) {
       toast({
         title: "Organização Necessária",
         description: "Selecione uma organização para iniciar o teste",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
@@ -104,7 +86,7 @@ const Demo = ({ selectedOrganization }: DemoProps) => {
       toast({
         title: "Créditos Insuficientes",
         description: "Adicione créditos à sua conta para testar o agente",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
@@ -112,81 +94,70 @@ const Demo = ({ selectedOrganization }: DemoProps) => {
     // Request microphone permission
     const micGranted = await requestMicrophonePermission();
     if (!micGranted) return;
-
     setIsConnecting(true);
     setCreditsConsumed(0);
-
     try {
       // Get agent config from server (same as widget)
-      const { agentId, apiKey } = await getAgentConfig(selectedOrganization.id);
-      console.log('🔧 Got agent config:', { agentId });
+      const {
+        agentId,
+        apiKey
+      } = await getAgentConfig(selectedOrganization.id);
+      console.log('🔧 Got agent config:', {
+        agentId
+      });
 
       // Create VoiceWebSocket connection (same as widget)
-      voiceWebSocketRef.current = new VoiceWebSocket(
-        agentId,
-        apiKey,
-        handleWebSocketMessage,
-        (connected) => {
-          setIsConnected(connected);
-          setIsConnecting(false);
-          setConnectionQuality(connected ? 'good' : 'disconnected');
-          
-          if (connected) {
-            toast({
-              title: "Conectado",
-              description: "Agente IA pronto para conversar",
-            });
-            addTranscriptMessage("system", "Conectado ao agente. Comece a falar!");
-          }
-        },
-        (error) => {
-          console.error('VoiceWebSocket error:', error);
-          setIsConnecting(false);
+      voiceWebSocketRef.current = new VoiceWebSocket(agentId, apiKey, handleWebSocketMessage, connected => {
+        setIsConnected(connected);
+        setIsConnecting(false);
+        setConnectionQuality(connected ? 'good' : 'disconnected');
+        if (connected) {
           toast({
-            title: "Erro de Conexão",
-            description: error,
-            variant: "destructive",
+            title: "Conectado",
+            description: "Agente IA pronto para conversar"
           });
+          addTranscriptMessage("system", "Conectado ao agente. Comece a falar!");
         }
-      );
+      }, error => {
+        console.error('VoiceWebSocket error:', error);
+        setIsConnecting(false);
+        toast({
+          title: "Erro de Conexão",
+          description: error,
+          variant: "destructive"
+        });
+      });
 
       // Connect to ElevenLabs directly (same as widget)
       await voiceWebSocketRef.current.connect();
-
     } catch (error) {
       console.error('Error starting demo call:', error);
       setIsConnecting(false);
       toast({
         title: "Erro",
         description: error instanceof Error ? error.message : "Falha ao iniciar o teste",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
-
   const endDemoCall = () => {
     if (voiceWebSocketRef.current) {
       voiceWebSocketRef.current.disconnect();
       voiceWebSocketRef.current = null;
     }
-
     setIsConnected(false);
     setIsConnecting(false);
     setConnectionQuality('disconnected');
     setIsSpeaking(false);
     setIsAgentSpeaking(false);
-    
     addTranscriptMessage("system", "Chamada encerrada");
-    
     toast({
       title: "Chamada Encerrada",
-      description: `Teste concluído. Créditos utilizados: ${creditsConsumed}`,
+      description: `Teste concluído. Créditos utilizados: ${creditsConsumed}`
     });
   };
-
   const handleWebSocketMessage = (data: any) => {
     console.log('📨 Received message:', data.type, data);
-    
     switch (data.type) {
       case 'conversation_initiation_metadata':
         addTranscriptMessage("system", "Conversa iniciada - pode começar a falar!");
@@ -212,22 +183,18 @@ const Demo = ({ selectedOrganization }: DemoProps) => {
         console.log('📨 Unknown message type:', data.type);
     }
   };
-
   const addTranscriptMessage = (sender: 'user' | 'agent' | 'system', text: string) => {
     const timestamp = new Date().toLocaleTimeString();
     const message = `[${timestamp}] ${sender === 'user' ? 'Você' : sender === 'agent' ? 'Agente' : 'Sistema'}: ${text}`;
     setTranscript(prev => [...prev.slice(-9), message]); // Keep last 10 messages
   };
-
   const toggleMute = () => {
     const newMutedState = !isMuted;
     setIsMuted(newMutedState);
-    
     if (voiceWebSocketRef.current) {
       voiceWebSocketRef.current.setMuted(newMutedState);
     }
   };
-
   const getConnectionIcon = () => {
     switch (connectionQuality) {
       case 'good':
@@ -238,15 +205,12 @@ const Demo = ({ selectedOrganization }: DemoProps) => {
         return <WifiOff className="h-4 w-4 text-red-500" />;
     }
   };
-
   const getConnectionStatus = () => {
     if (isConnecting) return "Conectando...";
     if (isConnected) return "Conectado";
     return "Desconectado";
   };
-
-  return (
-    <div className="p-6 space-y-6">
+  return <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Teste do Agente IA</h1>
@@ -276,45 +240,24 @@ const Demo = ({ selectedOrganization }: DemoProps) => {
 
             <Separator />
 
-            {!isConnected ? (
-              <Button 
-                onClick={startDemoCall} 
-                disabled={isConnecting || !selectedOrganization || creditsLoading}
-                className="w-full"
-              >
-                {isConnecting ? (
-                  <>
+            {!isConnected ? <Button onClick={startDemoCall} disabled={isConnecting || !selectedOrganization || creditsLoading} className="w-full">
+                {isConnecting ? <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     Conectando...
-                  </>
-                ) : (
-                  <>
+                  </> : <>
                     <PlayCircle className="h-4 w-4 mr-2" />
                     Iniciar Teste
-                  </>
-                )}
-              </Button>
-            ) : (
-              <Button 
-                onClick={endDemoCall}
-                variant="destructive" 
-                className="w-full"
-              >
+                  </>}
+              </Button> : <Button onClick={endDemoCall} variant="destructive" className="w-full">
                 <StopCircle className="h-4 w-4 mr-2" />
                 Encerrar Teste
-              </Button>
-            )}
+              </Button>}
 
             {/* Audio Controls */}
             <div className="space-y-3 pt-2">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Microfone:</span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={toggleMute}
-                  disabled={!isConnected}
-                >
+                <Button variant="outline" size="sm" onClick={toggleMute} disabled={!isConnected}>
                   {isMuted ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
                 </Button>
               </div>
@@ -324,13 +267,7 @@ const Demo = ({ selectedOrganization }: DemoProps) => {
                   <span className="text-sm font-medium">Volume:</span>
                   <span className="text-sm text-muted-foreground">{volume[0]}%</span>
                 </div>
-                <Slider
-                  value={volume}
-                  onValueChange={setVolume}
-                  max={100}
-                  step={10}
-                  disabled={!isConnected}
-                />
+                <Slider value={volume} onValueChange={setVolume} max={100} step={10} disabled={!isConnected} />
               </div>
             </div>
           </CardContent>
@@ -362,25 +299,19 @@ const Demo = ({ selectedOrganization }: DemoProps) => {
 
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Qualidade:</span>
-                <Badge 
-                  variant={connectionQuality === 'good' ? "default" : 
-                          connectionQuality === 'poor' ? "outline" : "destructive"}
-                >
-                  {connectionQuality === 'good' ? "Boa" : 
-                   connectionQuality === 'poor' ? "Instável" : "Sem conexão"}
+                <Badge variant={connectionQuality === 'good' ? "default" : connectionQuality === 'poor' ? "outline" : "destructive"}>
+                  {connectionQuality === 'good' ? "Boa" : connectionQuality === 'poor' ? "Instável" : "Sem conexão"}
                 </Badge>
               </div>
             </div>
 
-            {isConnected && (isAgentSpeaking || isSpeaking) && (
-              <div className="flex justify-center pt-2">
+            {isConnected && (isAgentSpeaking || isSpeaking) && <div className="flex justify-center pt-2">
                 <div className="animate-pulse flex space-x-1">
                   <div className="h-2 w-2 bg-primary rounded-full"></div>
                   <div className="h-2 w-2 bg-primary rounded-full animation-delay-200"></div>
                   <div className="h-2 w-2 bg-primary rounded-full animation-delay-400"></div>
                 </div>
-              </div>
-            )}
+              </div>}
           </CardContent>
         </Card>
 
@@ -408,15 +339,13 @@ const Demo = ({ selectedOrganization }: DemoProps) => {
                 </Badge>
               </div>
 
-              {currentCredits && currentCredits <= 100 && (
-                <div className="flex items-start gap-2 p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+              {currentCredits && currentCredits <= 100 && <div className="flex items-start gap-2 p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
                   <AlertTriangle className="h-4 w-4 text-orange-500 mt-0.5" />
                   <div className="text-sm text-orange-700 dark:text-orange-300">
                     <p className="font-medium">Créditos baixos</p>
                     <p>Considere fazer uma recarga</p>
                   </div>
-                </div>
-              )}
+                </div>}
             </div>
           </CardContent>
         </Card>
@@ -432,19 +361,13 @@ const Demo = ({ selectedOrganization }: DemoProps) => {
         </CardHeader>
         <CardContent>
           <div className="bg-muted/30 rounded-lg p-4 h-48 overflow-y-auto">
-            {transcript.length === 0 ? (
-              <p className="text-muted-foreground text-sm text-center py-8">
+            {transcript.length === 0 ? <p className="text-muted-foreground text-sm text-center py-8">
                 A transcrição aparecerá aqui quando a conversa iniciar
-              </p>
-            ) : (
-              <div className="space-y-2">
-                {transcript.map((message, index) => (
-                  <p key={index} className="text-sm font-mono">
+              </p> : <div className="space-y-2">
+                {transcript.map((message, index) => <p key={index} className="text-sm font-mono">
                     {message}
-                  </p>
-                ))}
-              </div>
-            )}
+                  </p>)}
+              </div>}
           </div>
         </CardContent>
       </Card>
@@ -472,7 +395,7 @@ const Demo = ({ selectedOrganization }: DemoProps) => {
               <h4 className="font-medium mb-2">Durante o teste:</h4>
               <ul className="space-y-1 text-muted-foreground">
                 <li>• Fale claramente e com pausas</li>
-                <li>• Aguarde o agente terminar de falar</li>
+                <li>• Pode falar para interromper o agente, conversa de forma natural</li>
                 <li>• Monitore o consumo de créditos</li>
                 <li>• Observe a qualidade da conexão</li>
               </ul>
@@ -480,8 +403,6 @@ const Demo = ({ selectedOrganization }: DemoProps) => {
           </div>
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>;
 };
-
 export default Demo;
