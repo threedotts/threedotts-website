@@ -108,6 +108,7 @@ export function AppSidebar({ user, profile, selectedOrganization }: AppSidebarPr
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [organizationId, setOrganizationId] = useState<string | null>(null);
+  const [menuSettings, setMenuSettings] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     const fetchUserRole = async () => {
@@ -152,6 +153,62 @@ export function AppSidebar({ user, profile, selectedOrganization }: AppSidebarPr
     fetchUserRole();
   }, [user]);
 
+  // Fetch menu settings for the selected organization
+  useEffect(() => {
+    const fetchMenuSettings = async () => {
+      if (!selectedOrganization?.id) {
+        setMenuSettings({});
+        return;
+      }
+
+      try {
+        const { data: settings, error } = await supabase
+          .from('organization_menu_settings')
+          .select('menu_settings')
+          .eq('organization_id', selectedOrganization.id)
+          .maybeSingle();
+
+        if (error) {
+          console.error('Error fetching menu settings:', error);
+          return;
+        }
+
+        if (settings?.menu_settings) {
+          setMenuSettings(settings.menu_settings as Record<string, boolean>);
+        } else {
+          // Create default settings if none exist
+          const defaultSettings = {
+            home: false,
+            demo: false,
+            scheduling: false,
+            employees: false,
+            analytics: false,
+            messages: false,
+            "call-history": false,
+            settings: true
+          };
+
+          const { error: insertError } = await supabase
+            .from('organization_menu_settings')
+            .insert({
+              organization_id: selectedOrganization.id,
+              menu_settings: defaultSettings
+            });
+
+          if (insertError) {
+            console.error('Error creating default menu settings:', insertError);
+          } else {
+            setMenuSettings(defaultSettings);
+          }
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    };
+
+    fetchMenuSettings();
+  }, [selectedOrganization?.id]);
+
   const isActive = (path: string) => {
     if (path === "/dashboard") {
       return currentPath === "/dashboard";
@@ -194,13 +251,19 @@ export function AppSidebar({ user, profile, selectedOrganization }: AppSidebarPr
         {/* Main Menu */}
         <div className="flex-1 p-4">
           <SidebarMenu className="space-y-1">
-            {menuItems.map((item) => {
+            {menuItems
+              .filter((item) => {
+                // Hide admin-only items if user is not admin or owner
+                if (item.adminOnly && !['owner', 'admin'].includes(userRole || '')) {
+                  return false;
+                }
+                
+                // Filter based on menu visibility settings
+                const isVisible = menuSettings[item.key] !== false;
+                return isVisible;
+              })
+              .map((item) => {
               const IconComponent = item.icon;
-              
-              // Hide admin-only items if user is not admin or owner
-              if (item.adminOnly && !['owner', 'admin'].includes(userRole || '')) {
-                return null;
-              }
               
               return (
                 <SidebarMenuItem key={item.title}>
