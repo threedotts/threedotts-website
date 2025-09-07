@@ -8,6 +8,7 @@ import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useCreditConsumption } from "@/hooks/useCreditConsumption";
+import { VoiceWebSocket, getAgentConfig } from "@/utils/ElevenLabsDemo";
 import { 
   Phone, 
   PhoneOff, 
@@ -44,9 +45,7 @@ const Demo = ({ selectedOrganization }: DemoProps) => {
   
   const { toast } = useToast();
   const { checkCreditBalance, loading: creditsLoading } = useCreditConsumption();
-  const wsRef = useRef<WebSocket | null>(null);
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const streamRef = useRef<MediaStream | null>(null);
+  const voiceWebSocketRef = useRef<VoiceWebSocket | null>(null);
   
   usePageTitle("Demo - Teste do Agente");
 
@@ -75,7 +74,8 @@ const Demo = ({ selectedOrganization }: DemoProps) => {
           autoGainControl: true
         } 
       });
-      streamRef.current = stream;
+      // Test and release the stream
+      stream.getTracks().forEach(track => track.stop());
       return true;
     } catch (error) {
       console.error('Microphone permission denied:', error);
@@ -117,87 +117,57 @@ const Demo = ({ selectedOrganization }: DemoProps) => {
     setCreditsConsumed(0);
 
     try {
-      // Initialize audio context
-      audioContextRef.current = new AudioContext();
-      
-      // Connect to WebSocket proxy
-      const wsUrl = `wss://dkqzzypemdewomxrjftv.supabase.co/functions/v1/elevenlabs-websocket-proxy?organization_id=${selectedOrganization.id}&agent_id=demo`;
-      wsRef.current = new WebSocket(wsUrl);
+      // Get agent config from server (same as widget)
+      const { agentId, apiKey } = await getAgentConfig(selectedOrganization.id);
+      console.log('🔧 Got agent config:', { agentId });
 
-      wsRef.current.onopen = () => {
-        console.log('Demo WebSocket connected');
-        setIsConnected(true);
-        setIsConnecting(false);
-        setConnectionQuality('good');
-        
-        toast({
-          title: "Conectado",
-          description: "Agente IA pronto para conversar",
-        });
-
-        addTranscriptMessage("system", "Conectado ao agente. Comece a falar!");
-      };
-
-      wsRef.current.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          handleWebSocketMessage(data);
-        } catch (error) {
-          console.error('Error parsing WebSocket message:', error);
-        }
-      };
-
-      wsRef.current.onclose = (event) => {
-        console.log('Demo WebSocket closed:', event.code, event.reason);
-        setIsConnected(false);
-        setIsConnecting(false);
-        setConnectionQuality('disconnected');
-        setIsAgentSpeaking(false);
-        
-        if (event.code !== 1000) { // Not normal closure
+      // Create VoiceWebSocket connection (same as widget)
+      voiceWebSocketRef.current = new VoiceWebSocket(
+        agentId,
+        apiKey,
+        handleWebSocketMessage,
+        (connected) => {
+          setIsConnected(connected);
+          setIsConnecting(false);
+          setConnectionQuality(connected ? 'good' : 'disconnected');
+          
+          if (connected) {
+            toast({
+              title: "Conectado",
+              description: "Agente IA pronto para conversar",
+            });
+            addTranscriptMessage("system", "Conectado ao agente. Comece a falar!");
+          }
+        },
+        (error) => {
+          console.error('VoiceWebSocket error:', error);
+          setIsConnecting(false);
           toast({
-            title: "Conexão Perdida",
-            description: "A conexão com o agente foi interrompida",
+            title: "Erro de Conexão",
+            description: error,
             variant: "destructive",
           });
         }
-      };
+      );
 
-      wsRef.current.onerror = (error) => {
-        console.error('Demo WebSocket error:', error);
-        setIsConnecting(false);
-        toast({
-          title: "Erro de Conexão",
-          description: "Falha ao conectar com o agente",
-          variant: "destructive",
-        });
-      };
+      // Connect to ElevenLabs directly (same as widget)
+      await voiceWebSocketRef.current.connect();
 
     } catch (error) {
       console.error('Error starting demo call:', error);
       setIsConnecting(false);
       toast({
         title: "Erro",
-        description: "Falha ao iniciar o teste",
+        description: error instanceof Error ? error.message : "Falha ao iniciar o teste",
         variant: "destructive",
       });
     }
   };
 
   const endDemoCall = () => {
-    if (wsRef.current) {
-      wsRef.current.close(1000, 'User ended call');
-      wsRef.current = null;
-    }
-
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
-      streamRef.current = null;
-    }
-
-    if (audioContextRef.current) {
-      audioContextRef.current.close();
-      audioContextRef.current = null;
+    if (voiceWebSocketRef.current) {
+      voiceWebSocketRef.current.disconnect();
+      voiceWebSocketRef.current = null;
     }
 
     setIsConnected(false);
@@ -215,33 +185,31 @@ const Demo = ({ selectedOrganization }: DemoProps) => {
   };
 
   const handleWebSocketMessage = (data: any) => {
+    console.log('📨 Received message:', data.type, data);
+    
     switch (data.type) {
-      case 'audio.delta':
-        setIsAgentSpeaking(true);
-        // Handle incoming audio
+      case 'conversation_initiation_metadata':
+        addTranscriptMessage("system", "Conversa iniciada - pode começar a falar!");
         break;
-      case 'audio.done':
+      case 'user_transcript':
+        if (data.user_transcription_event?.user_transcript) {
+          addTranscriptMessage("user", data.user_transcription_event.user_transcript);
+          setIsSpeaking(false); // User stopped speaking
+        }
+        break;
+      case 'agent_response':
+        if (data.agent_response_event?.agent_response) {
+          addTranscriptMessage("agent", data.agent_response_event.agent_response);
+        }
+        break;
+      case 'audio':
+        setIsAgentSpeaking(true);
+        break;
+      case 'interruption':
         setIsAgentSpeaking(false);
         break;
-      case 'transcript':
-        addTranscriptMessage("agent", data.text);
-        break;
-      case 'user_speech':
-        addTranscriptMessage("user", data.text);
-        break;
-      case 'credit_consumed':
-        setCreditsConsumed(prev => prev + (data.amount || 1));
-        fetchCurrentCredits(); // Refresh current credits
-        break;
-      case 'error':
-        toast({
-          title: "Erro do Agente",
-          description: data.message || "Ocorreu um erro durante a conversa",
-          variant: "destructive",
-        });
-        break;
       default:
-        console.log('Unknown message type:', data.type, data);
+        console.log('📨 Unknown message type:', data.type);
     }
   };
 
@@ -252,8 +220,12 @@ const Demo = ({ selectedOrganization }: DemoProps) => {
   };
 
   const toggleMute = () => {
-    setIsMuted(!isMuted);
-    // In a real implementation, you would mute/unmute the microphone stream
+    const newMutedState = !isMuted;
+    setIsMuted(newMutedState);
+    
+    if (voiceWebSocketRef.current) {
+      voiceWebSocketRef.current.setMuted(newMutedState);
+    }
   };
 
   const getConnectionIcon = () => {
