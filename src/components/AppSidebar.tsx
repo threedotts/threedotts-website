@@ -40,6 +40,7 @@ interface MenuItem {
   url: string;
   icon: any;
   adminOnly?: boolean;
+  key: string; // Database key for visibility settings
 }
 
 const menuItems: MenuItem[] = [
@@ -47,41 +48,49 @@ const menuItems: MenuItem[] = [
     title: "Dashboard", 
     url: "/dashboard", 
     icon: PieChart,
+    key: "home"
   },
   { 
     title: "Demo", 
     url: "/dashboard/demo", 
     icon: TestTube,
+    key: "demo"
   },
   { 
     title: "Agendamento", 
     url: "/dashboard/schedule", 
     icon: Calendar,
+    key: "scheduling"
   },
   { 
     title: "Funcionários", 
     url: "/dashboard/employees", 
     icon: Users,
+    key: "employees"
   },
   { 
     title: "Análises", 
     url: "/dashboard/analytics", 
     icon: TrendingUp,
+    key: "analytics"
   },
   { 
     title: "Mensagens", 
     url: "/dashboard/messages", 
     icon: MessageSquare,
+    key: "messages"
   },
   { 
     title: "Histórico", 
     url: "/dashboard/call-history", 
     icon: PhoneCall,
+    key: "call-history"
   },
   { 
     title: "Configurações", 
     url: "/dashboard/settings", 
     icon: Settings,
+    key: "settings"
   },
 ];
 
