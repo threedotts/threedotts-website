@@ -214,15 +214,13 @@ const Demo = ({
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Teste do Agente IA</h1>
-          <p className="text-muted-foreground mt-1">
-            Teste e valide o seu agente conversacional antes da implementação
-          </p>
+          <p className="text-muted-foreground mt-1">Teste o seu agente antes da implementação</p>
         </div>
       </div>
 
-      <div className="flex justify-start">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Connection Controls */}
-        <Card className="w-full max-w-md">
+        <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Phone className="h-5 w-5" />
@@ -261,6 +259,91 @@ const Demo = ({
                   {isMuted ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
                 </Button>
               </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Volume:</span>
+                  <span className="text-sm text-muted-foreground">{volume[0]}%</span>
+                </div>
+                <Slider value={volume} onValueChange={setVolume} max={100} step={10} disabled={!isConnected} />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Real-time Status */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="h-5 w-5" />
+              Status em Tempo Real
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Você está falando:</span>
+                <Badge variant={isSpeaking ? "default" : "secondary"}>
+                  {isSpeaking ? "Sim" : "Não"}
+                </Badge>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Agente falando:</span>
+                <Badge variant={isAgentSpeaking ? "default" : "secondary"}>
+                  {isAgentSpeaking ? "Sim" : "Não"}
+                </Badge>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Qualidade:</span>
+                <Badge variant={connectionQuality === 'good' ? "default" : connectionQuality === 'poor' ? "outline" : "destructive"}>
+                  {connectionQuality === 'good' ? "Boa" : connectionQuality === 'poor' ? "Instável" : "Sem conexão"}
+                </Badge>
+              </div>
+            </div>
+
+            {isConnected && (isAgentSpeaking || isSpeaking) && <div className="flex justify-center pt-2">
+                <div className="animate-pulse flex space-x-1">
+                  <div className="h-2 w-2 bg-primary rounded-full"></div>
+                  <div className="h-2 w-2 bg-primary rounded-full animation-delay-200"></div>
+                  <div className="h-2 w-2 bg-primary rounded-full animation-delay-400"></div>
+                </div>
+              </div>}
+          </CardContent>
+        </Card>
+
+        {/* Credits Monitor */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Zap className="h-5 w-5" />
+              Monitor de Créditos
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Créditos atuais:</span>
+                <Badge variant={currentCredits && currentCredits > 100 ? "default" : "destructive"}>
+                  {creditsLoading ? "..." : currentCredits || 0}
+                </Badge>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Consumidos no teste:</span>
+                <Badge variant="outline">
+                  {creditsConsumed}
+                </Badge>
+              </div>
+
+              {currentCredits && currentCredits <= 100 && <div className="flex items-start gap-2 p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+                  <AlertTriangle className="h-4 w-4 text-orange-500 mt-0.5" />
+                  <div className="text-sm text-orange-700 dark:text-orange-300">
+                    <p className="font-medium">Créditos baixos</p>
+                    <p>Considere fazer uma recarga</p>
+                  </div>
+                </div>}
             </div>
           </CardContent>
         </Card>
@@ -310,8 +393,8 @@ const Demo = ({
               <h4 className="font-medium mb-2">Durante o teste:</h4>
               <ul className="space-y-1 text-muted-foreground">
                 <li>• Fale claramente e com pausas</li>
-                <li>• Fale para interromper o agente</li>
-                <li>• Conversa de forma natural</li>
+                <li>• Pode falar para interromper o agente, conversa de forma natural</li>
+                <li>• Monitore o consumo de créditos</li>
                 <li>• Observe a qualidade da conexão</li>
               </ul>
             </div>
