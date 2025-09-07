@@ -920,20 +920,13 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
               <div className="flex items-center space-x-3">
                 <div className="w-3 h-3 bg-primary rounded-full animate-pulse"></div>
                 <span className="text-foreground font-medium">Chamadas Ativas</span>
               </div>
               <span className="text-2xl font-bold text-primary">{totalActiveCalls}</span>
-            </div>
-            <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
-              <div className="flex items-center space-x-3">
-                <div className="w-3 h-3 bg-accent rounded-full"></div>
-                <span className="text-foreground font-medium">Fila de Espera</span>
-              </div>
-              <span className="text-2xl font-bold text-accent">12</span>
             </div>
             <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
               <div className="flex items-center space-x-3">
