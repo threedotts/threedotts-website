@@ -220,7 +220,7 @@ const Demo = ({
         </div>
       </div>
 
-      <div className="flex justify-center">
+      <div className="flex justify-start">
         {/* Connection Controls */}
         <Card className="w-full max-w-md">
           <CardHeader>
