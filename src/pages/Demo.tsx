@@ -3,12 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useCreditConsumption } from "@/hooks/useCreditConsumption";
 import { VoiceWebSocket, getAgentConfig } from "@/utils/ElevenLabsDemo";
-import { Phone, Mic, MicOff, Wifi, WifiOff, PlayCircle, StopCircle, Loader2, CheckCircle, Activity } from "lucide-react";
+import { Phone, PhoneOff, Mic, MicOff, Volume2, VolumeX, Wifi, WifiOff, Zap, PlayCircle, StopCircle, Loader2, AlertTriangle, CheckCircle, Activity } from "lucide-react";
 interface DemoProps {
   selectedOrganization?: any;
 }
@@ -23,10 +24,30 @@ const Demo = ({
   const [isAgentSpeaking, setIsAgentSpeaking] = useState(false);
   const [transcript, setTranscript] = useState<string[]>([]);
   const [connectionQuality, setConnectionQuality] = useState<'good' | 'poor' | 'disconnected'>('disconnected');
-  const { toast } = useToast();
-  const { checkCreditBalance, loading: creditsLoading } = useCreditConsumption();
+  const [creditsConsumed, setCreditsConsumed] = useState(0);
+  const [currentCredits, setCurrentCredits] = useState<number | null>(null);
+  const {
+    toast
+  } = useToast();
+  const {
+    checkCreditBalance,
+    loading: creditsLoading
+  } = useCreditConsumption();
   const voiceWebSocketRef = useRef<VoiceWebSocket | null>(null);
   usePageTitle("Demo - Teste do Agente");
+  useEffect(() => {
+    // Fetch current credit balance when component loads
+    if (selectedOrganization?.id) {
+      fetchCurrentCredits();
+    }
+  }, [selectedOrganization?.id]);
+  const fetchCurrentCredits = async () => {
+    if (!selectedOrganization?.id) return;
+    const balance = await checkCreditBalance(selectedOrganization.id);
+    if (balance !== null) {
+      setCurrentCredits(balance);
+    }
+  };
   const requestMicrophonePermission = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -74,6 +95,7 @@ const Demo = ({
     const micGranted = await requestMicrophonePermission();
     if (!micGranted) return;
     setIsConnecting(true);
+    setCreditsConsumed(0);
     try {
       // Get agent config from server (same as widget)
       const {
@@ -131,7 +153,7 @@ const Demo = ({
     addTranscriptMessage("system", "Chamada encerrada");
     toast({
       title: "Chamada Encerrada",
-      description: "Teste concluído"
+      description: `Teste concluído. Créditos utilizados: ${creditsConsumed}`
     });
   };
   const handleWebSocketMessage = (data: any) => {
@@ -156,10 +178,6 @@ const Demo = ({
         break;
       case 'interruption':
         setIsAgentSpeaking(false);
-        break;
-      case 'user_activity':
-        setIsSpeaking(true); // User started speaking
-        setIsAgentSpeaking(false); // Interrupt agent
         break;
       default:
         console.log('📨 Unknown message type:', data.type);
@@ -202,7 +220,7 @@ const Demo = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Connection Controls */}
         <Card>
           <CardHeader>
@@ -294,6 +312,41 @@ const Demo = ({
                   <div className="h-2 w-2 bg-primary rounded-full animation-delay-400"></div>
                 </div>
               </div>}
+          </CardContent>
+        </Card>
+
+        {/* Credits Monitor */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Zap className="h-5 w-5" />
+              Monitor de Créditos
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Créditos atuais:</span>
+                <Badge variant={currentCredits && currentCredits > 100 ? "default" : "destructive"}>
+                  {creditsLoading ? "..." : currentCredits || 0}
+                </Badge>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Consumidos no teste:</span>
+                <Badge variant="outline">
+                  {creditsConsumed}
+                </Badge>
+              </div>
+
+              {currentCredits && currentCredits <= 100 && <div className="flex items-start gap-2 p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+                  <AlertTriangle className="h-4 w-4 text-orange-500 mt-0.5" />
+                  <div className="text-sm text-orange-700 dark:text-orange-300">
+                    <p className="font-medium">• Fale para interromper o agente</p>
+                    <p>• Conversa de forma natural</p>
+                  </div>
+                </div>}
+            </div>
           </CardContent>
         </Card>
       </div>
