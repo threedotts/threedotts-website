@@ -17,7 +17,8 @@ import {
   Star,
   ChevronDown,
   ChevronRight,
-  PhoneCall
+  PhoneCall,
+  TestTube
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -46,6 +47,11 @@ const menuItems: MenuItem[] = [
     title: "Dashboard", 
     url: "/dashboard", 
     icon: PieChart,
+  },
+  { 
+    title: "Demo", 
+    url: "/dashboard/demo", 
+    icon: TestTube,
   },
   { 
     title: "Agendamento", 

@@ -17,6 +17,7 @@ import DashboardHome from "@/components/DashboardHome";
 import Settings from "./Settings";
 import Employees from "./Employees";
 import Billing from "./Billing";
+import Demo from "./Demo";
 
 interface Profile {
   id: string;
@@ -344,6 +345,7 @@ const Dashboard = () => {
           <main className="flex-1 overflow-auto">
             <Routes>
               <Route path="/" element={<DashboardHome key={`home-${reloadKey}`} selectedOrganization={selectedOrg} />} />
+              <Route path="/demo" element={<Demo key={`demo-${reloadKey}`} selectedOrganization={selectedOrg} />} />
               <Route path="/call-history" element={<CallHistory key={`history-${reloadKey}`} selectedOrganization={selectedOrg} />} />
               <Route path="/settings" element={<Settings key={`settings-${reloadKey}`} selectedOrganization={selectedOrg} onOrganizationUpdate={setSelectedOrg} />} />
               <Route path="/employees" element={<Employees key={`employees-${reloadKey}`} selectedOrganization={selectedOrg} />} />
