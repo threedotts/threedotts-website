@@ -8,15 +8,12 @@ export const useGoogleAuthCallback = () => {
   useEffect(() => {
     const handleGoogleAuthCallback = async () => {
       const pendingOrgName = localStorage.getItem('pending_organization_name');
-      console.log('Google auth callback - pendingOrgName:', pendingOrgName);
       
       // Always try to create organization for Google OAuth users, even without localStorage
       const orgName = pendingOrgName || 'Minha Empresa';
-      console.log('Using organization name:', orgName);
       try {
         // Get current session
         const { data: { session } } = await supabase.auth.getSession();
-        console.log('Session found:', !!session?.user);
         
         if (session?.user) {
           // Check if this is a new user (user was just created)
@@ -26,18 +23,13 @@ export const useGoogleAuthCallback = () => {
             .eq('user_id', session.user.id)
             .single();
 
-          console.log('Profile found:', !!profile);
-
           // If user exists but doesn't have an organization yet
           const { data: organizations } = await supabase
             .from('organizations')
             .select('*')
             .eq('user_id', session.user.id);
 
-          console.log('Organizations found:', organizations?.length || 0);
-
           if (profile && (!organizations || organizations.length === 0)) {
-            console.log('Creating organization with name:', orgName);
             
             // Create organization for Google OAuth user
             const { data: newOrg, error: orgError } = await supabase
@@ -51,7 +43,6 @@ export const useGoogleAuthCallback = () => {
               .single();
 
               if (orgError) {
-                console.error('Error creating organization:', orgError);
                 toast({
                   title: "Erro ao criar organização",
                   description: "Falha ao criar a organização. Tente novamente.",
@@ -73,7 +64,7 @@ export const useGoogleAuthCallback = () => {
                 });
 
               if (memberError) {
-                console.error('Error adding organization member:', memberError);
+                // Error handled silently
               }
 
               toast({
@@ -87,7 +78,6 @@ export const useGoogleAuthCallback = () => {
             localStorage.removeItem('pending_organization_name');
           }
         } catch (error) {
-          console.error('Error in Google auth callback:', error);
           localStorage.removeItem('pending_organization_name');
         }
     };

@@ -107,10 +107,8 @@ const Dashboard = () => {
         .maybeSingle();
 
       if (error) {
-        console.error("Error fetching profile:", error);
         // If profile doesn't exist, sign out user
         if (error.code === 'PGRST116' || error.message.includes('No rows found')) {
-          console.log("Profile not found, signing out user");
           await supabase.auth.signOut();
           return;
         }
@@ -124,14 +122,12 @@ const Dashboard = () => {
 
       // If no profile data found, sign out user
       if (!data) {
-        console.log("No profile data found, signing out user");
         await supabase.auth.signOut();
         return;
       }
 
       setProfile(data);
     } catch (error) {
-      console.error("Error fetching profile:", error);
       // On any error, sign out to avoid getting stuck
       await supabase.auth.signOut();
     }
@@ -149,11 +145,10 @@ const Dashboard = () => {
         .order("created_at", { ascending: false });
 
       if (ownedError) {
-        console.error("Error fetching owned organizations:", ownedError);
+        // Error handled silently
       }
 
       // Fetch organizations where user is a member
-      console.log("Fetching organizations for user:", user.id);
       const { data: memberOrgs, error: memberError } = await supabase
         .from("organization_members")
         .select(`
@@ -172,10 +167,8 @@ const Dashboard = () => {
         .eq("user_id", user.id)
         .eq("status", "active");
       
-      console.log("Member organizations result:", { memberOrgs, memberError });
-
       if (memberError) {
-        console.error("Error fetching member organizations:", memberError);
+        // Error handled silently
       }
 
       // Combine both lists and remove duplicates
@@ -250,7 +243,7 @@ const Dashboard = () => {
         localStorage.setItem("selectedOrganizationId", allOrgs[0].id);
       }
     } catch (error) {
-      console.error("Error fetching organizations:", error);
+      // Error handled silently
     } finally {
       setLoading(false);
     }
