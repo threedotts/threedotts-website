@@ -339,11 +339,9 @@ export class ElevenLabsWebSocket {
       default:
         // Unhandled message type
     }
-    }
   }
 
   private handleClientToolCall(toolCall: any) {
-    
     try {
       let result = '';
       
@@ -369,7 +367,6 @@ export class ElevenLabsWebSocket {
           result = `Tool ${toolCall.tool_name} executed successfully`;
           // Unknown tool, but acknowledged
       }
-      }
       
       this.send({
         type: "client_tool_response",
@@ -377,10 +374,7 @@ export class ElevenLabsWebSocket {
         result: result
       });
       
-      console.log('✅ Client tool response sent:', result);
     } catch (error) {
-      console.error('❌ Error executing client tool:', error);
-      
       this.send({
         type: "client_tool_response",
         tool_call_id: toolCall.tool_call_id,
@@ -391,10 +385,9 @@ export class ElevenLabsWebSocket {
 
   private send(message: any) {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      console.log('📤 Sending:', message.type);
       this.ws.send(JSON.stringify(message));
     } else {
-      console.warn('⚠️ WebSocket not ready, cannot send:', message.type);
+      // WebSocket not ready, cannot send message
     }
   }
 
@@ -421,7 +414,6 @@ export class ElevenLabsWebSocket {
       this.send({
         type: "user_activity"
       });
-      console.log('📢 Sent user_activity event to interrupt agent');
       
       await this.audioRecorder.start();
     }
@@ -442,7 +434,6 @@ export class ElevenLabsWebSocket {
   }
 
   disconnect() {
-    console.log('🔌 Disconnecting...');
     
     if (this.audioRecorder) {
       this.audioRecorder.stop();
@@ -478,7 +469,6 @@ export class ElevenLabsWebSocket {
       this.send({
         type: "user_activity"
       });
-      console.log('📢 Sent user_activity event on unmute');
     }
   }
 
