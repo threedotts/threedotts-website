@@ -41,7 +41,7 @@ export function CreditsMeter({ organizationId, isCollapsed }: CreditsMeterProps)
           });
         }
       } catch (error) {
-        console.error('Error fetching credit data:', error);
+        // Error handled silently
       }
     };
 
@@ -60,7 +60,6 @@ export function CreditsMeter({ organizationId, isCollapsed }: CreditsMeterProps)
             filter: `organization_id=eq.${organizationId}`
           },
           (payload) => {
-            console.log('Credit data changed:', payload);
             fetchCreditData(); // Refetch data when changes occur
           }
         )

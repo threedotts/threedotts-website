@@ -18,7 +18,6 @@ export function AudioPlayer({ audioUrl }: AudioPlayerProps) {
       try {
         setLoading(true);
         setError(null);
-        console.log('Fetching audio blob from:', audioUrl);
 
         const response = await fetch(audioUrl);
         
@@ -27,15 +26,12 @@ export function AudioPlayer({ audioUrl }: AudioPlayerProps) {
         }
 
         const blob = await response.blob();
-        console.log('Audio blob fetched successfully, size:', blob.size, 'type:', blob.type);
         
         if (mounted) {
           objectUrl = URL.createObjectURL(blob);
           setBlobUrl(objectUrl);
-          console.log('Object URL created:', objectUrl);
         }
       } catch (err) {
-        console.error('Error fetching audio blob:', err);
         if (mounted) {
           setError(err instanceof Error ? err.message : 'Failed to load audio');
         }
@@ -93,18 +89,6 @@ export function AudioPlayer({ audioUrl }: AudioPlayerProps) {
         className="w-full"
         preload="auto"
         src={blobUrl || undefined}
-        onLoadedMetadata={() => {
-          console.log('Audio metadata loaded successfully');
-          if (audioRef.current) {
-            console.log('Audio duration:', audioRef.current.duration);
-          }
-        }}
-        onError={(e) => {
-          console.error('Audio playback error:', e);
-          const target = e.target as HTMLAudioElement;
-          console.log('Audio error code:', target.error?.code);
-          console.log('Audio error message:', target.error?.message);
-        }}
       >
         Your browser does not support the audio element.
       </audio>

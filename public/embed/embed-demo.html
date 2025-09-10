@@ -133,14 +133,13 @@
     <script>
       // Configure the widget with working agent ID
       window.addEventListener('load', function() {
-        console.log('🔧 Configuring ThreeDotts widget...');
         if (window.threedottsWidget) {
           window.threedottsWidget.configure({
             agentId: 'agent_01k02ete3tfjgrq97y8a7v541y'
           });
-          console.log('✅ Widget configured successfully');
+          // Widget configured successfully
         } else {
-          console.error('❌ ThreeDotts widget not found');
+          // ThreeDotts widget not found
         }
       });
     </script>

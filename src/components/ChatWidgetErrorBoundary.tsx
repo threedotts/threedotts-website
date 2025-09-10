@@ -20,7 +20,7 @@ export class ChatWidgetErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('[SECURITY] Chat widget error:', error, errorInfo);
+    // Chat widget error handled silently
   }
 
   render() {

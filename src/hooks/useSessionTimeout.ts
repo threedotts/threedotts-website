@@ -32,7 +32,6 @@ export const useSessionTimeout = (isAuthenticated: boolean = false) => {
 
     // Set logout timer
     timeoutRef.current = setTimeout(async () => {
-      console.log('[SECURITY] Session timeout - logging out user at:', new Date().toISOString());
       await supabase.auth.signOut();
       toast({
         title: "Sessão expirada",

@@ -8,17 +8,14 @@ const ThreeDotsEmbeddedConvai: React.FC<ThreeDotsEmbeddedConvaiProps> = ({
   className = ''
 }) => {
   useEffect(() => {
-    console.log('🔧 Loading embedded widget script...');
     
     // Check if script is already loaded
     const existingScript = document.querySelector('script[src*="widget-script"]');
     if (existingScript) {
-      console.log('⚠️ Widget script already exists, reinitializing widget...');
       
       // If script exists but widget isn't working, reinitialize it
       setTimeout(() => {
         if ((window as any).threedottsWidget) {
-          console.log('🔄 Reinitializing existing widget...');
           
           // Force recreate the widget UI
           const existingWidget = document.getElementById('threedotts-widget');
@@ -39,16 +36,14 @@ const ThreeDotsEmbeddedConvai: React.FC<ThreeDotsEmbeddedConvaiProps> = ({
     const script = document.createElement('script');
     script.src = 'https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?organizationId=1e926240-b303-444b-9f8c-57abd9fa657b&v=60';
     script.onerror = (error) => {
-      console.error('❌ Failed to load widget script:', error);
+      // Error handled silently
     };
     
     script.onload = () => {
-      console.log('✅ Widget script loaded successfully');
       
     (window as any).redirectToExternalURL = (parameters: { url: string }) => {
       const url = parameters?.url;
       if (url) {
-        console.log('🔗 Redirecting to:', url);
         // Perform the actual redirect
         if (url.startsWith('http')) {
           window.open(url, '_blank');
@@ -65,7 +60,6 @@ const ThreeDotsEmbeddedConvai: React.FC<ThreeDotsEmbeddedConvaiProps> = ({
     // LAYER 3: Server tool for credit checking during conversation
     (window as any).checkCredits = async (parameters: { organization_id: string }) => {
       const orgId = parameters?.organization_id || '${organizationId}';
-      console.log('🔍 Server tool: Checking credits for organization:', orgId);
       
       try {
         const response = await fetch('https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/credit-validator', {
@@ -89,7 +83,6 @@ const ThreeDotsEmbeddedConvai: React.FC<ThreeDotsEmbeddedConvaiProps> = ({
         
         return `Credits available: ${data.current_credits}. Conversation can continue.`;
       } catch (error) {
-        console.error('Credit check failed:', error);
         return `Credit check failed: ${error.message}`;
       }
     };
@@ -98,7 +91,6 @@ const ThreeDotsEmbeddedConvai: React.FC<ThreeDotsEmbeddedConvaiProps> = ({
       setTimeout(async () => {
         if ((window as any).threedottsWidget) {
           // LAYER 4: Pre-configure credit validation
-          console.log('🔍 Validating credits before widget configuration...');
           
           try {
             const creditResponse = await fetch('https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/credit-validator', {
@@ -115,7 +107,6 @@ const ThreeDotsEmbeddedConvai: React.FC<ThreeDotsEmbeddedConvaiProps> = ({
             const creditData = await creditResponse.json();
             
             if (creditData.blocked) {
-              console.log('❌ Credits validation failed:', creditData.reason);
               
               // Show no credits message in widget
               (window as any).threedottsWidget.showError({
@@ -126,15 +117,12 @@ const ThreeDotsEmbeddedConvai: React.FC<ThreeDotsEmbeddedConvaiProps> = ({
               return;
             }
             
-            console.log('✅ Credits validated, configuring widget...');
             (window as any).threedottsWidget.configure({
               organizationId: '1e926240-b303-444b-9f8c-57abd9fa657b',
               creditsValidated: true,
               currentCredits: creditData.current_credits
             });
-            console.log('✅ Widget configured with organizationId and credit validation!');
           } catch (error) {
-            console.error('❌ Credit validation failed:', error);
             (window as any).threedottsWidget.showError({
               title: 'Validation Error',
               message: 'Unable to validate credits. Please try again.',
@@ -142,7 +130,7 @@ const ThreeDotsEmbeddedConvai: React.FC<ThreeDotsEmbeddedConvaiProps> = ({
             });
           }
         } else {
-          console.error('❌ Widget not found after loading script');
+          // Widget not found after loading script
         }
       }, 100);
     };

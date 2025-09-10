@@ -137,7 +137,6 @@ export function AppSidebar({ user, profile, selectedOrganization }: AppSidebarPr
           .maybeSingle();
 
         if (memberError) {
-          console.error('Error fetching user role:', memberError);
           return;
         }
 
@@ -146,7 +145,7 @@ export function AppSidebar({ user, profile, selectedOrganization }: AppSidebarPr
           setOrganizationId(memberRole.organization_id);
         }
       } catch (error) {
-        console.error('Error:', error);
+        // Error handled silently
       }
     };
 
@@ -169,7 +168,6 @@ export function AppSidebar({ user, profile, selectedOrganization }: AppSidebarPr
           .maybeSingle();
 
         if (error) {
-          console.error('Error fetching menu settings:', error);
           return;
         }
 
@@ -195,14 +193,12 @@ export function AppSidebar({ user, profile, selectedOrganization }: AppSidebarPr
               menu_settings: defaultSettings
             });
 
-          if (insertError) {
-            console.error('Error creating default menu settings:', insertError);
-          } else {
+          if (!insertError) {
             setMenuSettings(defaultSettings);
           }
         }
       } catch (error) {
-        console.error('Error:', error);
+        // Error handled silently
       }
     };
 

@@ -53,12 +53,7 @@ const App = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setIsAuthenticated(!!session);
       
-      // Log security events
-      if (event === 'SIGNED_IN') {
-        console.log('[SECURITY] User signed in at:', new Date().toISOString());
-      } else if (event === 'SIGNED_OUT') {
-        console.log('[SECURITY] User signed out at:', new Date().toISOString());
-      }
+      // Log security events (logging disabled)
     });
 
     return () => subscription.unsubscribe();

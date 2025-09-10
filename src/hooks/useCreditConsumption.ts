@@ -30,7 +30,6 @@ export const useCreditConsumption = () => {
       });
 
       if (error) {
-        console.error('Error consuming credits:', error);
         toast({
           title: "Erro",
           description: "Falha ao consumir créditos",
@@ -50,7 +49,6 @@ export const useCreditConsumption = () => {
 
       return true;
     } catch (error) {
-      console.error('Error consuming credits:', error);
       toast({
         title: "Erro",
         description: "Erro inesperado ao consumir créditos",
@@ -71,13 +69,11 @@ export const useCreditConsumption = () => {
         .maybeSingle();
 
       if (error) {
-        console.error('Error checking credit balance:', error);
         return null;
       }
 
       return data?.current_credits || 0;
     } catch (error) {
-      console.error('Error checking credit balance:', error);
       return null;
     }
   };

@@ -32,7 +32,6 @@ export const useConversationPolling = ({
 
   const fetchConversations = useCallback(async () => {
     if (!sortedAgentIds.length) {
-      console.log('No agent IDs found for organization:', selectedOrganization?.id);
       setActiveCallsByAgent({});
       return;
     }
@@ -40,7 +39,6 @@ export const useConversationPolling = ({
     setIsLoading(true);
 
     try {
-      console.log('Fetching conversations for agents:', sortedAgentIds);
       
       // Calculate timestamp for 12 hours ago in seconds
       const twelveHoursAgo = Math.floor((Date.now() - (12 * 60 * 60 * 1000)) / 1000);
@@ -53,22 +51,18 @@ export const useConversationPolling = ({
       });
 
       if (error) {
-        console.error('Error calling fetch-conversations function:', error);
         setIsLoading(false);
         return;
       }
 
-      console.log('Conversation polling results:', data);
-      
       // Aggregate active calls by agent
       const activeCalls: ActiveCallsByAgent = {};
 
       // Log each agent's conversations separately for better visibility
       data.results?.forEach((result: any) => {
         if (result.error) {
-          console.error(`Error for agent ${result.agentId}:`, result.error);
+          // Error handled silently
         } else {
-          console.log(`Conversations for agent ${result.agentId}:`, result.data);
           
           const conversations = result.data?.conversations;
           
@@ -89,11 +83,9 @@ export const useConversationPolling = ({
             allAgentNames.forEach((agentName: string) => {
               const count = inProgressByAgent[agentName] || 0;
               activeCalls[agentName] = count;
-              console.log(`${agentName}: ${count}`);
             });
           } else {
             // If no conversations or invalid data, we can't determine agent name
-            console.log(`No conversation data for agent ${result.agentId}`);
           }
         }
       });
@@ -101,7 +93,7 @@ export const useConversationPolling = ({
       setActiveCallsByAgent(activeCalls);
 
     } catch (error) {
-      console.error('Error fetching conversations:', error);
+      // Error handled silently
     }
 
     setIsLoading(false);
@@ -112,12 +104,6 @@ export const useConversationPolling = ({
     const handleVisibilityChange = () => {
       const isVisible = !document.hidden;
       setIsPageVisible(isVisible);
-      
-      if (isVisible) {
-        console.log('Page became visible - resuming polling');
-      } else {
-        console.log('Page became hidden - pausing polling');
-      }
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -138,14 +124,12 @@ export const useConversationPolling = ({
     }
 
     if (!enabled || !sortedAgentIds.length) {
-      console.log('Conversation polling disabled:', { enabled, agentCount: sortedAgentIds.length });
       // Clear active calls when disabled
       setActiveCallsByAgent({});
       return;
     }
 
     const orgId = selectedOrganization?.id;
-    console.log(`Setting up conversation polling for org ${orgId} with agents:`, sortedAgentIds);
 
     // Initial fetch
     fetchConversations();
@@ -153,10 +137,9 @@ export const useConversationPolling = ({
     // Set up polling every 45 seconds (only when page is visible)
     intervalRef.current = setInterval(() => {
       if (!document.hidden) {
-        console.log(`Polling conversations for org ${orgId}`);
         fetchConversations();
       } else {
-        console.log(`Skipping poll - page not visible for org ${orgId}`);
+        // Skip poll when page not visible
       }
     }, 45000);
 
@@ -165,7 +148,6 @@ export const useConversationPolling = ({
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
-        console.log('Stopped conversation polling for organization:', orgId);
       }
     };
   }, [enabled, selectedOrganization?.id, sortedAgentIds]);

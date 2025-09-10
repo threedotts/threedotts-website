@@ -202,7 +202,6 @@ export function ContactSection() {
       });
 
       if (error) {
-        console.error('Supabase function error:', error);
         toast({
           title: "Erro ao enviar mensagem",
           description: error.message || "Erro interno do servidor.",
@@ -225,7 +224,6 @@ export function ContactSection() {
       });
 
     } catch (error: any) {
-      console.error('Contact form error:', error);
       toast({
         title: "Erro ao enviar mensagem",
         description: error.message || "Tente novamente mais tarde.",

@@ -49,7 +49,7 @@ export const useSecurityMonitor = (identifier: string) => {
           });
         }
       } catch (error) {
-        console.error('[SECURITY] Error parsing stored security data:', error);
+        // Error handled silently
       }
     }
   }, [storageKey]);
@@ -94,11 +94,10 @@ export const useSecurityMonitor = (identifier: string) => {
       lastFailedAttempt: now.toISOString(),
     }));
 
-    // Log security event
-    console.log(`[SECURITY] Failed login attempt ${newFailedAttempts}/${MAX_FAILED_ATTEMPTS} for ${identifier} at:`, now.toISOString());
+    // Log security event silently
     
     if (newSecurity.isLocked) {
-      console.log(`[SECURITY] Account locked for ${identifier} until:`, new Date(Date.now() + LOCKOUT_DURATION).toISOString());
+      // Security logging disabled
     }
   };
 
@@ -110,7 +109,7 @@ export const useSecurityMonitor = (identifier: string) => {
       lastFailedAttempt: null,
     });
     localStorage.removeItem(storageKey);
-    console.log(`[SECURITY] Successful login for ${identifier} at:`, new Date().toISOString());
+    // Successful login recorded
   };
 
   const formatTimeRemaining = (): string => {

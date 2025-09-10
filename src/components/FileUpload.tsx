@@ -66,7 +66,6 @@ export default function FileUpload({
           .upload(filePath, file);
 
         if (uploadError) {
-          console.error('Erro no upload:', uploadError);
           toast({
             title: "Erro no upload",
             description: `Falha ao fazer upload de ${file.name}`,
@@ -93,7 +92,6 @@ export default function FileUpload({
       });
 
     } catch (error) {
-      console.error('Erro no upload:', error);
       toast({
         title: "Erro no upload",
         description: "Ocorreu um erro ao fazer upload dos ficheiros.",

@@ -59,7 +59,6 @@ export function Footer() {
       toast.success("Email subscrito com sucesso!");
       setEmail("");
     } catch (error) {
-      console.error('Erro ao subscrever newsletter:', error);
       toast.error("Erro ao subscrever newsletter. Tente novamente.");
     } finally {
       setIsLoading(false);

@@ -203,27 +203,27 @@
       state.websocket.onopen = function() {
         state.isConnected = true;
         updateUI();
-        console.log('ThreeDotts widget connected');
+        // ThreeDotts widget connected
       };
 
       state.websocket.onclose = function() {
         state.isConnected = false;
         updateUI();
-        console.log('ThreeDotts widget disconnected');
+        // ThreeDotts widget disconnected
       };
 
       state.websocket.onerror = function(error) {
-        console.error('ThreeDotts widget error:', error);
+        // ThreeDotts widget error handled silently
         state.isConnected = false;
         updateUI();
       };
 
       state.websocket.onmessage = function(event) {
         // Handle incoming messages
-        console.log('ThreeDotts widget message:', event.data);
+        // ThreeDotts widget message processed
       };
     } catch (error) {
-      console.error('Failed to connect ThreeDotts widget:', error);
+      // Failed to connect ThreeDotts widget
     }
   }
 

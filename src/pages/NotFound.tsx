@@ -8,10 +8,7 @@ const NotFound = () => {
   usePageTitle("Página não encontrada");
 
   useEffect(() => {
-    console.error(
-      "404 Error: User attempted to access non-existent route:",
-      location.pathname
-    );
+    // User attempting to access non-existent route
   }, [location.pathname]);
 
   return (

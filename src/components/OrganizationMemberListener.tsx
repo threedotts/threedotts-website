@@ -16,7 +16,6 @@ export const OrganizationMemberListener = ({ children }: OrganizationMemberListe
   };
 
   const handleRefresh = () => {
-    console.log('User confirmed page refresh');
     window.location.reload();
   };
 
