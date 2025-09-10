@@ -384,6 +384,39 @@ export type Database = {
         }
         Relationships: []
       }
+      financial_data_access_log: {
+        Row: {
+          access_type: string
+          accessed_by: string
+          created_at: string
+          data_accessed: Json | null
+          id: string
+          organization_id: string
+          table_name: string
+          user_id: string | null
+        }
+        Insert: {
+          access_type: string
+          accessed_by: string
+          created_at?: string
+          data_accessed?: Json | null
+          id?: string
+          organization_id: string
+          table_name: string
+          user_id?: string | null
+        }
+        Update: {
+          access_type?: string
+          accessed_by?: string
+          created_at?: string
+          data_accessed?: Json | null
+          id?: string
+          organization_id?: string
+          table_name?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       low_credit_alert_queue: {
         Row: {
           alert_type: string | null
