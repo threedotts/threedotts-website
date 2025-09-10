@@ -261,18 +261,23 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
           )
         : null;
 
-      // Calculate average time between calls
+      // Calculate average time between calls (general, not per customer)
       let totalTimeBetween = 0;
       let callIntervals = 0;
-      Object.values(customerCalls).forEach(dates => {
-        if (dates.length > 1) {
-          dates.sort((a, b) => a.getTime() - b.getTime());
-          for (let i = 1; i < dates.length; i++) {
-            totalTimeBetween += dates[i].getTime() - dates[i-1].getTime();
-            callIntervals++;
-          }
+      
+      if (currentCalls && currentCalls.length > 1) {
+        // Get all call dates and sort them
+        const allCallDates = currentCalls
+          .map(call => new Date(call.created_at))
+          .sort((a, b) => a.getTime() - b.getTime());
+        
+        // Calculate intervals between consecutive calls
+        for (let i = 1; i < allCallDates.length; i++) {
+          totalTimeBetween += allCallDates[i].getTime() - allCallDates[i-1].getTime();
+          callIntervals++;
         }
-      });
+      }
+      
       const avgTimeBetweenCallsHours = callIntervals > 0 ? Math.round(totalTimeBetween / callIntervals / (1000 * 60 * 60)) : 0;
 
 
