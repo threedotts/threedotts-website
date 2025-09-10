@@ -546,6 +546,7 @@ export type Database = {
           invitation_token: string
           invited_by: string
           organization_id: string
+          organization_name: string | null
           role: Database["public"]["Enums"]["organization_role"]
           updated_at: string
         }
@@ -558,6 +559,7 @@ export type Database = {
           invitation_token?: string
           invited_by: string
           organization_id: string
+          organization_name?: string | null
           role?: Database["public"]["Enums"]["organization_role"]
           updated_at?: string
         }
@@ -570,6 +572,7 @@ export type Database = {
           invitation_token?: string
           invited_by?: string
           organization_id?: string
+          organization_name?: string | null
           role?: Database["public"]["Enums"]["organization_role"]
           updated_at?: string
         }
