@@ -158,17 +158,8 @@ const ThreeDotsEmbeddedConvai: React.FC<ThreeDotsEmbeddedConvaiProps> = ({
     };
   }, []);
 
-  // Return empty div with isolation styles to prevent CSS interference
-  return (
-    <div 
-      className={className} 
-      style={{ 
-        position: 'relative',
-        zIndex: 0,
-        isolation: 'isolate'
-      }} 
-    />
-  );
+  // Return empty div since the script will handle the UI
+  return <div className={className} />;
 };
 
 export default ThreeDotsEmbeddedConvai;

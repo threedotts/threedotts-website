@@ -31,88 +31,24 @@
 
     const styles = `
       .threedotts-widget {
-        /* Complete isolation from page layout */
-        all: initial !important;
-        position: fixed !important;
-        bottom: 24px !important;
-        right: 24px !important;
-        z-index: 999999 !important;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        border: none !important;
-        outline: none !important;
-        background: transparent !important;
-        box-sizing: border-box !important;
-        pointer-events: auto !important;
-        transform: none !important;
-        width: auto !important;
-        height: auto !important;
-        max-width: none !important;
-        max-height: none !important;
-        min-width: 0 !important;
-        min-height: 0 !important;
-        overflow: visible !important;
-        clip: none !important;
-        clip-path: none !important;
-        display: block !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        filter: none !important;
-        backdrop-filter: none !important;
-        isolation: isolate !important;
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        z-index: 9999;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       }
       
       .threedotts-widget-container {
-        /* Reset all inherited styles */
-        all: unset !important;
-        /* Apply only our specific styles */
-        background: rgba(255, 255, 255, 0.95) !important;
-        backdrop-filter: blur(12px) !important;
-        border: 1px solid rgba(0, 0, 0, 0.1) !important;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-        border-radius: 50px !important;
-        padding: 8px 16px 8px 8px !important;
-        display: flex !important;
-        align-items: center !important;
-        gap: 12px !important;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        /* Additional isolation */
-        position: relative !important;
-        box-sizing: border-box !important;
-        margin: 0 !important;
-        width: auto !important;
-        height: auto !important;
-        min-width: 0 !important;
-        min-height: 0 !important;
-        max-width: none !important;
-        max-height: none !important;
-        overflow: visible !important;
-        text-align: left !important;
-        direction: ltr !important;
-        unicode-bidi: normal !important;
-        writing-mode: horizontal-tb !important;
-        font-size: 14px !important;
-        line-height: 1.4 !important;
-        letter-spacing: normal !important;
-        word-spacing: normal !important;
-        text-transform: none !important;
-        text-indent: 0 !important;
-        text-shadow: none !important;
-        white-space: normal !important;
-        word-wrap: normal !important;
-        word-break: normal !important;
-        hyphens: none !important;
-        vertical-align: baseline !important;
-        color: inherit !important;
-        font-weight: normal !important;
-        font-style: normal !important;
-        font-variant: normal !important;
-        text-decoration: none !important;
-        list-style: none !important;
-        quotes: none !important;
-        counter-reset: none !important;
-        counter-increment: none !important;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        border-radius: 50px;
+        padding: 8px 16px 8px 8px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       }
       
       .threedotts-widget-container.connected {
@@ -121,18 +57,14 @@
       }
       
       .threedotts-widget-avatar {
-        all: unset !important;
-        width: 40px !important;
-        height: 40px !important;
-        border-radius: 50% !important;
-        background: rgba(0, 0, 0, 0.1) !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        overflow: hidden !important;
-        box-sizing: border-box !important;
-        flex-shrink: 0 !important;
-        position: relative !important;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
       }
       
       .threedotts-widget-avatar svg {
@@ -142,28 +74,17 @@
       }
       
       .threedotts-widget-button {
-        all: unset !important;
-        border: none !important;
-        border-radius: 50% !important;
-        width: 32px !important;
-        height: 32px !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        cursor: pointer !important;
-        transition: all 0.2s ease !important;
-        font-size: 14px !important;
-        font-weight: 500 !important;
-        box-sizing: border-box !important;
-        position: relative !important;
-        flex-shrink: 0 !important;
-        outline: none !important;
-        user-select: none !important;
-        -webkit-user-select: none !important;
-        -moz-user-select: none !important;
-        -ms-user-select: none !important;
-        touch-action: manipulation !important;
-        -webkit-tap-highlight-color: transparent !important;
+        border: none;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 14px;
+        font-weight: 500;
       }
       
       .threedotts-widget-button:hover {
@@ -172,20 +93,13 @@
       }
       
       .threedotts-widget-call-btn {
-        background: linear-gradient(135deg, #3b82f6, #8b5cf6) !important;
-        color: white !important;
-        padding: 8px 16px !important;
-        border-radius: 50px !important;
-        width: auto !important;
-        height: auto !important;
-        gap: 4px !important;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-        font-size: 14px !important;
-        font-weight: 500 !important;
-        text-decoration: none !important;
-        text-transform: none !important;
-        letter-spacing: normal !important;
-        word-spacing: normal !important;
+        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 50px;
+        width: auto;
+        height: auto;
+        gap: 4px;
       }
       
       .threedotts-widget-end-btn {
@@ -204,24 +118,16 @@
       }
       
       .threedotts-widget-controls {
-        all: unset !important;
-        display: flex !important;
-        gap: 8px !important;
-        animation: scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
-        align-items: center !important;
-        justify-content: center !important;
-        flex-shrink: 0 !important;
+        display: flex;
+        gap: 8px;
+        animation: scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
       }
       
       .threedotts-widget-powered {
-        all: unset !important;
-        font-size: 10px !important;
-        color: rgba(0, 0, 0, 0.5) !important;
-        text-align: right !important;
-        margin-top: 8px !important;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-        display: block !important;
-        line-height: 1.2 !important;
+        font-size: 10px;
+        color: rgba(0, 0, 0, 0.5);
+        text-align: right;
+        margin-top: 8px;
       }
       
       @keyframes scaleIn {
