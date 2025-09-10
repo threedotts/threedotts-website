@@ -204,6 +204,27 @@ export default function CallHistory({ selectedOrganization }: CallHistoryProps) 
   const endIndex = startIndex + itemsPerPage;
   const currentPageCalls = filteredCalls.slice(startIndex, endIndex);
 
+  // Calculate page numbers to show (maximum 5)
+  const getVisiblePages = () => {
+    const maxVisible = 5;
+    if (totalPages <= maxVisible) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+
+    const half = Math.floor(maxVisible / 2);
+    let start = Math.max(1, currentPage - half);
+    let end = Math.min(totalPages, start + maxVisible - 1);
+
+    // Adjust start if we're near the end
+    if (end - start + 1 < maxVisible) {
+      start = Math.max(1, end - maxVisible + 1);
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  };
+
+  const visiblePages = getVisiblePages();
+
   // Reset to first page when filters change
   useMemo(() => {
     setCurrentPage(1);
@@ -481,7 +502,31 @@ export default function CallHistory({ selectedOrganization }: CallHistoryProps) 
                 />
               </PaginationItem>
               
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              {/* Show first page if not in visible range */}
+              {visiblePages[0] > 1 && (
+                <>
+                  <PaginationItem>
+                    <PaginationLink
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setCurrentPage(1);
+                      }}
+                      isActive={false}
+                    >
+                      1
+                    </PaginationLink>
+                  </PaginationItem>
+                  {visiblePages[0] > 2 && (
+                    <PaginationItem>
+                      <PaginationEllipsis />
+                    </PaginationItem>
+                  )}
+                </>
+              )}
+
+              {/* Show visible pages */}
+              {visiblePages.map((page) => (
                 <PaginationItem key={page}>
                   <PaginationLink
                     href="#"
@@ -495,6 +540,29 @@ export default function CallHistory({ selectedOrganization }: CallHistoryProps) 
                   </PaginationLink>
                 </PaginationItem>
               ))}
+
+              {/* Show last page if not in visible range */}
+              {visiblePages[visiblePages.length - 1] < totalPages && (
+                <>
+                  {visiblePages[visiblePages.length - 1] < totalPages - 1 && (
+                    <PaginationItem>
+                      <PaginationEllipsis />
+                    </PaginationItem>
+                  )}
+                  <PaginationItem>
+                    <PaginationLink
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setCurrentPage(totalPages);
+                      }}
+                      isActive={false}
+                    >
+                      {totalPages}
+                    </PaginationLink>
+                  </PaginationItem>
+                </>
+              )}
               
               <PaginationItem>
                 <PaginationNext 
