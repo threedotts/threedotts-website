@@ -131,10 +131,10 @@ export default {
 				},
 				'shimmer': {
 					'0%': {
-						backgroundPosition: '-1000px 0'
+						transform: 'translateX(-100%)'
 					},
 					'100%': {
-						backgroundPosition: '1000px 0'
+						transform: 'translateX(100%)'
 					}
 				}
 			},
@@ -144,7 +144,7 @@ export default {
 				'fade-in': 'fade-in 0.6s ease-out',
 				'scale-in': 'scale-in 0.4s ease-out',
 				'float': 'float 6s ease-in-out infinite',
-				'shimmer': 'shimmer 2s infinite linear'
+				'shimmer': 'shimmer 1.5s infinite ease-in-out'
 			}
 		}
 	},

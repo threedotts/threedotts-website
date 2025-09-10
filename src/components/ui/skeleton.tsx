@@ -19,7 +19,7 @@ function ShimmerSkeleton({
   return (
     <div
       className={cn(
-        "animate-shimmer rounded-md bg-gradient-to-r from-muted via-muted/50 to-muted bg-[length:1000px_100%]",
+        "relative overflow-hidden rounded-md bg-muted before:absolute before:inset-0 before:-translate-x-full before:animate-shimmer before:bg-gradient-to-r before:from-transparent before:via-background/60 before:to-transparent",
         className
       )}
       {...props}
