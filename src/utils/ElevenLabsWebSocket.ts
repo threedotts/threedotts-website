@@ -12,7 +12,6 @@ export class AudioRecorder {
     if (this.isRecording) return;
 
     try {
-      console.log('Starting audio recording...');
       
       this.stream = await navigator.mediaDevices.getUserMedia({
         audio: {
@@ -53,15 +52,13 @@ export class AudioRecorder {
       this.processor.connect(this.audioContext.destination);
       this.isRecording = true;
       
-      console.log('Audio recording started successfully');
+      // Audio recording started successfully
     } catch (error) {
-      console.error('Error starting audio recording:', error);
       throw error;
     }
   }
 
   stop() {
-    console.log('Stopping audio recording...');
     this.isRecording = false;
     
     if (this.source) {
@@ -88,7 +85,6 @@ export class AudioRecorder {
 
   setMuted(muted: boolean) {
     this.isMuted = muted;
-    console.log(muted ? '🔇 Microphone muted' : '🎤 Microphone unmuted');
     if (this.onMuteChange) {
       this.onMuteChange(muted);
     }
@@ -143,7 +139,6 @@ export class AudioPlayer {
       source.onended = () => this.playNext();
       source.start(0);
     } catch (error) {
-      console.error('Error playing audio:', error);
       this.playNext(); // Continue with next chunk
     }
   }
@@ -214,13 +209,10 @@ export class ElevenLabsWebSocket {
 
   async connect() {
     if (this.isConnected) {
-      console.log('Already connected');
       return;
     }
 
     try {
-      console.log('🚀 Connecting to ElevenLabs Conversational AI...');
-      console.log('Agent ID:', this.agentId);
       
       // Initialize audio components
       this.audioPlayer = new AudioPlayer();
@@ -230,12 +222,10 @@ export class ElevenLabsWebSocket {
 
       // Connect using the US endpoint (allowed by CSP)
       const wsUrl = `wss://api.us.elevenlabs.io/v1/convai/conversation?agent_id=${this.agentId}`;
-      console.log('🔗 Connecting to:', wsUrl);
       
       this.ws = new WebSocket(wsUrl);
 
       this.ws.onopen = () => {
-        console.log('✅ WebSocket opened, sending conversation initiation...');
         
         // Send conversation initiation as per documentation
         // For public agents, no API key is needed
@@ -247,11 +237,9 @@ export class ElevenLabsWebSocket {
       this.ws.onmessage = async (event) => {
         try {
           const message = JSON.parse(event.data);
-          console.log('📨 Received:', message.type);
           
           // Handle connection confirmation
           if (message.type === 'conversation_initiation_metadata' && !this.isConnected) {
-            console.log('✅ Conversation initiated successfully');
             this.isConnected = true;
             this.onConnectionChange(true);
             
@@ -262,50 +250,44 @@ export class ElevenLabsWebSocket {
           this.handleMessage(message);
           this.onMessage(message);
         } catch (error) {
-          console.error('❌ Error parsing message:', error, event.data);
+          // Error handled silently
         }
       };
 
       this.ws.onclose = (event) => {
-        console.log('❌ WebSocket closed:', event.code, event.reason);
         this.isConnected = false;
         this.onConnectionChange(false);
       };
 
       this.ws.onerror = (error) => {
-        console.error('❌ WebSocket error:', error);
         this.onError('WebSocket connection failed');
       };
 
     } catch (error) {
-      console.error('❌ Connection error:', error);
       this.onError(`Connection failed: ${error}`);
     }
   }
 
   private handleMessage(message: ElevenLabsMessage) {
-    console.log('🔄 Handling message:', message.type);
     
     switch (message.type) {
       case 'conversation_initiation_metadata':
-        console.log('✅ Conversation metadata:', message);
         break;
         
       case 'user_transcript':
         if (message.user_transcription_event?.user_transcript) {
-          console.log('📝 User said:', message.user_transcription_event.user_transcript);
+          // User transcript processed silently
         }
         break;
         
       case 'agent_response':
         if (message.agent_response_event?.agent_response) {
-          console.log('🤖 Agent response:', message.agent_response_event.agent_response);
+          // Agent response processed silently
         }
         break;
         
       case 'audio':
         if (message.audio_event?.audio_base_64 && this.audioPlayer) {
-          console.log('🎵 Playing audio chunk');
           try {
             // Convert base64 to ArrayBuffer
             const binaryString = atob(message.audio_event.audio_base_64);
@@ -315,13 +297,12 @@ export class ElevenLabsWebSocket {
             }
             this.audioPlayer.addAudioChunk(bytes.buffer);
           } catch (error) {
-            console.error('❌ Error processing audio:', error);
+            // Error handled silently
           }
         }
         break;
         
       case 'interruption':
-        console.log('🛑 Conversation interrupted:', message.interruption_event?.reason);
         // Stop current audio playback when interrupted
         if (this.audioPlayer) {
           this.audioPlayer.stop();
@@ -331,13 +312,12 @@ export class ElevenLabsWebSocket {
         
       case 'agent_response_correction':
         if (message.agent_response_correction_event) {
-          console.log('🔄 Agent response corrected:', message.agent_response_correction_event.corrected_agent_response);
+          // Agent response corrected silently
         }
         break;
         
       case 'client_tool_call':
         if (message.client_tool_call) {
-          console.log('🔧 Client tool call:', message.client_tool_call);
           this.handleClientToolCall(message.client_tool_call);
         }
         break;
@@ -357,12 +337,12 @@ export class ElevenLabsWebSocket {
         break;
         
       default:
-        console.log('❓ Unhandled message type:', message.type, message);
+        // Unhandled message type
+    }
     }
   }
 
   private handleClientToolCall(toolCall: any) {
-    console.log('🔧 Executing client tool:', toolCall.tool_name, toolCall.parameters);
     
     try {
       let result = '';
@@ -372,7 +352,6 @@ export class ElevenLabsWebSocket {
         case 'redirectToExternalURL':
           const url = toolCall.parameters?.url;
           if (url) {
-            console.log('🔗 Redirecting to:', url);
             // Perform the actual redirect
             if (url.startsWith('http')) {
               window.open(url, '_blank');
@@ -388,7 +367,8 @@ export class ElevenLabsWebSocket {
           
         default:
           result = `Tool ${toolCall.tool_name} executed successfully`;
-          console.log('⚠️ Unknown tool, but acknowledged');
+          // Unknown tool, but acknowledged
+      }
       }
       
       this.send({

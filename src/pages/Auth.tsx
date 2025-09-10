@@ -56,9 +56,7 @@ const Auth = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    console.log('Input change:', { name, originalValue: value, originalLength: value.length });
     const sanitizedValue = sanitizeInput(value);
-    console.log('After sanitization:', { sanitizedValue, sanitizedLength: sanitizedValue.length });
     
     setFormData(prev => ({
       ...prev,

@@ -140,7 +140,6 @@ export default function Billing({ selectedOrganization }: BillingProps) {
         lastTopUp: data?.last_top_up_at || null
       });
     } catch (error) {
-      console.error('Error fetching minute data:', error);
     }
   };
 
@@ -175,7 +174,6 @@ export default function Billing({ selectedOrganization }: BillingProps) {
       setTempThreshold((data?.low_credit_warning_threshold || 100).toString());
       setHasUnsavedChanges(false);
     } catch (error) {
-      console.error('Error fetching billing settings:', error);
     } finally {
       setLoading(false);
     }
@@ -205,7 +203,6 @@ export default function Billing({ selectedOrganization }: BillingProps) {
         createdAt: item.created_at
       })));
     } catch (error) {
-      console.error('Error fetching billing history:', error);
     }
   };
 
@@ -259,26 +256,20 @@ export default function Billing({ selectedOrganization }: BillingProps) {
     const currentCredits = minuteData.currentMinutes;
     const threshold = settings.lowMinuteThreshold;
 
-    console.log(`Checking credits immediately: ${currentCredits} vs threshold ${threshold}`);
-
     // If current credits are at or below threshold, trigger webhook immediately
     if (currentCredits <= threshold) {
-      console.log(`⚠️ IMMEDIATE LOW CREDITS ALERT: ${currentCredits} <= ${threshold}`);
       
       // Trigger immediate check via edge function
       try {
-        console.log('🚀 Calling check-low-credits edge function...');
         const { data, error } = await supabase.functions.invoke('check-low-credits');
         
         if (error) {
-          console.error('❌ Edge function error:', error);
           toast({
             title: "Erro na Verificação",
             description: "Não foi possível verificar créditos. Tente novamente.",
             variant: "destructive"
           });
         } else {
-          console.log('✅ Edge function response:', data);
           toast({
             title: "Alerta de Créditos Baixos",
             description: `Seus créditos (${currentCredits}) estão abaixo do limite configurado (${threshold}). Notificação enviada automaticamente.`,
@@ -286,7 +277,6 @@ export default function Billing({ selectedOrganization }: BillingProps) {
           });
         }
       } catch (functionError) {
-        console.error('❌ Function call error:', functionError);
         toast({
           title: "Erro de Conexão",
           description: "Falha ao conectar com sistema de monitoramento.",
@@ -294,7 +284,7 @@ export default function Billing({ selectedOrganization }: BillingProps) {
         });
       }
     } else {
-      console.log('✅ Credits above threshold, no alert needed');
+      // Credits above threshold, no alert needed
     }
   };
 
@@ -355,7 +345,6 @@ export default function Billing({ selectedOrganization }: BillingProps) {
         description: "Suas preferências de cobrança foram salvas."
       });
     } catch (error) {
-      console.error('Error updating settings:', error);
       toast({
         title: "Erro",
         description: "Falha ao atualizar configurações. Tente novamente.",
@@ -452,7 +441,6 @@ export default function Billing({ selectedOrganization }: BillingProps) {
         });
 
         if (error) {
-          console.error('Edge function error:', error);
           
           // For FunctionsHttpError, we need to try to get the response body
           if (error.message && error.message.includes('non-2xx status code')) {
@@ -460,9 +448,6 @@ export default function Billing({ selectedOrganization }: BillingProps) {
               // The error.context is a Response object, we need to read its body
               if (error.context && typeof error.context.json === 'function') {
                 const errorResponse = await error.context.json();
-                console.log('Parsed error response:', errorResponse);
-                
-                // Extract M-Pesa error details
                 if (errorResponse && errorResponse.details && errorResponse.details.body && errorResponse.details.body.output_ResponseCode) {
                   const responseCode = errorResponse.details.body.output_ResponseCode;
                   let userMessage = 'Falha no pagamento';

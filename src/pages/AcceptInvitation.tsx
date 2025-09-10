@@ -67,9 +67,7 @@ const AcceptInvitation = () => {
     }
 
     try {
-      console.log('Checking invitation for token:', token);
       const currentTime = new Date().toISOString();
-      console.log('Current time for comparison:', currentTime);
       
       const { data, error } = await supabase
         .from("organization_invitations")
@@ -79,10 +77,7 @@ const AcceptInvitation = () => {
         .gt("expires_at", currentTime)
         .maybeSingle();
 
-      console.log('Query result:', { data, error });
-
       if (error) {
-        console.error("Database error:", error);
         toast({
           title: "Erro",
           description: "Erro ao verificar o convite: " + error.message,
@@ -100,7 +95,7 @@ const AcceptInvitation = () => {
           .eq("invitation_token", token)
           .maybeSingle();
         
-        console.log('Debug - invitation found:', debugData);
+        
         
         if (debugData) {
           if (debugData.accepted_at) {
@@ -134,17 +129,14 @@ const AcceptInvitation = () => {
       }
 
       // Fetch organization details separately
-      console.log('Fetching organization data for ID:', data.organization_id);
       const { data: orgData, error: orgError } = await supabase
         .from("organizations")
         .select("name, description")
         .eq("id", data.organization_id)
         .single();
 
-      console.log('Organization query result:', { orgData, orgError });
-
       if (orgError) {
-        console.error("Error fetching organization:", orgError);
+        // Error handled silently
       }
 
       const invitationWithOrg = {
@@ -152,12 +144,11 @@ const AcceptInvitation = () => {
         organizations: orgData || { name: "Unknown Organization", description: null }
       };
 
-      console.log('Final invitation data:', invitationWithOrg);
+      
 
       setInvitation(invitationWithOrg);
       setFormData(prev => ({ ...prev, email: data.email }));
     } catch (error) {
-      console.error("Erro ao verificar convite:", error);
       toast({
         title: "Erro",
         description: "Erro ao verificar o convite.",
@@ -295,12 +286,6 @@ const AcceptInvitation = () => {
 
     setAccepting(true);
     try {
-      console.log('Starting invitation acceptance for:', {
-        userId: user.id,
-        invitationId: invitation.id,
-        organizationId: invitation.organization_id,
-        role: invitation.role
-      });
 
       // Marcar convite como aceito
       const { error: updateError } = await supabase
@@ -309,11 +294,8 @@ const AcceptInvitation = () => {
         .eq("id", invitation.id);
 
       if (updateError) {
-        console.error('Error updating invitation:', updateError);
         throw updateError;
       }
-
-      console.log('Invitation marked as accepted, creating organization member...');
 
       // Criar membro na organização
       const { error: memberError } = await supabase
@@ -329,11 +311,8 @@ const AcceptInvitation = () => {
         });
 
       if (memberError) {
-        console.error('Error creating organization member:', memberError);
         throw memberError;
       }
-
-      console.log('Organization member created successfully');
 
       // Save the accepted organization ID for automatic selection
       localStorage.setItem("selectedOrganizationId", invitation.organization_id);
@@ -346,7 +325,6 @@ const AcceptInvitation = () => {
 
       navigate("/dashboard");
     } catch (error: any) {
-      console.error('Error accepting invitation:', error);
       toast({
         title: "Erro",
         description: "Erro ao aceitar convite: " + error.message,

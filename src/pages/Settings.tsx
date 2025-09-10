@@ -76,7 +76,7 @@ export default function Settings({ selectedOrganization, onOrganizationUpdate }:
         .maybeSingle();
 
       if (configError) {
-        console.error("Error checking existing config:", configError);
+        // Error handled silently
       }
 
       if (existingConfig) {
@@ -135,17 +135,6 @@ export default function Settings({ selectedOrganization, onOrganizationUpdate }:
 
     setLoading(true);
     try {
-      console.log("Attempting to update organization:", selectedOrganization.id);
-      console.log("Update data:", {
-        name: orgData.name.trim(),
-        description: orgData.description.trim() || null,
-        domain: orgData.domain.trim() || null,
-      });
-
-      // Check if user is authenticated
-      const { data: { user } } = await supabase.auth.getUser();
-      console.log("Current user:", user?.id);
-      console.log("Organization user_id:", selectedOrganization.user_id);
 
       const { data, error } = await supabase
         .from("organizations")
@@ -157,8 +146,6 @@ export default function Settings({ selectedOrganization, onOrganizationUpdate }:
         })
         .eq("id", selectedOrganization.id)
         .select();
-
-      console.log("Update result:", { data, error });
 
       if (error) throw error;
 

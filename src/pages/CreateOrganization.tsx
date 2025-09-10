@@ -41,8 +41,7 @@ const CreateOrganization = () => {
           return;
         }
         setUser(session.user);
-      } catch (error) {
-        console.error("Error checking auth:", error);
+    } catch (error) {
         navigate("/auth");
       } finally {
         setChecking(false);

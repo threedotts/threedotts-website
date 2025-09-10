@@ -42,13 +42,12 @@ export const useUserPresence = (currentOrganizationId?: string) => {
         // If it's an RLS error (user no longer has access to this organization),
         // silently fail instead of causing issues
         if (error.code === '42501') {
-          console.log('User no longer has access to organization presence tracking');
           return;
         }
-        console.error('Error updating presence:', error);
+        // Error handled silently
       }
     } catch (error) {
-      console.error('Error updating presence:', error);
+      // Error handled silently
     }
   };
 
@@ -105,7 +104,6 @@ export const useUserPresence = (currentOrganizationId?: string) => {
 
       setPresenceData(presenceMap);
     } catch (error) {
-      console.error('Error fetching presence data:', error);
     }
   };
 
@@ -224,7 +222,6 @@ export const useUserPresence = (currentOrganizationId?: string) => {
       try {
         await supabase.functions.invoke('cleanup-inactive-users');
       } catch (error) {
-        console.error('Error cleaning up inactive users:', error);
       }
     }, 30000);
 

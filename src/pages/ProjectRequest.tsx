@@ -391,9 +391,7 @@ export default function ProjectRequest() {
       // Clear the form after successful submission
       form.reset();
 
-      console.log("Form data sent successfully:", data);
-    } catch (error) {
-      console.error('Erro ao enviar:', error);
+      } catch (error) {
       toast({
         title: "Erro ao enviar solicitação",
         description: "Tente novamente mais tarde.",

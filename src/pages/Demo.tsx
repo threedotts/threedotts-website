@@ -102,9 +102,6 @@ const Demo = ({
         agentId,
         apiKey
       } = await getAgentConfig(selectedOrganization.id);
-      console.log('🔧 Got agent config:', {
-        agentId
-      });
 
       // Create VoiceWebSocket connection (same as widget)
       voiceWebSocketRef.current = new VoiceWebSocket(agentId, apiKey, handleWebSocketMessage, connected => {
@@ -128,10 +125,8 @@ const Demo = ({
         });
       });
 
-      // Connect to ElevenLabs directly (same as widget)
       await voiceWebSocketRef.current.connect();
     } catch (error) {
-      console.error('Error starting demo call:', error);
       setIsConnecting(false);
       toast({
         title: "Erro",
@@ -157,7 +152,6 @@ const Demo = ({
     });
   };
   const handleWebSocketMessage = (data: any) => {
-    console.log('📨 Received message:', data.type, data);
     switch (data.type) {
       case 'conversation_initiation_metadata':
         addTranscriptMessage("system", "Conversa iniciada - pode começar a falar!");
@@ -180,7 +174,6 @@ const Demo = ({
         setIsAgentSpeaking(false);
         break;
       default:
-        console.log('📨 Unknown message type:', data.type);
     }
   };
   const addTranscriptMessage = (sender: 'user' | 'agent' | 'system', text: string) => {

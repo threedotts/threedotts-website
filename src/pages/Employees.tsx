@@ -246,7 +246,7 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
           emailMap = emailData.emailMap;
         }
       } catch (error) {
-        console.log('Could not fetch emails:', error);
+        // Could not fetch emails, continue silently
       }
 
       const membersWithProfiles = await Promise.all(
@@ -284,7 +284,6 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
       const memberUserIds = membersWithProfiles.map(member => member.user_id);
       fetchPresenceData(memberUserIds);
     } catch (error: any) {
-      console.error("Error fetching members:", error);
       toast({
         title: "Erro",
         description: "Erro ao carregar membros: " + error.message,
@@ -299,7 +298,6 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
     if (!selectedOrganization) return;
 
     try {
-      console.log('Fetching invitations for organization:', selectedOrganization.id);
       
       const { data, error } = await supabase
         .from("organization_invitations")
@@ -309,13 +307,10 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
         .gt("expires_at", new Date().toISOString())
         .order("created_at", { ascending: false });
 
-      console.log('Invitations query result:', { data, error });
-
       if (error) throw error;
       
       setInvitations((data || []).map(inv => ({ ...inv, invited_by_profile: null })));
     } catch (error: any) {
-      console.error("Error fetching invitations:", error);
       toast({
         title: "Erro",
         description: "Erro ao carregar convites: " + error.message,
@@ -382,20 +377,15 @@ const Employees = ({ selectedOrganization }: EmployeesProps) => {
           invitation_link: invitationLink,
         };
 
-        console.log('Enviando dados para webhook via Edge Function:', webhookData);
-
         const { data, error: webhookError } = await supabase.functions.invoke('send-invitation-webhook', {
           body: webhookData,
         });
 
         if (webhookError) {
-          console.error('Erro na Edge Function:', webhookError);
           throw webhookError;
         }
 
-        console.log('Resposta da Edge Function:', data);
-      } catch (webhookError) {
-        console.error('Erro ao enviar para webhook n8n:', webhookError);
+        } catch (webhookError) {
         // Não falha o processo principal se o webhook falhar
         toast({
           title: "Aviso",

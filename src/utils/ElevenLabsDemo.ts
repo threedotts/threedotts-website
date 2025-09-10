@@ -51,7 +51,6 @@ export class AudioRecorder {
       this.source.connect(this.processor);
       this.processor.connect(this.audioContext.destination);
     } catch (error) {
-      console.error('Error accessing microphone:', error);
       throw error;
     }
   }
@@ -142,7 +141,6 @@ export class AudioPlayer {
       source.onended = () => this.playNext();
       source.start(0);
     } catch (error) {
-      console.error('Error playing audio:', error);
       this.playNext(); // Continue with next chunk
     }
   }
@@ -199,12 +197,10 @@ export class VoiceWebSocket {
 
       // Connect DIRECTLY to ElevenLabs like the widget
       const wsUrl = `wss://api.us.elevenlabs.io/v1/convai/conversation?agent_id=${this.agentId}`;
-      console.log('🔌 Connecting to ElevenLabs:', wsUrl);
       
       this.ws = new WebSocket(wsUrl);
       
       this.ws.onopen = () => {
-        console.log('✅ Connected to ElevenLabs');
         
         // Send conversation initiation with API key
         this.send({
@@ -229,23 +225,19 @@ export class VoiceWebSocket {
           this.handleMessage(message);
           this.onMessage(message);
         } catch (error) {
-          console.error('❌ Error parsing message:', error, event.data);
         }
       };
       
       this.ws.onclose = (event) => {
-        console.log('🔌 WebSocket closed:', event.code, event.reason);
         this.isConnected = false;
         this.onConnectionChange(false);
       };
 
       this.ws.onerror = (error) => {
-        console.error('❌ WebSocket error:', error);
         this.onError('WebSocket connection failed');
       };
 
     } catch (error) {
-      console.error('❌ Connection error:', error);
       this.onError(`Connection failed: ${error}`);
     }
   }
@@ -253,18 +245,17 @@ export class VoiceWebSocket {
   private handleMessage(message: any) {
     switch (message.type) {
       case 'conversation_initiation_metadata':
-        console.log('🔄 Conversation initiated');
         break;
         
       case 'user_transcript':
         if (message.user_transcription_event?.user_transcript) {
-          console.log('🗣️ User said:', message.user_transcription_event.user_transcript);
+          // User transcript processed silently
         }
         break;
         
       case 'agent_response':
         if (message.agent_response_event?.agent_response) {
-          console.log('🤖 Agent said:', message.agent_response_event.agent_response);
+          // Agent response processed silently
         }
         break;
         
@@ -279,7 +270,6 @@ export class VoiceWebSocket {
             }
             this.audioPlayer.addAudioChunk(bytes.buffer);
           } catch (error) {
-            console.error('❌ Error processing audio:', error);
           }
         }
         break;
@@ -297,7 +287,7 @@ export class VoiceWebSocket {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(message));
     } else {
-      console.warn('⚠️ WebSocket not ready, cannot send:', message.type);
+      // WebSocket not ready, cannot send message
     }
   }
 
