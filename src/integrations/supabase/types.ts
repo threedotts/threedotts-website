@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_config_access_log: {
+        Row: {
+          access_type: string
+          accessed_by: string
+          created_at: string
+          id: string
+          organization_id: string
+          user_id: string | null
+        }
+        Insert: {
+          access_type: string
+          accessed_by: string
+          created_at?: string
+          id?: string
+          organization_id: string
+          user_id?: string | null
+        }
+        Update: {
+          access_type?: string
+          accessed_by?: string
+          created_at?: string
+          id?: string
+          organization_id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       appointment_access_log: {
         Row: {
           access_type: string
