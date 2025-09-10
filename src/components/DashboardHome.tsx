@@ -701,7 +701,7 @@ export default function DashboardHome({ selectedOrganization }: DashboardHomePro
     {
       title: "Tempo Entre Chamadas",
       value: dashboardData.avgTimeBetweenCalls,
-      change: "Média por cliente",
+      change: "Média geral",
       icon: Timer,
       iconBg: "bg-gray-100",
       iconColor: "text-gray-600"
