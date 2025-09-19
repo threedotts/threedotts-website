@@ -9,7 +9,7 @@ import {
   MapPin
 } from "lucide-react";
 import { useState } from "react";
-// Supabase functionality removed
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 const footerSections = [
@@ -18,6 +18,12 @@ const footerSections = [
     links: [
       { name: "Agendamento", href: "/scheduling" },
       { name: "Pedido de Projeto", href: "/project-request" }
+    ]
+  },
+  {
+    title: "Plataforma",
+    links: [
+      { name: "Dashboard", href: "/dashboard" }
     ]
   }
 ];
@@ -43,10 +49,20 @@ export function Footer() {
 
     setIsLoading(true);
     
-    // Newsletter functionality removed - form is for display only
-    toast.success("Para subscrever, contacte: suporte@threedotts.co.mz");
-    setEmail("");
-    setIsLoading(false);
+    try {
+      const { data, error } = await supabase.functions.invoke('newsletter-signup', {
+        body: { email }
+      });
+
+      if (error) throw error;
+
+      toast.success("Email subscrito com sucesso!");
+      setEmail("");
+    } catch (error) {
+      toast.error("Erro ao subscrever newsletter. Tente novamente.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

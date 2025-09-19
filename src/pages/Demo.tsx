@@ -7,8 +7,8 @@ import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
 import { usePageTitle } from "@/hooks/usePageTitle";
-// Credit consumption functionality removed
-// Demo functionality removed
+import { useCreditConsumption } from "@/hooks/useCreditConsumption";
+import { VoiceWebSocket, getAgentConfig } from "@/utils/ElevenLabsDemo";
 import { Phone, PhoneOff, Mic, MicOff, Volume2, VolumeX, Wifi, WifiOff, Zap, PlayCircle, StopCircle, Loader2, AlertTriangle, CheckCircle, Activity } from "lucide-react";
 interface DemoProps {
   selectedOrganization?: any;
@@ -29,10 +29,25 @@ const Demo = ({
   const {
     toast
   } = useToast();
-  // Credit consumption functionality removed
-  // Demo functionality removed
+  const {
+    checkCreditBalance,
+    loading: creditsLoading
+  } = useCreditConsumption();
+  const voiceWebSocketRef = useRef<VoiceWebSocket | null>(null);
   usePageTitle("Demo - Teste do Agente");
-  // Credit consumption functionality removed
+  useEffect(() => {
+    // Fetch current credit balance when component loads
+    if (selectedOrganization?.id) {
+      fetchCurrentCredits();
+    }
+  }, [selectedOrganization?.id]);
+  const fetchCurrentCredits = async () => {
+    if (!selectedOrganization?.id) return;
+    const balance = await checkCreditBalance(selectedOrganization.id);
+    if (balance !== null) {
+      setCurrentCredits(balance);
+    }
+  };
   const requestMicrophonePermission = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -65,22 +80,77 @@ const Demo = ({
       return;
     }
 
-    // Credit validation removed - demo mode
+    // Check credits before starting
+    const balance = await checkCreditBalance(selectedOrganization.id);
+    if (balance === null || balance <= 0) {
+      toast({
+        title: "Créditos Insuficientes",
+        description: "Adicione créditos à sua conta para testar o agente",
+        variant: "destructive"
+      });
+      return;
+    }
 
     // Request microphone permission
     const micGranted = await requestMicrophonePermission();
     if (!micGranted) return;
     setIsConnecting(true);
     setCreditsConsumed(0);
-    // Demo functionality removed
-    toast({
-      title: "Demo Indisponível",
-      description: "Contacte suporte@threedotts.co.mz para uma demonstração",
-      variant: "destructive"
-    });
-    setIsConnecting(false);
+    try {
+      // Get agent config from server (same as widget)
+      const {
+        agentId,
+        apiKey
+      } = await getAgentConfig(selectedOrganization.id);
+
+      // Create VoiceWebSocket connection (same as widget)
+      voiceWebSocketRef.current = new VoiceWebSocket(agentId, apiKey, handleWebSocketMessage, connected => {
+        setIsConnected(connected);
+        setIsConnecting(false);
+        setConnectionQuality(connected ? 'good' : 'disconnected');
+        if (connected) {
+          toast({
+            title: "Conectado",
+            description: "Agente IA pronto para conversar"
+          });
+          addTranscriptMessage("system", "Conectado ao agente. Comece a falar!");
+        }
+      }, error => {
+        console.error('VoiceWebSocket error:', error);
+        setIsConnecting(false);
+        toast({
+          title: "Erro de Conexão",
+          description: error,
+          variant: "destructive"
+        });
+      });
+
+      await voiceWebSocketRef.current.connect();
+    } catch (error) {
+      setIsConnecting(false);
+      toast({
+        title: "Erro",
+        description: error instanceof Error ? error.message : "Falha ao iniciar o teste",
+        variant: "destructive"
+      });
+    }
   };
-    // Demo functionality removed
+  const endDemoCall = () => {
+    if (voiceWebSocketRef.current) {
+      voiceWebSocketRef.current.disconnect();
+      voiceWebSocketRef.current = null;
+    }
+    setIsConnected(false);
+    setIsConnecting(false);
+    setConnectionQuality('disconnected');
+    setIsSpeaking(false);
+    setIsAgentSpeaking(false);
+    addTranscriptMessage("system", "Chamada encerrada");
+    toast({
+      title: "Chamada Encerrada",
+      description: `Teste concluído. Créditos utilizados: ${creditsConsumed}`
+    });
+  };
   const handleWebSocketMessage = (data: any) => {
     switch (data.type) {
       case 'conversation_initiation_metadata':
@@ -112,7 +182,11 @@ const Demo = ({
     setTranscript(prev => [...prev.slice(-9), message]); // Keep last 10 messages
   };
   const toggleMute = () => {
-    // Demo functionality removed
+    const newMutedState = !isMuted;
+    setIsMuted(newMutedState);
+    if (voiceWebSocketRef.current) {
+      voiceWebSocketRef.current.setMuted(newMutedState);
+    }
   };
   const getConnectionIcon = () => {
     switch (connectionQuality) {
@@ -159,7 +233,7 @@ const Demo = ({
 
             <Separator />
 
-            {!isConnected ? <Button onClick={startDemoCall} disabled={isConnecting || !selectedOrganization} className="w-full">
+            {!isConnected ? <Button onClick={startDemoCall} disabled={isConnecting || !selectedOrganization || creditsLoading} className="w-full">
                 {isConnecting ? <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     Conectando...
@@ -167,7 +241,7 @@ const Demo = ({
                     <PlayCircle className="h-4 w-4 mr-2" />
                     Iniciar Teste
                   </>}
-              </Button> : <Button onClick={() => toast({title: "Demo Indisponível", description: "Contacte suporte@threedotts.co.mz", variant: "destructive"})} variant="destructive" className="w-full">
+              </Button> : <Button onClick={endDemoCall} variant="destructive" className="w-full">
                 <StopCircle className="h-4 w-4 mr-2" />
                 Encerrar Teste
               </Button>}
