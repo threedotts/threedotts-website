@@ -42,7 +42,7 @@ export function Header() {
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center space-x-4">
             <Button variant="ghost" className="text-foreground" asChild>
-              <Link to="/auth">Plataforma</Link>
+              <a href="https://platform.threedotts.co.mz/" target="_blank" rel="noopener noreferrer">Plataforma</a>
             </Button>
             <Button variant="default" asChild>
               <Link to="/project-request">Começar</Link>
@@ -74,7 +74,7 @@ export function Header() {
               ))}
               <div className="flex flex-col space-y-2 pt-4 border-t border-primary/10">
                 <Button variant="ghost" className="text-foreground justify-start" asChild>
-                  <Link to="/auth">Plataforma</Link>
+                  <a href="https://platform.threedotts.co.mz/" target="_blank" rel="noopener noreferrer">Plataforma</a>
                 </Button>
                 <Button variant="default" className="justify-start" asChild>
                   <Link to="/project-request">Começar</Link>
