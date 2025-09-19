@@ -9,7 +9,7 @@ import {
   MapPin
 } from "lucide-react";
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+// Supabase functionality removed
 import { toast } from "sonner";
 
 const footerSections = [
@@ -42,20 +42,10 @@ export function Footer() {
 
     setIsLoading(true);
     
-    try {
-      const { data, error } = await supabase.functions.invoke('newsletter-signup', {
-        body: { email }
-      });
-
-      if (error) throw error;
-
-      toast.success("Email subscrito com sucesso!");
-      setEmail("");
-    } catch (error) {
-      toast.error("Erro ao subscrever newsletter. Tente novamente.");
-    } finally {
-      setIsLoading(false);
-    }
+    // Newsletter functionality removed - form is for display only
+    toast.success("Para subscrever, contacte: suporte@threedotts.co.mz");
+    setEmail("");
+    setIsLoading(false);
   };
 
   return (

@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Send, Smartphone, Globe, Bot, Cog, BarChart3, Headphones } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import FileUpload from "@/components/FileUpload";
+// File upload functionality removed
 import PhoneInput from "@/components/PhoneInput";
 const serviceSchema = z.object({
   // Seção 1: Informações básicas
@@ -649,7 +649,11 @@ export default function ProjectRequest() {
                 field
               }) => <FormItem>
                           <FormControl>
-                            <FileUpload label="Ficheiros de design da aplicação móvel" description="Carregue logos, mockups, guias de estilo, etc. (máx. 10MB por ficheiro)" onFileUpload={urls => field.onChange(urls)} maxFiles={5} acceptedFileTypes="image/*,.pdf,.ai,.psd,.sketch,.fig,.zip,.rar" />
+                            <div className="p-4 border border-dashed border-primary/20 rounded-lg">
+                              <p className="text-sm text-muted-foreground text-center">
+                                Upload de ficheiros temporariamente indisponível. Envie os ficheiros para: suporte@threedotts.co.mz
+                              </p>
+                            </div>
                           </FormControl>
                           <FormMessage />
                         </FormItem>} />}
@@ -743,7 +747,11 @@ export default function ProjectRequest() {
                 field
               }) => <FormItem>
                           <FormControl>
-                            <FileUpload label="Ficheiros de design do website" description="Carregue logos, mockups, guias de estilo, etc. (máx. 10MB por ficheiro)" onFileUpload={urls => field.onChange(urls)} maxFiles={5} acceptedFileTypes="image/*,.pdf,.ai,.psd,.sketch,.fig,.zip,.rar" />
+                            <div className="p-4 border border-dashed border-primary/20 rounded-lg">
+                              <p className="text-sm text-muted-foreground text-center">
+                                Upload de ficheiros temporariamente indisponível. Envie os ficheiros para: suporte@threedotts.co.mz
+                              </p>
+                            </div>
                           </FormControl>
                           <FormMessage />
                         </FormItem>} />}
@@ -1043,13 +1051,11 @@ export default function ProjectRequest() {
                 field
               }) => <FormItem>
                       <FormControl>
-                        <FileUpload 
-                          label="Documentos, Imagens e Arquivos Extras" 
-                          description="Envie qualquer arquivo relevante: logos, rascunhos, exemplos, planilhas, imagens, documentos (máx. 10MB por ficheiro)" 
-                          onFileUpload={(urls) => field.onChange(urls)} 
-                          maxFiles={10} 
-                          acceptedFileTypes="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip,.rar,.ai,.psd,.sketch,.fig" 
-                        />
+                        <div className="p-4 border border-dashed border-primary/20 rounded-lg">
+                          <p className="text-sm text-muted-foreground text-center">
+                            Upload de ficheiros temporariamente indisponível. Envie os ficheiros para: suporte@threedotts.co.mz
+                          </p>
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>} />

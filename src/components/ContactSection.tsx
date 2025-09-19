@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { supabase } from "@/integrations/supabase/client";
+// Supabase functionality removed
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import { 
@@ -191,47 +191,13 @@ export function ContactSection() {
 
     setIsSubmitting(true);
 
-    try {
-      const { data, error } = await supabase.functions.invoke('contact-form', {
-        body: {
-          ...formData,
-          timestamp: new Date().toISOString(),
-          source: 'contact_form',
-          webhookUrl: 'https://n8n.srv922768.hstgr.cloud/webhook/bca4e21a-2d74-485e-8e46-5f7238ca0b7a'
-        }
-      });
+    // Contact form functionality removed - form is for display only
+    toast({
+      title: "Formulário de Contacto",
+      description: "Entre em contacto através do email: suporte@threedotts.co.mz",
+    });
 
-      if (error) {
-        toast({
-          title: "Erro ao enviar mensagem",
-          description: error.message || "Erro interno do servidor.",
-          variant: "destructive",
-        });
-        return;
-      }
-      toast({
-        title: "Mensagem enviada!",
-        description: "Obrigado pelo seu contacto. Responderemos em breve.",
-      });
-
-      // Reset form
-      setFormData({
-        firstName: "",
-        lastName: "",
-        email: "",
-        company: "",
-        message: "",
-      });
-
-    } catch (error: any) {
-      toast({
-        title: "Erro ao enviar mensagem",
-        description: error.message || "Tente novamente mais tarde.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+    setIsSubmitting(false);
   };
 
   return (

@@ -8,7 +8,7 @@ import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
 import { usePageTitle } from "@/hooks/usePageTitle";
 // Credit consumption functionality removed
-import { VoiceWebSocket, getAgentConfig } from "@/utils/ElevenLabsDemo";
+// Demo functionality removed
 import { Phone, PhoneOff, Mic, MicOff, Volume2, VolumeX, Wifi, WifiOff, Zap, PlayCircle, StopCircle, Loader2, AlertTriangle, CheckCircle, Activity } from "lucide-react";
 interface DemoProps {
   selectedOrganization?: any;
@@ -30,7 +30,7 @@ const Demo = ({
     toast
   } = useToast();
   // Credit consumption functionality removed
-  const voiceWebSocketRef = useRef<VoiceWebSocket | null>(null);
+  // Demo functionality removed
   usePageTitle("Demo - Teste do Agente");
   // Credit consumption functionality removed
   const requestMicrophonePermission = async () => {
@@ -72,61 +72,15 @@ const Demo = ({
     if (!micGranted) return;
     setIsConnecting(true);
     setCreditsConsumed(0);
-    try {
-      // Get agent config from server (same as widget)
-      const {
-        agentId,
-        apiKey
-      } = await getAgentConfig(selectedOrganization.id);
-
-      // Create VoiceWebSocket connection (same as widget)
-      voiceWebSocketRef.current = new VoiceWebSocket(agentId, apiKey, handleWebSocketMessage, connected => {
-        setIsConnected(connected);
-        setIsConnecting(false);
-        setConnectionQuality(connected ? 'good' : 'disconnected');
-        if (connected) {
-          toast({
-            title: "Conectado",
-            description: "Agente IA pronto para conversar"
-          });
-          addTranscriptMessage("system", "Conectado ao agente. Comece a falar!");
-        }
-      }, error => {
-        console.error('VoiceWebSocket error:', error);
-        setIsConnecting(false);
-        toast({
-          title: "Erro de Conexão",
-          description: error,
-          variant: "destructive"
-        });
-      });
-
-      await voiceWebSocketRef.current.connect();
-    } catch (error) {
-      setIsConnecting(false);
-      toast({
-        title: "Erro",
-        description: error instanceof Error ? error.message : "Falha ao iniciar o teste",
-        variant: "destructive"
-      });
-    }
-  };
-  const endDemoCall = () => {
-    if (voiceWebSocketRef.current) {
-      voiceWebSocketRef.current.disconnect();
-      voiceWebSocketRef.current = null;
-    }
-    setIsConnected(false);
-    setIsConnecting(false);
-    setConnectionQuality('disconnected');
-    setIsSpeaking(false);
-    setIsAgentSpeaking(false);
-    addTranscriptMessage("system", "Chamada encerrada");
+    // Demo functionality removed
     toast({
-      title: "Chamada Encerrada",
-      description: `Teste concluído. Créditos utilizados: ${creditsConsumed}`
+      title: "Demo Indisponível",
+      description: "Contacte suporte@threedotts.co.mz para uma demonstração",
+      variant: "destructive"
     });
+    setIsConnecting(false);
   };
+    // Demo functionality removed
   const handleWebSocketMessage = (data: any) => {
     switch (data.type) {
       case 'conversation_initiation_metadata':
@@ -158,11 +112,7 @@ const Demo = ({
     setTranscript(prev => [...prev.slice(-9), message]); // Keep last 10 messages
   };
   const toggleMute = () => {
-    const newMutedState = !isMuted;
-    setIsMuted(newMutedState);
-    if (voiceWebSocketRef.current) {
-      voiceWebSocketRef.current.setMuted(newMutedState);
-    }
+    // Demo functionality removed
   };
   const getConnectionIcon = () => {
     switch (connectionQuality) {
@@ -217,7 +167,7 @@ const Demo = ({
                     <PlayCircle className="h-4 w-4 mr-2" />
                     Iniciar Teste
                   </>}
-              </Button> : <Button onClick={endDemoCall} variant="destructive" className="w-full">
+              </Button> : <Button onClick={() => toast({title: "Demo Indisponível", description: "Contacte suporte@threedotts.co.mz", variant: "destructive"})} variant="destructive" className="w-full">
                 <StopCircle className="h-4 w-4 mr-2" />
                 Encerrar Teste
               </Button>}
