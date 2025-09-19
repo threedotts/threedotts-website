@@ -16,6 +16,7 @@ const footerSections = [
   {
     title: "Serviços",
     links: [
+      { name: "Agendamento", href: "/scheduling" },
       { name: "Pedido de Projeto", href: "/project-request" }
     ]
   }

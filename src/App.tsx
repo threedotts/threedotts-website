@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import ServiceDetails from "./pages/ServiceDetails";
 import ProjectRequest from "./pages/ProjectRequest";
+import Scheduling from "./pages/Scheduling";
 import NotFound from "./pages/NotFound";
 import EmbedDemo from "./pages/EmbedDemo";
 import { SecurityHeaders } from "./components/SecurityHeaders";
@@ -21,6 +22,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/project-request" element={<ProjectRequest />} />
+          <Route path="/scheduling" element={<Scheduling />} />
           <Route path="/service/:serviceId" element={<ServiceDetails />} />
           <Route path="/embed-demo" element={<EmbedDemo />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
