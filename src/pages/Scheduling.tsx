@@ -2,9 +2,26 @@ import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { useEffect } from "react";
 
 const Scheduling = () => {
   usePageTitle("Agendamento");
+  
+  useEffect(() => {
+    // Load ThreeDotts widget script
+    const script = document.createElement('script');
+    script.src = 'https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?organizationId=1e926240-b303-444b-9f8c-57abd9fa657b';
+    script.async = true;
+    document.head.appendChild(script);
+
+    return () => {
+      // Cleanup script on unmount
+      const existingScript = document.querySelector(`script[src="${script.src}"]`);
+      if (existingScript) {
+        existingScript.remove();
+      }
+    };
+  }, []);
   
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden">

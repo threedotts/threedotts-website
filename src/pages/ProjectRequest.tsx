@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -260,6 +260,22 @@ export default function ProjectRequest() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   usePageTitle("Solicitar Projeto");
+
+  useEffect(() => {
+    // Load ThreeDotts widget script
+    const script = document.createElement('script');
+    script.src = 'https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?organizationId=1e926240-b303-444b-9f8c-57abd9fa657b';
+    script.async = true;
+    document.head.appendChild(script);
+
+    return () => {
+      // Cleanup script on unmount
+      const existingScript = document.querySelector(`script[src="${script.src}"]`);
+      if (existingScript) {
+        existingScript.remove();
+      }
+    };
+  }, []);
   const form = useForm<ServiceFormData>({
     resolver: zodResolver(serviceSchema),
     defaultValues: {
