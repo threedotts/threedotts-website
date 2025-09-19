@@ -7,13 +7,13 @@ export const SecurityHeaders = () => {
     cspMeta.httpEquiv = 'Content-Security-Policy';
     cspMeta.content = `
       default-src 'self'; 
-      script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://cdn.jsdelivr.net https://cdn.gpteng.co;
+      script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://cdn.jsdelivr.net https://cdn.gpteng.co https://dkqzzypemdewomxrjftv.supabase.co https://*.supabase.co;
       style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; 
       font-src 'self' https://fonts.gstatic.com; 
       img-src 'self' data: https:; 
-      connect-src 'self' https://lovable.dev; 
-      media-src 'self' blob:;
-      worker-src 'self' blob: https://cdn.jsdelivr.net;
+      connect-src 'self' https://lovable.dev https://dkqzzypemdewomxrjftv.supabase.co wss://dkqzzypemdewomxrjftv.supabase.co https://*.supabase.co wss://*.supabase.co; 
+      media-src 'self' blob: https://dkqzzypemdewomxrjftv.supabase.co;
+      worker-src 'self' blob: https://cdn.jsdelivr.net https://dkqzzypemdewomxrjftv.supabase.co;
       frame-src 'self' https://calendar.google.com;
     `.replace(/\s+/g, ' ').trim();
     
