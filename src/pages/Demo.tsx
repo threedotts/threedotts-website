@@ -7,7 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { useCreditConsumption } from "@/hooks/useCreditConsumption";
+// Credit consumption functionality removed
 import { VoiceWebSocket, getAgentConfig } from "@/utils/ElevenLabsDemo";
 import { Phone, PhoneOff, Mic, MicOff, Volume2, VolumeX, Wifi, WifiOff, Zap, PlayCircle, StopCircle, Loader2, AlertTriangle, CheckCircle, Activity } from "lucide-react";
 interface DemoProps {
@@ -29,25 +29,10 @@ const Demo = ({
   const {
     toast
   } = useToast();
-  const {
-    checkCreditBalance,
-    loading: creditsLoading
-  } = useCreditConsumption();
+  // Credit consumption functionality removed
   const voiceWebSocketRef = useRef<VoiceWebSocket | null>(null);
   usePageTitle("Demo - Teste do Agente");
-  useEffect(() => {
-    // Fetch current credit balance when component loads
-    if (selectedOrganization?.id) {
-      fetchCurrentCredits();
-    }
-  }, [selectedOrganization?.id]);
-  const fetchCurrentCredits = async () => {
-    if (!selectedOrganization?.id) return;
-    const balance = await checkCreditBalance(selectedOrganization.id);
-    if (balance !== null) {
-      setCurrentCredits(balance);
-    }
-  };
+  // Credit consumption functionality removed
   const requestMicrophonePermission = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -80,16 +65,7 @@ const Demo = ({
       return;
     }
 
-    // Check credits before starting
-    const balance = await checkCreditBalance(selectedOrganization.id);
-    if (balance === null || balance <= 0) {
-      toast({
-        title: "Créditos Insuficientes",
-        description: "Adicione créditos à sua conta para testar o agente",
-        variant: "destructive"
-      });
-      return;
-    }
+    // Credit validation removed - demo mode
 
     // Request microphone permission
     const micGranted = await requestMicrophonePermission();
@@ -233,7 +209,7 @@ const Demo = ({
 
             <Separator />
 
-            {!isConnected ? <Button onClick={startDemoCall} disabled={isConnecting || !selectedOrganization || creditsLoading} className="w-full">
+            {!isConnected ? <Button onClick={startDemoCall} disabled={isConnecting || !selectedOrganization} className="w-full">
                 {isConnecting ? <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     Conectando...
