@@ -9,7 +9,6 @@ import {
   MapPin
 } from "lucide-react";
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 const footerSections = [
@@ -18,12 +17,6 @@ const footerSections = [
     links: [
       { name: "Agendamento", href: "/scheduling" },
       { name: "Pedido de Projeto", href: "/project-request" }
-    ]
-  },
-  {
-    title: "Plataforma",
-    links: [
-      { name: "Dashboard", href: "/dashboard" }
     ]
   }
 ];
@@ -50,13 +43,7 @@ export function Footer() {
     setIsLoading(true);
     
     try {
-      const { data, error } = await supabase.functions.invoke('newsletter-signup', {
-        body: { email }
-      });
-
-      if (error) throw error;
-
-      toast.success("Email subscrito com sucesso!");
+      toast.success("Funcionalidade temporariamente indisponível. Contacte-nos diretamente.");
       setEmail("");
     } catch (error) {
       toast.error("Erro ao subscrever newsletter. Tente novamente.");

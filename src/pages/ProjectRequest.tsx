@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Send, Smartphone, Globe, Bot, Cog, BarChart3, Headphones } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import FileUpload from "@/components/FileUpload";
+
 import PhoneInput from "@/components/PhoneInput";
 const serviceSchema = z.object({
   // Seção 1: Informações básicas
@@ -31,16 +31,14 @@ const serviceSchema = z.object({
   needsUserAccount: z.enum(["sim", "nao", "nao-sei"]).optional(),
   needsOfflineMode: z.enum(["sim", "nao", "nao-sei"]).optional(),
   hasDesignIdentity: z.enum(["sim", "nao", "em-desenvolvimento"]).optional(),
-  designFiles: z.array(z.string()).optional(),
-  // URLs dos ficheiros de design móvel
+  // Design files removed for marketing site
 
   // Websites
   websiteType: z.string().optional(),
   websitePages: z.string().optional(),
   needsLoginPayments: z.enum(["login", "pagamentos", "ambos", "nenhum"]).optional(),
   hasDesignIdeasWeb: z.enum(["sim", "nao", "em-desenvolvimento"]).optional(),
-  webDesignFiles: z.array(z.string()).optional(),
-  // URLs dos ficheiros de design web
+  // Web design files removed for marketing site
 
   // Call Center
   supportChannels: z.array(z.string()).optional(),
@@ -63,7 +61,7 @@ const serviceSchema = z.object({
   integrationDetails: z.string().optional(),
   // Seção 5: Finalização
   additionalInfo: z.string().optional(),
-  additionalFiles: z.array(z.string()).optional()
+  // Additional files removed for marketing site
 }).superRefine((data, ctx) => {
   // Validação condicional para Aplicações Móveis
   if (data.selectedServices.includes("mobile-apps")) {
@@ -278,13 +276,11 @@ export default function ProjectRequest() {
       needsUserAccount: undefined,
       needsOfflineMode: undefined,
       hasDesignIdentity: undefined,
-      designFiles: [],
       // Websites
       websiteType: "",
       websitePages: "",
       needsLoginPayments: undefined,
       hasDesignIdeasWeb: undefined,
-      webDesignFiles: [],
       // Call center
       supportChannels: [],
       otherSupportChannels: "",
@@ -305,8 +301,7 @@ export default function ProjectRequest() {
       needsIntegration: undefined,
       integrationDetails: "",
       // Final
-      additionalInfo: "",
-      additionalFiles: []
+      additionalInfo: ""
     }
   });
   const selectedServices = form.watch("selectedServices") || [];
@@ -331,14 +326,12 @@ export default function ProjectRequest() {
         needsUserAccount: data.needsUserAccount || undefined,
         needsOfflineMode: data.needsOfflineMode || undefined,
         hasDesignIdentity: data.hasDesignIdentity || undefined,
-        designFiles: data.designFiles || [],
         
         // Websites
         websiteType: data.websiteType || "",
         websitePages: data.websitePages || "",
         needsLoginPayments: data.needsLoginPayments || undefined,
         hasDesignIdeasWeb: data.hasDesignIdeasWeb || undefined,
-        webDesignFiles: data.webDesignFiles || [],
         
         // Call Center
         supportChannels: data.supportChannels || [],
@@ -365,24 +358,13 @@ export default function ProjectRequest() {
         integrationDetails: data.integrationDetails || "",
         
         // Additional
-        additionalInfo: data.additionalInfo || "",
-        additionalFiles: data.additionalFiles || []
+        additionalInfo: data.additionalInfo || ""
       };
 
-      // Send form data through Supabase edge function (proxy to n8n webhook)
-      const response = await fetch('https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/send-project-request', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(completeFormData)
-      });
+      // Placeholder for form submission
+      throw new Error('Formulário temporariamente indisponível. Contacte-nos diretamente.');
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Falha ao enviar dados');
-      }
-
+      // This won't be reached due to the error above
       toast({
         title: "Solicitação enviada com sucesso!",
         description: "Entraremos em contacto consigo em breve para discutir o seu projeto."
@@ -393,8 +375,8 @@ export default function ProjectRequest() {
 
       } catch (error) {
       toast({
-        title: "Erro ao enviar solicitação",
-        description: "Tente novamente mais tarde.",
+        title: "Formulário temporariamente indisponível",
+        description: "Por favor, contacte-nos diretamente através do email ou telefone para discutir o seu projeto.",
         variant: "destructive"
       });
     } finally {
@@ -644,15 +626,7 @@ export default function ProjectRequest() {
                         <FormMessage />
                       </FormItem>} />
 
-                  {/* Campo para ficheiros de design móvel */}
-                  {form.watch("hasDesignIdentity") === "sim" && <FormField control={form.control} name="designFiles" render={({
-                field
-              }) => <FormItem>
-                          <FormControl>
-                            <FileUpload label="Ficheiros de design da aplicação móvel" description="Carregue logos, mockups, guias de estilo, etc. (máx. 10MB por ficheiro)" onFileUpload={urls => field.onChange(urls)} maxFiles={5} acceptedFileTypes="image/*,.pdf,.ai,.psd,.sketch,.fig,.zip,.rar" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>} />}
+                  {/* File upload removed for marketing site */}
                 </CardContent>
               </Card>}
 
@@ -738,15 +712,7 @@ export default function ProjectRequest() {
                         <FormMessage />
                       </FormItem>} />
 
-                  {/* Campo para ficheiros de design web */}
-                  {form.watch("hasDesignIdeasWeb") === "sim" && <FormField control={form.control} name="webDesignFiles" render={({
-                field
-              }) => <FormItem>
-                          <FormControl>
-                            <FileUpload label="Ficheiros de design do website" description="Carregue logos, mockups, guias de estilo, etc. (máx. 10MB por ficheiro)" onFileUpload={urls => field.onChange(urls)} maxFiles={5} acceptedFileTypes="image/*,.pdf,.ai,.psd,.sketch,.fig,.zip,.rar" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>} />}
+                  {/* File upload removed for marketing site */}
                 </CardContent>
               </Card>}
             {selectedServices.includes("call-center") && <Card>
@@ -1039,20 +1005,7 @@ export default function ProjectRequest() {
                       <FormMessage />
                     </FormItem>} />
 
-                <FormField control={form.control} name="additionalFiles" render={({
-                field
-              }) => <FormItem>
-                      <FormControl>
-                        <FileUpload 
-                          label="Documentos, Imagens e Arquivos Extras" 
-                          description="Envie qualquer arquivo relevante: logos, rascunhos, exemplos, planilhas, imagens, documentos (máx. 10MB por ficheiro)" 
-                          onFileUpload={(urls) => field.onChange(urls)} 
-                          maxFiles={10} 
-                          acceptedFileTypes="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip,.rar,.ai,.psd,.sketch,.fig" 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>} />
+                {/* File upload removed for marketing site */}
               </CardContent>
             </Card>
 
