@@ -11,7 +11,7 @@ export const SecurityHeaders = () => {
       style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; 
       font-src 'self' https://fonts.gstatic.com; 
       img-src 'self' data: https:; 
-      connect-src 'self' https://lovable.dev https://dkqzzypemdewomxrjftv.supabase.co wss://dkqzzypemdewomxrjftv.supabase.co https://*.supabase.co wss://*.supabase.co; 
+      connect-src 'self' https://lovable.dev https://dkqzzypemdewomxrjftv.supabase.co wss://dkqzzypemdewomxrjftv.supabase.co https://*.supabase.co wss://*.supabase.co https://api.us.elevenlabs.io wss://api.us.elevenlabs.io https://*.elevenlabs.io wss://*.elevenlabs.io; 
       media-src 'self' blob: https://dkqzzypemdewomxrjftv.supabase.co;
       worker-src 'self' blob: https://cdn.jsdelivr.net https://dkqzzypemdewomxrjftv.supabase.co;
       frame-src 'self' https://calendar.google.com;
