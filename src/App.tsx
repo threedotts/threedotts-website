@@ -8,12 +8,10 @@ import ServiceDetails from "./pages/ServiceDetails";
 import ProjectRequest from "./pages/ProjectRequest";
 import Scheduling from "./pages/Scheduling";
 import NotFound from "./pages/NotFound";
-import { SecurityHeaders } from "./components/SecurityHeaders";
 
 const App = () => {
   return (
     <TooltipProvider>
-      <SecurityHeaders />
       <Toaster />
       <Sonner />
       <BrowserRouter>
