@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,6 +11,19 @@ import Scheduling from "./pages/Scheduling";
 import NotFound from "./pages/NotFound";
 
 const App = () => {
+  useEffect(() => {
+    // Load the widget script after React is ready
+    const script = document.createElement('script');
+    script.src = 'https://dkqzzypemdewomxrjftv.supabase.co/functions/v1/widget-script?organizationId=1e926240-b303-444b-9f8c-57abd9fa657b';
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      // Cleanup: remove script when component unmounts
+      document.body.removeChild(script);
+    };
+  }, []);
+
   return (
     <TooltipProvider>
       <Toaster />
